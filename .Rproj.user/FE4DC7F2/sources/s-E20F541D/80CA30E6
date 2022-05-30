@@ -1,0 +1,27 @@
+{
+    "id": "80CA30E6",
+    "path": "~/Google Drive/research/projects/r-projects/multiverse/combine_grids.R",
+    "project_path": "combine_grids.R",
+    "type": "r_source",
+    "hash": "63213809",
+    "contents": "",
+    "dirty": false,
+    "created": 1653902957840.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "0,78",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1653635024,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1653635024,
+    "read_only": false,
+    "read_only_alternatives": []
+}

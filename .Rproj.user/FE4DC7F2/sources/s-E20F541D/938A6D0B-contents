@@ -1,0 +1,49 @@
+
+sim_iv1_grid <- 
+  create_iv_grid(
+    my_data = sim_data, 
+    Unpredictability = c(iv_unp1, iv_unp2), 
+    Violence = c(iv_vio1, iv_vio2, iv_vio3), 
+  )
+
+sim_iv2_grid <- 
+  create_iv_grid(
+    my_data = sim_data, 
+    effect = "predictor 2",
+    stress  = c(iv_stress1, iv_stress2), 
+    anxiety = c(iv_anx1, iv_anx2, iv_anx2)
+  )
+
+
+bind_rows(sim_iv1_grid, sim_iv2_grid)
+
+
+map_df(function{x}{
+  
+  combine_grids
+  
+  makedata
+  
+  preprocessdata
+  
+  modelwithformula
+  
+  post_fit
+  
+  catch warnings and/or check assumptions
+  
+  assumptions <- influence(x$model, )
+  
+  save results
+  
+  
+  list(
+    grid
+    results
+    warnings
+    assu
+  )
+  
+})
+
+

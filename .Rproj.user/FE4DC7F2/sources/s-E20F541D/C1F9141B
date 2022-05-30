@@ -1,0 +1,27 @@
+{
+    "id": "C1F9141B",
+    "path": "~/Google Drive/research/projects/r-projects/multiverse/filter_grid.R",
+    "project_path": "filter_grid.R",
+    "type": "r_source",
+    "hash": "3021519826",
+    "contents": "",
+    "dirty": false,
+    "created": 1653903048693.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "67,0",
+        "scrollLine": "29"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1653909513,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1653909513438,
+    "read_only": false,
+    "read_only_alternatives": []
+}
