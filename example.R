@@ -3,6 +3,7 @@
 library(tidyverse)
 source("filter_grid.R")
 source("var_grids.R")
+source("grid_to_list.R")
 
 ## Seed ----
 set.seed(12345)
@@ -103,29 +104,18 @@ sim_cov_grid <-
     SES = c(cov_ses1, cov_ses2)
   )
 
-
+sim_cov_grid
 
 # Change grids to lists ---------------------------------------------------
-grid_to_list(sim_filter_grid$grid)
-grid_to_list(sim_iv_grid)
-
+grid_to_list(sim_filter_grid$grid, type = "filter")
+grid_to_list(sim_iv_grid, type = "iv")
 
 # Combine Grids -----------------------------------------------------------
-
-filter_grid <- 
-  sim_filter_grid$grid %>% 
-  map_df(function(x){
-    
-    x %>% as.list %>% as_tibble()
-    
-  }) %>% 
-  mutate(filter_group = "filter")
-
 filter_iv_grid <- 
   sim_iv_grid %>% 
   group_by(iv) %>% 
   group_split() %>% 
-  map_df(function(x) bind_cols(filter_grid, x))
+  map_df(function(x) bind_cols(sim_filter_grid$grid, x))
 
 filter_iv_dv_grid <- 
   sim_dv_grid %>% 
@@ -140,20 +130,3 @@ grid_to_formulas <- function(grid, glue_string){
 }
 
 grid_to_formulas(filter_iv_dv_grid, "{dv} ~ {iv} * test_type + control1 + control2")
-
-grid_to_formulas(filter_iv_dv_grid, "{dv} ~ {iv} * test_type + control1 + control2") %>% length()
-
-2*2*2*4*6*4
-
-map(grids, formulas, function(x, y){
-  
-  grids
-  
-  data_prep
-  
-  formula_insertion
-  
-  run_models
-
-})
-

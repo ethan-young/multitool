@@ -52,7 +52,6 @@ create_filter_grid <- function(my_data, ..., print = T){
     rlang::parse_expr() %>% 
     rlang::eval_tidy() %>% 
     as_tibble() %>% 
-    mutate(decision_type = "filter") %>% 
     rownames_to_column(var = "decision") %>% 
     select(starts_with("decision"), everything())
   
