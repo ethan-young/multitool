@@ -13,11 +13,6 @@ combine_var_grids <- function(grid1, grid2){
 # Combine all grids -------------------------------------------------------
 combine_all_grids <- function(filter_grid = NULL, iv_grids = NULL, dv_grid = NULL, covariate_grids = NULL){
   
-  print(length(filter_grid))
-  print(length(iv_grids))
-  print(length(dv_grid))
-  print(length(covariate_grids))
-  
   all_grids <- 
     list(
       filters    = NULL,
@@ -31,21 +26,17 @@ combine_all_grids <- function(filter_grid = NULL, iv_grids = NULL, dv_grid = NUL
   }
   
   if(!is.null(iv_grids)){
-    
-    all_grids$ivs <-  iv_grids
-    
-  }else if(!is.null(iv_grids) & length(iv_grids) > 1){
-    
-    iv_grids <- 
+
+    iv_grids_prep <- 
       map2(seq_along(iv_grids), iv_grids, function(x, y){
         
         y %>% rename_with(~str_replace(.x, "iv", paste0("iv", x)))
         
       })
     
-    iv_grids <- reduce(iv_grids, combine_var_grids)
+    iv_grid <- reduce(iv_grids_prep, combine_var_grids)
     
-    all_grids$ivs <-  iv_grids
+    all_grids$ivs <-  iv_grid
     
   }
   
@@ -55,18 +46,14 @@ combine_all_grids <- function(filter_grid = NULL, iv_grids = NULL, dv_grid = NUL
   
   if(!is.null(covariate_grids)){
     
-    all_grids$covariates <-  covariate_grids
-    
-  }else if(!is.null(covariate_grids) & length(covariate_grids) > 1){
-    
-    covariate_grids <- 
+    covariate_grids_prep <- 
       map2(seq_along(covariate_grids), covariate_grids, function(x, y){
         
         y %>% rename_with(~str_replace(.x, "covariate", paste0("covariate", x)))
         
       })
     
-    covariate_grids <- reduce(covariate_grids, combine_var_grids)
+    covariate_grid <- reduce(covariate_grids_prep, combine_var_grids)
     
     all_grids$covariates <-  covariate_grids
   }
@@ -76,5 +63,6 @@ combine_all_grids <- function(filter_grid = NULL, iv_grids = NULL, dv_grid = NUL
     reduce(combine_var_grids) %>% 
     mutate(
       decision = 1:n()
-    )
+    ) %>% 
+    select(decision, starts_with("dv"), starts_with("iv"), starts_with("covari"), starts_with("filter"))
 }

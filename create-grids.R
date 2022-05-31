@@ -1,3 +1,4 @@
+# Filter Grid -------------------------------------------------------------
 create_filter_grid <- function(my_data, ..., print = T){
   filter_exprs <- enexprs(...)
   filter_exprs_chr <- as.character(filter_exprs)
@@ -52,7 +53,8 @@ create_filter_grid <- function(my_data, ..., print = T){
     rlang::parse_expr() %>% 
     rlang::eval_tidy() %>% 
     as_tibble() %>% 
-    rownames_to_column(var = "filter_decision") %>% 
+    rownames_to_column(var = "decision") %>% 
+    rename_with(~paste0("filter_", .x)) %>% 
     select(matches("decision"), everything())
   
   if(print){
@@ -64,3 +66,41 @@ create_filter_grid <- function(my_data, ..., print = T){
     grid          = filter_grid_expand
   )
 }
+
+# Variable Grids ----------------------------------------------------------
+create_iv_grid <- function(my_data, ...){
+  vars <- enquos(..., .named = TRUE)
+  var_groups <- names(vars)
+  
+  map2_df(vars, var_groups, function(x,y){
+    tibble(
+      iv_group = y,
+      iv       = my_data %>% select(!!x) %>% names
+    )
+  })
+}
+
+create_dv_grid <- function(my_data, ...){
+  vars <- enquos(..., .named = TRUE)
+  var_groups <- names(vars)
+  
+  map2_df(vars, var_groups, function(x,y){
+    tibble(
+      dv_group = y,
+      dv       = my_data %>% select(!!x) %>% names
+    )
+  })
+}
+
+create_covariate_grid <- function(my_data, ...){
+  vars <- enquos(..., .named = TRUE)
+  var_groups <- names(vars)
+  
+  map2_df(vars, var_groups, function(x,y){
+    tibble(
+      covariate_group = y,
+      covariate       = my_data %>% select(!!x) %>% names
+    )
+  })
+}
+

@@ -1,9 +1,9 @@
 # Setup -------------------------------------------------------------------
 ## Packages ----
 library(tidyverse)
-source("filter_grid.R")
-source("var_grids.R")
-source("grid_to_list.R")
+source("create-grids.R")
+source("grid-helpers.R")
+source("combine-grids.R")
 
 ## Seed ----
 set.seed(12345)
@@ -49,12 +49,10 @@ sim_filter_grid <-
     my_data = sim_data, 
     ex_sample == 1, 
     ex_sample == 2, 
-    ex_sample == 3,
     ex_att == 1, 
     ex_imp == 0, 
     ex_sped == 1,
     scale(dv_std_sc) > -2.25,
-    scale(dv_std_sc) > -3,
     print = F
   ) 
 
@@ -64,28 +62,25 @@ sim_filter_grid$grid_summary
 ### Full grid ----
 sim_filter_grid$grid
 
-# ### Create datasets based on the grid ----
-# map(sim_filter_grid$grid, function(x){
-#   
-#   filter_expr <- glue::glue("filter(sim_data, {paste(x, collapse = ', ')})") %>% as.character()
-#   data <- rlang::parse_expr(filter_expr) %>% rlang::eval_tidy()
-#   
-#   list(
-#     decisions = x,
-#     data      = data
-#   )
-#   
-# })
-
 ## Create an IV grid ----
-sim_iv_grid <- 
+sim_iv1_grid <- 
   create_iv_grid(
     my_data = sim_data, 
     Unpredictability = c(iv_unp1, iv_unp2), 
     Violence = c(iv_vio1, iv_vio2)
   )
 
-sim_iv_grid
+sim_iv1_grid
+
+## Create a second IV grid ----
+sim_iv2_grid <- 
+  create_iv_grid(
+    my_data = sim_data, 
+    Anxiety = c(iv_anx1, iv_anx2),
+    Stress  = c(iv_stress1, iv_stress2)
+  )
+
+sim_iv2_grid
 
 ## Create an DV grid ----
 sim_dv_grid <- 
@@ -106,27 +101,13 @@ sim_cov_grid <-
 
 sim_cov_grid
 
-# Change grids to lists ---------------------------------------------------
-grid_to_list(sim_filter_grid$grid, type = "filter")
-grid_to_list(sim_iv_grid, type = "iv")
-
 # Combine Grids -----------------------------------------------------------
-filter_iv_grid <- 
-  sim_iv_grid %>% 
-  group_by(iv) %>% 
-  group_split() %>% 
-  map_df(function(x) bind_cols(sim_filter_grid$grid, x))
+sim_all_grids <- 
+  combine_all_grids(
+    filter_grid     = sim_filter_grid,
+    iv_grids        = list(sim_iv1_grid, sim_iv2_grid),
+    dv_grid         = sim_dv_grid,
+    covariate_grids = list(sim_cov_grid)
+  ) 
 
-filter_iv_dv_grid <- 
-  sim_dv_grid %>% 
-  group_by(dv) %>% 
-  group_split() %>% 
-  map_df(function(x) bind_cols(filter_iv_grid, x))
-
-
-grid_to_formulas <- function(grid, glue_string){
-  grid %>% 
-    glue::glue_data(glue_string)
-}
-
-grid_to_formulas(filter_iv_dv_grid, "{dv} ~ {iv} * test_type + control1 + control2")
+sim_all_grids
