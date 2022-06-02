@@ -33,29 +33,9 @@ create_filter_grid <- function(my_data, ..., print = T){
       
     })
   
-  filter_grid_prep <- 
-    filter_grid_summary2 %>% 
-    distinct(expr_var) %>%
-    pull() %>% 
-    map(function(x){
-      
-      vect <- 
-        filter_grid_summary2 %>% 
-        filter(expr_var == x) %>% 
-        pull(expr) %>% 
-        paste0("'", ., "'", collapse=",")
-      
-      new_vect <- glue::glue("{x} = c({paste0(vect)})") %>% as.character()
-    })
-  
   filter_grid_expand <- 
-    glue::glue("expand_grid({paste(filter_grid_prep, collapse = ', ')})") %>% 
-    rlang::parse_expr() %>% 
-    rlang::eval_tidy() %>% 
-    as_tibble() %>% 
-    rownames_to_column(var = "decision") %>% 
-    rename_with(~paste0("filter_", .x)) %>% 
-    select(matches("decision"), everything())
+    df_to_expand_prep(filter_grid_summary2, expr_var, expr) %>% 
+    df_to_expand()
   
   if(print){
     print(filter_grid_summary2)
@@ -104,10 +84,34 @@ create_covariate_grid <- function(my_data, ...){
   })
 }
 
-
+create_var_grid <- function(my_data, ..., print = T){
+  vars_raw <- enquos(..., .named = TRUE)
+  var_groups <- names(vars_raw)
+  
+  var_grid_summary <- 
+    map2_df(vars_raw, var_groups, function(x,y){
+      tibble(
+        var_group = y,
+        var       = my_data %>% select(!!x) %>% names
+      )
+    })
+  
+  var_grid <- 
+    df_to_expand_prep(var_grid_summary, var_group, var) %>% 
+    df_to_expand()
+  
+  if(print){
+    print(var_grid_summary)
+  }
+  
+  list(
+    grid_summary = var_grid_summary,
+    grid         = var_grid
+  )
+  
+}
 
 # Model Grid --------------------------------------------------------------
-
 create_model_grid <- function(formulas, models) {
   
   stopifnot("The list of formulas must be of the same length as the list of models."= length(formulas)==length(models))
@@ -125,3 +129,13 @@ create_model_grid <- function(formulas, models) {
 }
 
 
+create_model_grid2 <- function(...){
+  model_formulas <- enexprs(..., .named = T)
+  model_formulas_chr <- as.character(model_formulas) %>% str_remove_all("\n|    ")
+  
+  tibble(
+    mod_group   = "models",
+    mod_formula = model_formulas_chr
+  )
+
+}

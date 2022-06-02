@@ -53,3 +53,32 @@ generate_multi_data <- function(my_data, filter_grid){
   
   multi_data_list
 }
+
+df_to_expand_prep <- function(df, grouping_var, values_var){
+  
+  grid_prep <- 
+    df %>% 
+    distinct({{grouping_var}}) %>%
+    pull() %>% 
+    map(function(x){
+      vect <- 
+        df %>% 
+        filter({{grouping_var}} == x) %>% 
+        pull({{values_var}}) %>% 
+        paste0("'", ., "'", collapse=",")
+      
+      new_vect <- glue::glue("{x} = c({paste0(vect)})") %>% as.character()
+    })
+  
+  grid_prep
+}
+
+
+
+df_to_expand <- function(prep){
+  
+  glue::glue("expand_grid({paste(prep, collapse = ', ')})") %>% 
+    rlang::parse_expr() %>% 
+    rlang::eval_tidy() 
+  
+}

@@ -101,9 +101,23 @@ sim_cov_grid <-
 
 sim_cov_grid
 
+# Create a full variable grid ---------------------------------------------
+sim_var_grid <- 
+  create_var_grid(
+    my_data = sim_data, 
+    iv1       = c(iv_unp1, iv_unp2, iv_vio1, iv_vio2),
+    iv2       = c(iv_anx1, iv_anx2, iv_stress1, iv_stress2),
+    covariate = c(cov_ses1, cov_ses2),
+    dv        = c(dv_std_up, dv_eco_up, dv_std_sc, dv_eco_sc)
+  )
 
+### Look at a summary ----
+sim_var_grid$grid_summary
 
-## Create a model grid ----
+### Full grid ----
+sim_var_grid$grid
+
+## Create a model grid - method 1 ----
 sim_mod_grid <- 
   create_model_grid(
     formulas = list(
@@ -118,8 +132,14 @@ sim_mod_grid <-
 
 sim_mod_grid
 
+## Create a model grid - method 2 ----
+sim_mod_grid2 <- 
+  create_model_grid2(
+    lm({dv} ~ {iv1} * {iv2} + {covariate}), 
+    lmer({dv} ~ {iv1} * {iv2} + {covariate} + (1|id))
+  )
 
-# Combine Grids -----------------------------------------------------------
+# Combine Grids - Method 1 ------------------------------------------------
 sim_all_grids <- 
   combine_all_grids(
     filter_grid     = sim_filter_grid,
@@ -130,3 +150,9 @@ sim_all_grids <-
   ) 
 
 sim_all_grids
+
+# Combine Grids - Method 2 ------------------------------------------------
+sim_all_grids2 <- 
+  combine_all_grids2(sim_filter_grid, sim_var_grid, sim_mod_grid2)
+
+sim_all_grids2
