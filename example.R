@@ -107,8 +107,8 @@ sim_cov_grid
 sim_mod_grid <- 
   create_model_grid(
     formulas = list(
-      mod1 = "{dv} ~ {iv} * test_type + control1 + control2 + (1|id)", 
-      mod2 = "{dv} ~ {iv} * test_type + control1 + (1|id)"
+      mod1 = "{dv} ~ {iv1} * test_type + control1 + control2 + (1|id)", 
+      mod2 = "{dv} ~ {iv1} * test_type + control1 + (1|id)"
     ),
     models = list(
       mod1    = "lmer",

@@ -110,6 +110,7 @@ create_covariate_grid <- function(my_data, ...){
 
 create_model_grid <- function(formulas, models) {
   
+  stopifnot("The list of formulas must be of the same length as the list of models."= length(formulas)==length(models))
   
   map2_df(formulas, models, function(f, m) {
     

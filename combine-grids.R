@@ -64,12 +64,26 @@ combine_all_grids <- function(filter_grid = NULL, iv_grids = NULL, dv_grid = NUL
     all_grids$models <- model_grid
   }
   
-  all_grids %>% 
+  all_grids <- all_grids %>% 
     discard(is.null) %>% 
     reduce(combine_var_grids) %>% 
     mutate(
       decision = 1:n()
     ) %>% 
     select(decision, starts_with("dv"), starts_with("iv"), starts_with("covari"), starts_with("filter"), starts_with("mod"))
+
+  
+  if("mod_formula" %in% names(all_grids)) {
+    all_grids <- all_grids %>%
+      nest(data = c(starts_with("dv"), starts_with("iv"), starts_with("covari"), mod_formula)) %>%
+      mutate(
+        dynamic_formula = map_chr(data, function(x) glue::glue_data(x, x$mod_formula))
+      ) %>%
+      unnest(data) %>%
+      select(-mod_formula) %>%
+      rename(mod_formula = dynamic_formula) %>%
+      select(decision, starts_with("dv"), starts_with("iv"), starts_with("covari"), starts_with("filter"), starts_with("mod"))
+  }
    
+  all_grids
 }
