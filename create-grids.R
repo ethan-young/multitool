@@ -104,3 +104,23 @@ create_covariate_grid <- function(my_data, ...){
   })
 }
 
+
+
+# Model Grid --------------------------------------------------------------
+
+create_model_grid <- function(formulas, models) {
+  
+  
+  map2_df(formulas, models, function(f, m) {
+    
+    tibble(
+      mod_formula = f,
+      mod_type    = m[[1]],
+      mod_args    = ifelse(length(m) == 2, list(m[[2]]), NA)
+    )
+  }) %>%
+    mutate(mod_group = names(formulas)) %>%
+    select(mod_group, everything())
+}
+
+

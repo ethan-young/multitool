@@ -101,13 +101,32 @@ sim_cov_grid <-
 
 sim_cov_grid
 
+
+
+## Create a model grid ----
+sim_mod_grid <- 
+  create_model_grid(
+    formulas = list(
+      mod1 = "{dv} ~ {iv} * test_type + control1 + control2 + (1|id)", 
+      mod2 = "{dv} ~ {iv} * test_type + control1 + (1|id)"
+    ),
+    models = list(
+      mod1    = "lmer",
+      mod2    = list("lmer", args = list(REML = FALSE, verbose = 0.5))
+    )
+  )
+
+sim_mod_grid
+
+
 # Combine Grids -----------------------------------------------------------
 sim_all_grids <- 
   combine_all_grids(
     filter_grid     = sim_filter_grid,
     iv_grids        = list(sim_iv1_grid, sim_iv2_grid),
     dv_grid         = sim_dv_grid,
-    covariate_grids = list(sim_cov_grid)
+    covariate_grids = list(sim_cov_grid),
+    model_grid      = sim_mod_grid
   ) 
 
 sim_all_grids

@@ -11,14 +11,15 @@ combine_var_grids <- function(grid1, grid2){
 }
 
 # Combine all grids -------------------------------------------------------
-combine_all_grids <- function(filter_grid = NULL, iv_grids = NULL, dv_grid = NULL, covariate_grids = NULL){
+combine_all_grids <- function(filter_grid = NULL, iv_grids = NULL, dv_grid = NULL, covariate_grids = NULL, model_grid = NULL){
   
   all_grids <- 
     list(
       filters    = NULL,
       ivs        = NULL,
       dvs        = NULL,
-      covariates = NULL
+      covariates = NULL,
+      models     = NULL
     )
   
   if(!is.null(filter_grid)){
@@ -58,11 +59,17 @@ combine_all_grids <- function(filter_grid = NULL, iv_grids = NULL, dv_grid = NUL
     all_grids$covariates <-  covariate_grids
   }
   
+  if(!is.null(model_grid)) {
+    
+    all_grids$models <- model_grid
+  }
+  
   all_grids %>% 
     discard(is.null) %>% 
     reduce(combine_var_grids) %>% 
     mutate(
       decision = 1:n()
     ) %>% 
-    select(decision, starts_with("dv"), starts_with("iv"), starts_with("covari"), starts_with("filter"))
+    select(decision, starts_with("dv"), starts_with("iv"), starts_with("covari"), starts_with("filter"), starts_with("mod"))
+   
 }

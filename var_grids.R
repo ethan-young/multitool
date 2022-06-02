@@ -1,7 +1,8 @@
 create_iv_grid <- function(my_data, ...){
   vars <- enquos(..., .named = TRUE)
   var_groups <- names(vars)
-  
+  print(vars)
+  print(var_groups)
   map2_df(vars, var_groups, function(x,y){
     tibble(
       iv_group       = y,
