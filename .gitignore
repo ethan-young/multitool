@@ -9,3 +9,4 @@
 ^Icon\?$
 **/Icon\?$
 Icon\\?
+Icon[\r]
