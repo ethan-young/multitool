@@ -1,9 +1,7 @@
 # Setup -------------------------------------------------------------------
 ## Packages ----
 library(tidyverse)
-source("create-grids.R")
-source("grid-helpers.R")
-source("combine-grids.R")
+walk(list.files("R/", pattern = ".R$", full.names = T), source)
 
 ## Seed ----
 set.seed(12345)
@@ -56,52 +54,10 @@ sim_filter_grid <-
     print = F
   ) 
 
-### Look at a summary ----
 sim_filter_grid$grid_summary
-
-### Full grid ----
 sim_filter_grid$grid
 
-## Create an IV grid ----
-sim_iv1_grid <- 
-  create_iv_grid(
-    my_data = sim_data, 
-    Unpredictability = c(iv_unp1, iv_unp2), 
-    Violence = c(iv_vio1, iv_vio2)
-  )
-
-sim_iv1_grid
-
-## Create a second IV grid ----
-sim_iv2_grid <- 
-  create_iv_grid(
-    my_data = sim_data, 
-    Anxiety = c(iv_anx1, iv_anx2),
-    Stress  = c(iv_stress1, iv_stress2)
-  )
-
-sim_iv2_grid
-
-## Create an DV grid ----
-sim_dv_grid <- 
-  create_dv_grid(
-    my_data  = sim_data, 
-    Shifting = c(dv_std_sc, dv_eco_sc), 
-    Updating = c(dv_std_up, dv_eco_up)
-  )
-
-sim_dv_grid
-
-## Create a covariate grid ----
-sim_cov_grid <- 
-  create_covariate_grid(
-    my_data  = sim_data, 
-    SES = c(cov_ses1, cov_ses2)
-  )
-
-sim_cov_grid
-
-# Create a full variable grid ---------------------------------------------
+## Create variable grid ----
 sim_var_grid <- 
   create_var_grid(
     my_data = sim_data, 
@@ -111,48 +67,24 @@ sim_var_grid <-
     dv        = c(dv_std_up, dv_eco_up, dv_std_sc, dv_eco_sc)
   )
 
-### Look at a summary ----
 sim_var_grid$grid_summary
-
-### Full grid ----
 sim_var_grid$grid
 
-## Create a model grid - method 1 ----
+## Create a model grid ----
 sim_mod_grid <- 
   create_model_grid(
-    formulas = list(
-      mod1 = "{dv} ~ {iv1} * test_type + control1 + control2 + (1|id)", 
-      mod2 = "{dv} ~ {iv1} * test_type + control1 + (1|id)"
-    ),
-    models = list(
-      mod1    = "lmer",
-      mod2    = list("lmer", args = list(REML = FALSE, verbose = 0.5))
-    )
-  )
-
-sim_mod_grid
-
-## Create a model grid - method 2 ----
-sim_mod_grid2 <- 
-  create_model_grid2(
     lm({dv} ~ {iv1} * {iv2} + {covariate}), 
     lmer({dv} ~ {iv1} * {iv2} + {covariate} + (1|id))
   )
 
-# Combine Grids - Method 1 ------------------------------------------------
+sim_mod_grid
+
+## Combine grids ----
 sim_all_grids <- 
   combine_all_grids(
-    filter_grid     = sim_filter_grid,
-    iv_grids        = list(sim_iv1_grid, sim_iv2_grid),
-    dv_grid         = sim_dv_grid,
-    covariate_grids = list(sim_cov_grid),
-    model_grid      = sim_mod_grid
-  ) 
+    filter_grid = sim_filter_grid, 
+    var_grid = sim_var_grid, 
+    model_grid = sim_mod_grid
+  )
 
 sim_all_grids
-
-# Combine Grids - Method 2 ------------------------------------------------
-sim_all_grids2 <- 
-  combine_all_grids2(sim_filter_grid, sim_var_grid, sim_mod_grid2)
-
-sim_all_grids2
