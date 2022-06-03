@@ -35,8 +35,7 @@ create_filter_grid <- function(my_data, ..., print = T){
   
   filter_grid_expand <- 
     df_to_expand_prep(filter_grid_summary2, expr_var, expr) %>% 
-    df_to_expand() %>%
-    rename_with(~paste0("filter_", .x))
+    df_to_expand() 
   
   if(print){
     print(filter_grid_summary2)
@@ -135,7 +134,7 @@ create_model_grid2 <- function(...){
   model_formulas_chr <- as.character(model_formulas) %>% str_remove_all("\n|    ")
   
   tibble(
-    mod_group   = names(model_formulas),
+    mod_group   = "models",
     mod_formula = model_formulas_chr
   )
 

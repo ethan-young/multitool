@@ -124,9 +124,10 @@ combine_all_grids2 <- function(filter_grid = NULL, var_grid = NULL, model_grid =
       model_syntax = map_chr(data, function(x) glue::glue_data(x, x$models)),
     ) %>%
     unnest(data) %>% 
-    select(-models) %>% 
-    rename_with(~ paste0("filter_", .x), matches(paste0(names(filter_grid$grid), collapse = "|"))) %>% 
-    rename_with(~ paste0("var_", .x), matches(paste0(names(var_grid$grid), collapse = "|"))) 
+    select(-models) %>%
+    rename_with(~ paste0("var_", .x), matches(ifelse(!is.null(var_grid), paste0(names(var_grid$grid), collapse = "|"), paste0("_", names(.))))) %>%
+    rename_with(~ paste0("filter_", .x), matches(ifelse(!is.null(filter_grid), paste0(names(filter_grid$grid), collapse = "|"), paste0("_", names(.)))))
+    
   
   all_grids
 }
