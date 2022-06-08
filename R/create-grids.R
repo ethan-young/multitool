@@ -139,3 +139,29 @@ create_model_grid <- function(...){
   )
 
 }
+
+post_filter_code <- function(grid, ...){
+  code <- enexprs(..., .named = T)
+  code_chr <- as.character(code) %>% str_remove_all("\n|    ")
+  
+  post_filter_code <- 
+    grid %>% 
+    unnest(everything()) %>% 
+    glue::glue_data(code_chr)
+  
+  bind_cols(grid, post_filter_code = post_filter_code %>% as.character())
+  
+}
+
+post_analysis_code <- function(grid, ...){
+  code <- enexprs(..., .named = T)
+  code_chr <- as.character(code) %>% str_remove_all("\n|    ")
+  
+  post_analysis_code <- 
+    grid %>% 
+    unnest(everything()) %>% 
+    glue::glue_data(code_chr)
+  
+  bind_cols(grid, post_analysis_code = post_analysis_code %>% as.character())
+  
+}

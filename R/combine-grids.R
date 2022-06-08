@@ -11,7 +11,7 @@ exp_combine_var_grids <- function(grid1, grid2){
 }
 
 # Method 1 ----------------------------------------------------------------
-exp_combine_all_grids <- function(filter_grid = NULL, iv_grids = NULL, dv_grid = NULL, covariate_grids = NULL, model_grid = NULL){
+exp1_combine_all_grids <- function(filter_grid = NULL, iv_grids = NULL, dv_grid = NULL, covariate_grids = NULL, model_grid = NULL){
   
   all_grids <- 
     list(
@@ -89,7 +89,7 @@ exp_combine_all_grids <- function(filter_grid = NULL, iv_grids = NULL, dv_grid =
 }
 
 # Method 2 ----------------------------------------------------------------
-combine_all_grids <- function(filter_grid = NULL, var_grid = NULL, model_grid = NULL){
+exp2_combine_all_grids <- function(filter_grid = NULL, var_grid = NULL, model_grid = NULL, nest = T){
   
   all_grids <- 
     list(
@@ -123,8 +123,51 @@ combine_all_grids <- function(filter_grid = NULL, var_grid = NULL, model_grid = 
     select(-models) %>%
     rename_with(~paste0("var_", .x), any_of(names(var_grid$grid))) %>% 
     rename_with(~paste0("filter_", .x), any_of(names(filter_grid$grid)))
-    
   
-  all_grids
+  
+  if(nest){
+    all_grids %>% 
+      nest(filters = starts_with("filter_")) %>% 
+      nest(variables = starts_with("var_")) %>% 
+      select(decision, filters, variables, model_syntax)
+  }
+}
+
+# Method 3 ----------------------------------------------------------------
+combine_all_grids <- function(filter_grid = NULL, var_grid = NULL, model_grid = NULL, nest = T){
+  
+  all_grids <- 
+    list(
+      filters    = NULL,
+      variables  = NULL,
+      models     = NULL
+    )
+  
+  if(!is.null(filter_grid)){
+    all_grids$filters <- df_to_expand_prep(filter_grid$grid_summary, expr_var, expr)
+  }
+  
+  if(!is.null(var_grid)){
+    all_grids$variables <- df_to_expand_prep(var_grid$grid_summary, var_group, var)
+  }
+  
+  if(!is.null(model_grid)) {
+    all_grids$models <- df_to_expand_prep(model_grid, mod_group, mod_formula)
+  }
+  
+  all_grids <- 
+    all_grids %>% 
+    discard(is.null) %>% 
+    flatten() %>% 
+    df_to_expand() %>% 
+    mutate(decision = 1:n()) %>% 
+    select(decision, everything()) %>% 
+    nest(data = c(-decision)) %>%
+    mutate(model_syntax = map_chr(data, function(x) glue::glue_data(x, x$models))) %>%
+    unnest(data) %>% 
+    select(-models) %>%
+    nest(filters   = any_of(names(filter_grid$grid))) %>% 
+    nest(variables = any_of(names(var_grid$grid))) %>% 
+    select(decision, filters, variables, model_syntax)
 }
 
