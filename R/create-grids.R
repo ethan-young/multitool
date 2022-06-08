@@ -48,7 +48,7 @@ create_filter_grid <- function(my_data, ..., print = T){
 }
 
 # Variable Grids ----------------------------------------------------------
-create_iv_grid <- function(my_data, ...){
+exp_create_iv_grid <- function(my_data, ...){
   vars <- enquos(..., .named = TRUE)
   var_groups <- names(vars)
   
@@ -60,7 +60,7 @@ create_iv_grid <- function(my_data, ...){
   })
 }
 
-create_dv_grid <- function(my_data, ...){
+exp_create_dv_grid <- function(my_data, ...){
   vars <- enquos(..., .named = TRUE)
   var_groups <- names(vars)
   
@@ -72,7 +72,7 @@ create_dv_grid <- function(my_data, ...){
   })
 }
 
-create_covariate_grid <- function(my_data, ...){
+exp_create_covariate_grid <- function(my_data, ...){
   vars <- enquos(..., .named = TRUE)
   var_groups <- names(vars)
   
@@ -112,7 +112,7 @@ create_var_grid <- function(my_data, ..., print = T){
 }
 
 # Model Grid --------------------------------------------------------------
-create_model_grid <- function(formulas, models) {
+exp_create_model_grid <- function(formulas, models) {
   
   stopifnot("The list of formulas must be of the same length as the list of models."= length(formulas)==length(models))
   
@@ -129,7 +129,7 @@ create_model_grid <- function(formulas, models) {
 }
 
 
-create_model_grid2 <- function(...){
+create_model_grid <- function(...){
   model_formulas <- enexprs(..., .named = T)
   model_formulas_chr <- as.character(model_formulas) %>% str_remove_all("\n|    ")
   

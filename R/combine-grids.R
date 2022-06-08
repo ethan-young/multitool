@@ -1,5 +1,5 @@
 # Combine variable grids --------------------------------------------------
-combine_var_grids <- function(grid1, grid2){
+exp_combine_var_grids <- function(grid1, grid2){
   
   grid1 %>% 
     rownames_to_column(var = "row_split") %>% 
@@ -11,7 +11,7 @@ combine_var_grids <- function(grid1, grid2){
 }
 
 # Method 1 ----------------------------------------------------------------
-combine_all_grids <- function(filter_grid = NULL, iv_grids = NULL, dv_grid = NULL, covariate_grids = NULL, model_grid = NULL){
+exp_combine_all_grids <- function(filter_grid = NULL, iv_grids = NULL, dv_grid = NULL, covariate_grids = NULL, model_grid = NULL){
   
   all_grids <- 
     list(
@@ -89,7 +89,7 @@ combine_all_grids <- function(filter_grid = NULL, iv_grids = NULL, dv_grid = NUL
 }
 
 # Method 2 ----------------------------------------------------------------
-combine_all_grids2 <- function(filter_grid = NULL, var_grid = NULL, model_grid = NULL){
+combine_all_grids <- function(filter_grid = NULL, var_grid = NULL, model_grid = NULL){
   
   all_grids <- 
     list(
@@ -115,18 +115,14 @@ combine_all_grids2 <- function(filter_grid = NULL, var_grid = NULL, model_grid =
     discard(is.null) %>% 
     flatten() %>% 
     df_to_expand() %>% 
-    mutate(
-      decision = 1:n()
-    ) %>% 
+    mutate(decision = 1:n()) %>% 
     select(decision, everything()) %>% 
     nest(data = c(-decision)) %>%
-    mutate(
-      model_syntax = map_chr(data, function(x) glue::glue_data(x, x$models)),
-    ) %>%
+    mutate(model_syntax = map_chr(data, function(x) glue::glue_data(x, x$models))) %>%
     unnest(data) %>% 
     select(-models) %>%
-    rename_with(~ paste0("var_", .x), matches(ifelse(!is.null(var_grid), paste0(names(var_grid$grid), collapse = "|"), paste0("_", names(.))))) %>%
-    rename_with(~ paste0("filter_", .x), matches(ifelse(!is.null(filter_grid), paste0(names(filter_grid$grid), collapse = "|"), paste0("_", names(.)))))
+    rename_with(~paste0("var_", .x), any_of(names(var_grid$grid))) %>% 
+    rename_with(~paste0("filter_", .x), any_of(names(filter_grid$grid)))
     
   
   all_grids

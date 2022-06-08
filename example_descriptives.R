@@ -1,9 +1,7 @@
 ## Packages ----
 library(tidyverse)
 library(faux)
-source("create-grids.R")
-source("grid-helpers.R")
-source("combine-grids.R")
+walk(list.files("R/", pattern = ".R$", full.names = T), source)
 
 ## Seed ----
 set.seed(12345)
@@ -48,13 +46,13 @@ sim_filter_grid$grid
 
 ## Create Model grid ----
 sim_mod_grid <- 
-  create_model_grid2(
+  create_model_grid(
     reliability = psych::alpha(data)
   )
 
 
 sim_all_grids <- 
-  combine_all_grids2(
+  combine_all_grids(
     filter_grid     = sim_filter_grid,
     model_grid      = sim_mod_grid
   ) 
