@@ -49,9 +49,9 @@ sim_filter_grid <-
     my_data = sim_data, 
     ex_sample == 1, 
     ex_sample == 2, 
-    ex_att == 1, 
+    ex_att == 0, 
     ex_imp == 0, 
-    ex_sped == 1,
+    ex_sped == 0,
     scale(dv_std_sc) > -2.25,
     print = F
   ) 
@@ -135,8 +135,7 @@ sim_mod_grid
 ## Create a model grid - method 2 ----
 sim_mod_grid2 <- 
   create_model_grid2(
-    lm({dv} ~ {iv1} * {iv2} + {covariate}), 
-    lmer({dv} ~ {iv1} * {iv2} + {covariate} + (1|id))
+    lm({dv} ~ {iv1} * {iv2} + {covariate})
   )
 
 # Combine Grids - Method 1 ------------------------------------------------
@@ -156,3 +155,10 @@ sim_all_grids2 <-
   combine_all_grids2(sim_filter_grid, sim_var_grid, sim_mod_grid2)
 
 sim_all_grids2
+
+
+
+# Run analyses ------------------------------------------------------------
+
+results <- 
+  run_multiverse(data = sim_data, grid = sim_all_grids2)

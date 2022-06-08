@@ -2,7 +2,7 @@ grid_to_list <- function(my_grid){
   
   map(1:nrow(my_grid), function(x){
     
-    my_grid <- my_grid %>% select(-filter_decision)
+    my_grid <- my_grid %>% select(-matches("filter_decision|decision"))
     
     grid_list <-
       my_grid %>%
