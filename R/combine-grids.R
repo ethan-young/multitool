@@ -100,5 +100,7 @@ combine_all_grids <- function(filter_grid = NULL, var_grid = NULL, model_grid = 
     tidyr::nest(filters   = dplyr::any_of(names(filter_grid$grid))) |>
     tidyr::nest(variables = dplyr::any_of(names(var_grid$grid))) |>
     dplyr::select(decision, filters, variables, model_syntax)
+
+  all_grids
 }
 
