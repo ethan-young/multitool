@@ -1,0 +1,39 @@
+Package: multitool
+Title: Tools for Running Multiverse Style Analyses
+Version: 0.0.0.9000
+Authors@R: c(
+        person(
+          "Ethan", "Young", 
+          email = "young.ethan.scott@gmail.com", 
+          role = c("aut", "cre"),
+          comment = c(ORCID = "0000-0002-8232-0184")
+        ),
+        person(
+          "Stefan", "Vermeent", 
+          email = "p.c.s.vermeent@gmail.com", 
+          role = c("aut"),
+          comment = c(ORCID = "0000-0002-9595-5373")
+        )
+       )
+Description: Multiverse analyses run the same (or very similar) analyses over a
+    range of arbitrary data processing decisions. We provide an intervace for creating
+    analysis decision grids and generating all possible combinations of those decisions. 
+    Grids can be lists of data filtering criteria, different versions of IVs and DVs, 
+    and/or modeling strategies.
+License: MIT + file LICENSE
+Imports:
+  broom,
+  broom.mixed,
+  dplyr,
+  glue,
+  purrr,
+  rlang,
+  stringr,
+  tibble,
+  tidyr
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.0

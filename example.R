@@ -2,13 +2,12 @@
 ## Packages ----
 library(tidyverse)
 library(lmerTest)
-walk(list.files("R/", pattern = ".R$", full.names = T), source)
 
 ## Seed ----
 set.seed(12345)
 
 ## Simulated Data ----
-sim_data <- 
+sim_data <-
   tibble(
     id          = 1:500,
     classroom   = sample(1:10, size = 500, replace = T),
@@ -31,7 +30,7 @@ sim_data <-
     ex_sped     = rbinom(500, size = 1, prob = .1),
     ex_att      = rbinom(500, size = 1, prob = .1),
     ex_imp      = rbinom(500, size = 1, prob = .05)
-  ) %>% 
+  ) %>%
   mutate(
     intercept   = ifelse(ex_sped == 1, intercept - rnorm(1,.5,.25), intercept),
     intercept   = ifelse(ex_imp == 1, intercept - rnorm(1,.5,.25), intercept),
@@ -44,66 +43,63 @@ sim_data <-
 
 # Create some grids -------------------------------------------------------
 ## Create a filtering grid ----
-sim_filter_grid <- 
+sim_filter_grid <-
   create_filter_grid(
-    my_data = sim_data, 
-    ex_sample == 1, 
-    ex_sample == 2, 
-    ex_att == 0, 
-    ex_imp == 0, 
+    my_data = sim_data,
+    ex_sample == 1,
+    ex_sample == 2,
+    ex_att == 0,
+    ex_imp == 0,
     ex_sped == 0,
-    scale(dv_std_sc) > -2,
-    print = F
-  ) 
+    scale(dv_std_sc) > -2
+  )
 
-sim_filter_grid$grid_summary
 sim_filter_grid$grid
 
 ## Create variable grid ----
-sim_var_grid <- 
+sim_var_grid <-
   create_var_grid(
-    my_data = sim_data, 
+    my_data = sim_data,
     iv1       = c(iv_unp1, iv_unp2, iv_vio1, iv_vio2),
     iv2       = c(iv_anx1, iv_anx2, iv_stress1, iv_stress2),
     covariate = c(cov_ses1, cov_ses2),
     dv        = c(dv_std_up, dv_eco_up, dv_std_sc, dv_eco_sc)
   )
 
-sim_var_grid$grid_summary
 sim_var_grid$grid
 
 ## Create a model grid ----
-sim_mod_grid <- 
+sim_mod_grid <-
   create_model_grid(
-    lm({dv} ~ {iv1} * {iv2} + {covariate}), 
+    lm({dv} ~ {iv1} * {iv2} + {covariate}),
     lmer({dv} ~ {iv1} * {iv2} + {covariate} + (1|classroom))
   )
 
 sim_mod_grid
 
 ## Combine grids ----
-sim_all_grids1 <- 
+sim_all_grids1 <-
   combine_all_grids(
-    filter_grid = sim_filter_grid, 
-    var_grid = sim_var_grid, 
+    filter_grid = sim_filter_grid,
+    var_grid = sim_var_grid,
     model_grid = sim_mod_grid
   )
 
 sim_all_grids1
 
 # Add post-filtering code -----------------------
-sim_all_grids2 <- 
+sim_all_grids2 <-
   post_filter_code(sim_all_grids1, mutate(across(c({iv1}, {iv2}), ~scale(.x) %>% as.numeric())))
 
 sim_all_grids2
 
 # Add post analysis code --------------------------------------------------
-
-sim_all_grids3 <- 
+sim_all_grids3 <-
   post_analysis_code(sim_all_grids2, interactions::sim_slopes(universe_analysis, pred = '{iv1}', modx = '{iv2}'))
 
+sim_all_grids3
 # Run analyses ------------------------------------------------------------
-results <- 
+results <-
   run_multiverse(data = sim_data, grid = sim_all_grids3[1:10,]) # only do 10 so it doesn't take too long
 
 results
@@ -113,9 +109,9 @@ results %>% unnest(data)
 results %>% unnest(post_analysis_results)
 
 # check post filtered but pre analyzed data code
-results %>% 
-  filter(decision == 1) %>% 
-  unnest(c(data)) %>% 
+results %>%
+  filter(decision == 1) %>%
+  unnest(c(data)) %>%
   summarize(
     mean = mean(iv_unp1),
     sd   = sd(iv_unp1)
