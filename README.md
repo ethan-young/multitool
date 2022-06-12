@@ -66,14 +66,14 @@ my_filter_grid <-
 #> # A tibble: 9 × 4
 #>   expr                         expr_var expr_n expr_type 
 #>   <chr>                        <chr>     <int> <chr>     
-#> 1 filter1 == 1                 filter1     167 filter    
-#> 2 filter1 == 2                 filter1     158 filter    
+#> 1 filter1 == 1                 filter1     181 filter    
+#> 2 filter1 == 2                 filter1     169 filter    
 #> 3 filter1 %in% unique(filter1) filter1     500 do nothing
 #> 4 filter2 == 0                 filter2       0 filter    
 #> 5 filter2 %in% unique(filter2) filter2     500 do nothing
-#> 6 filter3 == 0                 filter3     450 filter    
+#> 6 filter3 == 0                 filter3     445 filter    
 #> 7 filter3 %in% unique(filter3) filter3     500 do nothing
-#> 8 filter4 == 0                 filter4     456 filter    
+#> 8 filter4 == 0                 filter4     449 filter    
 #> 9 filter4 %in% unique(filter4) filter4     500 do nothing
 ```
 
@@ -120,4 +120,18 @@ my_model_grid
 
 ``` r
 combine_all_grids(my_filter_grid, my_var_grid, my_model_grid)
+#> # A tibble: 576 × 4
+#>    decision filters          variables        model_syntax              
+#>       <int> <list>           <list>           <chr>                     
+#>  1        1 <tibble [1 × 4]> <tibble [1 × 3]> lm(dv1 ~ iv1)             
+#>  2        2 <tibble [1 × 4]> <tibble [1 × 3]> lm(dv1 ~ iv1 + covariate1)
+#>  3        3 <tibble [1 × 4]> <tibble [1 × 3]> lm(dv1 ~ iv1)             
+#>  4        4 <tibble [1 × 4]> <tibble [1 × 3]> lm(dv1 ~ iv1 + covariate2)
+#>  5        5 <tibble [1 × 4]> <tibble [1 × 3]> lm(dv2 ~ iv1)             
+#>  6        6 <tibble [1 × 4]> <tibble [1 × 3]> lm(dv2 ~ iv1 + covariate1)
+#>  7        7 <tibble [1 × 4]> <tibble [1 × 3]> lm(dv2 ~ iv1)             
+#>  8        8 <tibble [1 × 4]> <tibble [1 × 3]> lm(dv2 ~ iv1 + covariate2)
+#>  9        9 <tibble [1 × 4]> <tibble [1 × 3]> lm(dv1 ~ iv2)             
+#> 10       10 <tibble [1 × 4]> <tibble [1 × 3]> lm(dv1 ~ iv2 + covariate1)
+#> # … with 566 more rows
 ```
