@@ -8,15 +8,15 @@ combine_all_grids(filter_grid = NULL, var_grid = NULL, model_grid = NULL)
 }
 \arguments{
 \item{filter_grid}{a data.frame created using
-\code{\link{create_filter_grid()}}. This grid contains all observation
+\code{\link{create_filter_grid}}. This grid contains all observation
 (row) filtering decisions.}
 
-\item{var_grid}{a data.frame created using \code{\link{create_var_grid()}}.
+\item{var_grid}{a data.frame created using \code{\link{create_var_grid}}.
 This grid should contain different versions of variables or sets of
 different versions of variables.}
 
 \item{model_grid}{a data.frame created using
-\code{\link{create_model_grid()}}. This grid contains the actual model
+\code{\link{create_model_grid}}. This grid contains the actual model
 syntax (with possible alternatives) to run over the specified grids.}
 }
 \value{
@@ -30,10 +30,9 @@ the list column \code{filters} containing all filter deicions.
 Combine grids of analysis decisions into a single \code{tibble}
 }
 \examples{
-
 library(multitool)
 
-data <-
+my_data <-
   data.frame(
    id   = 1:500,
    iv1  = rnorm(500),
@@ -51,7 +50,7 @@ data <-
 
 my_filter_grid <-
   create_filter_grid(
-    data,
+    my_data,
     filter1 == 1,
     filter1 == 2,
     filter2 == 0,
@@ -61,7 +60,7 @@ my_filter_grid <-
 
 my_var_grid <-
   create_var_grid(
-    my_data = sim_data,
+    my_data = my_data,
     iv       = c(iv1, iv2, iv3),
     dv       = c(dv1, dv2),
     covariates = c(covariate1, covariate2)

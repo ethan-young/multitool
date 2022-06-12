@@ -28,17 +28,19 @@ You can install the development version of multitool from [GitHub](https://githu
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("ethan-young/multiverse_tools")
+devtools::install_github("ethan-young/multitool")
 ```
 
 ## Example
 
 This is a basic example which shows you how to solve a common problem:
 
-```{r example}
-#library(multitool)
+```{r}
+library(multitool)
+```
 
-data <-
+```{r data}
+my_data <-
   data.frame(
     id   = 1:500,
     iv1  = rnorm(500),
@@ -56,25 +58,25 @@ data <-
 ```
 
 ```{r filter_grid}
-# my_filter_grid <-
-#   create_filter_grid(
-#     data,
-#     filter1 == 1,
-#     filter1 == 2,
-#     filter2 == 0,
-#     filter3 == 0,
-#     filter4 == 0
-#   )
+my_filter_grid <-
+  create_filter_grid(
+    my_data = my_data,
+    filter1 == 1,
+    filter1 == 2,
+    filter2 == 0,
+    filter3 == 0,
+    filter4 == 0
+  )
 ```
 
 ```{r variable_grid}
-# my_var_grid <-
-#   create_var_grid(
-#     my_data = sim_data,
-#     iv       = c(iv1, iv2, iv3),
-#     dv       = c(dv1, dv2),
-#     covariates = c(covariate1, covariate2)
-#   )
+my_var_grid <-
+  create_var_grid(
+    my_data = my_data,
+    iv = c(iv1, iv2, iv3),
+    dv = c(dv1, dv2),
+    covariates = c(covariate1, covariate2)
+  )
 ```
 
 ```{r model_grid}

@@ -20,7 +20,7 @@ You can install the development version of multitool from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("ethan-young/multiverse_tools")
+devtools::install_github("ethan-young/multitool")
 ```
 
 ## Example
