@@ -74,12 +74,12 @@ my_filter_grid <-
 #> # A tibble: 7 × 4
 #>   expr                         expr_var expr_n expr_type 
 #>   <chr>                        <chr>     <int> <chr>     
-#> 1 filter1 == 1                 filter1     152 filter    
-#> 2 filter1 == 2                 filter1     183 filter    
+#> 1 filter1 == 1                 filter1     181 filter    
+#> 2 filter1 == 2                 filter1     173 filter    
 #> 3 filter1 %in% unique(filter1) filter1     500 do nothing
-#> 4 scale(filter2) > -2          filter2     491 filter    
+#> 4 scale(filter2) > -2          filter2     489 filter    
 #> 5 filter2 %in% unique(filter2) filter2     500 do nothing
-#> 6 filter3 == 0                 filter3     447 filter    
+#> 6 filter3 == 0                 filter3     449 filter    
 #> 7 filter3 %in% unique(filter3) filter3     500 do nothing
 ```
 

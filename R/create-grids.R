@@ -281,6 +281,15 @@ post_filter_code <- function(grid, ...){
 
 }
 
+#' Title
+#'
+#' @param grid
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
 post_hoc_code <- function(grid, ...){
   code <- dplyr::enexprs(..., .named = T)
   code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
