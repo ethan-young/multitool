@@ -83,3 +83,22 @@ df_to_expand <- function(prep){
     rlang::eval_tidy()
 
 }
+
+list_to_pipeline <- function(pipeline, execute = FALSE){
+  pipeline_code <-
+    pipeline |>
+    compact() |>
+    paste(collapse = " |> ") |>
+    glue::glue()
+
+  if(execute){
+    result <-
+      pipeline_code |>
+      rlang::parse_expr() |>
+      rlang::eval_tidy()
+
+    result
+  } else{
+    pipeline_code
+  }
+}

@@ -1,3 +1,4 @@
+# Create Grids ------------------------------------------------------------
 #' Create all combinations of filtering decisions for exploring exclusions
 #'
 #' @param my_data the actual data as a \code{data.frame} you want to create a
@@ -211,33 +212,95 @@ create_model_grid <- function(...){
 }
 
 # Pre and Post analysis code ----------------------------------------------
+
+#' Add arbitrary code to execute after data are filtered (but before analysis)
+#'
+#' @param grid a \code{tibble} produced by \code{\link{combine_all_grids}}
+#' @param ... the literal code you would like to execute after data are
+#'   filtered. \code{glue} syntax is allowed. An example might be centering or
+#'   scaling a predictor after the appropriate filters are applied to the data.
+#'
+#' @return Your combined grid with a new column containing arbitrary code to run
+#'   post filtering but pre-analysis
+#' @export
+#'
+#' @examples
+#' library(multitool)
+#'
+#' my_data <-
+#'   data.frame(
+#'    id   = 1:500,
+#'    iv1  = rnorm(500),
+#'    iv2  = rnorm(500),
+#'    iv3  = rnorm(500),
+#'    covariate1 = rnorm(500),
+#'    covariate2 = rnorm(500),
+#'    dv1 = rnorm(500),
+#'    dv2 = rnorm(500),
+#'    filter1   = sample(1:3, size = 500, replace = TRUE),
+#'    filter2   = rnorm(500),
+#'    filter3   = rbinom(500, size = 1, prob = .1),
+#'    filter4   = rbinom(500, size = 1, prob = .1)
+#'   )
+#'
+#' my_filter_grid <-
+#'   create_filter_grid(
+#'     my_data,
+#'     filter1 == 1,
+#'     filter1 == 2,
+#'     filter2 == 0,
+#'     filter3 == 0,
+#'     filter4 == 0
+#'   )
+#'
+#'
+#'
+#' post_filter_code(my_filter_grid, mutate({iv} = scale({iv}) |> as.numeric()))
+#'
 post_filter_code <- function(grid, ...){
   code <- dplyr::enexprs(..., .named = T)
   code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
 
   post_filter_code <-
-    grid |>
-    tidyr::unnest(dplyr::everything()) |>
-    glue::glue_data(code_chr)
+    purrr::imap_dfc(code_chr, function(x, y){
+      code_column <-
+        grid |>
+        tidyr::unnest(dplyr::everything()) |>
+        glue::glue_data(x)
+
+      tibble::tibble(
+        post_filter_code = code_column |> as.character()
+      ) |>
+        rename_with(~paste0(.x, y))
+    })
 
   dplyr::bind_cols(
     grid,
-    post_filter_code = post_filter_code |> as.character()
+    post_filter_code
   )
 
 }
 
-post_analysis_code <- function(grid, ...){
+post_hoc_code <- function(grid, ...){
   code <- dplyr::enexprs(..., .named = T)
   code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
 
-  post_analysis_code <-
-    grid |>
-    tidyr::unnest(dplyr::everything()) |>
-    glue::glue_data(code_chr)
+  post_hoc_code <-
+    purrr::imap_dfc(code_chr, function(x, y){
+      code_column <-
+        grid |>
+        tidyr::unnest(dplyr::everything()) |>
+        glue::glue_data(x)
+
+      tibble::tibble(
+        post_hoc_code = code_column |> as.character()
+      ) |>
+        rename_with(~paste0(.x, y))
+    })
 
   dplyr::bind_cols(
-    grid, post_analysis_code = post_analysis_code |> as.character()
+    grid,
+    post_hoc_code
   )
 
 }

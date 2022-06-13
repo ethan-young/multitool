@@ -95,7 +95,7 @@ sim_all_grids2
 
 # Add post analysis code --------------------------------------------------
 sim_all_grids3 <-
-  post_analysis_code(sim_all_grids2, interactions::sim_slopes(universe_analysis, pred = '{iv1}', modx = '{iv2}'))
+  post_hoc_code(sim_all_grids2, interactions::sim_slopes(universe_analysis, pred = '{iv1}', modx = '{iv2}'))
 
 sim_all_grids3
 # Run analyses ------------------------------------------------------------
