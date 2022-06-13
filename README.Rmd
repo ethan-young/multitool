@@ -107,16 +107,16 @@ my_full_grid <- combine_all_grids(my_filter_grid, my_var_grid, my_model_grid)
 ## Add arbitrary code
 
 ```{r add_code}
-# my_grid <- post_filter_code(my_full_grid, mutate({iv} := scale({iv})), mutate({dv} := log({dv})))
-# my_grid <- post_hoc_code(my_grid, lm.beta())
+my_grid <- post_filter_code(my_full_grid, mutate({iv} := scale({iv})), mutate({dv} := log({dv})))
+my_grid <- post_hoc_code(my_grid, lm.beta())
 ```
 
 ## Run multiverse
 
 ```{r}
-# my_multi_results <- run_multiverse(my_data, my_grid[1:10,])
-# my_multi_results |> filter(decision == 1) |> pull(model_post_hoc_code) |> str_replace_all(" \\|> ", " |> \n") |> glue::glue()
-# my_multi_results |> filter(decision == 1) |> unnest(data) |> summarize(mean = mean(iv1), sd = sd(iv1))
-# my_multi_results |> filter(decision == 1) |> unnest(results)
+my_multi_results <- run_multiverse(my_data, my_grid[1:10,])
+my_multi_results |> filter(decision == 1) |> pull(model_post_hoc_code) |> str_replace_all(" \\|> ", " |> \n") |> glue::glue()
+my_multi_results |> filter(decision == 1) |> unnest(data) |> summarize(mean = mean(iv1), sd = sd(iv1))
+my_multi_results |> filter(decision == 1) |> unnest(model_results)
 ```
 

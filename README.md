@@ -74,12 +74,12 @@ my_filter_grid <-
 #> # A tibble: 7 × 4
 #>   expr                         expr_var expr_n expr_type 
 #>   <chr>                        <chr>     <int> <chr>     
-#> 1 filter1 == 1                 filter1     181 filter    
-#> 2 filter1 == 2                 filter1     173 filter    
+#> 1 filter1 == 1                 filter1     176 filter    
+#> 2 filter1 == 2                 filter1     148 filter    
 #> 3 filter1 %in% unique(filter1) filter1     500 do nothing
-#> 4 scale(filter2) > -2          filter2     489 filter    
+#> 4 scale(filter2) > -2          filter2     483 filter    
 #> 5 filter2 %in% unique(filter2) filter2     500 do nothing
-#> 6 filter3 == 0                 filter3     449 filter    
+#> 6 filter3 == 0                 filter3     444 filter    
 #> 7 filter3 %in% unique(filter3) filter3     500 do nothing
 ```
 
@@ -131,15 +131,92 @@ my_full_grid <- combine_all_grids(my_filter_grid, my_var_grid, my_model_grid)
 ## Add arbitrary code
 
 ``` r
-# my_grid <- post_filter_code(my_full_grid, mutate({iv} := scale({iv})), mutate({dv} := log({dv})))
-# my_grid <- post_hoc_code(my_grid, lm.beta())
+my_grid <- post_filter_code(my_full_grid, mutate({iv} := scale({iv})), mutate({dv} := log({dv})))
+my_grid <- post_hoc_code(my_grid, lm.beta())
 ```
 
 ## Run multiverse
 
 ``` r
-# my_multi_results <- run_multiverse(my_data, my_grid[1:10,])
-# my_multi_results |> filter(decision == 1) |> pull(model_post_hoc_code) |> str_replace_all(" \\|> ", " |> \n") |> glue::glue()
-# my_multi_results |> filter(decision == 1) |> unnest(data) |> summarize(mean = mean(iv1), sd = sd(iv1))
-# my_multi_results |> filter(decision == 1) |> unnest(results)
+my_multi_results <- run_multiverse(my_data, my_grid[1:10,])
+#> Warning in log(dv1): NaNs produced
+
+#> Warning in log(dv1): NaNs produced
+
+#> Warning in log(dv1): NaNs produced
+#> decision 1 executed
+#> Warning in log(dv1): NaNs produced
+
+#> Warning in log(dv1): NaNs produced
+
+#> Warning in log(dv1): NaNs produced
+#> decision 2 executed
+#> Warning in log(dv1): NaNs produced
+
+#> Warning in log(dv1): NaNs produced
+
+#> Warning in log(dv1): NaNs produced
+#> decision 3 executed
+#> Warning in log(dv1): NaNs produced
+
+#> Warning in log(dv1): NaNs produced
+
+#> Warning in log(dv1): NaNs produced
+#> decision 4 executed
+#> Warning in log(dv2): NaNs produced
+#> Warning in log(dv2): NaNs produced
+
+#> Warning in log(dv2): NaNs produced
+#> decision 5 executed
+#> Warning in log(dv2): NaNs produced
+
+#> Warning in log(dv2): NaNs produced
+
+#> Warning in log(dv2): NaNs produced
+#> decision 6 executed
+#> Warning in log(dv2): NaNs produced
+
+#> Warning in log(dv2): NaNs produced
+
+#> Warning in log(dv2): NaNs produced
+#> decision 7 executed
+#> Warning in log(dv2): NaNs produced
+
+#> Warning in log(dv2): NaNs produced
+
+#> Warning in log(dv2): NaNs produced
+#> decision 8 executed
+#> Warning in log(dv1): NaNs produced
+#> Warning in log(dv1): NaNs produced
+
+#> Warning in log(dv1): NaNs produced
+#> decision 9 executed
+#> Warning in log(dv1): NaNs produced
+
+#> Warning in log(dv1): NaNs produced
+
+#> Warning in log(dv1): NaNs produced
+#> decision 10 executed
+my_multi_results |> filter(decision == 1) |> pull(model_post_hoc_code) |> str_replace_all(" \\|> ", " |> \n") |> glue::glue()
+#> my_data |> 
+#> dplyr::filter(filter1 == 1, scale(filter2) > -2, filter3 == 0) |> 
+#> mutate(`:=`(iv1, scale(iv1))) |> 
+#> mutate(`:=`(dv1, log(dv1))) |> 
+#> lm(dv1 ~ iv1, data = _) |> 
+#> lm.beta()
+my_multi_results |> filter(decision == 1) |> unnest(data) |> summarize(mean = mean(iv1), sd = sd(iv1))
+#> # A tibble: 1 × 2
+#>       mean    sd
+#>      <dbl> <dbl>
+#> 1 2.88e-17     1
+my_multi_results |> filter(decision == 1) |> unnest(model_results)
+#> # A tibble: 2 × 16
+#>   decision filters  variables model_syntax  post_filter_code1   post_filter_cod…
+#>      <int> <list>   <list>    <chr>         <chr>               <chr>           
+#> 1        1 <tibble> <tibble>  lm(dv1 ~ iv1) mutate(`:=`(iv1, s… mutate(`:=`(dv1…
+#> 2        1 <tibble> <tibble>  lm(dv1 ~ iv1) mutate(`:=`(iv1, s… mutate(`:=`(dv1…
+#> # … with 10 more variables: post_hoc_code1 <chr>, data <list>,
+#> #   model_code <glue>, term <chr>, estimate <dbl>, std.error <dbl>,
+#> #   statistic <dbl>, p.value <dbl>, model_post_hoc <list>,
+#> #   model_post_hoc_code <glue>
 ```
