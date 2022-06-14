@@ -1,7 +1,7 @@
 #' Run a multiverse based on a complete decision grid
 #'
 #' @param my_data a \code{data.frame} representing the the original data
-#' @param grid a \code{data.frame} produced by \link{\code{combine_all_grids}}
+#' @param grid a \code{tibble} produced by \code{\link{combine_all_grids}}
 #'
 #' @return various thing based on the grid, model, and post hoc analyses
 #' @export
@@ -13,7 +13,7 @@
 #' }
 #'
 run_multiverse <- function(my_data, grid) {
-
+  data_chr <- dplyr::enexpr(my_data)|> as.character()
   grid_elements <- paste(names(grid), collapse = " ")
 
   estimates <-
@@ -23,7 +23,7 @@ run_multiverse <- function(my_data, grid) {
 
       universe_pipeline <-
         list(
-          universe_data = "my_data",
+          universe_data = data_chr,
           filters = NULL,
           post_filter_code = NULL,
           model = NULL,
@@ -47,17 +47,18 @@ run_multiverse <- function(my_data, grid) {
       if(stringr::str_detect(grid_elements, "post_filter")){
         universe_pipeline$post_filter_code <-
           universe |>
-          select(starts_with("post_filter_code")) |>
+          dplyr::pull(post_filter_code) |>
+          unlist() |>
           paste0(collapse = " |> ")
 
         universe_data <-
           list_to_pipeline(universe_pipeline, execute = TRUE)
       }
 
-      if(stringr::str_detect(grid_elements, "model_syntax")){
+      if(stringr::str_detect(grid_elements, "models")){
         universe_pipeline$model <-
           universe |>
-          select(model_syntax) |>
+          select(models) |>
           str_replace(string = _ ,"\\)$", ", data = _)")
       }
 
@@ -69,7 +70,7 @@ run_multiverse <- function(my_data, grid) {
         universe_pipeline |>
         list_to_pipeline(execute = TRUE)
 
-      if(stringr::str_detect(universe$model_syntax, "lmer")){
+      if(stringr::str_detect(universe$models, "lmer")){
         universe_results <- broom.mixed::tidy(universe_analysis)
       } else{
         universe_results <- broom::tidy(universe_analysis)
@@ -79,7 +80,8 @@ run_multiverse <- function(my_data, grid) {
 
         universe_pipeline$post_hoc_code <-
           universe |>
-          select(starts_with("post_hoc")) |>
+          dplyr::pull(post_hoc_code) |>
+          unlist() |>
           paste0()
 
         post_hoc_code <-

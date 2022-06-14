@@ -215,101 +215,78 @@ create_model_grid <- function(...){
 
 #' Add arbitrary code to execute after data are filtered (but before analysis)
 #'
-#' @param grid a \code{tibble} produced by \code{\link{combine_all_grids}}
 #' @param ... the literal code you would like to execute after data are
 #'   filtered. \code{glue} syntax is allowed. An example might be centering or
 #'   scaling a predictor after the appropriate filters are applied to the data.
 #'
-#' @return Your combined grid with a new column containing arbitrary code to run
-#'   post filtering but pre-analysis
+#' @return a \code{tibble} with  two columns, "step" and "code". Each row
+#'   representing a post filtering step to execute. The "step" column indicates
+#'   the order and the "code" column is the literal code to be ran.
+#'
 #' @export
 #'
 #' @examples
 #' library(multitool)
 #'
-#' my_data <-
-#'   data.frame(
-#'    id   = 1:500,
-#'    iv1  = rnorm(500),
-#'    iv2  = rnorm(500),
-#'    iv3  = rnorm(500),
-#'    covariate1 = rnorm(500),
-#'    covariate2 = rnorm(500),
-#'    dv1 = rnorm(500),
-#'    dv2 = rnorm(500),
-#'    filter1   = sample(1:3, size = 500, replace = TRUE),
-#'    filter2   = rnorm(500),
-#'    filter3   = rbinom(500, size = 1, prob = .1),
-#'    filter4   = rbinom(500, size = 1, prob = .1)
-#'   )
+#' post_filter_code(mutate({iv} := scale({iv}) |> as.numeric()))
 #'
-#' my_filter_grid <-
-#'   create_filter_grid(
-#'     my_data,
-#'     filter1 == 1,
-#'     filter1 == 2,
-#'     filter2 == 0,
-#'     filter3 == 0,
-#'     filter4 == 0
-#'   )
-#'
-#'
-#'
-#' post_filter_code(my_filter_grid, mutate({iv} = scale({iv}) |> as.numeric()))
-#'
-post_filter_code <- function(grid, ...){
+post_filter_code <- function(...){
   code <- dplyr::enexprs(..., .named = T)
   code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
 
   post_filter_code <-
-    purrr::imap_dfc(code_chr, function(x, y){
-      code_column <-
-        grid |>
-        tidyr::unnest(dplyr::everything()) |>
-        glue::glue_data(x)
-
+    purrr::imap_dfr(code_chr, function(x, y){
       tibble::tibble(
-        post_filter_code = code_column |> as.character()
-      ) |>
-        rename_with(~paste0(.x, y))
+        step = paste0("step_",y),
+        code = x
+      )
     })
 
-  dplyr::bind_cols(
-    grid,
-    post_filter_code
-  )
+  post_filter_code
 
 }
 
-#' Title
+#' Add arbitrary post hoc code to execute after each analysis
 #'
-#' @param grid
-#' @param ...
+#' @param ... the literal code block (unquoted) you would like to execute after
+#'   each analysis. If you have multiple post hoc tasks, separate each distinct
+#'   code chunk by a comma.
 #'
-#' @return
+#'   The code should be written to work with pipes (i.e., \code{|>} or
+#'   \code{\%>\%}). Because the post hoc code comes last in each multiverse
+#'   analysis step, the analysis model object will be passed to the post hoc
+#'   code.
+#'
+#'   So if you fit a simple linear model like: \code{lm(y ~ x1 + x2)}, and your
+#'   post hoc code executes a call to \code{anova}, you would simply pass
+#'   \code{anova()} to \code{post_hoc_code()}. The underlying code would be
+#'
+#'   \code{data |> filters |> lm(y ~ x1 + x2, data = _) |> anova()}
+#'
+#' @return a \code{tibble} with  two columns, "post_hoc_test" and "code". Each
+#'   row representing a post hoc test (or task) to execute. The "post_hoc_test"
+#'   column indicates the order (should be arbitrary) and the "code" column is
+#'   the literal code to be ran.
+#'
 #' @export
 #'
 #' @examples
-post_hoc_code <- function(grid, ...){
+#'
+#' library(multitool)
+#'
+#' my_post_hoc_code <- post_hoc_code(predict(), anova())
+post_hoc_code <- function(...){
   code <- dplyr::enexprs(..., .named = T)
   code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
 
   post_hoc_code <-
-    purrr::imap_dfc(code_chr, function(x, y){
-      code_column <-
-        grid |>
-        tidyr::unnest(dplyr::everything()) |>
-        glue::glue_data(x)
-
+    purrr::imap_dfr(code_chr, function(x, y){
       tibble::tibble(
-        post_hoc_code = code_column |> as.character()
-      ) |>
-        rename_with(~paste0(.x, y))
+        post_hoc_test = paste0("post_hoc_test",y),
+        code = x
+      )
     })
 
-  dplyr::bind_cols(
-    grid,
-    post_hoc_code
-  )
+  post_hoc_code
 
 }

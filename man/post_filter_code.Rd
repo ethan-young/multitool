@@ -4,18 +4,17 @@
 \alias{post_filter_code}
 \title{Add arbitrary code to execute after data are filtered (but before analysis)}
 \usage{
-post_filter_code(grid, ...)
+post_filter_code(...)
 }
 \arguments{
-\item{grid}{a \code{tibble} produced by \code{\link{combine_all_grids}}}
-
 \item{...}{the literal code you would like to execute after data are
 filtered. \code{glue} syntax is allowed. An example might be centering or
 scaling a predictor after the appropriate filters are applied to the data.}
 }
 \value{
-Your combined grid with a new column containing arbitrary code to run
-post filtering but pre-analysis
+a \code{tibble} with  two columns, "step" and "code". Each row
+representing a post filtering step to execute. The "step" column indicates
+the order and the "code" column is the literal code to be ran.
 }
 \description{
 Add arbitrary code to execute after data are filtered (but before analysis)
@@ -23,34 +22,6 @@ Add arbitrary code to execute after data are filtered (but before analysis)
 \examples{
 library(multitool)
 
-my_data <-
-  data.frame(
-   id   = 1:500,
-   iv1  = rnorm(500),
-   iv2  = rnorm(500),
-   iv3  = rnorm(500),
-   covariate1 = rnorm(500),
-   covariate2 = rnorm(500),
-   dv1 = rnorm(500),
-   dv2 = rnorm(500),
-   filter1   = sample(1:3, size = 500, replace = TRUE),
-   filter2   = rnorm(500),
-   filter3   = rbinom(500, size = 1, prob = .1),
-   filter4   = rbinom(500, size = 1, prob = .1)
-  )
-
-my_filter_grid <-
-  create_filter_grid(
-    my_data,
-    filter1 == 1,
-    filter1 == 2,
-    filter2 == 0,
-    filter3 == 0,
-    filter4 == 0
-  )
-
-
-
-post_filter_code(my_filter_grid, mutate({iv} = scale({iv}) |> as.numeric()))
+post_filter_code(mutate({iv} := scale({iv}) |> as.numeric()))
 
 }

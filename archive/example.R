@@ -30,7 +30,7 @@ sim_data <-
     ex_sped     = rbinom(500, size = 1, prob = .1),
     ex_att      = rbinom(500, size = 1, prob = .1),
     ex_imp      = rbinom(500, size = 1, prob = .05)
-  ) %>%
+  ) |>
   mutate(
     intercept   = ifelse(ex_sped == 1, intercept - rnorm(1,.5,.25), intercept),
     intercept   = ifelse(ex_imp == 1, intercept - rnorm(1,.5,.25), intercept),
@@ -77,41 +77,47 @@ sim_mod_grid <-
 
 sim_mod_grid
 
+## Add post-filtering code ----
+sim_post_filter_code <-
+  post_filter_code(mutate(across(c({iv1}, {iv2}), ~scale(.x) |> as.numeric())), mutate({dv} := log({dv})))
+
+sim_post_filter_code
+
+# Add post analysis code --------------------------------------------------
+sim_post_hoc_code <-
+  post_hoc_code(interactions::sim_slopes(pred = '{iv1}', modx = '{iv2}'))
+
 ## Combine grids ----
-sim_all_grids1 <-
+sim_all_grids <-
   combine_all_grids(
     filter_grid = sim_filter_grid,
     var_grid = sim_var_grid,
-    model_grid = sim_mod_grid
+    model_grid = sim_mod_grid,
+    post_filter_code = sim_post_filter_code,
+    post_hoc_code = sim_post_hoc_code
   )
 
-sim_all_grids1
+sim_all_grids
+sim_all_grids |> unnest(filters)
+sim_all_grids |> unnest(variables)
+sim_all_grids |> unnest(post_filter_code)
+sim_all_grids |> unnest(post_hoc_code)
 
-# Add post-filtering code -----------------------
-sim_all_grids2 <-
-  post_filter_code(sim_all_grids1, mutate(across(c({iv1}, {iv2}), ~scale(.x) %>% as.numeric())))
 
-sim_all_grids2
-
-# Add post analysis code --------------------------------------------------
-sim_all_grids3 <-
-  post_hoc_code(sim_all_grids2, interactions::sim_slopes(universe_analysis, pred = '{iv1}', modx = '{iv2}'))
-
-sim_all_grids3
 # Run analyses ------------------------------------------------------------
 results <-
-  run_multiverse(data = sim_data, grid = sim_all_grids3[1:10,]) # only do 10 so it doesn't take too long
+  run_multiverse(data = sim_data, grid = sim_all_grids[1:10,]) # only do 10 so it doesn't take too long
 
 results
-results %>% names()
-results %>% unnest(results)
-results %>% unnest(data)
-results %>% unnest(post_analysis_results)
+results |> names()
+results |> unnest(results)
+results |> unnest(data)
+results |> unnest(post_analysis_results)
 
 # check post filtered but pre analyzed data code
-results %>%
-  filter(decision == 1) %>%
-  unnest(c(data)) %>%
+results |>
+  filter(decision == 1) |>
+  unnest(c(data)) |>
   summarize(
     mean = mean(iv_unp1),
     sd   = sd(iv_unp1)

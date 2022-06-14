@@ -2,13 +2,38 @@
 % Please edit documentation in R/create-grids.R
 \name{post_hoc_code}
 \alias{post_hoc_code}
-\title{Title}
+\title{Add arbitrary post hoc code to execute after each analysis}
 \usage{
-post_hoc_code(grid, ...)
+post_hoc_code(...)
 }
 \arguments{
-\item{...}{}
+\item{...}{the literal code block (unquoted) you would like to execute after
+each analysis. If you have multiple post hoc tasks, separate each distinct
+code chunk by a comma.
+
+The code should be written to work with pipes (i.e., \code{|>} or
+\code{\%>\%}). Because the post hoc code comes last in each multiverse
+analysis step, the analysis model object will be passed to the post hoc
+code.
+
+So if you fit a simple linear model like: \code{lm(y ~ x1 + x2)}, and your
+post hoc code executes a call to \code{anova}, you would simply pass
+\code{anova()} to \code{post_hoc_code()}. The underlying code would be
+
+\code{data |> filters |> lm(y ~ x1 + x2, data = _) |> anova()}}
+}
+\value{
+a \code{tibble} with  two columns, "post_hoc_test" and "code". Each
+row representing a post hoc test (or task) to execute. The "post_hoc_test"
+column indicates the order (should be arbitrary) and the "code" column is
+the literal code to be ran.
 }
 \description{
-Title
+Add arbitrary post hoc code to execute after each analysis
+}
+\examples{
+
+library(multitool)
+
+my_post_hoc_code <- post_hoc_code(predict(), anova())
 }

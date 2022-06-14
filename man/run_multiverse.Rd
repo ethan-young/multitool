@@ -9,7 +9,7 @@ run_multiverse(my_data, grid)
 \arguments{
 \item{my_data}{a \code{data.frame} representing the the original data}
 
-\item{grid}{a \code{data.frame} produced by \link{\code{combine_all_grids}}}
+\item{grid}{a \code{tibble} produced by \code{\link{combine_all_grids}}}
 }
 \value{
 various thing based on the grid, model, and post hoc analyses
