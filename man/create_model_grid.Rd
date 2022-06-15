@@ -12,7 +12,7 @@ use \code{glue} inside formulas to dynamically generate variable names
 based on a variable grid. For example, if you make variable grid with two
 versions of your IVs (e.g., \code{iv1} and \code{iv2}), you can write your
 formula like so: \code{lm(happiness ~ {iv} + control_var)}. The only
-requirement is that the variables written in the formula actaully exist in
+requirement is that the variables written in the formula actually exist in
 the underlying data. You are also responsible for loading any packages that
 run a particular model (e.g., \code{lme4} for mixed-models)}
 }

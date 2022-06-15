@@ -84,7 +84,6 @@ my_var_grid <-
   )
 ```
 
-
 ## Create model grid
 
 ```{r model_grid}
@@ -99,16 +98,33 @@ my_model_grid
 
 ## Add arbitrary code
 
-```{r add_code}
+```{r}
 # Code to execute after filtering step
 my_post_filter_code <- 
   post_filter_code(
     mutate({iv} := scale({iv})), 
     mutate({dv} := log({dv}))
   )
+```
 
+```{r}
+# Code to summarize the model
+my_model_summary_code <- 
+  model_summary_code(
+    summary(),
+    broom::tidy()
+  )
+
+my_model_summary_code
+```
+
+```{r}
 # Code to execute after analysis is donoe
-my_post_hoc_code <- post_hoc_code(predict())
+my_post_hoc_code <- 
+  post_hoc_code(
+    anova(),
+    aov()
+  )
 ```
 
 
@@ -119,20 +135,30 @@ my_full_grid <-
   combine_all_grids(
     my_filter_grid, 
     my_var_grid, 
-    my_model_grid,
     my_post_filter_code,
+    my_model_grid,
+    my_model_summary_code,
     my_post_hoc_code
   )
+
+# my_full_grid |> glimpse()
 ```
+
+## Run a universe
+
+```{r}
+run_universe(my_full_grid, the_data, 1)
+```
+
 
 ## Run multiverse
 
 ```{r}
-my_multi_results <- run_multiverse(the_data, my_full_grid[1:10,])
-
-my_multi_results |> filter(decision == 1) |> pull(model_code) |> str_replace_all(" \\|> ", " |> \n") |> glue::glue()
-my_multi_results |> filter(decision == 1) |> pull(model_post_hoc_code) |> str_replace_all(" \\|> ", " |> \n") |> glue::glue()
-my_multi_results |> filter(decision == 1) |> unnest(data) |> summarize(mean = mean(iv1), sd = sd(iv1))
-my_multi_results |> filter(decision == 1) |> unnest(model_results)
+# my_multi_results <- run_multiverse(the_data, my_full_grid[1:10,])
+# 
+# my_multi_results |> filter(decision == 1) |> pull(model_code) |> str_replace_all(" \\|> ", " |> \n") |> glue::glue()
+# my_multi_results |> filter(decision == 1) |> pull(model_post_hoc_code) |> str_replace_all(" \\|> ", " |> \n") |> glue::glue()
+# my_multi_results |> filter(decision == 1) |> unnest(data) |> summarize(mean = mean(iv1), sd = sd(iv1))
+# my_multi_results |> filter(decision == 1) |> unnest(model_results)
 ```
 

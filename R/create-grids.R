@@ -175,7 +175,6 @@ create_var_grid <- function(my_data, ..., print = TRUE){
 
 }
 
-
 #' Create a modeling grid
 #'
 #' @param ... literal model syntax (no quotes) you would like to run. You can
@@ -183,7 +182,7 @@ create_var_grid <- function(my_data, ..., print = TRUE){
 #'   based on a variable grid. For example, if you make variable grid with two
 #'   versions of your IVs (e.g., \code{iv1} and \code{iv2}), you can write your
 #'   formula like so: \code{lm(happiness ~ {iv} + control_var)}. The only
-#'   requirement is that the variables written in the formula actaully exist in
+#'   requirement is that the variables written in the formula actually exist in
 #'   the underlying data. You are also responsible for loading any packages that
 #'   run a particular model (e.g., \code{lme4} for mixed-models)
 #'
@@ -200,15 +199,18 @@ create_var_grid <- function(my_data, ..., print = TRUE){
 #'     lm({dv} ~ {iv} + {covariates})
 #'   )
 create_model_grid <- function(...){
-  model_formulas <- dplyr::enexprs(..., .named = T)
-  model_formulas_chr <-
-    as.character(model_formulas) |> stringr::str_remove_all("\n|    ")
+  code <- dplyr::enexprs(..., .named = T)
+  code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
 
-  tibble::tibble(
-    mod_group   = "models",
-    mod_formula = model_formulas_chr
-  )
+  model_code <-
+    purrr::imap_dfr(code_chr, function(x, y){
+      tibble::tibble(
+        model = "model",
+        code = x
+      )
+    })
 
+  model_code
 }
 
 # Pre and Post analysis code ----------------------------------------------
@@ -237,12 +239,53 @@ post_filter_code <- function(...){
   post_filter_code <-
     purrr::imap_dfr(code_chr, function(x, y){
       tibble::tibble(
-        step = paste0("step_",y),
+        post_filter_step = paste0("post_filter_step",y),
         code = x
       )
     })
 
   post_filter_code
+
+}
+
+#' Add a model summary function to the grid
+#'
+#' @param ... the literal code (unquoted) you would like to execute on the model
+#'   object. This could be \code{summary()} or \code{\link{broom::tidy}}.
+#'
+#'   The code should be written to work with pipes (i.e., \code{|>} or
+#'   \code{\%>\%}) because the model object will be passed directly to the
+#'   summary function of choice.
+#'
+#'   So if you fit a simple linear model like: \code{lm(y ~ x1 + x2)}, and you
+#'   want to save a summary instead of the entire \code{lm} object, would simply
+#'   pass \code{summary()} to \code{model_summary_code()}. The underlying code
+#'   would be:
+#'
+#'   \code{data |> filters |> lm(y ~ x1 + x2, data = _) |> summary()}
+#'
+#' @return a \code{tibble} with  two columns, "summary_code" and "code".
+#'
+#' @export
+#'
+#' @examples
+#'
+#' library(multitool)
+#'
+#' my_model_summary_code <- model_summary_code(summary(), broom::tidy())
+model_summary_code <- function(...){
+  code <- dplyr::enexprs(..., .named = T)
+  code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
+
+  model_summary_code <-
+    purrr::imap_dfr(code_chr, function(x, y){
+      tibble::tibble(
+        summary = paste0("summary",y),
+        code = x
+      )
+    })
+
+  model_summary_code
 
 }
 

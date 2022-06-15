@@ -73,12 +73,12 @@ my_filter_grid <-
 #> # A tibble: 7 × 4
 #>   expr                         expr_var expr_n expr_type 
 #>   <chr>                        <chr>     <int> <chr>     
-#> 1 filter1 == 1                 filter1     175 filter    
-#> 2 filter1 == 2                 filter1     162 filter    
+#> 1 filter1 == 1                 filter1     182 filter    
+#> 2 filter1 == 2                 filter1     168 filter    
 #> 3 filter1 %in% unique(filter1) filter1     500 do nothing
-#> 4 scale(filter2) > -2          filter2     485 filter    
+#> 4 scale(filter2) > -2          filter2     488 filter    
 #> 5 filter2 %in% unique(filter2) filter2     500 do nothing
-#> 6 filter3 == 0                 filter3     451 filter    
+#> 6 filter3 == 0                 filter3     454 filter    
 #> 7 filter3 %in% unique(filter3) filter3     500 do nothing
 ```
 
@@ -115,10 +115,10 @@ my_model_grid <-
 
 my_model_grid
 #> # A tibble: 2 × 2
-#>   mod_group mod_formula                   
-#>   <chr>     <chr>                         
-#> 1 models    lm({dv} ~ {iv})               
-#> 2 models    lm({dv} ~ {iv} + {covariates})
+#>   model code                          
+#>   <chr> <chr>                         
+#> 1 model lm({dv} ~ {iv})               
+#> 2 model lm({dv} ~ {iv} + {covariates})
 ```
 
 ## Add arbitrary code
@@ -130,9 +130,31 @@ my_post_filter_code <-
     mutate({iv} := scale({iv})), 
     mutate({dv} := log({dv}))
   )
+```
 
+``` r
+# Code to summarize the model
+my_model_summary_code <- 
+  model_summary_code(
+    summary(),
+    broom::tidy()
+  )
+
+my_model_summary_code
+#> # A tibble: 2 × 2
+#>   summary  code         
+#>   <chr>    <chr>        
+#> 1 summary1 summary()    
+#> 2 summary2 broom::tidy()
+```
+
+``` r
 # Code to execute after analysis is donoe
-my_post_hoc_code <- post_hoc_code(predict())
+my_post_hoc_code <- 
+  post_hoc_code(
+    anova(),
+    aov()
+  )
 ```
 
 ## Combine all grids together
@@ -142,100 +164,43 @@ my_full_grid <-
   combine_all_grids(
     my_filter_grid, 
     my_var_grid, 
-    my_model_grid,
     my_post_filter_code,
+    my_model_grid,
+    my_model_summary_code,
     my_post_hoc_code
   )
+
+my_full_grid |> glimpse()
+#> Rows: 288
+#> Columns: 7
+#> $ decision           <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, …
+#> $ variables          <list> [<tbl_df[1 x 3]>], [<tbl_df[1 x 3]>], [<tbl_df[1 x…
+#> $ filters            <list> [<tbl_df[1 x 3]>], [<tbl_df[1 x 3]>], [<tbl_df[1 x…
+#> $ post_filter_code   <list> [<tbl_df[1 x 2]>], [<tbl_df[1 x 2]>], [<tbl_df[1 x…
+#> $ model              <chr> "lm(dv1 ~ iv1)", "lm(dv1 ~ iv1 + covariate1)", "lm(…
+#> $ model_summary_code <list> [<tbl_df[1 x 2]>], [<tbl_df[1 x 2]>], [<tbl_df[1 x…
+#> $ post_hoc_code      <list> [<tbl_df[1 x 2]>], [<tbl_df[1 x 2]>], [<tbl_df[1 x…
+```
+
+## Run a universe
+
+``` r
+run_universe(my_full_grid, the_data, 1)
+#> # A tibble: 1 × 6
+#>   post_hoc_test1_code         post_hoc_test1_… post_hoc_test1_… post_hoc_test2_…
+#>   <glue>                      <list>           <list>           <glue>          
+#> 1 the_data |> filter(filter1… <anova [2 × 5]>  <tibble [1 × 1]> the_data |> fil…
+#> # … with 2 more variables: post_hoc_test2_results <list>,
+#> #   post_hoc_test2_results_notes <list>
 ```
 
 ## Run multiverse
 
 ``` r
-my_multi_results <- run_multiverse(the_data, my_full_grid[1:10,])
-#> Warning in log(dv1): NaNs produced
-
-#> Warning in log(dv1): NaNs produced
-
-#> Warning in log(dv1): NaNs produced
-#> decision 1 executed
-#> Warning in log(dv1): NaNs produced
-
-#> Warning in log(dv1): NaNs produced
-
-#> Warning in log(dv1): NaNs produced
-#> decision 2 executed
-#> Warning in log(dv1): NaNs produced
-
-#> Warning in log(dv1): NaNs produced
-
-#> Warning in log(dv1): NaNs produced
-#> decision 3 executed
-#> Warning in log(dv1): NaNs produced
-
-#> Warning in log(dv1): NaNs produced
-
-#> Warning in log(dv1): NaNs produced
-#> decision 4 executed
-#> Warning in log(dv2): NaNs produced
-#> Warning in log(dv2): NaNs produced
-
-#> Warning in log(dv2): NaNs produced
-#> decision 5 executed
-#> Warning in log(dv2): NaNs produced
-
-#> Warning in log(dv2): NaNs produced
-
-#> Warning in log(dv2): NaNs produced
-#> decision 6 executed
-#> Warning in log(dv2): NaNs produced
-
-#> Warning in log(dv2): NaNs produced
-
-#> Warning in log(dv2): NaNs produced
-#> decision 7 executed
-#> Warning in log(dv2): NaNs produced
-
-#> Warning in log(dv2): NaNs produced
-
-#> Warning in log(dv2): NaNs produced
-#> decision 8 executed
-#> Warning in log(dv1): NaNs produced
-#> Warning in log(dv1): NaNs produced
-
-#> Warning in log(dv1): NaNs produced
-#> decision 9 executed
-#> Warning in log(dv1): NaNs produced
-
-#> Warning in log(dv1): NaNs produced
-
-#> Warning in log(dv1): NaNs produced
-#> decision 10 executed
-
-my_multi_results |> filter(decision == 1) |> pull(model_code) |> str_replace_all(" \\|> ", " |> \n") |> glue::glue()
-#> the_data |> 
-#> dplyr::filter(filter1 == 1, scale(filter2) > -2, filter3 == 0) |> 
-#> mutate(`:=`(iv1, scale(iv1))) |> 
-#> mutate(`:=`(dv1, log(dv1))) |> 
-#> lm(dv1 ~ iv1, data = _)
-my_multi_results |> filter(decision == 1) |> pull(model_post_hoc_code) |> str_replace_all(" \\|> ", " |> \n") |> glue::glue()
-#> the_data |> 
-#> dplyr::filter(filter1 == 1, scale(filter2) > -2, filter3 == 0) |> 
-#> mutate(`:=`(iv1, scale(iv1))) |> 
-#> mutate(`:=`(dv1, log(dv1))) |> 
-#> lm(dv1 ~ iv1, data = _) |> 
-#> predict()
-my_multi_results |> filter(decision == 1) |> unnest(data) |> summarize(mean = mean(iv1), sd = sd(iv1))
-#> # A tibble: 1 × 2
-#>       mean    sd
-#>      <dbl> <dbl>
-#> 1 6.21e-19     1
-my_multi_results |> filter(decision == 1) |> unnest(model_results)
-#> # A tibble: 2 × 15
-#>   decision filters  variables        post_filter_code post_hoc_code models data 
-#>      <int> <list>   <list>           <list>           <list>        <chr>  <lis>
-#> 1        1 <tibble> <tibble [1 × 3]> <tibble [1 × 2]> <tibble>      lm(dv… <df> 
-#> 2        1 <tibble> <tibble [1 × 3]> <tibble [1 × 2]> <tibble>      lm(dv… <df> 
-#> # … with 8 more variables: model_code <glue>, term <chr>, estimate <dbl>,
-#> #   std.error <dbl>, statistic <dbl>, p.value <dbl>, model_post_hoc <list>,
-#> #   model_post_hoc_code <glue>
+# my_multi_results <- run_multiverse(the_data, my_full_grid[1:10,])
+# 
+# my_multi_results |> filter(decision == 1) |> pull(model_code) |> str_replace_all(" \\|> ", " |> \n") |> glue::glue()
+# my_multi_results |> filter(decision == 1) |> pull(model_post_hoc_code) |> str_replace_all(" \\|> ", " |> \n") |> glue::glue()
+# my_multi_results |> filter(decision == 1) |> unnest(data) |> summarize(mean = mean(iv1), sd = sd(iv1))
+# my_multi_results |> filter(decision == 1) |> unnest(model_results)
 ```

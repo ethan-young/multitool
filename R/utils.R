@@ -74,8 +74,6 @@ df_to_expand_prep <- function(df, grouping_var, values_var){
   grid_prep
 }
 
-
-
 df_to_expand <- function(prep){
 
   glue::glue("tidyr::expand_grid({paste(prep, collapse = ', ')})") |>
@@ -89,7 +87,7 @@ list_to_pipeline <- function(pipeline, execute = FALSE){
     pipeline |>
     compact() |>
     paste(collapse = " |> ") |>
-    glue::glue()
+    glue::glue(.trim = F)
 
   if(execute){
     result <-
@@ -102,3 +100,11 @@ list_to_pipeline <- function(pipeline, execute = FALSE){
     pipeline_code
   }
 }
+
+run_universe_code_quietly <-
+  purrr::quietly(
+    function(code){
+      rlang::parse_expr(code) |>
+        rlang::eval_tidy()
+    }
+  )

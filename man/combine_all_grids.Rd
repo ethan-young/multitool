@@ -7,8 +7,9 @@
 combine_all_grids(
   filter_grid = NULL,
   var_grid = NULL,
-  model_grid = NULL,
   post_filter_code = NULL,
+  model_code = NULL,
+  model_summary_code = NULL,
   post_hoc_code = NULL
 )
 }
@@ -21,13 +22,13 @@ filtering decisions.}
 This grid should contain different versions of variables or sets of
 different versions of variables.}
 
-\item{model_grid}{a \code{tibble} created by \code{\link{create_model_grid}}.
-This grid contains the actual model syntax (with possible alternatives) to
-run over the specified grids.}
-
 \item{post_filter_code}{a \code{tibble} created by
 \code{\link{post_filter_code}}. It should contain code you want to run just
 after filtering but before analysis}
+
+\item{model_code}{a \code{tibble} created by \code{\link{create_model_grid}}.
+This grid contains the actual model syntax (with possible alternatives) to
+run over the specified grids.}
 
 \item{post_hoc_code}{a \code{tibble} created by \code{\link{post_hoc_code}}.
 It should contain code that executes post hoc processing or analysis on the
@@ -38,68 +39,17 @@ slopes).}
 \value{
 The output of this function will be a \code{tibble} of all
 combinations of analysis decisions. Each decision is denoted by the column
-\code{decision}. Ecah type of decision grid will create a list column. For
-example, when \code{filter_grid} is provided, the master grid will contain
-the list column \code{filters} containing all filter deicions.
+\code{decision}. Filter and variable grids (if they were included) will
+become list columns. For example, when \code{filter_grid} is provided, the
+master grid will contain the list column \code{filters} containing all
+filter decisions. An analysis pipeline list column will also be created. In
+the simplest case this will just be the model you plan to run. In more
+complex cases, it will contain code to run after filters, the model,
+different summaries, and any post-hoc tests.
 }
 \description{
 Combine grids of analysis decisions into a single \code{tibble}
 }
 \examples{
 library(multitool)
-
-my_data <-
-  data.frame(
-   id   = 1:500,
-   iv1  = rnorm(500),
-   iv2  = rnorm(500),
-   iv3  = rnorm(500),
-   covariate1 = rnorm(500),
-   covariate2 = rnorm(500),
-   dv1 = rnorm(500),
-   dv2 = rnorm(500),
-   filter1   = sample(1:3, size = 500, replace = TRUE),
-   filter2   = rnorm(500),
-   filter3   = rbinom(500, size = 1, prob = .1),
-   filter4   = rbinom(500, size = 1, prob = .1)
-  )
-
-my_filter_grid <-
-  create_filter_grid(
-    my_data,
-    filter1 == 1,
-    filter1 == 2,
-    filter2 == 0,
-    filter3 == 0,
-    filter4 == 0
-  )
-
-my_var_grid <-
-  create_var_grid(
-    my_data = my_data,
-    iv       = c(iv1, iv2, iv3),
-    dv       = c(dv1, dv2),
-    covariates = c(covariate1, covariate2)
-  )
-
-my_model_grid <-
- create_model_grid(
-   lm({dv} ~ {iv}),
-   lm({dv} ~ {iv} + {covariates})
- )
-
-my_post_filter_code <-
-  post_filter_code(
-    mutate({iv} := scale({iv})),
-    mutate({dv} := log({dv}))
-  )
-
-combine_all_grids(
-  my_filter_grid,
-  my_var_grid,
-  my_model_grid,
-  my_post_filter_code,
-
-)
-
 }
