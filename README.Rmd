@@ -115,7 +115,7 @@ my_model_summary_code <-
 ```
 
 ```{r}
-# Code to execute after analysis is donoe
+# Code to execute after analysis is fit
 my_post_hoc_code <- 
   post_hoc_code(
     aov() 
