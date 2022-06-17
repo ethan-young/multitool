@@ -54,17 +54,17 @@ generate_multi_data <- function(my_data, filter_grid){
   multi_data_list
 }
 
-df_to_expand_prep <- function(df, grouping_var, values_var){
+df_to_expand_prep <- function(decision_grid, decision_group, alternatives){
 
   grid_prep <-
-    df |>
-    dplyr::distinct({{grouping_var}}) |>
+    decision_grid |>
+    dplyr::distinct({{decision_group}}) |>
     dplyr::pull() |>
     purrr::map(function(x){
       vect <-
-        df |>
-        dplyr::filter({{grouping_var}} == x) |>
-        dplyr::pull({{values_var}})
+        decision_grid |>
+        dplyr::filter({{decision_group}} == x) |>
+        dplyr::pull({{alternatives}})
 
       vect_chr <- paste0("'", vect, "'", collapse=",")
 
@@ -85,7 +85,7 @@ df_to_expand <- function(prep){
 list_to_pipeline <- function(pipeline, execute = FALSE){
   pipeline_code <-
     pipeline |>
-    compact() |>
+    purrr::compact() |>
     paste(collapse = " |> ") |>
     glue::glue(.trim = F)
 
@@ -108,3 +108,16 @@ run_universe_code_quietly <-
         rlang::eval_tidy()
     }
   )
+
+collect_quiet_results <- function(code){
+
+  quiet_results <- run_universe_code_quietly(code) |> compact()
+
+  tibble::tibble(
+    code     = code,
+    result   = list(quiet_results$result),
+    messages = ifelse(is.null(quiet_results$messages), 0, 1),
+    warnings = ifelse(is.null(quiet_results$warnings), 0, 1),
+  )
+
+}

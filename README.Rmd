@@ -38,6 +38,7 @@ This is a basic example which shows you how to solve a common problem:
 ```{r}
 library(tidyverse)
 library(multitool)
+library(broom)
 ```
 
 ## Simulate some data
@@ -53,9 +54,9 @@ the_data <-
     covariate2 = rnorm(500),
     dv1 = rnorm(500),
     dv2 = rnorm(500),
-    filter1   = sample(1:3, size = 500, replace = TRUE),
-    filter2   = rnorm(500),
-    filter3   = rbinom(500, size = 1, prob = .1)
+    exculsion1 = sample(1:3, size = 500, replace = TRUE),
+    exculsion2 = rnorm(500),
+    exculsion3 = rbinom(500, size = 1, prob = .1)
   )
 ```
 
@@ -65,10 +66,10 @@ the_data <-
 my_filter_grid <-
   create_filter_grid(
     my_data = the_data,
-    filter1 == 1,
-    filter1 == 2,
-    scale(filter2) > -2,
-    filter3 == 0,
+    exculsion1 == 1,
+    exculsion1 == 2,
+    scale(exculsion2) > -2,
+    exculsion3 == 0,
   )
 ```
 
@@ -89,11 +90,10 @@ my_var_grid <-
 ```{r model_grid}
 my_model_grid <-
   create_model_grid(
-    lm({dv} ~ {iv}),
-    lm({dv} ~ {iv} + {covariates})
+    lm({dv} ~ {iv} + {covariates}),
+    lm({dv} ~ {iv} * {covariates})
   )
 
-my_model_grid
 ```
 
 ## Add arbitrary code
@@ -102,8 +102,7 @@ my_model_grid
 # Code to execute after filtering step
 my_post_filter_code <- 
   post_filter_code(
-    mutate({iv} := scale({iv})), 
-    mutate({dv} := log({dv}))
+    mutate({iv} := scale({iv}))
   )
 ```
 
@@ -111,37 +110,30 @@ my_post_filter_code <-
 # Code to summarize the model
 my_model_summary_code <- 
   model_summary_code(
-    summary(),
-    broom::tidy()
+    tidy()
   )
-
-my_model_summary_code
 ```
 
 ```{r}
 # Code to execute after analysis is donoe
 my_post_hoc_code <- 
   post_hoc_code(
-    anova(),
-    aov()
+    aov() 
   )
 ```
-
 
 ## Combine all grids together
 
 ```{r combine_grids}
 my_full_grid <- 
   combine_all_grids(
-    my_filter_grid, 
     my_var_grid, 
-    my_post_filter_code,
+    my_filter_grid, 
     my_model_grid,
+    my_post_filter_code,
     my_model_summary_code,
     my_post_hoc_code
   )
-
-# my_full_grid |> glimpse()
 ```
 
 ## Run a universe
@@ -150,15 +142,9 @@ my_full_grid <-
 run_universe(my_full_grid, the_data, 1)
 ```
 
-
-## Run multiverse
+## Run a multiverse
 
 ```{r}
-# my_multi_results <- run_multiverse(the_data, my_full_grid[1:10,])
-# 
-# my_multi_results |> filter(decision == 1) |> pull(model_code) |> str_replace_all(" \\|> ", " |> \n") |> glue::glue()
-# my_multi_results |> filter(decision == 1) |> pull(model_post_hoc_code) |> str_replace_all(" \\|> ", " |> \n") |> glue::glue()
-# my_multi_results |> filter(decision == 1) |> unnest(data) |> summarize(mean = mean(iv1), sd = sd(iv1))
-# my_multi_results |> filter(decision == 1) |> unnest(model_results)
+run_multiverse(my_full_grid[1:10,], the_data)
 ```
 

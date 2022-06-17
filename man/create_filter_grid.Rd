@@ -4,7 +4,7 @@
 \alias{create_filter_grid}
 \title{Create all combinations of filtering decisions for exploring exclusions}
 \usage{
-create_filter_grid(my_data, ..., print = TRUE)
+create_filter_grid(my_data, ...)
 }
 \arguments{
 \item{my_data}{the actual data as a \code{data.frame} you want to create a
@@ -38,6 +38,7 @@ This is created under the hood by \code{\link[tidyr]{expand_grid}}.
 Create all combinations of filtering decisions for exploring exclusions
 }
 \examples{
+library(tidyverse)
 library(multitool)
 
 my_data <-

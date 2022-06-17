@@ -28,6 +28,7 @@
 #' @export
 #'
 #' @examples
+#' library(tidyverse)
 #' library(multitool)
 #'
 #' my_data <-
@@ -55,55 +56,74 @@
 #'     filter3 == 0,
 #'     filter4 == 0
 #'   )
-create_filter_grid <- function(my_data, ..., print = TRUE){
+create_filter_grid <- function(my_data, ...){
   filter_exprs <- dplyr::enexprs(...)
   filter_exprs_chr <- as.character(filter_exprs)
   filter_vars <-
     stringr::str_extract(filter_exprs_chr, paste(names(my_data), collapse = "|"))
 
-  filter_grid_summary1 <-
+  grid_summary1 <-
     purrr::map2_df(filter_exprs_chr, filter_vars, function(x, y){
 
       tibble::tibble(
-        expr        = x,
-        expr_var    = y,
-        expr_n      = my_data |> dplyr::filter(rlang::parse_expr(x) |> rlang::eval_tidy()) |> nrow(),
-        expr_type   = "filter"
+        filter_expr  = x,
+        filter_group = y,
+        filtered_n   = my_data |> dplyr::filter(rlang::parse_expr(x) |> rlang::eval_tidy()) |> nrow(),
+        filter_type  = "filter"
       )
 
     })
 
-  filter_grid_summary2 <-
-    filter_grid_summary1 |>
-    dplyr::pull(expr_var) |>
+  grid_summary2 <-
+    grid_summary1 |>
+    dplyr::pull(filter_group) |>
     unique() |>
     purrr::map_df(function(x){
 
-      filter_grid_summary1 |>
-        dplyr::filter(expr_var == x) |>
+      grid_summary1 |>
+        dplyr::filter(filter_group == x) |>
         tibble::add_row(
-          expr        = glue::glue("{x} %in% unique({x})") |> as.character(),
-          expr_var    = x,
-          expr_n      = my_data |> dplyr::filter(rlang::parse_expr(expr) |> rlang::eval_tidy()) |> nrow(),
-          expr_type   = "do nothing"
+          filter_expr  = glue::glue("{x} %in% unique({x})") |> as.character(),
+          filter_group = x,
+          filtered_n   = my_data |> dplyr::filter(rlang::parse_expr(filter_expr) |> rlang::eval_tidy()) |> nrow(),
+          filter_type  = "do nothing"
         )
 
     })
 
-  filter_grid_expand <-
-    df_to_expand_prep(filter_grid_summary2, expr_var, expr) |>
+  combinations <-
+    grid_summary2 |>
+    dplyr::group_by(filter_group) |>
+    dplyr::summarize(
+      n_alternatives = dplyr::n()
+    )
+
+  n_combinations <-
+    combinations |>
+    dplyr::pull(n_alternatives) |>
+    cumprod() |>
+    max()
+
+  combination_products <-
+    combinations |>
+    dplyr::pull(n_alternatives) |>
+    paste0(... = _, collapse = '*')
+
+  grid_expanded <-
+    grid_summary2 |>
+    df_to_expand_prep(filter_group, filter_expr) |>
     df_to_expand()
 
-  if(print){
-    print(filter_grid_summary2)
-  }
+  message(glue::glue_data(combinations, "filters involving {filter_group} has {n_alternatives} alternative filtering criteria\n",.trim = FALSE))
+  message(glue::glue("{n_combinations} combinations ({combination_products} = {n_combinations})"))
 
   list(
-    grid_summary  = filter_grid_summary2,
-    grid          = filter_grid_expand
+    summary        = grid_summary2,
+    combinations   = combinations,
+    n_combinations = n_combinations,
+    grid           = grid_expanded
   )
 }
-
 
 #' Create a grid of all combinations of variables
 #'
@@ -123,6 +143,7 @@ create_filter_grid <- function(my_data, ..., print = TRUE){
 #' @export
 #'
 #' @examples
+#' library(tidyverse)
 #' library(multitool)
 #'
 #' my_data <-
@@ -148,11 +169,11 @@ create_filter_grid <- function(my_data, ..., print = TRUE){
 #'    dv = c(dv1, dv2),
 #'    covariates = c(covariate1, covariate2)
 #'  )
-create_var_grid <- function(my_data, ..., print = TRUE){
+create_var_grid <- function(my_data, ...){
   vars_raw <- dplyr::enquos(..., .named = TRUE)
   var_groups <- names(vars_raw)
 
-  var_grid_summary <-
+  grid_summary <-
     purrr::map2_df(vars_raw, var_groups, function(x,y){
       tibble::tibble(
         var_group = y,
@@ -160,17 +181,37 @@ create_var_grid <- function(my_data, ..., print = TRUE){
       )
     })
 
-  var_grid <-
-    df_to_expand_prep(var_grid_summary, var_group, var) |>
+  grid_expanded <-
+    grid_summary |>
+    df_to_expand_prep(var_group, var) |>
     df_to_expand()
 
-  if(print){
-    print(var_grid_summary)
-  }
+  combinations <-
+    grid_summary |>
+    dplyr::group_by(var_group) |>
+    dplyr::summarize(
+      n_alternatives = dplyr::n()
+    )
+
+  n_combinations <-
+    combinations |>
+    dplyr::pull(n_alternatives) |>
+    cumprod() |>
+    max()
+
+  combination_products <-
+    combinations |>
+    dplyr::pull(n_alternatives) |>
+    paste0(... = _, collapse = '*')
+
+  message(glue::glue_data(combinations, "{var_group} variable group has {n_alternatives} alternative variables\n",.trim = FALSE))
+  message(glue::glue("{n_combinations} combinations ({combination_products} = {n_combinations})"))
 
   list(
-    grid_summary = var_grid_summary,
-    grid         = var_grid
+    summary        = grid_summary,
+    combinations   = combinations,
+    n_combinations = n_combinations,
+    grid           = grid_expanded
   )
 
 }
@@ -191,6 +232,7 @@ create_var_grid <- function(my_data, ..., print = TRUE){
 #' @export
 #'
 #' @examples
+#' library(tidyverse)
 #' library(multitool)
 #'
 #' my_model_grid <-
@@ -202,7 +244,7 @@ create_model_grid <- function(...){
   code <- dplyr::enexprs(..., .named = T)
   code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
 
-  model_code <-
+  grid_summary <-
     purrr::imap_dfr(code_chr, function(x, y){
       tibble::tibble(
         model = "model",
@@ -210,7 +252,38 @@ create_model_grid <- function(...){
       )
     })
 
-  model_code
+  grid_expanded <-
+    grid_summary |>
+    df_to_expand_prep(model, code) |>
+    df_to_expand()
+
+  combinations <-
+    grid_summary |>
+    dplyr::group_by(model) |>
+    dplyr::summarize(
+      n_alternatives = dplyr::n()
+    )
+
+  n_combinations <-
+    combinations |>
+    dplyr::pull(n_alternatives) |>
+    cumprod() |>
+    max()
+
+  combination_products <-
+    combinations |>
+    dplyr::pull(n_alternatives) |>
+    paste0(... = _, collapse = '*')
+
+  message(glue::glue_data(combinations, "Your {model} has {n_combinations} alternatives",.trim = FALSE))
+
+  list(
+    summary        = grid_summary,
+    combinations   = combinations,
+    n_combinations = n_combinations,
+    grid           = grid_expanded
+  )
+
 }
 
 # Pre and Post analysis code ----------------------------------------------
@@ -228,6 +301,7 @@ create_model_grid <- function(...){
 #' @export
 #'
 #' @examples
+#' library(tidyverse)
 #' library(multitool)
 #'
 #' post_filter_code(mutate({iv} := scale({iv}) |> as.numeric()))
@@ -244,14 +318,19 @@ post_filter_code <- function(...){
       )
     })
 
-  post_filter_code
+  if(nrow(post_filter_code) ==1){
+    post_filter_code |> mutate(post_filter_step = str_remove(post_filter_step, "\\d"))
+  } else{
+    post_filter_code
+  }
 
 }
 
 #' Add a model summary function to the grid
 #'
 #' @param ... the literal code (unquoted) you would like to execute on the model
-#'   object. This could be \code{summary()} or \code{\link{broom::tidy}}.
+#'   object. This usually \code{\link[broom]{tidy}} but could be other
+#'   functions.
 #'
 #'   The code should be written to work with pipes (i.e., \code{|>} or
 #'   \code{\%>\%}) because the model object will be passed directly to the
@@ -270,9 +349,10 @@ post_filter_code <- function(...){
 #'
 #' @examples
 #'
+#' library(tidyverse)
 #' library(multitool)
 #'
-#' my_model_summary_code <- model_summary_code(summary(), broom::tidy())
+#' my_model_summary_code <- model_summary_code(tidy())
 model_summary_code <- function(...){
   code <- dplyr::enexprs(..., .named = T)
   code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
@@ -285,7 +365,11 @@ model_summary_code <- function(...){
       )
     })
 
-  model_summary_code
+  if(nrow(model_summary_code) ==1){
+    model_summary_code |> mutate(summary = str_remove(summary, "\\d"))
+  } else{
+    model_summary_code
+  }
 
 }
 
@@ -314,10 +398,10 @@ model_summary_code <- function(...){
 #' @export
 #'
 #' @examples
-#'
+#' library(tidyverse)
 #' library(multitool)
 #'
-#' my_post_hoc_code <- post_hoc_code(predict(), anova())
+#' my_post_hoc_code <- post_hoc_code(anova() |> tidy())
 post_hoc_code <- function(...){
   code <- dplyr::enexprs(..., .named = T)
   code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
@@ -330,6 +414,10 @@ post_hoc_code <- function(...){
       )
     })
 
-  post_hoc_code
+  if(nrow(post_hoc_code) ==1){
+    post_hoc_code |> mutate(post_hoc_test = str_remove(post_hoc_test, "\\d"))
+  } else{
+    post_hoc_code
+  }
 
 }

@@ -33,40 +33,40 @@
 #' library(multitool)
 combine_all_grids <-
   function(
-    filter_grid = NULL,
     var_grid = NULL,
+    filter_grid = NULL,
+    model_grid = NULL,
     post_filter_code = NULL,
-    model_code = NULL,
     model_summary_code = NULL,
     post_hoc_code = NULL)
   {
 
     all_grids <-
       list(
-        filters            = NULL,
         variables          = NULL,
-        post_filter_code   = NULL,
+        filters            = NULL,
         model_code         = NULL,
+        post_filter_code   = NULL,
         model_summary_code = NULL,
         post_hoc_code      = NULL
       )
 
-    if(!is.null(filter_grid)){
-      all_grids$filters <-
-        df_to_expand_prep(filter_grid$grid_summary, expr_var, expr)
-    }
-
     if(!is.null(var_grid)){
       all_grids$variables <-
-        df_to_expand_prep(var_grid$grid_summary, var_group, var)
+        df_to_expand_prep(var_grid$summary, var_group, var)
+    }
+
+    if(!is.null(filter_grid)){
+      all_grids$filters <-
+        df_to_expand_prep(filter_grid$summary, filter_group, filter_expr)
+    }
+
+    if(!is.null(model_grid)) {
+      all_grids$model_code <- df_to_expand_prep(model_grid$summary, model, code)
     }
 
     if(!is.null(post_filter_code)){
       all_grids$post_filter_code <- df_to_expand_prep(post_filter_code, post_filter_step, code)
-    }
-
-    if(!is.null(model_code)) {
-      all_grids$model_code <- df_to_expand_prep(model_code, model, code)
     }
 
     if(!is.null(model_summary_code)){
@@ -77,7 +77,7 @@ combine_all_grids <-
       all_grids$post_hoc_code <- df_to_expand_prep(post_hoc_code, post_hoc_test, code)
     }
 
-    all_grids <-
+    combined_grid <-
       all_grids |>
       purrr::compact() |>
       purrr::flatten() |>
@@ -89,36 +89,68 @@ combine_all_grids <-
       tidyr::unnest(data)
 
     if(!is.null(filter_grid)){
-      all_grids <-
-        all_grids |>
+      combined_grid <-
+        combined_grid |>
         tidyr::nest(filters = dplyr::any_of(names(filter_grid$grid)))
     }
 
     if(!is.null(var_grid)){
-      all_grids <-
-        all_grids |>
+      combined_grid <-
+        combined_grid |>
         tidyr::nest(variables = dplyr::any_of(names(var_grid$grid)))
     }
 
     if(!is.null(post_filter_code)){
-      all_grids <-
-        all_grids |>
+      combined_grid <-
+        combined_grid |>
         tidyr::nest(post_filter_code = dplyr::any_of(starts_with("post_filter")))
     }
 
     if(!is.null(model_summary_code)){
-      all_grids <-
-        all_grids |>
+      combined_grid <-
+        combined_grid |>
         tidyr::nest(model_summary_code = dplyr::any_of(starts_with("summary")))
     }
 
     if(!is.null(post_hoc_code)){
-      all_grids <-
-        all_grids |>
+      combined_grid <-
+        combined_grid |>
         tidyr::nest(post_hoc_code = dplyr::any_of(starts_with("post_hoc")))
     }
 
-    all_grids |>
+    all_combinations <-
+      list(
+        variable  = var_grid$combinations,
+        filter    = filter_grid$combinations,
+        model     = model_grid$combinations
+      ) |>
+      purrr::compact()
+
+    all_combinations <-
+      map2_df(all_combinations, names(all_combinations), function(x, y){
+        combs <-
+          x |>
+          rename_with(~c("group", "n_alternatives")) |>
+          mutate(
+            category = paste0("(", y, ") "),
+            category = ifelse(category != "(model) ", category, ""))
+      })
+
+    n_combinations <-
+      all_combinations |>
+      pull(n_alternatives) |>
+      cumprod() |>
+      max()
+
+    combination_products <-
+      all_combinations |>
+      pull(n_alternatives) |>
+      paste0(... = _, collapse = '*')
+
+    message(glue::glue_data(all_combinations, "{group} {category}has {n_alternatives} alternatives\n", .trim = FALSE))
+    message(glue::glue("{n_combinations} combinations ({combination_products} = {n_combinations})"))
+
+    combined_grid |>
       dplyr::select(
         decision,
         any_of(c("variables", "filters", "post_filter_code", "model", "model_summary_code", "post_hoc_code"))

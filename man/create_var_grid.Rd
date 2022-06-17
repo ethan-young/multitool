@@ -4,7 +4,7 @@
 \alias{create_var_grid}
 \title{Create a grid of all combinations of variables}
 \usage{
-create_var_grid(my_data, ..., print = TRUE)
+create_var_grid(my_data, ...)
 }
 \arguments{
 \item{my_data}{the actual data as a \code{data.frame} with the variables to
@@ -28,6 +28,7 @@ a \code{tibble} with all possible variable combinations.
 Create a grid of all combinations of variables
 }
 \examples{
+library(tidyverse)
 library(multitool)
 
 my_data <-

@@ -20,6 +20,7 @@ the order and the "code" column is the literal code to be ran.
 Add arbitrary code to execute after data are filtered (but before analysis)
 }
 \examples{
+library(tidyverse)
 library(multitool)
 
 post_filter_code(mutate({iv} := scale({iv}) |> as.numeric()))

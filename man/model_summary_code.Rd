@@ -8,7 +8,8 @@ model_summary_code(...)
 }
 \arguments{
 \item{...}{the literal code (unquoted) you would like to execute on the model
-object. This could be \code{summary()} or \code{\link{broom::tidy}}.
+object. This usually \code{\link[broom]{tidy}} but could be other
+functions.
 
 The code should be written to work with pipes (i.e., \code{|>} or
 \code{\%>\%}) because the model object will be passed directly to the
@@ -29,7 +30,8 @@ Add a model summary function to the grid
 }
 \examples{
 
+library(tidyverse)
 library(multitool)
 
-my_model_summary_code <- model_summary_code(summary(), broom::tidy())
+my_model_summary_code <- model_summary_code(tidy())
 }

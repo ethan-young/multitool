@@ -24,6 +24,7 @@ decision grid
 Create a modeling grid
 }
 \examples{
+library(tidyverse)
 library(multitool)
 
 my_model_grid <-

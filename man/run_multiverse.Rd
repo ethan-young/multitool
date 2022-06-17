@@ -4,7 +4,7 @@
 \alias{run_multiverse}
 \title{Run a multiverse based on a complete decision grid}
 \usage{
-run_multiverse(my_data, grid)
+run_multiverse(my_grid, my_data, save_model = FALSE)
 }
 \arguments{
 \item{my_data}{a \code{data.frame} representing the the original data}

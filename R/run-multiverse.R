@@ -14,18 +14,23 @@
 #' \dontrun{
 #' run_universe(my_grid, my_data, decision_num)
 #' }
-run_universe <- function(my_grid, my_data, decision_num){
+run_universe <- function(my_grid, my_data, decision_num, save_model = FALSE){
 
-  data_chr <- dplyr::enexpr(my_data)|> as.character()
+  data_chr <- dplyr::enexpr(my_data) |> as.character()
+
+  if(rlang::is_expression(my_data)){
+    data_chr <- my_data |> as.character()
+  }
+
   grid_elements <- paste(names(my_grid), collapse = " ")
 
   universe <-
     my_grid |>
-    filter(decision == decision_num)
+    dplyr::filter(decision == decision_num)
 
   universe_pipeline <-
     list(
-      universe_data = data_chr,
+      original_data = data_chr,
       filters = NULL,
       post_filter_code = NULL,
       model = NULL,
@@ -33,7 +38,14 @@ run_universe <- function(my_grid, my_data, decision_num){
       post_hoc_code = NULL
     )
 
-  universe_data <- my_data
+  universe_results <-
+    list(
+      filter_code = NULL,
+      post_filter_code = NULL,
+      model = NULL,
+      summary = NULL,
+      post_hoc = NULL
+    )
 
   if(stringr::str_detect(grid_elements, "filters")){
     universe_pipeline$filters <-
@@ -42,6 +54,11 @@ run_universe <- function(my_grid, my_data, decision_num){
       unlist() |>
       paste0(collapse = ", ") |>
       paste0("filter(", ... =  _, ")")
+
+    universe_results$filter_code <-
+      tibble::tibble(
+        filter_code = list_to_pipeline(universe_pipeline)
+      )
   }
 
   if(stringr::str_detect(grid_elements, "post_filter")){
@@ -50,13 +67,27 @@ run_universe <- function(my_grid, my_data, decision_num){
       dplyr::pull(post_filter_code) |>
       unlist() |>
       paste0(collapse = " |> ")
+
+    universe_results$post_filter_code <-
+      tibble::tibble(
+        post_filter_code = list_to_pipeline(universe_pipeline)
+      )
   }
 
-  if(stringr::str_detect(grid_elements, "model")){
-    universe_pipeline$model <-
-      universe |>
-      dplyr::pull(model) |>
-      str_replace(string = _ ,"\\)$", ", data = _)")
+  universe_pipeline$model <-
+    universe |>
+    dplyr::pull(model) |>
+    stringr::str_replace(string = _ ,"\\)$", ", data = _)")
+
+  if(save_model | !stringr::str_detect(grid_elements, "summary")){
+    universe_model <-
+      list_to_pipeline(universe_pipeline) |>
+      collect_quiet_results() |>
+      dplyr::rename_with(~paste0("model_", .x))
+
+    universe_results$model <- universe_model
+  } else{
+    universe_results$model <- tibble::tibble(model_code = list_to_pipeline(universe_pipeline))
   }
 
   if(stringr::str_detect(grid_elements, "summary")){
@@ -64,22 +95,13 @@ run_universe <- function(my_grid, my_data, decision_num){
       universe |>
       dplyr::select(model_summary_code) |>
       tidyr::unnest(model_summary_code) |>
-      mutate(across(everything(), ~glue::glue(list_to_pipeline(universe_pipeline), " |> ", .x)))
+      dplyr::mutate(dplyr::across(dplyr::everything(), ~glue::glue(list_to_pipeline(universe_pipeline), " |> ", .x)))
 
-    universe_results <-
-      map2_dfc(universe_summaries, names(universe_summaries), function(x, y){
-        quiet_results <- run_universe_code_quietly(x) |> compact()
-        universe_results <- quiet_results$result
-        universe_results_notes <-
-          quiet_results[3:length(quiet_results)] |>
-          as_tibble()
-
-        tibble(
-          code           = x,
-          results        = list(universe_results),
-          results_notes  = list(universe_results_notes)
-        ) |>
-          rename_with(~paste0("model_", y, "_", .x))
+    universe_results$summary <-
+      purrr::map2_dfc(universe_summaries, names(universe_summaries), function(x, y){
+        summaries <-
+          collect_quiet_results(x) |>
+          dplyr::rename_with(~paste0(y, "_", .x))
       })
   }
 
@@ -88,27 +110,25 @@ run_universe <- function(my_grid, my_data, decision_num){
       universe |>
       dplyr::select(post_hoc_code) |>
       tidyr::unnest(post_hoc_code) |>
-      mutate(across(everything(), ~glue::glue(list_to_pipeline(universe_pipeline), " |> ", .x)))
+      dplyr::mutate(dplyr::across(dplyr::everything(), ~glue::glue(list_to_pipeline(universe_pipeline), " |> ", .x)))
 
-    post_hoc_results <-
-      map2_dfc(universe_post_hoc, names(universe_post_hoc), function(x, y){
-        quiet_results <- run_universe_code_quietly(x) |> compact()
-        universe_results <- quiet_results$result
-        universe_results_notes <-
-          quiet_results[3:length(quiet_results)] |>
-          as_tibble()
-
-        tibble(
-          code           = x,
-          results        = list(universe_results),
-          results_notes  = list(universe_results_notes)
-        ) |>
-          rename_with(~paste0(y, "_", .x))
+    universe_results$post_hoc <-
+      purrr::map2_dfc(universe_post_hoc, names(universe_post_hoc), function(x, y){
+        collect_quiet_results(x) |>
+          dplyr::rename_with(~paste0(y, "_", .x))
       })
   }
 
-  post_hoc_results
-
+  universe_results |>
+    purrr::compact() |>
+    purrr::reduce(dplyr::bind_cols) |>
+    mutate(
+      decision = decision_num,
+      n_notes = across(matches("messages|warnings")) |> sum()
+      ) |>
+    tidyr::nest(code  = ends_with("code")) |>
+    tidyr::nest(notes  = matches("messages|warnings")) |>
+    select(decision, everything(), code, n_notes, notes)
 }
 
 #' Run a multiverse based on a complete decision grid
@@ -125,109 +145,26 @@ run_universe <- function(my_grid, my_data, decision_num){
 #' run_multiverse(data, grid)
 #' }
 #'
-run_multiverse <- function(my_data, grid) {
+run_multiverse <- function(my_grid, my_data, save_model = FALSE) {
   data_chr <- dplyr::enexpr(my_data)|> as.character()
-  grid_elements <- paste(names(grid), collapse = " ")
 
-  estimates <-
-    grid |>
-    dplyr::group_split(decision) |>
-    purrr::map_df(function(universe){
-
-      universe_pipeline <-
-        list(
-          universe_data = data_chr,
-          filters = NULL,
-          post_filter_code = NULL,
-          model = NULL,
-          post_hoc_code = NULL
+  multiverse <-
+    purrr::map_df(1:nrow(my_grid), function(x){
+      universe <-
+        run_universe(
+          my_grid = my_grid,
+          my_data = data_chr,
+          decision_num = x,
+          save_model = save_model
         )
-
-      universe_data <- my_data
-
-      if(stringr::str_detect(grid_elements, "filters")){
-        universe_pipeline$filters <-
-          universe |>
-          dplyr::pull(filters) |>
-          unlist() |>
-          paste0(collapse = ", ") |>
-          paste0("dplyr::filter(", ... =  _, ")")
-
-        universe_data <-
-          list_to_pipeline(universe_pipeline, execute = TRUE)
-      }
-
-      if(stringr::str_detect(grid_elements, "post_filter")){
-        universe_pipeline$post_filter_code <-
-          universe |>
-          dplyr::pull(post_filter_code) |>
-          unlist() |>
-          paste0(collapse = " |> ")
-
-        universe_data <-
-          list_to_pipeline(universe_pipeline, execute = TRUE)
-      }
-
-      if(stringr::str_detect(grid_elements, "models")){
-        universe_pipeline$model <-
-          universe |>
-          select(models) |>
-          str_replace(string = _ ,"\\)$", ", data = _)")
-      }
-
-      model_code <-
-        universe_pipeline |>
-        list_to_pipeline()
-
-      universe_analysis <-
-        universe_pipeline |>
-        list_to_pipeline(execute = TRUE)
-
-      if(stringr::str_detect(universe$models, "lmer")){
-        universe_results <- broom.mixed::tidy(universe_analysis)
-      } else{
-        universe_results <- broom::tidy(universe_analysis)
-      }
-
-      if(stringr::str_detect(grid_elements, "post_hoc")){
-
-        universe_pipeline$post_hoc_code <-
-          universe |>
-          dplyr::pull(post_hoc_code) |>
-          unlist() |>
-          paste0()
-
-        post_hoc_code <-
-          universe_pipeline |>
-          list_to_pipeline()
-
-        universe_post_hoc <-
-          universe_pipeline |>
-          list_to_pipeline(execute = TRUE)
-
-        results <-
-          tibble::tibble(
-            decision            = universe$decision,
-            data                = list(universe_data),
-            model_code          = model_code,
-            model_results       = list(universe_results),
-            model_post_hoc      = list(universe_post_hoc),
-            model_post_hoc_code = post_hoc_code
-          )
-      } else{
-        results <-
-          tibble::tibble(
-            decision            = universe$decision,
-            data                = list(universe_data),
-            model_code          = model_code,
-            model_results       = list(universe_results)
-          )
-      }
-
-      message("decision ", universe$decision, " executed")
-
-      results
+      message("Decision set ", x, " analyzed")
+      universe
     })
 
-  dplyr::full_join(grid, estimates, by = "decision")
+  dplyr::full_join(
+    my_grid |> select(-contains("code")),
+    multiverse,
+    by = "decision"
+  )
+
 }

@@ -32,8 +32,8 @@ the literal code to be ran.
 Add arbitrary post hoc code to execute after each analysis
 }
 \examples{
-
+library(tidyverse)
 library(multitool)
 
-my_post_hoc_code <- post_hoc_code(predict(), anova())
+my_post_hoc_code <- post_hoc_code(anova() |> tidy())
 }
