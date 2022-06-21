@@ -8,9 +8,8 @@ combine_all_grids(
   var_grid = NULL,
   filter_grid = NULL,
   model_grid = NULL,
-  post_filter_code = NULL,
-  model_summary_code = NULL,
-  post_hoc_code = NULL
+  preprocessing = NULL,
+  postprocessing = NULL
 )
 }
 \arguments{
@@ -26,15 +25,15 @@ filtering decisions.}
 \code{\link{post_filter_code}}. It should contain code you want to run just
 after filtering but before analysis}
 
+\item{model_code}{a \code{tibble} created by \code{\link{create_model_grid}}.
+This grid contains the actual model syntax (with possible alternatives) to
+run over the specified grids.}
+
 \item{post_hoc_code}{a \code{tibble} created by \code{\link{post_hoc_code}}.
 It should contain code that executes post hoc processing or analysis on the
 model object specified in the \code{model_grid}. This could be something
 like standardizing coefficients or running post hoc analysis (e.g., simple
 slopes).}
-
-\item{model_code}{a \code{tibble} created by \code{\link{create_model_grid}}.
-This grid contains the actual model syntax (with possible alternatives) to
-run over the specified grids.}
 }
 \value{
 The output of this function will be a \code{tibble} of all

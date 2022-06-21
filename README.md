@@ -38,7 +38,6 @@ library(tidyverse)
 #> ✖ dplyr::filter() masks stats::filter()
 #> ✖ dplyr::lag()    masks stats::lag()
 library(multitool)
-library(broom)
 ```
 
 ## Simulate some data
@@ -50,47 +49,52 @@ the_data <-
     iv1  = rnorm(500),
     iv2  = rnorm(500),
     iv3  = rnorm(500),
-    covariate1 = rnorm(500),
-    covariate2 = rnorm(500),
-    dv1 = rnorm(500),
-    dv2 = rnorm(500),
-    exculsion1 = sample(1:3, size = 500, replace = TRUE),
-    exculsion2 = rnorm(500),
-    exculsion3 = rbinom(500, size = 1, prob = .1)
+    mod1 = rnorm(500),
+    mod2 = rnorm(500),
+    mod3 = rnorm(500),
+    cov1 = rnorm(500),
+    cov2 = rnorm(500),
+    dv1  = rnorm(500),
+    dv2  = rnorm(500),
+    include1 = rbinom(500, size = 1, prob = .1),
+    include2 = sample(1:3, size = 500, replace = TRUE),
+    include3 = rnorm(500)
   )
 ```
 
-## Create a filter grid
-
-``` r
-my_filter_grid <-
-  create_filter_grid(
-    my_data = the_data,
-    exculsion1 == 1,
-    exculsion1 == 2,
-    scale(exculsion2) > -2,
-    exculsion3 == 0,
-  )
-#> filters involving exculsion1 has 3 alternative filtering criteria
-#> filters involving exculsion2 has 2 alternative filtering criteria
-#> filters involving exculsion3 has 2 alternative filtering criteria
-#> 12 combinations (3*2*2 = 12)
-```
-
-## Create variable grid
+## Create a variable grid
 
 ``` r
 my_var_grid <-
   create_var_grid(
     my_data = the_data,
-    iv = c(iv1, iv2, iv3),
-    dv = c(dv1, dv2),
-    covariates = c(covariate1, covariate2)
+    iv  = c(iv1, iv2, iv3),
+    mod = c(mod1, mod2, mod3),
+    dv  = c(dv1, dv2),
+    cov = c(cov1, cov2)
   )
-#> covariates variable group has 2 alternative variables
+#> cov variable group has 2 alternative variables
 #> dv variable group has 2 alternative variables
 #> iv variable group has 3 alternative variables
-#> 12 combinations (2*2*3 = 12)
+#> mod variable group has 3 alternative variables
+#> 36 combinations (2*2*3*3 = 36)
+```
+
+## Create filter grid
+
+``` r
+my_filter_grid <-
+  create_filter_grid(
+    my_data = the_data,
+    include1 == 0,
+    include2 != 3,
+    include2 != 2,
+    scale(include3) > -2.5
+  )
+#> filters involving include1 has 2 alternative filtering criteria
+#> filters involving include2 has 3 alternative filtering criteria
+#> filters involving include3 has 2 alternative filtering criteria
+#> 12 combinations (2*3*2 = 12)
 ```
 
 ## Create model grid
@@ -98,8 +102,8 @@ my_var_grid <-
 ``` r
 my_model_grid <-
   create_model_grid(
-    lm({dv} ~ {iv} + {covariates}),
-    lm({dv} ~ {iv} * {covariates})
+    lm({dv} ~ {iv} * {mod}),
+    lm({dv} ~ {iv} * {mod} + {cov})
   )
 #> Your model has 2 alternatives
 ```
@@ -107,59 +111,51 @@ my_model_grid <-
 ## Add arbitrary code
 
 ``` r
-# Code to execute after filtering step
-my_post_filter_code <- 
-  post_filter_code(
-    mutate({iv} := scale({iv}))
-  )
-```
-
-``` r
-# Code to summarize the model
-my_model_summary_code <- 
-  model_summary_code(
-    tidy()
+#Add pre-processing code before model is fit (but after filtering)
+my_preprocess <-
+  create_preprocess(
+    mutate({iv} := scale({iv}) |> as.numeric(), {mod} := scale({mod}) |> as.numeric())
   )
 ```
 
 ``` r
 # Code to execute after analysis is fit
-my_post_hoc_code <- 
-  post_hoc_code(
-    aov() 
+my_postprocess <-
+  create_postprocess(
+    aov()
   )
 ```
 
 ## Combine all grids together
 
 ``` r
-my_full_grid <- 
+my_full_grid <-
   combine_all_grids(
-    my_var_grid, 
-    my_filter_grid, 
+    my_var_grid,
+    my_filter_grid,
     my_model_grid,
-    my_post_filter_code,
-    my_model_summary_code,
-    my_post_hoc_code
+    my_preprocess,
+    my_postprocess
   )
-#> covariates (variable) has 2 alternatives
+#> cov (variable) has 2 alternatives
 #> dv (variable) has 2 alternatives
 #> iv (variable) has 3 alternatives
-#> exculsion1 (filter) has 3 alternatives
-#> exculsion2 (filter) has 2 alternatives
-#> exculsion3 (filter) has 2 alternatives
+#> mod (variable) has 3 alternatives
+#> include1 (filter) has 2 alternatives
+#> include2 (filter) has 3 alternatives
+#> include3 (filter) has 2 alternatives
 #> model has 2 alternatives
-#> 288 combinations (2*2*3*3*2*2*2 = 288)
+#> 864 combinations (2*2*3*3*2*3*2*2 = 864)
 ```
 
 ## Run a universe
 
 ``` r
 run_universe(my_full_grid, the_data, 1)
-#> # A tibble: 1 × 6
-#>   decision summary_result   post_hoc_test_result n_notes code     notes   
-#>      <dbl> <list>           <list>                 <dbl> <list>   <list>  
-#> 1        1 <tibble [3 × 5]> <aov>                      0 <tibble> <tibble>
+#> # A tibble: 1 × 4
+#>   decision data_pipeline    lm               aov             
+#>      <dbl> <list>           <list>           <list>          
+#> 1        1 <tibble [1 × 2]> <tibble [1 × 5]> <tibble [1 × 5]>
 ```
 
 ## Run a multiverse
@@ -177,17 +173,17 @@ run_multiverse(my_full_grid[1:10,], the_data)
 #> Decision set 9 analyzed
 #> Decision set 10 analyzed
 #> # A tibble: 10 × 9
-#>    decision variables filters  model     summary_result post_hoc_test_r… n_notes
-#>       <int> <list>    <list>   <chr>     <list>         <list>             <dbl>
-#>  1        1 <tibble>  <tibble> lm(dv1 ~… <tibble>       <aov>                  0
-#>  2        2 <tibble>  <tibble> lm(dv1 ~… <tibble>       <aov>                  0
-#>  3        3 <tibble>  <tibble> lm(dv1 ~… <tibble>       <aov>                  0
-#>  4        4 <tibble>  <tibble> lm(dv1 ~… <tibble>       <aov>                  0
-#>  5        5 <tibble>  <tibble> lm(dv1 ~… <tibble>       <aov>                  0
-#>  6        6 <tibble>  <tibble> lm(dv1 ~… <tibble>       <aov>                  0
-#>  7        7 <tibble>  <tibble> lm(dv1 ~… <tibble>       <aov>                  0
-#>  8        8 <tibble>  <tibble> lm(dv1 ~… <tibble>       <aov>                  0
-#>  9        9 <tibble>  <tibble> lm(dv1 ~… <tibble>       <aov>                  0
-#> 10       10 <tibble>  <tibble> lm(dv1 ~… <tibble>       <aov>                  0
-#> # … with 2 more variables: code <list>, notes <list>
+#>    decision variables        filters  preprocess model postprocess data_pipeline
+#>       <int> <list>           <list>   <list>     <chr> <list>      <list>       
+#>  1        1 <tibble [1 × 4]> <tibble> <tibble>   lm(d… <tibble>    <tibble>     
+#>  2        2 <tibble [1 × 4]> <tibble> <tibble>   lm(d… <tibble>    <tibble>     
+#>  3        3 <tibble [1 × 4]> <tibble> <tibble>   lm(d… <tibble>    <tibble>     
+#>  4        4 <tibble [1 × 4]> <tibble> <tibble>   lm(d… <tibble>    <tibble>     
+#>  5        5 <tibble [1 × 4]> <tibble> <tibble>   lm(d… <tibble>    <tibble>     
+#>  6        6 <tibble [1 × 4]> <tibble> <tibble>   lm(d… <tibble>    <tibble>     
+#>  7        7 <tibble [1 × 4]> <tibble> <tibble>   lm(d… <tibble>    <tibble>     
+#>  8        8 <tibble [1 × 4]> <tibble> <tibble>   lm(d… <tibble>    <tibble>     
+#>  9        9 <tibble [1 × 4]> <tibble> <tibble>   lm(d… <tibble>    <tibble>     
+#> 10       10 <tibble [1 × 4]> <tibble> <tibble>   lm(d… <tibble>    <tibble>     
+#> # … with 2 more variables: lm <list>, aov <list>
 ```

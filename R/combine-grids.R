@@ -36,20 +36,12 @@ combine_all_grids <-
     var_grid = NULL,
     filter_grid = NULL,
     model_grid = NULL,
-    post_filter_code = NULL,
-    model_summary_code = NULL,
-    post_hoc_code = NULL)
+    preprocessing = NULL,
+    postprocessing = NULL
+  )
   {
 
-    all_grids <-
-      list(
-        variables          = NULL,
-        filters            = NULL,
-        model_code         = NULL,
-        post_filter_code   = NULL,
-        model_summary_code = NULL,
-        post_hoc_code      = NULL
-      )
+    all_grids <-list()
 
     if(!is.null(var_grid)){
       all_grids$variables <-
@@ -65,34 +57,24 @@ combine_all_grids <-
       all_grids$model_code <- df_to_expand_prep(model_grid$summary, model, code)
     }
 
-    if(!is.null(post_filter_code)){
-      all_grids$post_filter_code <- df_to_expand_prep(post_filter_code, post_filter_step, code)
+    if(!is.null(preprocessing)){
+      all_grids$preprocessing_code <- df_to_expand_prep(preprocessing, preprocess, code)
     }
 
-    if(!is.null(model_summary_code)){
-      all_grids$model_summary_code <- df_to_expand_prep(model_summary_code, summary, code)
-    }
-
-    if(!is.null(post_hoc_code)){
-      all_grids$post_hoc_code <- df_to_expand_prep(post_hoc_code, post_hoc_test, code)
+    if(!is.null(postprocessing)){
+      all_grids$postprocessing_code <- df_to_expand_prep(postprocessing, postprocess, code)
     }
 
     combined_grid <-
       all_grids |>
-      purrr::compact() |>
       purrr::flatten() |>
       df_to_expand() |>
       dplyr::mutate(decision = 1:dplyr::n()) |>
       dplyr::select(decision, dplyr::everything()) |>
-      tidyr::nest(data = c(-decision, -matches("step|model|summary|test"))) |>
-      dplyr::mutate(across(matches("step|model|summary|test"), ~purrr::map2_chr(data, .x, function(x, y) glue::glue_data(x, y)))) |>
+      tidyr::nest(data = c(-decision, -matches("step|model|set"))) |>
+      dplyr::mutate(across(matches("step|model|set"), ~purrr::map2_chr(data, .x, function(x, y) glue::glue_data(x, y)))) |>
       tidyr::unnest(data)
-
-    if(!is.null(filter_grid)){
-      combined_grid <-
-        combined_grid |>
-        tidyr::nest(filters = dplyr::any_of(names(filter_grid$grid)))
-    }
+      #mutate(across(c(model,contains("set")), ~check_tidiers(.x), .names = "{.col}_is_tidy"))
 
     if(!is.null(var_grid)){
       combined_grid <-
@@ -100,22 +82,22 @@ combine_all_grids <-
         tidyr::nest(variables = dplyr::any_of(names(var_grid$grid)))
     }
 
-    if(!is.null(post_filter_code)){
+    if(!is.null(filter_grid)){
       combined_grid <-
         combined_grid |>
-        tidyr::nest(post_filter_code = dplyr::any_of(starts_with("post_filter")))
+        tidyr::nest(filters = dplyr::any_of(names(filter_grid$grid)))
     }
 
-    if(!is.null(model_summary_code)){
+    if(!is.null(preprocessing)){
       combined_grid <-
         combined_grid |>
-        tidyr::nest(model_summary_code = dplyr::any_of(starts_with("summary")))
+        tidyr::nest(preprocess = dplyr::any_of(starts_with("step")))
     }
 
-    if(!is.null(post_hoc_code)){
+    if(!is.null(postprocessing)){
       combined_grid <-
         combined_grid |>
-        tidyr::nest(post_hoc_code = dplyr::any_of(starts_with("post_hoc")))
+        tidyr::nest(postprocess = dplyr::any_of(starts_with("set")))
     }
 
     all_combinations <-
@@ -153,7 +135,6 @@ combine_all_grids <-
     combined_grid |>
       dplyr::select(
         decision,
-        any_of(c("variables", "filters", "post_filter_code", "model", "model_summary_code", "post_hoc_code"))
+        any_of(c("variables", "filters", "preprocess", "model", "model_is_tidy", "postprocess"))
       )
   }
-

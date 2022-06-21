@@ -4,7 +4,7 @@
 \alias{run_universe}
 \title{Run a single set of arbitrary decisions and save the result}
 \usage{
-run_universe(my_grid, my_data, decision_num, save_model = FALSE)
+run_universe(my_grid, my_data, decision_num, mixed = FALSE, save_model = FALSE)
 }
 \arguments{
 \item{my_data}{a \code{data.frame} representing the the original data}

@@ -101,6 +101,20 @@ list_to_pipeline <- function(pipeline, execute = FALSE){
   }
 }
 
+check_tidiers <- function(code){
+
+  tidiers <-
+    methods(broom.mixed::tidy) |>
+    as.character() |>
+    stringr::str_remove("^tidy\\.")
+
+  can_be_tidied <-
+    stringr::str_remove(code, "\\(.*")
+
+  can_be_tidied %in% tidiers
+
+}
+
 run_universe_code_quietly <-
   purrr::quietly(
     function(code){
@@ -109,15 +123,55 @@ run_universe_code_quietly <-
     }
   )
 
-collect_quiet_results <- function(code){
+collect_quiet_results <- function(code, save_model = FALSE){
 
-  quiet_results <- run_universe_code_quietly(code) |> compact()
+  quiet_results <- list()
 
-  tibble::tibble(
-    code     = code,
-    result   = list(quiet_results$result),
-    messages = ifelse(is.null(quiet_results$messages), 0, 1),
-    warnings = ifelse(is.null(quiet_results$warnings), 0, 1),
-  )
+  model_func <-
+    code |>
+    str_extract("\\|\\>[^\\|\\>]*$") |>
+    str_remove(".*\\|\\> ") |>
+    str_remove("\\(.*\\)")
+
+  is_tidy <- check_tidiers(model_func)
+  quiet_results$model <- run_universe_code_quietly(code)
+  if(is_tidy){
+    quiet_results$tidy <- run_universe_code_quietly(code |> paste("|> broom.mixed::tidy()", collapse = " "))
+    quiet_results$glance <- run_universe_code_quietly(code |> paste("|> broom.mixed::glance()", collapse = " "))
+
+    warnings <- map_df(quiet_results, "warnings") |> rename_with(~paste0("warning_", .x))
+    messages <- map_df(quiet_results, "messages") |> rename_with(~paste0("message_", .x))
+
+    results <-
+      tibble::tibble(
+        code           = code,
+        result_tidy    = list(quiet_results$tidy$result),
+        result_glance  = list(quiet_results$glance$result),
+        warnings       = list(warnings),
+        messages       = list(messages)
+      ) |>
+      rename_with(~paste0(model_func, "_", .x))
+  } else{
+
+    warnings <- map_df(quiet_results, "warnings") |> rename_with(~paste0("warning_", .x))
+    messages <- map_df(quiet_results, "messages") |> rename_with(~paste0("message_", .x))
+
+    results <-
+      tibble::tibble(
+        code     = code,
+        result   = list(quiet_results$model$result |> summary()),
+        warnings = list(warnings),
+        messages = list(messages)
+      ) |>
+      rename_with(~paste0(model_func, "_", .x))
+  }
+
+  if(save_model){
+    results <-
+      bind_cols(tibble("{model_func}_full" := list(quiet_results$model$result)), results)
+  }
+
+  results |>
+    tidyr::nest("{model_func}" := starts_with(model_func))
 
 }

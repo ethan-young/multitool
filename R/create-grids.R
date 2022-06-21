@@ -244,11 +244,16 @@ create_model_grid <- function(...){
   code <- dplyr::enexprs(..., .named = T)
   code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
 
+  tidiers <-
+    methods(broom.mixed::tidy) |>
+    as.character() |>
+    str_remove("^tidy\\.")
+
   grid_summary <-
     purrr::imap_dfr(code_chr, function(x, y){
       tibble::tibble(
-        model = "model",
-        code = x
+        model   = "model",
+        code    = x
       )
     })
 
@@ -286,7 +291,7 @@ create_model_grid <- function(...){
 
 }
 
-# Pre and Post analysis code ----------------------------------------------
+# Pre and Post processing -------------------------------------------------
 
 #' Add arbitrary code to execute after data are filtered (but before analysis)
 #'
@@ -303,73 +308,19 @@ create_model_grid <- function(...){
 #' @examples
 #' library(tidyverse)
 #' library(multitool)
-#'
-#' post_filter_code(mutate({iv} := scale({iv}) |> as.numeric()))
-#'
-post_filter_code <- function(...){
+create_preprocess <- function(...){
   code <- dplyr::enexprs(..., .named = T)
   code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
 
-  post_filter_code <-
+  pre_processing_code <-
     purrr::imap_dfr(code_chr, function(x, y){
       tibble::tibble(
-        post_filter_step = paste0("post_filter_step",y),
-        code = x
+        preprocess = paste0("step",y),
+        code        = x
       )
     })
 
-  if(nrow(post_filter_code) ==1){
-    post_filter_code |> mutate(post_filter_step = str_remove(post_filter_step, "\\d"))
-  } else{
-    post_filter_code
-  }
-
-}
-
-#' Add a model summary function to the grid
-#'
-#' @param ... the literal code (unquoted) you would like to execute on the model
-#'   object. This usually \code{\link[broom]{tidy}} but could be other
-#'   functions.
-#'
-#'   The code should be written to work with pipes (i.e., \code{|>} or
-#'   \code{\%>\%}) because the model object will be passed directly to the
-#'   summary function of choice.
-#'
-#'   So if you fit a simple linear model like: \code{lm(y ~ x1 + x2)}, and you
-#'   want to save a summary instead of the entire \code{lm} object, would simply
-#'   pass \code{summary()} to \code{model_summary_code()}. The underlying code
-#'   would be:
-#'
-#'   \code{data |> filters |> lm(y ~ x1 + x2, data = _) |> summary()}
-#'
-#' @return a \code{tibble} with  two columns, "summary_code" and "code".
-#'
-#' @export
-#'
-#' @examples
-#'
-#' library(tidyverse)
-#' library(multitool)
-#'
-#' my_model_summary_code <- model_summary_code(tidy())
-model_summary_code <- function(...){
-  code <- dplyr::enexprs(..., .named = T)
-  code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
-
-  model_summary_code <-
-    purrr::imap_dfr(code_chr, function(x, y){
-      tibble::tibble(
-        summary = paste0("summary",y),
-        code = x
-      )
-    })
-
-  if(nrow(model_summary_code) ==1){
-    model_summary_code |> mutate(summary = str_remove(summary, "\\d"))
-  } else{
-    model_summary_code
-  }
+  pre_processing_code
 
 }
 
@@ -400,24 +351,23 @@ model_summary_code <- function(...){
 #' @examples
 #' library(tidyverse)
 #' library(multitool)
-#'
-#' my_post_hoc_code <- post_hoc_code(anova() |> tidy())
-post_hoc_code <- function(...){
+create_postprocess <- function(...){
   code <- dplyr::enexprs(..., .named = T)
   code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
 
-  post_hoc_code <-
+  tidiers <-
+    methods(broom.mixed::tidy) |>
+    as.character() |>
+    str_remove("^tidy\\.")
+
+  post_processing_code <-
     purrr::imap_dfr(code_chr, function(x, y){
       tibble::tibble(
-        post_hoc_test = paste0("post_hoc_test",y),
-        code = x
+        postprocess = paste0("set",y),
+        code         = x
       )
     })
 
-  if(nrow(post_hoc_code) ==1){
-    post_hoc_code |> mutate(post_hoc_test = str_remove(post_hoc_test, "\\d"))
-  } else{
-    post_hoc_code
-  }
+  post_processing_code
 
 }

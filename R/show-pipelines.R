@@ -1,9 +1,9 @@
-show_filter_pipeline <- function(multiverse, decision_num, copy = F){
+show_pipe_filter <- function(multiverse, decision_num, copy = F){
 
   code <-
     multiverse |>
     filter(decision == decision_num) |>
-    unnest(code) |>
+    unnest(data_pipeline) |>
     pull(filter_code) |>
     str_replace_all("\\|\\>", " |>\n  ") |>
     glue::glue(.trim = FALSE)
@@ -16,18 +16,15 @@ show_filter_pipeline <- function(multiverse, decision_num, copy = F){
   code
 }
 
-show_post_filter_pipeline <- function(multiverse, decision_num, copy = F){
+show_pipe_preprocess <- function(multiverse, decision_num, copy = F){
 
   code <-
     multiverse |>
     filter(decision == decision_num) |>
-    select(code) |>
-    unnest(code) |>
-    select(starts_with("step")) |>
-    map(function(x){
-      str_replace_all(x, "\\|\\>", " |>\n  ") |>
-        glue::glue(.trim = FALSE)
-    })
+    unnest(data_pipeline) |>
+    pull(preprocess_code) |>
+    str_replace_all("\\|\\>", " |>\n  ") |>
+    glue::glue(.trim = FALSE)
 
   if(copy){
     suppressWarnings({clipr::write_clip(code)})
@@ -37,13 +34,15 @@ show_post_filter_pipeline <- function(multiverse, decision_num, copy = F){
   code
 }
 
-show_model_pipeline <- function(multiverse, decision_num, copy = F){
+show_pipe_model <- function(multiverse, decision_num, mod, copy = F){
 
   code <-
     multiverse |>
     filter(decision == decision_num) |>
-    unnest(code) |>
-    pull(model_code) |>
+    select({{mod}}) |>
+    unnest({{mod}}) |>
+    select(ends_with("code")) |>
+    pull() |>
     str_replace_all("\\|\\>", " |>\n  ") |>
     glue::glue(.trim = FALSE)
 
@@ -54,46 +53,4 @@ show_model_pipeline <- function(multiverse, decision_num, copy = F){
 
   code
 
-}
-
-show_summary_pipeline <- function(multiverse, decision_num, copy = F){
-
-  code <-
-    multiverse |>
-    filter(decision == decision_num) |>
-    select(code) |>
-    unnest(code) |>
-    select(starts_with("summary")) |>
-    map(function(x){
-      str_replace_all(x, "\\|\\>", " |>\n  ") |>
-        glue::glue(.trim = FALSE)
-    })
-
-  if(copy){
-    suppressWarnings({clipr::write_clip(code)})
-    message("Summary pipline copied!")
-  }
-
-  code
-}
-
-show_post_hoc_pipeline <- function(multiverse, decision_num, copy = F){
-
-  code <-
-    multiverse |>
-    filter(decision == decision_num) |>
-    select(code) |>
-    unnest(code) |>
-    select(starts_with("post_hoc")) |>
-    map(function(x){
-      str_replace_all(x, "\\|\\>", " |>\n  ") |>
-        glue::glue(.trim = FALSE)
-    })
-
-  if(copy){
-    suppressWarnings({clipr::write_clip(code)})
-    message("Post hoc pipline copied!")
-  }
-
-  suppressWarnings(code)
 }
