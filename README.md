@@ -162,16 +162,6 @@ run_universe(my_full_grid, the_data, 1)
 
 ``` r
 run_multiverse(my_full_grid[1:10,], the_data)
-#> Decision set 1 analyzed
-#> Decision set 2 analyzed
-#> Decision set 3 analyzed
-#> Decision set 4 analyzed
-#> Decision set 5 analyzed
-#> Decision set 6 analyzed
-#> Decision set 7 analyzed
-#> Decision set 8 analyzed
-#> Decision set 9 analyzed
-#> Decision set 10 analyzed
 #> # A tibble: 10 × 9
 #>    decision variables        filters  preprocess model postprocess data_pipeline
 #>       <int> <list>           <list>   <list>     <chr> <list>      <list>       

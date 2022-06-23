@@ -1,9 +1,14 @@
 #' Run a single set of arbitrary decisions and save the result
 #'
+#' @param my_grid a \code{tibble} produced by \code{\link{combine_all_grids}}
 #' @param my_data a \code{data.frame} representing the the original data
-#' @param grid a \code{tibble} produced by \code{\link{combine_all_grids}}
 #' @param decision_num an single integer from 1 to \code{nrow(grid)} indicating
 #'   which specific decision set to run
+#' @param save_model logical, indicates whether to save the model object in its
+#'   entirety. The default is \code{FALSE} because model objects are usually
+#'   large and under the hood, \code{\link[broom]{tidy}} and
+#'   \code{\link[broom]{glance}} is used to summarize the most useful model
+#'   information.
 #'
 #' @return a single row \code{tibble} containing the decision, code that was
 #'   ran, the results, and any notes (e.g., warnings or messages).
@@ -14,7 +19,7 @@
 #' \dontrun{
 #' run_universe(my_grid, my_data, decision_num)
 #' }
-run_universe <- function(my_grid, my_data, decision_num, mixed = FALSE, save_model = FALSE){
+run_universe <- function(my_grid, my_data, decision_num, save_model = FALSE){
 
   data_chr <- dplyr::enexpr(my_data) |> as.character()
 
@@ -72,7 +77,9 @@ run_universe <- function(my_grid, my_data, decision_num, mixed = FALSE, save_mod
       dplyr::select(postprocess) |>
       tidyr::unnest(postprocess) |>
       as.list() |>
-      map(function(x) paste0(list_to_pipeline(universe_pipeline), " |> ", x))
+      purrr::map(
+        function(x) paste0(list_to_pipeline(universe_pipeline), " |> ", x)
+      )
 
     universe_analyses <-
       append(universe_analyses, universe_postprocess)
@@ -86,20 +93,33 @@ run_universe <- function(my_grid, my_data, decision_num, mixed = FALSE, save_mod
       })
 
   universe_results |>
-    purrr::reduce(bind_cols) |>
-    mutate(
+    purrr::reduce(dplyr::bind_cols) |>
+    dplyr::mutate(
       decision = decision_num,
     ) |>
-    nest(data_pipeline = ends_with("code")) |>
-    select(decision, data_pipeline, everything())
+    tidyr::nest(data_pipeline = dplyr::ends_with("code")) |>
+    dplyr::select(decision, data_pipeline, dplyr::everything())
 }
 
 #' Run a multiverse based on a complete decision grid
 #'
+#' @param my_grid a \code{tibble} produced by \code{\link{combine_all_grids}}
 #' @param my_data a \code{data.frame} representing the the original data
-#' @param grid a \code{tibble} produced by \code{\link{combine_all_grids}}
+#' @param save_model logical, indicates whether to save the model object in its
+#'   entirety. The default is \code{FALSE} because model objects are usually
+#'   large and under the hood, \code{\link[broom]{tidy}} and
+#'   \code{\link[broom]{glance}} is used to summarize the most useful model
+#'   information.
+#' @param ncores numeric. The number of cores you want to use for parallel
+#'   processing.
 #'
-#' @return various thing based on the grid, model, and post hoc analyses
+#' @return a single \code{tibble} containing tidied results for the model and
+#'   any post-processing tests/tasks. For each unique test (e.g., an \code{lm}
+#'   or \code{aov} called on an \code{lm}), a list column with the function name
+#'   is created with \code{\link[broom]{tidy}} and \code{\link[broom]{glance}}
+#'   and any warnings or messages printed while fitting the models. Internally,
+#'   modeling and post-processing functions are checked to see if there are tidy
+#'   or glance methods available. If not, \code{summary} will be called instead.
 #' @export
 #'
 #' @examples
@@ -107,27 +127,47 @@ run_universe <- function(my_grid, my_data, decision_num, mixed = FALSE, save_mod
 #' \dontrun{
 #' run_multiverse(data, grid)
 #' }
-#'
-run_multiverse <- function(my_grid, my_data, save_model = FALSE) {
+run_multiverse <- function(my_grid, my_data, save_model = FALSE, ncores = 1) {
   data_chr <- dplyr::enexpr(my_data)|> as.character()
 
-  multiverse <-
-    purrr::map_df(1:nrow(my_grid), function(x){
-      universe <-
-        run_universe(
-          my_grid = my_grid,
-          my_data = data_chr,
-          decision_num = x,
-          save_model = save_model
-        )
-      message("Decision set ", x, " analyzed")
-      universe
-    })
+  if(ncores > 1){
+    future::plan(future::multisession, workers = ncores)
+
+    multiverse <-
+      furrr::future_map_dfr(
+        1:nrow(my_grid),
+        function(x){
+          run_universe(
+            my_grid = my_grid,
+            my_data = data_chr,
+            decision_num = x,
+            save_model = save_model
+          )
+        },
+        .options = furrr::furrr_options(seed = T))
+
+    future::plan(future::sequential)
+  } else{
+
+    multiverse <-
+      purrr::map_df(
+        cli::cli_progress_along(1:nrow(my_grid)),
+        function(x){
+          run_universe(
+            my_grid = my_grid,
+            my_data = data_chr,
+            decision_num = x,
+            save_model = save_model
+          )
+        })
+
+  }
 
   dplyr::full_join(
-    my_grid |> select(-contains("code")),
+    my_grid |> dplyr::select(-dplyr::contains("code")),
     multiverse,
     by = "decision"
   )
-
 }
+
+

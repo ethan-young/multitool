@@ -1,12 +1,28 @@
-summary_console <-
+#' Create a 'universe' console report
+#'
+#' @param multiverse a \code{tibble} created from \code{\link{run_multiverse}}
+#' @param my_data the original data used in the multiverse dataset
+#' @param decision_num which decision set to create a report for
+#'
+#' @export
+#'
+#' @examples
+#'
+#' \dontrun{
+#' my_multi_results <- run_multiverse(my_grid, my_data)
+#'
+#' report_universe_console(my_multi_verse, my_data, 1)
+#' }
+report_universe_console <-
   function(multiverse, my_data, decision_num){
 
-    data_chr <- enexpr(my_data) |> as.character()
+    data_chr <- dplyr::enexpr(my_data) |> as.character()
     grid_elements <- paste(names(multiverse), collapse = " ")
 
     universe <-
       multiverse |>
-      filter(decision == decision_num)
+      dplyr::filter(decision == decision_num)
+
     cli::cli_h1("Multiverse Analysis - Decision set {decision_num}")
     cli::cli_h2("Decisions")
     data_ul <- cli::cli_ul()
@@ -19,8 +35,8 @@ summary_console <-
 
       filters <-
         universe |>
-        select(filters) |>
-        pull() |>
+        dplyr::select(filters) |>
+        dplyr::pull() |>
         unlist() |>
         unname()
 
@@ -37,8 +53,8 @@ summary_console <-
 
       variables <-
         universe |>
-        select(variables) |>
-        pull() |>
+        dplyr::select(variables) |>
+        dplyr::pull() |>
         unlist()
 
       variable_ul <- cli::cli_ul()
@@ -52,7 +68,7 @@ summary_console <-
 
     model <-
       universe |>
-      pull(model)
+      dplyr::pull(model)
 
     model_ul <- cli::cli_ul()
     cli::cli_li("Mdoel Syntax:")
@@ -65,5 +81,5 @@ summary_console <-
     cli::cli_code(show_model_pipeline(multiverse, decision_num = decision_num))
 
     cli::cli_h2("Results Summary")
-    universe |> select(summary_result) |> unnest(summary_result)
+    universe |> dplyr::select(summary_result) |> tidyr::unnest(summary_result)
   }

@@ -17,8 +17,15 @@ the underlying data. You are also responsible for loading any packages that
 run a particular model (e.g., \code{lme4} for mixed-models)}
 }
 \value{
-a \code{tibble} containing the models you wish to apply to your
-decision grid
+\ a list with four components:
+
+\describe{
+\item{summary}{a summary \code{tibble} of the models chosen.}
+\item{combinations}{a summary of the number of alternatives models}
+\item{n_combinations}{the total number of model combinations}
+\item{grid}{the actual modeling grid, the number of rows = n_combinations.
+}
+}
 }
 \description{
 Create a modeling grid
@@ -29,7 +36,7 @@ library(multitool)
 
 my_model_grid <-
   create_model_grid(
-    lm({dv} ~ {iv}),
-    lm({dv} ~ {iv} + {covariates})
+    lm({dv} ~ {iv} * {mod}),
+    lm({dv} ~ {iv} * {mod} + {cov})
   )
 }

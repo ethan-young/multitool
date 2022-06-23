@@ -21,34 +21,106 @@ different versions of variables.}
 \code{\link{create_filter_grid}}. This grid contains all observation (row)
 filtering decisions.}
 
-\item{post_filter_code}{a \code{tibble} created by
-\code{\link{post_filter_code}}. It should contain code you want to run just
-after filtering but before analysis}
-
-\item{model_code}{a \code{tibble} created by \code{\link{create_model_grid}}.
+\item{model_grid}{a \code{tibble} created by \code{\link{create_model_grid}}.
 This grid contains the actual model syntax (with possible alternatives) to
 run over the specified grids.}
 
-\item{post_hoc_code}{a \code{tibble} created by \code{\link{post_hoc_code}}.
-It should contain code that executes post hoc processing or analysis on the
-model object specified in the \code{model_grid}. This could be something
-like standardizing coefficients or running post hoc analysis (e.g., simple
-slopes).}
+\item{preprocessing}{a \code{tibble} created by
+\code{\link{create_preprocess}}. It should contain code you want to run
+just after filtering but before analysis}
+
+\item{postprocessing}{a \code{tibble} created by
+\code{\link{create_postprocess}}. It should contain code that executes post
+hoc processing or analysis on the model object specified in the
+\code{model_grid}. This could be something like standardizing coefficients
+or running post hoc analysis (e.g., simple slopes).}
 }
 \value{
 The output of this function will be a \code{tibble} of all
-combinations of analysis decisions. Each decision is denoted by the column
-\code{decision}. Filter and variable grids (if they were included) will
-become list columns. For example, when \code{filter_grid} is provided, the
-master grid will contain the list column \code{filters} containing all
-filter decisions. An analysis pipeline list column will also be created. In
-the simplest case this will just be the model you plan to run. In more
-complex cases, it will contain code to run after filters, the model,
-different summaries, and any post-hoc tests.
+combinations of analysis decisions. It contains the following columns:
+
+\describe{ \item{\code{decision}}{a numeric column from 1 to n combinations
+of decisions} \item{\code{filters}}{Filters (if they were included) as a
+list column.} \item{\code{variables}}{Variable combinations as a list
+column} \item{\code{model}}{The model, based on the decisions, that will be
+fit.} \item{\code{preprocess}}{any pre-processing steps contained in a list
+column} \item{\code{postprocess}}{any post-processing tasks contained in a
+list column}}
 }
 \description{
 Combine grids of analysis decisions into a single \code{tibble}
 }
 \examples{
+library(tidyverse)
 library(multitool)
+## Simulate some data
+the_data <-
+  data.frame(
+    id   = 1:500,
+    iv1  = rnorm(500),
+    iv2  = rnorm(500),
+    iv3  = rnorm(500),
+    mod1 = rnorm(500),
+    mod2 = rnorm(500),
+    mod3 = rnorm(500),
+    cov1 = rnorm(500),
+    cov2 = rnorm(500),
+    dv1  = rnorm(500),
+    dv2  = rnorm(500),
+    include1 = rbinom(500, size = 1, prob = .1),
+    include2 = sample(1:3, size = 500, replace = TRUE),
+    include3 = rnorm(500)
+  )
+
+## Create variable grid
+my_var_grid <-
+  create_var_grid(
+    my_data = the_data,
+    iv  = c(iv1, iv2, iv3),
+    mod = c(mod1, mod2, mod3),
+    dv  = c(dv1, dv2),
+    cov = c(cov1, cov2)
+  )
+
+## Create a filter grid
+my_filter_grid <-
+  create_filter_grid(
+    my_data = the_data,
+    include1 == 0,
+    include2 != 3,
+    include2 != 2,
+    scale(include3) > -2.5
+  )
+
+## Create model grid
+my_model_grid <-
+  create_model_grid(
+    lm({dv} ~ {iv} * {mod}),
+    lm({dv} ~ {iv} * {mod} + {cov})
+  )
+
+
+## Add arbitrary code
+
+# Code to execute after filtering step
+my_preprocess <-
+  create_preprocess(
+    mutate({iv} := scale({iv}) |> as.numeric())
+  )
+
+# Code to execute after analysis is done
+my_postprocess <-
+  create_postprocess(
+    aov()
+  )
+
+## Combine all grids together
+my_full_grid <-
+  combine_all_grids(
+    my_var_grid,
+    my_filter_grid,
+    my_model_grid,
+    my_preprocess,
+    my_postprocess
+  )
 }

@@ -17,12 +17,18 @@ to a multiverse to explore which variable matters (alongside other
 decisions). In this case, you could add \code{self_esteem = c(self_esteem1,
   self_esteem2)} to create a grid of these variables. In practice, you can
 add any kind of general variable categories e.g., ivs, dvs, covariates etc.}
-
-\item{print}{logical, whether or not to show a summary of the resulting grid.
-Defaults to \code{TRUE}}
 }
 \value{
-a \code{tibble} with all possible variable combinations.
+\ a list with four components:
+
+\describe{
+\item{summary}{a summary \code{tibble} of the variables chosen.}
+\item{combinations}{a summary of the number of alternatives variables for
+each variable group}
+\item{n_combinations}{the total number of variable combinations}
+\item{grid}{the actual variable grid, the number of rows = n_combinations.
+}
+}
 }
 \description{
 Create a grid of all combinations of variables

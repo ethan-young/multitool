@@ -2,24 +2,53 @@
 % Please edit documentation in R/create-grids.R
 \name{create_preprocess}
 \alias{create_preprocess}
-\title{Add arbitrary code to execute after data are filtered (but before analysis)}
+\title{Add arbitrary pre-processing code to execute after data are filtered (but
+before analysis)}
 \usage{
 create_preprocess(...)
 }
 \arguments{
-\item{...}{the literal code you would like to execute after data are
-filtered. \code{glue} syntax is allowed. An example might be centering or
+\item{...}{the literal code you would like to execute after data are filtered.
+\code{\link[glue]{glue}} syntax is allowed. An example might be centering or
 scaling a predictor after the appropriate filters are applied to the data.}
 }
 \value{
-a \code{tibble} with  two columns, "step" and "code". Each row
-representing a post filtering step to execute. The "step" column indicates
-the order and the "code" column is the literal code to be ran.
+a \code{tibble} with  two columns, "preprocess" and "code". Each row
+representing a pre-processing step to execute.
+
+The values in the "preprocess" column indicate the order (e.g., step1,
+step2, etc.) and the "code" column is the literal code to be ran. The code
+must be written in \code{|>} (pipe) format. Assume that the original data
+and filtering decisions (if any), will be passed directly to your
+pre-processing code.
+
+If you want to manipulate a variable that is part of a variable grid created
+by \code{\link{create_var_grid}}, you can use \code{\link[glue]{glue}}
+syntax to indicate the variable group (e.g., ivs). When all grids are
+combined with \code{\link{combine_all_grids}}, the variables corresponding
+to a particular decisions set will  be evaluated with
+\code{\link[glue]{glue}} syntax.
 }
 \description{
-Add arbitrary code to execute after data are filtered (but before analysis)
+Add arbitrary pre-processing code to execute after data are filtered (but
+before analysis)
 }
 \examples{
 library(tidyverse)
 library(multitool)
+
+# All in one step
+my_preprocess_v1 <-
+  create_preprocess(
+    mutate(
+      {iv} := as.numeric(scale({iv})), {mod} := as.numeric(scale({mod}))
+    )
+  )
+
+# In two steps
+my_preprocess_v2 <-
+  create_preprocess(
+    mutate({iv} := scale({iv}) |> as.numeric()),
+    mutate({mod} := scale({mod}) |> as.numeric())
+  )
 }

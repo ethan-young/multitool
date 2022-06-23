@@ -2,7 +2,7 @@
 % Please edit documentation in R/create-grids.R
 \name{create_filter_grid}
 \alias{create_filter_grid}
-\title{Create all combinations of filtering decisions for exploring exclusions}
+\title{Create all combinations of filtering decisions for exploring exclusion criteria}
 \usage{
 create_filter_grid(my_data, ...)
 }
@@ -12,58 +12,56 @@ filtering decisions for}
 
 \item{...}{logical expressions to be used with \code{\link[dplyr]{filter}}
 separated by commas. Expressions should not be quoted.}
-
-\item{print}{logical, whether or not to show a summary of the resulting grid.
-Defaults to \code{TRUE}}
 }
 \value{
-a list with two components. The first is a summary of your filters
-with the following columns: \code{expr}, \code{expr_var}, \code{expr_n},
-and \code{expr_typ}e:
+a list with four components:
 
-\describe{ \item{\code{expr}}{the expression(s) passed to
-\code{create_filter_grid()}} \item{\code{expr_var}}{the variable involved
-in the filtering expression} \item{\code{expr_n}}{the total number of rows
-after the expression is applied} \item{\code{expr_type}}{whether or not the
-expression filters data} }
-
-The summary is meant to help the user understand and evaluate different
-filters. The function automatically generates expressions that do nothing
-to complete a set of alternatives.
-
-The second component of the list is a full grid of filtering decisions.
-This is created under the hood by \code{\link[tidyr]{expand_grid}}.
+\describe{
+\item{summary}{a summary \code{tibble} of your filters with the following
+columns: \code{filter_expr} (the filtering code), \code{filter_group}
+(which variable does the filter apply to), \code{filtered_n}
+(how many observations are there after the filter), and  \code{filter_type}
+(does the expression filter or do nothing, which is auto-generated).}
+\item{combinations}{a summary of the number of alternatives per filtering
+decision}
+\item{n_combinations}{the total number of filtering combinations}
+\item{grid}{the actual filtering grid, the number of rows = n_combinations.
+}
+}
 }
 \description{
-Create all combinations of filtering decisions for exploring exclusions
+Create all combinations of filtering decisions for exploring exclusion criteria
 }
 \examples{
 library(tidyverse)
 library(multitool)
 
-my_data <-
+the_data <-
   data.frame(
-   id   = 1:500,
-   iv1  = rnorm(500),
-   iv2  = rnorm(500),
-   iv3  = rnorm(500),
-   covariate1 = rnorm(500),
-   covariate2 = rnorm(500),
-   dv1 = rnorm(500),
-   dv2 = rnorm(500),
-   filter1   = sample(1:3, size = 500, replace = TRUE),
-   filter2   = rnorm(500),
-   filter3   = rbinom(500, size = 1, prob = .1),
-   filter4   = rbinom(500, size = 1, prob = .1)
+    id   = 1:500,
+    iv1  = rnorm(500),
+    iv2  = rnorm(500),
+    iv3  = rnorm(500),
+    mod1 = rnorm(500),
+    mod2 = rnorm(500),
+    mod3 = rnorm(500),
+    cov1 = rnorm(500),
+    cov2 = rnorm(500),
+    dv1  = rnorm(500),
+    dv2  = rnorm(500),
+    include1 = rbinom(500, size = 1, prob = .1),
+    include2 = sample(1:3, size = 500, replace = TRUE),
+    include3 = rnorm(500)
   )
 
 my_filter_grid <-
   create_filter_grid(
-    my_data,
-    filter1 == 1,
-    filter1 == 2,
-    filter2 == 0,
-    filter3 == 0,
-    filter4 == 0
+    my_data = the_data,
+    include1 == 0,
+    include2 != 3,
+    include2 != 2,
+    scale(include3) > -2.5
   )
+
+my_filter_grid
 }

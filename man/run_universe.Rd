@@ -4,15 +4,21 @@
 \alias{run_universe}
 \title{Run a single set of arbitrary decisions and save the result}
 \usage{
-run_universe(my_grid, my_data, decision_num, mixed = FALSE, save_model = FALSE)
+run_universe(my_grid, my_data, decision_num, save_model = FALSE)
 }
 \arguments{
+\item{my_grid}{a \code{tibble} produced by \code{\link{combine_all_grids}}}
+
 \item{my_data}{a \code{data.frame} representing the the original data}
 
 \item{decision_num}{an single integer from 1 to \code{nrow(grid)} indicating
 which specific decision set to run}
 
-\item{grid}{a \code{tibble} produced by \code{\link{combine_all_grids}}}
+\item{save_model}{logical, indicates whether to save the model object in its
+entirety. The default is \code{FALSE} because model objects are usually
+large and under the hood, \code{\link[broom]{tidy}} and
+\code{\link[broom]{glance}} is used to summarize the most useful model
+information.}
 }
 \value{
 a single row \code{tibble} containing the decision, code that was

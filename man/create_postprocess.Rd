@@ -8,25 +8,37 @@ create_postprocess(...)
 }
 \arguments{
 \item{...}{the literal code block (unquoted) you would like to execute after
-each analysis. If you have multiple post hoc tasks, separate each distinct
-code chunk by a comma.
+each analysis. If you have multiple post processing tasks, separate each
+distinct code chunk by a comma.
 
 The code should be written to work with pipes (i.e., \code{|>} or
 \code{\%>\%}). Because the post hoc code comes last in each multiverse
-analysis step, the analysis model object will be passed to the post hoc
-code.
+analysis step, the chosen model object will be passed to the
+post-processing code.
 
-So if you fit a simple linear model like: \code{lm(y ~ x1 + x2)}, and your
-post hoc code executes a call to \code{anova}, you would simply pass
-\code{anova()} to \code{post_hoc_code()}. The underlying code would be
+For example, if you fit a simple linear model like: \code{lm(y ~ x1 + x2)},
+and your post hoc code executes a call to \code{anova}, you would simply
+pass \code{anova()} to \code{create_postprocess()}. The underlying code
+would be:
 
 \code{data |> filters |> lm(y ~ x1 + x2, data = _) |> anova()}}
 }
 \value{
-a \code{tibble} with  two columns, "post_hoc_test" and "code". Each
-row representing a post hoc test (or task) to execute. The "post_hoc_test"
-column indicates the order (should be arbitrary) and the "code" column is
-the literal code to be ran.
+a \code{tibble} with  two columns, "postprocess" and "code". Each row
+representing a post processing task to execute. The "postprocess" column
+indicates the order (although its arbitrary) and the "code" column is the
+literal code to be ran.
+
+You can add arguments to the code as you would normally. Always assume that
+the model you fit will passed as the first argument. However, for example,
+if you wanted to fit a simple slopes test with
+\code{\link[interactions]{sim_slopes}}, you use \code{\link[glue]{glue}}
+syntax. For example:
+
+\code{sim_slopes(pred = {iv}, modx = {mod})}
+
+The \code{\link{combine_all_grids}} will populate with the variables from
+your variable grid.
 }
 \description{
 Add arbitrary post hoc code to execute after each analysis
