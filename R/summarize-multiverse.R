@@ -71,7 +71,7 @@ report_universe_console <-
       dplyr::pull(model)
 
     model_ul <- cli::cli_ul()
-    cli::cli_li("Mdoel Syntax:")
+    cli::cli_li("Model Syntax:")
     sub_model_ul <- cli::cli_ul()
     cli::cli_li(cli::col_blue(model))
     cli::cli_end(sub_model_ul)
