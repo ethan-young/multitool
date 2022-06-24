@@ -33,7 +33,7 @@ show_pipe_filter <- function(multiverse, decision_num, copy = F){
 }
 
 #' @describeIn show_pipe_filter Show the code up to the preprocessing stage
-#''@export
+#' @export
 show_pipe_preprocess <- function(multiverse, decision_num, copy = F){
 
   code <-
