@@ -153,7 +153,7 @@ create_filter_grid <- function(.df, ...){
 #' library(tidyverse)
 #' library(multitool)
 #'
-#' .df <-
+#' the_data <-
 #'   data.frame(
 #'    id   = 1:500,
 #'    iv1  = rnorm(500),
@@ -171,7 +171,7 @@ create_filter_grid <- function(.df, ...){
 #'
 #' my_var_grid <-
 #'  create_var_grid(
-#'    .df = my_data,
+#'    .df = the_data,
 #'    iv = c(iv1, iv2, iv3),
 #'    dv = c(dv1, dv2),
 #'    covariates = c(covariate1, covariate2)

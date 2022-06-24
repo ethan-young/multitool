@@ -75,7 +75,7 @@ the_data <-
 ## Create variable grid
 my_var_grid <-
   create_var_grid(
-    my_data = the_data,
+    .df = the_data,
     iv  = c(iv1, iv2, iv3),
     mod = c(mod1, mod2, mod3),
     dv  = c(dv1, dv2),
@@ -85,7 +85,7 @@ my_var_grid <-
 ## Create a filter grid
 my_filter_grid <-
   create_filter_grid(
-    my_data = the_data,
+    .df = the_data,
     include1 == 0,
     include2 != 3,
     include2 != 2,

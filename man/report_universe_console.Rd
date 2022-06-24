@@ -4,12 +4,12 @@
 \alias{report_universe_console}
 \title{Create a 'universe' console report}
 \usage{
-report_universe_console(multiverse, my_data, decision_num)
+report_universe_console(multiverse, .df, decision_num)
 }
 \arguments{
 \item{multiverse}{a \code{tibble} created from \code{\link{run_multiverse}}}
 
-\item{my_data}{the original data used in the multiverse dataset}
+\item{.df}{the original data used in the multiverse dataset}
 
 \item{decision_num}{which decision set to create a report for}
 }
@@ -19,8 +19,8 @@ Create a 'universe' console report
 \examples{
 
 \dontrun{
-my_multi_results <- run_multiverse(my_grid, my_data)
+my_multi_results <- run_multiverse(my_grid, .df)
 
-report_universe_console(my_multi_verse, my_data, 1)
+report_universe_console(my_multi_verse, .df, 1)
 }
 }

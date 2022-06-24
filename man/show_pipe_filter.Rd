@@ -36,6 +36,7 @@ the code that produced it.
 \section{Functions}{
 \itemize{
 \item \code{show_pipe_preprocess}: Show the code up to the preprocessing stage
+'@export
 
 \item \code{show_pipe_model}: Show the code up to the modeling stage
 

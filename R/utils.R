@@ -35,7 +35,7 @@ grid_to_formulas <- function(grid, glue_string){
     glue::glue_data(glue_string)
 }
 
-generate_multi_data <- function(my_data, filter_grid){
+generate_multi_data <- function(.df, filter_grid){
 
   filter_list <- grid_to_list(filter_grid$grid)
 
@@ -43,13 +43,13 @@ generate_multi_data <- function(my_data, filter_grid){
     purrr::map(filter_list, function(x){
 
       filter_expr <-
-        glue::glue("filter(my_data, {paste(x, collapse = ', ')})") |>
+        glue::glue("filter(.df, {paste(x, collapse = ', ')})") |>
         as.character()
       data <- rlang::parse_expr(filter_expr) |> rlang::eval_tidy()
 
       list(
         decisions = x,
-        data      = my_data
+        data      = .df
       )
     })
 

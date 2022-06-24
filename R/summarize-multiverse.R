@@ -1,7 +1,7 @@
 #' Create a 'universe' console report
 #'
 #' @param multiverse a \code{tibble} created from \code{\link{run_multiverse}}
-#' @param my_data the original data used in the multiverse dataset
+#' @param .df the original data used in the multiverse dataset
 #' @param decision_num which decision set to create a report for
 #'
 #' @export
@@ -9,14 +9,14 @@
 #' @examples
 #'
 #' \dontrun{
-#' my_multi_results <- run_multiverse(my_grid, my_data)
+#' my_multi_results <- run_multiverse(my_grid, .df)
 #'
-#' report_universe_console(my_multi_verse, my_data, 1)
+#' report_universe_console(my_multi_verse, .df, 1)
 #' }
 report_universe_console <-
-  function(multiverse, my_data, decision_num){
+  function(multiverse, .df, decision_num){
 
-    data_chr <- dplyr::enexpr(my_data) |> as.character()
+    data_chr <- dplyr::enexpr(.df) |> as.character()
     grid_elements <- paste(names(multiverse), collapse = " ")
 
     universe <-

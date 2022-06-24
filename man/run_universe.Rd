@@ -4,12 +4,12 @@
 \alias{run_universe}
 \title{Run a single set of arbitrary decisions and save the result}
 \usage{
-run_universe(my_grid, my_data, decision_num, save_model = FALSE)
+run_universe(my_grid, .df, decision_num, save_model = FALSE)
 }
 \arguments{
 \item{my_grid}{a \code{tibble} produced by \code{\link{combine_all_grids}}}
 
-\item{my_data}{a \code{data.frame} representing the the original data}
+\item{.df}{a \code{data.frame} representing the the original data}
 
 \item{decision_num}{an single integer from 1 to \code{nrow(grid)} indicating
 which specific decision set to run}
@@ -30,6 +30,6 @@ Run a single set of arbitrary decisions and save the result
 \examples{
 
 \dontrun{
-run_universe(my_grid, my_data, decision_num)
+run_universe(my_grid, .df, decision_num)
 }
 }

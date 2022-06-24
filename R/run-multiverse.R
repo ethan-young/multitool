@@ -1,7 +1,7 @@
 #' Run a single set of arbitrary decisions and save the result
 #'
 #' @param my_grid a \code{tibble} produced by \code{\link{combine_all_grids}}
-#' @param my_data a \code{data.frame} representing the the original data
+#' @param .df a \code{data.frame} representing the the original data
 #' @param decision_num an single integer from 1 to \code{nrow(grid)} indicating
 #'   which specific decision set to run
 #' @param save_model logical, indicates whether to save the model object in its
@@ -17,14 +17,14 @@
 #' @examples
 #'
 #' \dontrun{
-#' run_universe(my_grid, my_data, decision_num)
+#' run_universe(my_grid, .df, decision_num)
 #' }
-run_universe <- function(my_grid, my_data, decision_num, save_model = FALSE){
+run_universe <- function(my_grid, .df, decision_num, save_model = FALSE){
 
-  data_chr <- dplyr::enexpr(my_data) |> as.character()
+  data_chr <- dplyr::enexpr(.df) |> as.character()
 
-  if(rlang::is_expression(my_data)){
-    data_chr <- my_data |> as.character()
+  if(rlang::is_expression(.df)){
+    data_chr <- .df |> as.character()
   }
 
   grid_elements <- paste(names(my_grid), collapse = " ")
@@ -104,7 +104,7 @@ run_universe <- function(my_grid, my_data, decision_num, save_model = FALSE){
 #' Run a multiverse based on a complete decision grid
 #'
 #' @param my_grid a \code{tibble} produced by \code{\link{combine_all_grids}}
-#' @param my_data a \code{data.frame} representing the the original data
+#' @param .df a \code{data.frame} representing the the original data
 #' @param save_model logical, indicates whether to save the model object in its
 #'   entirety. The default is \code{FALSE} because model objects are usually
 #'   large and under the hood, \code{\link[broom]{tidy}} and
@@ -127,8 +127,8 @@ run_universe <- function(my_grid, my_data, decision_num, save_model = FALSE){
 #' \dontrun{
 #' run_multiverse(data, grid)
 #' }
-run_multiverse <- function(my_grid, my_data, save_model = FALSE, ncores = 1) {
-  data_chr <- dplyr::enexpr(my_data)|> as.character()
+run_multiverse <- function(my_grid, .df, save_model = FALSE, ncores = 1) {
+  data_chr <- dplyr::enexpr(.df)|> as.character()
 
   if(ncores > 1){
     future::plan(future::multisession, workers = ncores)
@@ -139,7 +139,7 @@ run_multiverse <- function(my_grid, my_data, save_model = FALSE, ncores = 1) {
         function(x){
           run_universe(
             my_grid = my_grid,
-            my_data = data_chr,
+            .df = data_chr,
             decision_num = x,
             save_model = save_model
           )
@@ -155,7 +155,7 @@ run_multiverse <- function(my_grid, my_data, save_model = FALSE, ncores = 1) {
         function(x){
           run_universe(
             my_grid = my_grid,
-            my_data = data_chr,
+            .df = data_chr,
             decision_num = x,
             save_model = save_model
           )

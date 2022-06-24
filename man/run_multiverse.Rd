@@ -4,12 +4,12 @@
 \alias{run_multiverse}
 \title{Run a multiverse based on a complete decision grid}
 \usage{
-run_multiverse(my_grid, my_data, save_model = FALSE, ncores = 1)
+run_multiverse(my_grid, .df, save_model = FALSE, ncores = 1)
 }
 \arguments{
 \item{my_grid}{a \code{tibble} produced by \code{\link{combine_all_grids}}}
 
-\item{my_data}{a \code{data.frame} representing the the original data}
+\item{.df}{a \code{data.frame} representing the the original data}
 
 \item{save_model}{logical, indicates whether to save the model object in its
 entirety. The default is \code{FALSE} because model objects are usually
