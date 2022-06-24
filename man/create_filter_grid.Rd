@@ -4,10 +4,10 @@
 \alias{create_filter_grid}
 \title{Create all combinations of filtering decisions for exploring exclusion criteria}
 \usage{
-create_filter_grid(my_data, ...)
+create_filter_grid(.df, ...)
 }
 \arguments{
-\item{my_data}{the actual data as a \code{data.frame} you want to create a
+\item{.df}{the actual data as a \code{data.frame} you want to create a
 filtering decisions for}
 
 \item{...}{logical expressions to be used with \code{\link[dplyr]{filter}}
@@ -56,7 +56,7 @@ the_data <-
 
 my_filter_grid <-
   create_filter_grid(
-    my_data = the_data,
+    .df = the_data,
     include1 == 0,
     include2 != 3,
     include2 != 2,

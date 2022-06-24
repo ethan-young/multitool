@@ -108,7 +108,8 @@ check_tidiers <- function(code){
   tidiers <-
     utils::methods(broom.mixed::tidy) |>
     as.character() |>
-    stringr::str_remove("^tidy\\.")
+    stringr::str_remove("^tidy\\.") |>
+    c("lmer")
 
   can_be_tidied <-
     stringr::str_remove(code, "\\(.*")
@@ -131,7 +132,7 @@ collect_quiet_results <- function(code, save_model = FALSE){
 
   model_func <-
     code |>
-    stringr::str_extract("\\|\\>[^\\|\\>]*$") |>
+    stringr::str_extract("\\|\\>[^\\|\\>].*$") |>
     stringr::str_remove(".*\\|\\> ") |>
     stringr::str_remove("\\(.*\\)")
 

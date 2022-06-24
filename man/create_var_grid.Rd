@@ -4,10 +4,10 @@
 \alias{create_var_grid}
 \title{Create a grid of all combinations of variables}
 \usage{
-create_var_grid(my_data, ...)
+create_var_grid(.df, ...)
 }
 \arguments{
-\item{my_data}{the actual data as a \code{data.frame} with the variables to
+\item{.df}{the actual data as a \code{data.frame} with the variables to
 include in a grid}
 
 \item{...}{named vectors with the names indicating a category of variable.
@@ -37,7 +37,7 @@ Create a grid of all combinations of variables
 library(tidyverse)
 library(multitool)
 
-my_data <-
+.df <-
   data.frame(
    id   = 1:500,
    iv1  = rnorm(500),
@@ -55,7 +55,7 @@ my_data <-
 
 my_var_grid <-
  create_var_grid(
-   my_data = my_data,
+   .df = my_data,
    iv = c(iv1, iv2, iv3),
    dv = c(dv1, dv2),
    covariates = c(covariate1, covariate2)

@@ -1,7 +1,7 @@
 # Create Grids ------------------------------------------------------------
 #' Create all combinations of filtering decisions for exploring exclusion criteria
 #'
-#' @param my_data the actual data as a \code{data.frame} you want to create a
+#' @param .df the actual data as a \code{data.frame} you want to create a
 #'   filtering decisions for
 #' @param ... logical expressions to be used with \code{\link[dplyr]{filter}}
 #'   separated by commas. Expressions should not be quoted.
@@ -47,7 +47,7 @@
 #'
 #' my_filter_grid <-
 #'   create_filter_grid(
-#'     my_data = the_data,
+#'     .df = the_data,
 #'     include1 == 0,
 #'     include2 != 3,
 #'     include2 != 2,
@@ -55,11 +55,11 @@
 #'   )
 #'
 #' my_filter_grid
-create_filter_grid <- function(my_data, ...){
+create_filter_grid <- function(.df, ...){
   filter_exprs <- dplyr::enexprs(...)
   filter_exprs_chr <- as.character(filter_exprs)
   filter_vars <-
-    stringr::str_extract(filter_exprs_chr, paste(names(my_data), collapse = "|"))
+    stringr::str_extract(filter_exprs_chr, paste(names(.df), collapse = "|"))
 
   grid_summary1 <-
     purrr::map2_df(filter_exprs_chr, filter_vars, function(x, y){
@@ -67,7 +67,7 @@ create_filter_grid <- function(my_data, ...){
       tibble::tibble(
         filter_expr  = x,
         filter_group = y,
-        filtered_n   = my_data |> dplyr::filter(rlang::parse_expr(x) |> rlang::eval_tidy()) |> nrow(),
+        filtered_n   = .df |> dplyr::filter(rlang::parse_expr(x) |> rlang::eval_tidy()) |> nrow(),
         filter_type  = "filter"
       )
 
@@ -84,7 +84,7 @@ create_filter_grid <- function(my_data, ...){
         tibble::add_row(
           filter_expr  = glue::glue("{x} %in% unique({x})") |> as.character(),
           filter_group = x,
-          filtered_n   = my_data |> dplyr::filter(rlang::parse_expr(filter_expr) |> rlang::eval_tidy()) |> nrow(),
+          filtered_n   = .df |> dplyr::filter(rlang::parse_expr(filter_expr) |> rlang::eval_tidy()) |> nrow(),
           filter_type  = "do nothing"
         )
 
@@ -126,7 +126,7 @@ create_filter_grid <- function(my_data, ...){
 
 #' Create a grid of all combinations of variables
 #'
-#' @param my_data the actual data as a \code{data.frame} with the variables to
+#' @param .df the actual data as a \code{data.frame} with the variables to
 #'   include in a grid
 #' @param ... named vectors with the names indicating a category of variable.
 #'   For example, you want to test if self esteem affects happiness but you may
@@ -153,7 +153,7 @@ create_filter_grid <- function(my_data, ...){
 #' library(tidyverse)
 #' library(multitool)
 #'
-#' my_data <-
+#' .df <-
 #'   data.frame(
 #'    id   = 1:500,
 #'    iv1  = rnorm(500),
@@ -171,12 +171,12 @@ create_filter_grid <- function(my_data, ...){
 #'
 #' my_var_grid <-
 #'  create_var_grid(
-#'    my_data = my_data,
+#'    .df = my_data,
 #'    iv = c(iv1, iv2, iv3),
 #'    dv = c(dv1, dv2),
 #'    covariates = c(covariate1, covariate2)
 #'  )
-create_var_grid <- function(my_data, ...){
+create_var_grid <- function(.df, ...){
   vars_raw <- dplyr::enquos(..., .named = TRUE)
   var_groups <- names(vars_raw)
 
@@ -184,7 +184,7 @@ create_var_grid <- function(my_data, ...){
     purrr::map2_df(vars_raw, var_groups, function(x,y){
       tibble::tibble(
         var_group = y,
-        var       = my_data |> dplyr::select(!!x) |> names()
+        var       = .df |> dplyr::select(!!x) |> names()
       )
     })
 
@@ -223,6 +223,44 @@ create_var_grid <- function(my_data, ...){
 
 }
 
+# Descriptive Statistics --------------------------------------------------
+
+
+# Psychometrics -----------------------------------------------------------
+
+#' Title
+#'
+#' @param .df blah blah
+#' @param corr_vars  blah blah
+#' @param focus_vars blah blah
+#' @param add_stretch blah blah
+#'
+#' @return a sum
+#'
+#' @examples
+#' sum(c(1,2,3,4))
+create_corr_grid <- function(.df, corr_vars, focus_vars, add_stretch = NULL){
+  corrrs <- dplyr::enexprs(corr_vars)
+  focuss <- dplyr::enexprs(focus_vars)
+  # var_groups <- names(vars_raw)
+  # vars_raw_unnamed <- dplyr::enquos(corr_sets)
+
+  print(corrrs)
+  print(focuss)
+
+  # corr_sets <-
+  #   purrr::map2_df(vars_raw_unnamed, var_groups, function(x,y){
+  #     tibble::tibble(
+  #       corr_set  = y,
+  #       corr_vars = x |> rlang::as_label()
+  #     )
+  #   })
+  #
+  #
+  # corr_sets
+}
+
+# Full models -------------------------------------------------------------
 #' Create a modeling grid
 #'
 #' @param ... literal model syntax (no quotes) you would like to run. You can
