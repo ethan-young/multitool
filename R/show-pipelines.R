@@ -25,7 +25,7 @@ show_pipe_filter <- function(multiverse, decision_num, copy = F){
 
   if(copy){
     suppressWarnings({clipr::write_clip(code)})
-    message("Filter pipline copied!")
+    message("Filter pipeline copied!")
   }
 
   cli::cli_code(code)
@@ -46,7 +46,7 @@ show_pipe_preprocess <- function(multiverse, decision_num, copy = F){
 
   if(copy){
     suppressWarnings({clipr::write_clip(code)})
-    message("Post filter pipline copied!")
+    message("Post filter pipeline copied!")
   }
 
   cli::cli_code(code)
@@ -69,7 +69,7 @@ show_pipe_model <- function(multiverse, decision_num, mod, copy = F){
 
   if(copy){
     suppressWarnings({clipr::write_clip(code)})
-    message("Model pipline copied!")
+    message("Model pipeline copied!")
   }
 
   cli::cli_code(code)
@@ -93,7 +93,7 @@ show_pipe_postprocess <- function(multiverse, decision_num, mod, copy = F){
 
   if(copy){
     suppressWarnings({clipr::write_clip(code)})
-    message("Post process pipline copied!")
+    message("Post process pipeline copied!")
   }
 
   cli::cli_code(code)
