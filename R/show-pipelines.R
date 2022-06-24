@@ -33,6 +33,7 @@ show_pipe_filter <- function(multiverse, decision_num, copy = F){
 }
 
 #' @describeIn show_pipe_filter Show the code up to the preprocessing stage
+#''@export
 show_pipe_preprocess <- function(multiverse, decision_num, copy = F){
 
   code <-
@@ -53,6 +54,7 @@ show_pipe_preprocess <- function(multiverse, decision_num, copy = F){
 }
 
 #' @describeIn show_pipe_filter Show the code up to the modeling stage
+#' @export
 show_pipe_model <- function(multiverse, decision_num, mod, copy = F){
 
   code <-
@@ -76,6 +78,7 @@ show_pipe_model <- function(multiverse, decision_num, mod, copy = F){
 
 #' @describeIn show_pipe_filter Show the code up to the post_processing
 #'   stage
+#' @export
 show_pipe_postprocess <- function(multiverse, decision_num, mod, copy = F){
 
   code <-
