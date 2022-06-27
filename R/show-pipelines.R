@@ -123,7 +123,7 @@ show_pipe_postprocess <- function(.grid, decision_num, copy = F){
 
   universe <-
     .grid |>
-    filter::filter(decision == decision_num)
+    dplyr::filter(decision == decision_num)
 
   code <- list(base_data = data_chr)
 
