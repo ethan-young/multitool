@@ -1,7 +1,6 @@
 #' Create a 'universe' console report
 #'
 #' @param multiverse a \code{tibble} created from \code{\link{run_multiverse}}
-#' @param .df the original data used in the multiverse dataset
 #' @param decision_num which decision set to create a report for
 #'
 #' @export
@@ -14,17 +13,19 @@
 #' report_universe_console(my_multi_verse, .df, 1)
 #' }
 report_universe_console <-
-  function(multiverse, .df, decision_num){
+  function(multiverse, decision_num){
 
-    data_chr <- dplyr::enexpr(.df) |> as.character()
+    data_chr <- attr(multiverse, "base_df")
     grid_elements <- paste(names(multiverse), collapse = " ")
 
     universe <-
       multiverse |>
       dplyr::filter(decision == decision_num)
 
-    cli::cli_h1("Multiverse Analysis - Decision set {decision_num}")
-    cli::cli_h2("Decisions")
+    cli::cli_rule(cli::style_bold(cli::col_green("Multiverse Analysis - Decision set {decision_num}")))
+    cli::cli_par()
+    cli::cli_end()
+    cli::cli_text(cli::style_bold("Decisions"))
     data_ul <- cli::cli_ul()
     cli::cli_li("Input data:")
     sub_filter_ul <- cli::cli_ul()
@@ -64,7 +65,9 @@ report_universe_console <-
       cli::cli_end(sub_variables_ul)
       cli::cli_end(variable_ul)
 
-    } else{ cli::cli_ul("Same variables used for all analyses")}
+    } else{
+      cli::cli_ul("Same variables used for all analyses")
+    }
 
     model <-
       universe |>
@@ -77,9 +80,43 @@ report_universe_console <-
     cli::cli_end(sub_model_ul)
     cli::cli_end(model_ul)
 
-    cli::cli_h2("Literal Code")
-    cli::cli_code(show_model_pipeline(multiverse, decision_num = decision_num))
+    cli::cli_par()
+    cli::cli_end()
 
-    cli::cli_h2("Results Summary")
-    universe |> dplyr::select(summary_result) |> tidyr::unnest(summary_result)
+    results <-
+      universe |>
+      dplyr::select(-c(decision:data_pipeline))
+
+    walk2(results, names(results), function(x, y){
+
+
+      cli::cli_rule()
+      cli::cli_text(cli::style_bold("{y} Code and Results"))
+
+      map(x, function(z){
+        cli::cli_h3("Code Pipeline")
+        cli::cli_code(
+          z |>
+            select(ends_with("code")) |>
+            pull() |>
+            stringr::str_replace_all("\\|\\>", " |>\n  ") |>
+            glue::glue(.trim = FALSE)
+        )
+
+        cli::cli_h3("Tidy Results")
+        z |>
+          select(ends_with("tidy")) |>
+          unnest(everything()) |>
+          print()
+
+        cli::cli_h3("Glance")
+        z |>
+          select(ends_with("glance")) |>
+          unnest(everything()) |>
+          print()
+
+      })
+      cli::cli_par()
+      cli::cli_end()
+    })
   }

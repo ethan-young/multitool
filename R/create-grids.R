@@ -384,7 +384,7 @@ create_model_grid <- function(...){
 #'     mutate({mod} := scale({mod}) |> as.numeric())
 #'   )
 create_preprocess <- function(...){
-  code <- dplyr::enexprs(..., .named = T)
+  code <- dplyr::enexprs(..., .named = TRUE)
   code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
 
   pre_processing_code <-

@@ -5,6 +5,7 @@
 \title{Combine grids of analysis decisions into a single \code{tibble}}
 \usage{
 combine_all_grids(
+  .df,
   var_grid = NULL,
   filter_grid = NULL,
   model_grid = NULL,
@@ -13,6 +14,8 @@ combine_all_grids(
 )
 }
 \arguments{
+\item{.df}{a \code{data.frame} representing the the original data}
+
 \item{var_grid}{a \code{tibble} created by \code{\link{create_var_grid}}.
 This grid should contain different versions of variables or sets of
 different versions of variables.}
@@ -117,6 +120,7 @@ my_postprocess <-
 ## Combine all grids together
 my_full_grid <-
   combine_all_grids(
+    the_data,
     my_var_grid,
     my_filter_grid,
     my_model_grid,

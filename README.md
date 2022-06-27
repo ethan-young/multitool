@@ -131,6 +131,7 @@ my_postprocess <-
 ``` r
 my_full_grid <-
   combine_all_grids(
+    the_data,
     my_var_grid,
     my_filter_grid,
     my_model_grid,
@@ -151,7 +152,7 @@ my_full_grid <-
 ## Run a universe
 
 ``` r
-run_universe(my_full_grid, the_data, 1)
+run_universe(my_full_grid, 1)
 #> # A tibble: 1 × 4
 #>   decision data_pipeline    lm               aov             
 #>      <dbl> <list>           <list>           <list>          
@@ -161,7 +162,7 @@ run_universe(my_full_grid, the_data, 1)
 ## Run a multiverse
 
 ``` r
-run_multiverse(my_full_grid[1:10,], the_data)
+run_multiverse(my_full_grid[1:10,])
 #> # A tibble: 10 × 9
 #>    decision variables        filters  preprocess model postprocess data_pipeline
 #>       <int> <list>           <list>   <list>     <chr> <list>      <list>       

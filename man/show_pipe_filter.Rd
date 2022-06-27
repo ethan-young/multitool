@@ -7,24 +7,22 @@
 \alias{show_pipe_postprocess}
 \title{Show multiverse data code pipelines}
 \usage{
-show_pipe_filter(multiverse, decision_num, copy = F)
+show_pipe_filter(.grid, decision_num, copy = F)
 
-show_pipe_preprocess(multiverse, decision_num, copy = F)
+show_pipe_preprocess(.grid, decision_num, copy = F)
 
-show_pipe_model(multiverse, decision_num, mod, copy = F)
+show_pipe_model(.grid, decision_num, copy = F)
 
-show_pipe_postprocess(multiverse, decision_num, mod, copy = F)
+show_pipe_postprocess(.grid, decision_num, copy = F)
 }
 \arguments{
-\item{multiverse}{a \code{tibble} created by \code{\link{run_multiverse}}}
+\item{.grid}{a full decision grid created by \code{\link{combine_all_grids}}}
 
 \item{decision_num}{numeric. Indicates which 'universe' in the multiverse to
 show underlying code.}
 
 \item{copy}{logical. Whether to copy the pipeline code to the clipboard using
 \code{\link[clipr]{write_clip}}.}
-
-\item{mod}{the name of the model (e.g., \code{lm}) or post-processing task}
 }
 \description{
 Each \code{show_pipeline*} function should be self-explanatory - they indicate

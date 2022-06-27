@@ -4,12 +4,10 @@
 \alias{report_universe_console}
 \title{Create a 'universe' console report}
 \usage{
-report_universe_console(multiverse, .df, decision_num)
+report_universe_console(multiverse, decision_num)
 }
 \arguments{
 \item{multiverse}{a \code{tibble} created from \code{\link{run_multiverse}}}
-
-\item{.df}{the original data used in the multiverse dataset}
 
 \item{decision_num}{which decision set to create a report for}
 }

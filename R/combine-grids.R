@@ -1,5 +1,6 @@
 #' Combine grids of analysis decisions into a single \code{tibble}
 #'
+#' @param .df a \code{data.frame} representing the the original data
 #' @param filter_grid a \code{tibble} created by
 #'   \code{\link{create_filter_grid}}. This grid contains all observation (row)
 #'   filtering decisions.
@@ -98,6 +99,7 @@
 #' ## Combine all grids together
 #' my_full_grid <-
 #'   combine_all_grids(
+#'     the_data,
 #'     my_var_grid,
 #'     my_filter_grid,
 #'     my_model_grid,
@@ -106,6 +108,7 @@
 #'   )
 combine_all_grids <-
   function(
+    .df,
     var_grid = NULL,
     filter_grid = NULL,
     model_grid = NULL,
@@ -113,6 +116,8 @@ combine_all_grids <-
     postprocessing = NULL
   )
   {
+
+    base_df <- dplyr::enexpr(.df) |> as.character()
 
     all_grids <-list()
 
@@ -212,11 +217,16 @@ combine_all_grids <-
     message(glue::glue_data(all_combinations, "{group} {category}has {n_alternatives} alternatives\n", .trim = FALSE))
     message(glue::glue("{n_combinations} combinations ({combination_products} = {n_combinations})"))
 
-    combined_grid |>
+    combined_grid <-
+      combined_grid |>
       dplyr::select(
         decision,
         dplyr::any_of(
           c("variables", "filters", "preprocess", "model", "postprocess")
         )
       )
+
+    attr(combined_grid, "base_df") <- base_df
+
+    combined_grid
   }

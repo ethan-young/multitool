@@ -1,21 +1,21 @@
-grid_to_list <- function(my_grid){
+grid_to_list <- function(.grid){
 
-  purrr::map(1:nrow(my_grid), function(x){
+  purrr::map(1:nrow(.grid), function(x){
 
-    my_grid <- my_grid |> dplyr::select(-dplyr::matches("filter_decision|decision"))
+    grid_data <- .grid |> dplyr::select(-dplyr::matches("filter_decision|decision"))
 
     grid_list <-
-      my_grid |>
+      grid_data |>
       dplyr::filter(dplyr::row_number() == x) |>
       tidyr::pivot_longer(dplyr::everything()) |>
       dplyr::pull(value)
 
-    names(grid_list) <- names(my_grid)
+    names(grid_list) <- names(grid_data)
 
     grid_list
 
   }) |>
-    purrr::set_names(paste0("decision_", 1:nrow(my_grid)))
+    purrr::set_names(paste0("decision_", 1:nrow(grid_data)))
 
 }
 
@@ -84,11 +84,18 @@ df_to_expand <- function(prep){
 
 }
 
-list_to_pipeline <- function(pipeline, execute = FALSE){
+list_to_pipeline <- function(pipeline, for_print = FALSE, execute = FALSE){
+
+  if(for_print){
+    separator <- " |> \n  "
+  } else{
+    separator <- " |> "
+  }
+
   pipeline_code <-
     pipeline |>
     purrr::compact() |>
-    paste(collapse = " |> ") |>
+    paste(collapse = separator) |>
     glue::glue(.trim = F)
 
   if(execute){
