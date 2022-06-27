@@ -22,7 +22,6 @@ Description: Multiverse analyses run the same (or very similar) analyses over a
     and/or modeling strategies.
 License: MIT + file LICENSE
 Imports:
-  broom,
   broom.mixed,
   cli,
   clipr,

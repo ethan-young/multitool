@@ -45,7 +45,7 @@ show_pipe_preprocess <- function(.grid, decision_num, copy = F){
 
   universe <-
     .grid |>
-    filter(decision == decision_num)
+    dplyr::filter(decision == decision_num)
 
   code <- list(base_data = data_chr)
 
@@ -81,7 +81,7 @@ show_pipe_model <- function(.grid, decision_num, copy = F){
 
   universe <-
     .grid |>
-    filter(decision == decision_num)
+    dplyr::filter(decision == decision_num)
 
   code <- list(base_data = data_chr)
 
@@ -123,7 +123,7 @@ show_pipe_postprocess <- function(.grid, decision_num, copy = F){
 
   universe <-
     .grid |>
-    filter(decision == decision_num)
+    filter::filter(decision == decision_num)
 
   code <- list(base_data = data_chr)
 
@@ -158,7 +158,7 @@ show_pipe_postprocess <- function(.grid, decision_num, copy = F){
     suppressWarnings({clipr::write_clip(post_processes)})
     message("Post-process pipeline copied!")
   }
-  iwalk(post_processes,function(x,y){
+  purrr::iwalk(post_processes,function(x,y){
     cli::cli_h3("Post process {str_replace(y, 'set', 'set ')}")
     cli::cli_code(x)
   })

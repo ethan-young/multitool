@@ -87,7 +87,7 @@ report_universe_console <-
       universe |>
       dplyr::select(-c(decision:data_pipeline))
 
-    walk2(results, names(results), function(x, y){
+    purrr::walk2(results, names(results), function(x, y){
 
 
       cli::cli_rule()
@@ -97,22 +97,22 @@ report_universe_console <-
         cli::cli_h3("Code Pipeline")
         cli::cli_code(
           z |>
-            select(ends_with("code")) |>
-            pull() |>
+            dplyr::select(dplyr::ends_with("code")) |>
+            dplyr::pull() |>
             stringr::str_replace_all("\\|\\>", " |>\n  ") |>
             glue::glue(.trim = FALSE)
         )
 
         cli::cli_h3("Tidy Results")
         z |>
-          select(ends_with("tidy")) |>
-          unnest(everything()) |>
+          dplyr::select(dplyr::ends_with("tidy")) |>
+          tidyr::unnest(dplyr::everything()) |>
           print()
 
         cli::cli_h3("Glance")
         z |>
-          select(ends_with("glance")) |>
-          unnest(everything()) |>
+          dplyr::select(dplyr::ends_with("glance")) |>
+          tidyr::unnest(dplyr::everything()) |>
           print()
 
       })
