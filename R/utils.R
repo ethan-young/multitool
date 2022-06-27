@@ -183,7 +183,7 @@ collect_quiet_results <- function(code, save_model = FALSE){
     results <-
       tibble::tibble(
         code     = code,
-        result   = list(quiet_results$model$result |> summary()),
+        result   = list(quiet_results$model$result),
         warnings = list(warnings),
         messages = list(messages)
       ) |>
