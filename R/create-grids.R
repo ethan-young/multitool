@@ -1,8 +1,8 @@
 # Create Grids ------------------------------------------------------------
 #' Create all combinations of filtering decisions for exploring exclusion criteria
 #'
-#' @param .df the actual data as a \code{data.frame} you want to create a
-#'   filtering decisions for
+#' @param .df the actual data as a \code{data.frame} for which you want to create
+#'   filtering decisions
 #' @param ... logical expressions to be used with \code{\link[dplyr]{filter}}
 #'   separated by commas. Expressions should not be quoted.
 #'
@@ -223,41 +223,84 @@ create_var_grid <- function(.df, ...){
 
 }
 
-# Descriptive Statistics --------------------------------------------------
-
-
-# Psychometrics -----------------------------------------------------------
+# Psychometrics/Description -----------------------------------------------
 
 #' Title
 #'
-#' @param .df blah blah
-#' @param corr_vars  blah blah
+#' @param .df the base dataset
+#' @param ...  blah blah
 #' @param focus_vars blah blah
 #' @param add_stretch blah blah
 #'
-#' @return a sum
+#' @return a correlation grid
+#'
+#' @export
 #'
 #' @examples
 #' sum(c(1,2,3,4))
-create_corr_grid <- function(.df, corr_vars, focus_vars, add_stretch = NULL){
-  corrrs <- dplyr::enexprs(corr_vars)
-  focuss <- dplyr::enexprs(focus_vars)
-  # var_groups <- names(vars_raw)
-  # vars_raw_unnamed <- dplyr::enquos(corr_sets)
+create_desc_grid <-
+  function(.df, ..., stats){
+    desc_vars_raw <- dplyr::enquos(..., .named = TRUE)
+    desc_var_groups <- names(desc_vars_raw)
+    stats_raw <- dplyr::enexprs(stats)
 
-  print(corrrs)
-  print(focuss)
+    print(desc_vars_raw)
+    print(desc_var_groups)
+    print(stats_raw)
 
-  # corr_sets <-
-  #   purrr::map2_df(vars_raw_unnamed, var_groups, function(x,y){
-  #     tibble::tibble(
-  #       corr_set  = y,
-  #       corr_vars = x |> rlang::as_label()
-  #     )
-  #   })
-  #
-  #
-  # corr_sets
+  }
+
+
+#' Title
+#'
+#' @param .df the base dataset
+#' @param ...  blah blah
+#' @param focus_vars blah blah
+#' @param add_stretch blah blah
+#'
+#' @return a correlation grid
+#'
+#' @export
+#'
+#' @examples
+#' sum(c(1,2,3,4))
+create_corr_grid <- function(.df, ..., focus_vars, add_stretch = FALSE){
+  corr_vars_raw <- dplyr::enquos(..., .named = TRUE)
+  corr_var_groups <- names(corr_vars_raw)
+
+  focus_vars_raw <- dplyr::enquos(focus_vars)
+  focus_check <- .df |> dplyr::select(!!!focus_vars_raw) |> names()
+
+  corr_sets <-
+    purrr::map2_df(corr_vars_raw, corr_var_groups, function(x,y){
+      tibble::tibble(
+        corr_group = y,
+        corr_vars  = .df |> dplyr::select(!!x) |> names(),
+        is_focus   = corr_vars %in% focus_check
+      )
+    })
+
+  has_focus <- corr_sets |> pull(is_focus) |> sum() > 0
+
+  attr(corr_sets, "stretch") <- add_stretch
+
+  corr_sets <-
+    corr_sets |>
+    group_by(corr_group) |>
+    summarize(
+      corr_set  = glue::glue("c({paste0(corr_vars, collapse = ',')})") |> as.character(),
+      corr_focus = glue::glue("{paste0(ifelse(is_focus, corr_vars, ''), collapse = ',')}"),
+      corr_focus = str_replace_all(corr_focus, "(^,*|,*$)", ""),
+      corr_focus = paste0("c(", str_replace_all(corr_focus, ",,*", ","), ")"),
+      corr_focus = ifelse(corr_focus == "c()", NA, corr_focus)
+    )
+
+  if(has_focus){
+    corr_sets
+  } else{
+    corr_sets |> select(-corr_focus)
+  }
+
 }
 
 # Full models -------------------------------------------------------------

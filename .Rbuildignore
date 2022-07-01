@@ -7,3 +7,6 @@
 ^Icon.*
 .*/Icon
 Icon
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

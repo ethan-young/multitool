@@ -2,7 +2,8 @@ grid_to_list <- function(.grid){
 
   purrr::map(1:nrow(.grid), function(x){
 
-    grid_data <- .grid |> dplyr::select(-dplyr::matches("filter_decision|decision"))
+    grid_data <- .grid |>
+      dplyr::select(-dplyr::matches("filter_decision|decision"))
 
     grid_list <-
       grid_data |>
@@ -115,13 +116,34 @@ check_tidiers <- function(code){
   tidiers <-
     utils::methods(broom.mixed::tidy) |>
     as.character() |>
-    stringr::str_remove("^tidy\\.") |>
-    c("lmer")
+    stringr::str_remove("^tidy\\.")
 
   can_be_tidied <-
-    stringr::str_remove(code, "\\(.*")
+    stringr::str_remove_all(code, "(\\(.*|^.*\\:\\:)")
 
-  can_be_tidied %in% tidiers
+  if(can_be_tidied %in% c("lmer","glmer")){
+    can_be_tidied <- "merMod"
+  }
+
+  str_detect(tidiers, can_be_tidied) |> sum() > 0
+
+}
+
+check_glance <- function(code){
+
+  glancers <-
+    utils::methods(broom.mixed::glance) |>
+    as.character() |>
+    stringr::str_remove("^glance\\.")
+
+  can_be_glanced <-
+    stringr::str_remove_all(code, "(\\(.*|^.*\\:\\:)")
+
+  if(can_be_glanced %in% c("lmer","glmer")){
+    can_be_glanced <- "merMod"
+  }
+
+  str_detect(glancers, can_be_glanced) |> sum() > 0
 
 }
 
@@ -144,61 +166,64 @@ collect_quiet_results <- function(code, save_model = FALSE){
     stringr::str_remove("\\(.*\\)")
 
   is_tidy <- check_tidiers(model_func)
+  is_glance <- check_glance(model_func)
+
   quiet_results$model <- run_universe_code_quietly(code)
+
   if(is_tidy){
     quiet_results$tidy <-
       code |>
       paste("|> broom.mixed::tidy()", collapse = " ") |>
       run_universe_code_quietly()
+  }
+  if(is_glance){
     quiet_results$glance <-
       code |>
       paste("|> broom.mixed::glance()", collapse = " ") |>
       run_universe_code_quietly()
-
-    warnings <-
-      purrr::map_df(quiet_results, "warnings") |>
-      dplyr::rename_with(~paste0("warning_", .x))
-    messages <-
-      purrr::map_df(quiet_results, "messages") |>
-      dplyr::rename_with(~paste0("message_", .x))
-
-    results <-
-      tibble::tibble(
-        code           = code,
-        result_tidy    = list(quiet_results$tidy$result),
-        result_glance  = list(quiet_results$glance$result),
-        warnings       = list(warnings),
-        messages       = list(messages)
-      ) |>
-      dplyr::rename_with(~paste0(model_func, "_", .x))
-  } else{
-
-    warnings <-
-      purrr::map_df(quiet_results, "warnings") |>
-      dplyr::rename_with(~paste0("warning_", .x))
-    messages <-
-      purrr::map_df(quiet_results, "messages") |>
-      dplyr::rename_with(~paste0("message_", .x))
-
-    results <-
-      tibble::tibble(
-        code     = code,
-        result   = list(quiet_results$model$result),
-        warnings = list(warnings),
-        messages = list(messages)
-      ) |>
-      dplyr::rename_with(~paste0(model_func, "_", .x))
   }
 
-  if(save_model){
+  warnings <-
+    purrr::map_df(quiet_results, "warnings") |>
+    dplyr::rename_with(~paste0("warning_", .x))
+  messages <-
+    purrr::map_df(quiet_results, "messages") |>
+    dplyr::rename_with(~paste0("message_", .x))
+
+  results <-
+    tibble::tibble(
+      "{model_func}_code" := code
+    )
+
+  if(save_model | !is_tidy){
     results <-
       dplyr::bind_cols(
-        tibble::tibble("{model_func}_full" := list(quiet_results$model$result)),
-        results
+        results,
+        tibble::tibble("{model_func}_full" := list(quiet_results$model$result))
+      )
+  }
+
+  if(is_tidy){
+    results <-
+      dplyr::bind_cols(
+        results,
+        tibble::tibble("{model_func}_tidy" := list(quiet_results$tidy$result))
+      )
+  }
+
+  if(is_glance){
+    results <-
+      dplyr::bind_cols(
+        results,
+        tibble::tibble("{model_func}_glance" := list(quiet_results$glance$result))
       )
   }
 
   results |>
+    mutate(
+      "{model_func}_warnings" := list(warnings),
+      "{model_func}_messages" := list(messages)
+    ) |>
     tidyr::nest("{model_func}" := dplyr::starts_with(model_func))
 
 }

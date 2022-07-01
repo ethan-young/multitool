@@ -7,8 +7,8 @@
 create_filter_grid(.df, ...)
 }
 \arguments{
-\item{.df}{the actual data as a \code{data.frame} you want to create a
-filtering decisions for}
+\item{.df}{the actual data as a \code{data.frame} for which you want to create
+filtering decisions}
 
 \item{...}{logical expressions to be used with \code{\link[dplyr]{filter}}
 separated by commas. Expressions should not be quoted.}
