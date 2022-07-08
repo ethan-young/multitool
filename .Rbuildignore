@@ -10,3 +10,4 @@ Icon
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+^\.github$

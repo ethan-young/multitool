@@ -151,6 +151,47 @@ run_universe_corrs <- function(.grid, decision_num){
 
 }
 
+#' Compute summary statistics for a single decision set
+#'
+#' @param .grid the data.frame resulting from \code{\link{expand_decisions}}
+#' @param decision_num the index of a particular decision set you want to run
+#'
+#' @return a single row \code{data.frame} with list columns containing the
+#'   summary statistics specified in \code{.grid}
+#' @export
+#'
+#' @examples
+#' library(tidyverse)
+#' library(multitool)
+#'
+#' the_data <-
+#'   data.frame(
+#'     id   = 1:500,
+#'     iv1  = rnorm(500),
+#'     iv2  = rnorm(500),
+#'     iv3  = rnorm(500),
+#'     mod1 = rnorm(500),
+#'     mod2 = rnorm(500),
+#'     mod3 = rnorm(500),
+#'     cov1 = rnorm(500),
+#'     cov2 = rnorm(500),
+#'     dv1  = rnorm(500),
+#'     dv2  = rnorm(500),
+#'     include1 = rbinom(500, size = 1, prob = .1),
+#'     include2 = sample(1:3, size = 500, replace = TRUE),
+#'     include3 = rnorm(500)
+#'   )
+#'
+#' summary_stats_grid <-
+#'   the_data |>
+#'     add_variables("ivs", iv1, iv2, iv3) |>
+#'     add_variables("dvs", dv1, dv2) |>
+#'     add_variables("mods", starts_with("mod")) |>
+#'     add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |>
+#'     add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
+#'     add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis"))
+#'
+#' run_universe_summary_stats(summary_stats_grid, decision_num  = 12)
 run_universe_summary_stats <- function(.grid, decision_num){
 
   data_chr <- attr(.grid, "base_df")
