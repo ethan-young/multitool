@@ -18,13 +18,9 @@
 #' \dontrun{
 #' run_universe(.grid, .df, decision_num)
 #' }
-run_universe <- function(.grid, decision_num, save_model = FALSE){
+run_universe_model <- function(.grid, decision_num, save_model = FALSE){
 
   data_chr <- attr(.grid, "base_df")
-
-  # if(rlang::is_expression(.df)){
-  #   data_chr <- .df |> as.character()
-  # }
 
   grid_elements <- paste(names(.grid), collapse = " ")
 
@@ -65,7 +61,8 @@ run_universe <- function(.grid, decision_num, save_model = FALSE){
 
   universe_pipeline$model_code <-
     universe |>
-    dplyr::pull(model) |>
+    dplyr::pull(models) |>
+    unlist() |>
     stringr::str_replace(string = _ ,"\\)$", ", data = _)")
 
   universe_analyses$model <- list_to_pipeline(universe_pipeline)
@@ -94,10 +91,204 @@ run_universe <- function(.grid, decision_num, save_model = FALSE){
   universe_results |>
     purrr::reduce(dplyr::bind_cols) |>
     dplyr::mutate(
-      decision = decision_num,
+      decision = decision_num |> as.character(),
     ) |>
-    tidyr::nest(data_pipeline = dplyr::ends_with("code")) |>
-    dplyr::select(decision, data_pipeline, dplyr::everything())
+    dplyr::select(decision, dplyr::ends_with("fitted"))
+}
+
+run_universe_corrs <- function(.grid, decision_num){
+
+  data_chr <- attr(.grid, "base_df")
+  grid_elements <- paste(names(.grid), collapse = " ")
+
+  universe <-
+    .grid |>
+    dplyr::filter(decision == decision_num)
+
+  universe_pipeline <-list(original_data = data_chr)
+  universe_results <- list()
+
+  if(stringr::str_detect(grid_elements, "filters")){
+    universe_pipeline$filters <-
+      universe |>
+      dplyr::pull(filters) |>
+      unlist() |>
+      paste0(collapse = ", ") |>
+      paste0("filter(", ... =  _, ")")
+  }
+
+  corr_sets <-
+    universe |>
+    dplyr::select(corrs) |>
+    tidyr::unnest(corrs) |>
+    names() |>
+    unique()
+
+  universe_corrs <-
+    universe |>
+    dplyr::select(corrs) |>
+    tidyr::unnest(corrs) |>
+    as.list() |>
+    purrr::map(
+      function(x) paste0(list_to_pipeline(universe_pipeline), " |> ", x)
+    )
+
+  universe_results <-
+    purrr::map2_dfc(
+      universe_corrs, corr_sets,
+      function(x, y){
+        corr_results <- run_universe_code_quietly(x)
+        corr_results <-
+          tibble::tibble("{y}" := list(corr_results$result))
+      })
+
+  universe_results |>
+    dplyr::mutate(
+      decision = decision_num |> as.character(),
+    ) |>
+    tidyr::nest(corrs_computed = c(-decision)) |>
+    dplyr::select(decision, dplyr::everything())
+
+}
+
+run_universe_summary_stats <- function(.grid, decision_num){
+
+  data_chr <- attr(.grid, "base_df")
+  grid_elements <- paste(names(.grid), collapse = " ")
+
+  universe <-
+    .grid |>
+    dplyr::filter(decision == decision_num)
+
+  universe_pipeline <-list(original_data = data_chr)
+  universe_results <- list()
+
+  if(stringr::str_detect(grid_elements, "filters")){
+    universe_pipeline$filters <-
+      universe |>
+      dplyr::pull(filters) |>
+      unlist() |>
+      paste0(collapse = ", ") |>
+      paste0("filter(", ... =  _, ")")
+  }
+
+  var_sets <-
+    universe |>
+    dplyr::select(summary_stats) |>
+    tidyr::unnest(summary_stats) |>
+    names() |>
+    unique()
+
+  universe_summary_stats <-
+    universe |>
+    dplyr::select(summary_stats) |>
+    tidyr::unnest(summary_stats) |>
+    as.list() |>
+    purrr::map(
+      function(x) paste0(list_to_pipeline(universe_pipeline), " |> ", x)
+    )
+
+  universe_results <-
+    purrr::map2_dfc(
+      universe_summary_stats, var_sets,
+      function(x, y){
+        summary_stats_results <- run_universe_code_quietly(x)
+
+        tidied_summary_stats <-
+          summary_stats_results$result |>
+          tidyr::pivot_longer(dplyr::everything(), names_to = "key", values_to = "value") |>
+          tidyr::separate(key, c("variable", "stat")) |>
+          tidyr::pivot_wider(names_from = stat, values_from = value)
+
+        summary_stats_results <-
+          tibble::tibble("{y}" := list(tidied_summary_stats))
+      })
+
+  universe_results |>
+    dplyr::mutate(
+      decision = decision_num |> as.character(),
+    ) |>
+    tidyr::nest(summary_stats_computed = c(-decision)) |>
+    dplyr::select(decision, dplyr::everything())
+
+
+}
+
+run_universe_cron_alphas <- function(.grid, decision_num){
+
+  data_chr <- attr(.grid, "base_df")
+  grid_elements <- paste(names(.grid), collapse = " ")
+
+  universe <-
+    .grid |>
+    dplyr::filter(decision == decision_num)
+
+  universe_pipeline <-list(original_data = data_chr)
+  universe_results <- list()
+
+  if(stringr::str_detect(grid_elements, "filters")){
+    universe_pipeline$filters <-
+      universe |>
+      dplyr::pull(filters) |>
+      unlist() |>
+      paste0(collapse = ", ") |>
+      paste0("filter(", ... =  _, ")")
+  }
+
+  item_sets <-
+    universe |>
+    dplyr::select(cron_alphas) |>
+    tidyr::unnest(cron_alphas) |>
+    names() |>
+    unique()
+
+  universe_alphas <-
+    universe |>
+    dplyr::select(cron_alphas) |>
+    tidyr::unnest(cron_alphas) |>
+    as.list() |>
+    purrr::map(
+      function(x) paste0(list_to_pipeline(universe_pipeline), " |> ", x)
+    )
+
+  universe_results <-
+    purrr::map2_dfc(
+      universe_alphas, item_sets,
+      function(x, y){
+        alpha_results <- run_universe_code_quietly(x)
+        suppressMessages({
+          alpha_total <-
+            alpha_results$result$total |>
+            tibble(.name_repair = "universal") |>
+            dplyr::rename_with(tolower)
+
+          alpha_dropped <-
+            alpha_results$result$alpha.drop |>
+            tibble::tibble(.name_repair = "universal") |>
+            dplyr::rename_with(tolower)
+        })
+
+        alpha_item_stats <-
+          alpha_results$result$item.stats |>
+          tibble::tibble() |>
+          dplyr::rename_with(tolower)
+
+        alpha_results <-
+          tibble::tibble(
+            "{y}_total"      := list(alpha_total),
+            "{y}_dropped"    := list(alpha_dropped),
+            "{y}_item_stats" := list(alpha_item_stats)
+          )
+      })
+
+  universe_results |>
+    dplyr::mutate(
+      decision = decision_num |> as.character(),
+    ) |>
+    tidyr::nest(cron_alphas_computed = c(-decision)) |>
+    dplyr::select(decision, dplyr::everything())
+
+
 }
 
 #' Run a multiverse based on a complete decision grid
@@ -125,22 +316,52 @@ run_universe <- function(.grid, decision_num, save_model = FALSE){
 #' \dontrun{
 #' run_multiverse(data, grid)
 #' }
-run_multiverse <- function(.grid, save_model = FALSE, ncores = 1) {
+run_multiverse <- function(.grid, save_model = FALSE, ncores = 1){
   if(ncores > 1){
     future::plan(future::multisession, workers = ncores)
-
     multiverse <-
       furrr::future_map_dfr(
         1:nrow(.grid),
         function(x){
-          run_universe(
-            .grid = .grid,
-            decision_num = x,
-            save_model = save_model
-          )
-        },
-        .options = furrr::furrr_options(seed = T))
+          multi_results <- list()
 
+          if("models" %in% names(.grid)){
+            multi_results$models <-
+              run_universe_model(
+                .grid = .grid,
+                decision_num = x,
+                save_model = save_model
+              )
+          }
+
+          if("corrs" %in% names(.grid)){
+            multi_results$corrs <-
+              run_universe_corrs(
+                .grid = .grid,
+                decision_num = x
+              )
+          }
+
+          if("summary_stats" %in% names(.grid)){
+            multi_results$stats <-
+              run_universe_summary_stats(
+                .grid = .grid,
+                decision_num = x
+              )
+          }
+
+          if("cron_alphas" %in% names(.grid)){
+            multi_results$alphas <-
+              run_universe_cron_alphas(
+                .grid = .grid,
+                decision_num = x
+              )
+          }
+
+          reduce(multi_results, left_join, by = "decision")
+        },
+        .options = furrr::furrr_options(seed = TRUE)
+      )
     future::plan(future::sequential)
   } else{
 
@@ -148,20 +369,57 @@ run_multiverse <- function(.grid, save_model = FALSE, ncores = 1) {
       purrr::map_df(
         cli::cli_progress_along(1:nrow(.grid)),
         function(x){
-          run_universe(
-            .grid = .grid,
-            decision_num = x,
-            save_model = save_model
-          )
+          multi_results <- list()
+
+          if("models" %in% names(.grid)){
+            multi_results$models <-
+              run_universe_model(
+                .grid = .grid,
+                decision_num = x,
+                save_model = save_model
+              )
+          }
+
+          if("corrs" %in% names(.grid)){
+            multi_results$corrs <-
+              run_universe_corrs(
+                .grid = .grid,
+                decision_num = x
+              )
+          }
+
+          if("summary_stats" %in% names(.grid)){
+            multi_results$stats <-
+              run_universe_summary_stats(
+                .grid = .grid,
+                decision_num = x
+              )
+          }
+
+          if("cron_alphas" %in% names(.grid)){
+            multi_results$alphas <-
+              run_universe_cron_alphas(
+                .grid = .grid,
+                decision_num = x
+              )
+          }
+
+          reduce(multi_results, left_join, by = "decision")
+
         })
 
   }
 
   dplyr::full_join(
-    .grid |> dplyr::select(-dplyr::contains("code")),
+    .grid |>
+      dplyr::select(-dplyr::contains("code")) |>
+      mutate(decision = as.character(decision)),
     multiverse,
     by = "decision"
-  )
+  ) |>
+    tidyr::nest(specifications = c(-decision, -matches("fitted$|computed$"))) |>
+    dplyr::select(decision, specifications, everything())
 }
+
 
 

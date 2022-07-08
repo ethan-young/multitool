@@ -224,6 +224,7 @@ collect_quiet_results <- function(code, save_model = FALSE){
       "{model_func}_warnings" := list(warnings),
       "{model_func}_messages" := list(messages)
     ) |>
-    tidyr::nest("{model_func}" := dplyr::starts_with(model_func))
-
+    tidyr::nest("{model_func}_fitted" := dplyr::starts_with(model_func))
 }
+
+

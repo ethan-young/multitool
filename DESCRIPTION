@@ -16,19 +16,24 @@ Authors@R: c(
         )
        )
 Description: Multiverse analyses run the same (or very similar) analyses over a
-    range of arbitrary data processing decisions. We provide an intervace for creating
+    range of arbitrary data processing decisions. We provide an interface for creating
     analysis decision grids and generating all possible combinations of those decisions. 
-    Grids can be lists of data filtering criteria, different versions of IVs and DVs, 
-    and/or modeling strategies.
+    Grids can contain data filtering criteria, different versions of IVs and DVs, 
+    modeling strategies, pre- and post-analysis steps. You can also compute general
+    descriptive statistics, correlations, and cronbach's alpha (for reliability)
+    over arbitrary decisions.
 License: MIT + file LICENSE
 Imports:
   broom.mixed,
   cli,
   clipr,
+  corrr,
   dplyr,
   furrr,
   future,
   glue,
+  moments,
+  psych,
   purrr,
   rlang,
   stringr,

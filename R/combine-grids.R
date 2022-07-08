@@ -173,6 +173,12 @@ combine_all_grids <-
         tidyr::nest(filters = dplyr::any_of(names(filter_grid$grid)))
     }
 
+    if(!is.null(model_grid)){
+      combined_grid <-
+        combined_grid |>
+        tidyr::nest(models = dplyr::any_of(dplyr::starts_with("model")))
+    }
+
     if(!is.null(preprocessing)){
       combined_grid <-
         combined_grid |>
@@ -222,61 +228,11 @@ combine_all_grids <-
       dplyr::select(
         decision,
         dplyr::any_of(
-          c("variables", "filters", "preprocess", "model", "postprocess")
+          c("variables", "filters", "preprocess", "models", "postprocess")
         )
       )
 
     attr(combined_grid, "base_df") <- base_df
 
     combined_grid
-  }
-
-combine_descr_grids <-
-  function(
-    .df,
-    filter_grid  = NULL,
-    descriptives = NULL,
-    corr_grid    = NULL,
-    alpha_grid   = NULL
-  ){
-
-    base_df <- dplyr::enexpr(.df) |> as.character()
-
-    all_grids <-list()
-
-    if(!is.null(filter_grid)){
-      all_grids$filters <-
-        df_to_expand_prep(filter_grid$summary, filter_group, filter_expr)
-    }
-
-    if(!is.null(descriptives)){
-      all_grids$filters <-
-        df_to_expand_prep(filter_grid$summary, filter_group, filter_expr)
-    }
-
-    if(!is.null(corr_grid)){
-      all_grids$filters <-
-        df_to_expand_prep(filter_grid$summary, filter_group, filter_expr)
-    }
-
-    if(!is.null(alpha_grid)){
-      all_grids$filters <-
-        df_to_expand_prep(filter_grid$summary, filter_group, filter_expr)
-    }
-
-    combined_grid <-
-      all_grids |>
-      purrr::flatten() |>
-      df_to_expand() |>
-      dplyr::mutate(decision = 1:dplyr::n()) |>
-      dplyr::select(decision, dplyr::everything()) |>
-      tidyr::nest(data = c(-decision, -dplyr::matches("step|model|set"))) |>
-      dplyr::mutate(
-        dplyr::across(
-          dplyr::matches("step|model|set"),
-          ~purrr::map2_chr(data, .x, function(x, y) glue::glue_data(x, y))
-        )
-      ) |>
-      tidyr::unnest(data)
-
   }

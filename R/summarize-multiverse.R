@@ -71,7 +71,8 @@ report_universe_console <-
 
     model <-
       universe |>
-      dplyr::pull(model)
+      dplyr::pull(models) |>
+      unlist()
 
     model_ul <- cli::cli_ul()
     cli::cli_li("Model Syntax:")
@@ -85,7 +86,7 @@ report_universe_console <-
 
     results <-
       universe |>
-      dplyr::select(-c(decision:data_pipeline))
+      dplyr::select(c(ends_with("fitted")))
 
     purrr::walk2(results, names(results), function(x, y){
 
