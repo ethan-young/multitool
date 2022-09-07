@@ -1,4 +1,4 @@
-look_at <- function(.multi, .what, .which = NULL, .unpack_specs = FALSE){
+reveal <- function(.multi, .what, .which = NULL, .unpack_specs = FALSE){
 
   which_sublist <- enexprs(.which) |> as.character()
   which_sublist <- which_sublist != "NULL"
@@ -29,7 +29,7 @@ look_at <- function(.multi, .what, .which = NULL, .unpack_specs = FALSE){
   unpacked
 }
 
-look_at_summary_stats <- function(.multi, .which, .unpack_specs = FALSE){
+reveal_summary_stats <- function(.multi, .which, .unpack_specs = FALSE){
   which_sublist <- enexprs(.which) |> as.character()
   which_sublist <- which_sublist != "NULL"
 
@@ -53,7 +53,7 @@ look_at_summary_stats <- function(.multi, .which, .unpack_specs = FALSE){
   unpacked
 }
 
-look_at_corrs <- function(.multi, .which, .unpack_specs = FALSE){
+reveal_corrs <- function(.multi, .which, .unpack_specs = FALSE){
   which_sublist <- enexprs(.which) |> as.character()
   which_sublist <- which_sublist != "NULL"
 
@@ -77,7 +77,7 @@ look_at_corrs <- function(.multi, .which, .unpack_specs = FALSE){
   unpacked
 }
 
-look_at_alphas <- function(.multi, .which, .type = NULL, .unpack_specs = FALSE){
+reveal_alphas <- function(.multi, .which, .type = NULL, .unpack_specs = FALSE){
   which_sublist <- enexprs(.which) |> as.character()
   which_sublist <- which_sublist != "NULL"
 
@@ -100,3 +100,11 @@ look_at_alphas <- function(.multi, .which, .type = NULL, .unpack_specs = FALSE){
 
   unpacked
 }
+
+condense <- function(.multi, .what, .how){
+
+  .multi |>
+    mutate(across(.cols = {{.what}}, .fns = {{.how}}, .names = "{.col}_{.fn}"))
+
+}
+

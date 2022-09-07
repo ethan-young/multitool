@@ -11,3 +11,4 @@ Icon
 ^docs$
 ^pkgdown$
 ^\.github$
+^data-raw$

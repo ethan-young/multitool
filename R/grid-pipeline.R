@@ -524,7 +524,7 @@ add_summary_stats <- function(.df, var_set, variables, stats){
 
 }
 
-#' Title
+#' Add correlations from the {correlation} package in {easystats}
 #'
 #' @param .df the original data.frame (e.g., base data set). If part of set of
 #'   add_* decision functions in a pipeline, the base data will be passed along
@@ -586,18 +586,17 @@ add_summary_stats <- function(.df, var_set, variables, stats){
 #'   add_postprocess("aov", aov()) |>
 #'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
 #'   add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis")) |>
-#'   add_corrs("predictors", matches("iv|mod|cov"), focus = c(cov1,cov2)) |>
-#'   add_corrs("outcomes", matches("dv"))
-add_corrs <-
+#'   add_correlations("predictors", matches("iv|mod|cov"), focus = c(cov1,cov2)) |>
+#'   add_correlations("outcomes", matches("dv"))
+add_correlations <-
   function(
     .df,
     var_set,
     variables,
-    focus = NULL,
-    stretch = FALSE,
-    pair_ns = TRUE,
-    use = 'pairwise.complete.obs',
-    method = 'pearson'
+    focus_set = NULL,
+    method = 'auto',
+    redundant = TRUE,
+    add_matrix = TRUE
   ){
 
     data_chr <- dplyr::enexpr(.df) |> as.character()
@@ -610,60 +609,63 @@ add_corrs <-
     base_df <- rlang::parse_expr(data_chr) |> rlang::eval_tidy()
 
     variables <- enexprs(variables) |> as.character()
-    focus_set <- enexprs(focus) |> as.character()
-    focus <- focus_set != "NULL"
+    focus_set <- base_df |> select({{focus_set}}) |> names()
+    focus_set_chr <-
+      focus_set |>
+      paste0("\"", ... = _, "\"") |>
+      paste0(collapse = ", ")
+    focus <- length(focus_set) > 1
 
-    full_matrix <-
+    full_pairs <-
       glue::glue(
-        'select({variables}) |> correlate(use = "{use}", method = "{method}")'
+        'select({variables}) |> correlation(method = "{method}", redundant = {redundant})'
       ) |>
       as.character() |>
       stringr::str_remove_all("\n|  ")
+
 
     grid_prep <-
       tibble::tibble(
         type  = "corrs",
         group = paste0(var_set,"_rs"),
-        code  = full_matrix
+        code  = full_pairs
       )
 
+    if(add_matrix){
+      corrs_matrix <-
+        glue::glue(
+          'select({variables}) |>
+           correlation(method = "{method}", redundant = {redundant}) |>
+           select(1:3) |>
+           pivot_wider(names_from = Parameter2, values_from = r) |>
+           rename(variable = Parameter1)',
+          .trim = FALSE
+        ) |>
+        as.character() |>
+        stringr::str_remove_all("\n|  ")
+
+      grid_prep <-
+        grid_prep |>
+        add_row(type = "corrs", group = paste0(var_set, "_matrix"), code = corrs_matrix)
+    }
+
     if(focus){
-      focus_corrs <-
+      corrs_focused <-
         glue::glue(
-          'select({variables}) |> correlate(use = "{use}", method = "{method}") |> focus({focus_set})'
+          'select({variables}) |>
+           correlation(method = "{method}", redundant = {redundant}) |>
+           select(1:3) |>
+           filter(Parameter1 %in% c({focus_set_chr}), r!=1, !Parameter2 %in% c({focus_set_chr})) |>
+           pivot_wider(names_from = Parameter1, values_from = r) |>
+           rename(variable = Parameter2)',
+          .trim = FALSE
         ) |>
         as.character() |>
         stringr::str_remove_all("\n|  ")
 
       grid_prep <-
         grid_prep |>
-        add_row(type = "corrs", group = paste0(var_set, "_focus"), code = focus_corrs)
-    }
-
-    if(stretch){
-      stretched_corrs <-
-        glue::glue(
-          'select({variables}) |> correlate(use = "{use}", method = "{method}") |> stretch(na.rm = TRUE, remove.dups = TRUE)'
-        ) |>
-        as.character() |>
-        stringr::str_remove_all("\n|  ")
-
-      grid_prep <-
-        grid_prep |>
-        add_row(type = "corrs", group = paste0(var_set, "_stretch"), code = stretched_corrs)
-    }
-
-    if(pair_ns){
-      corr_pair_ns <-
-        glue::glue(
-          'select(c({variables})) |> pair_n()'
-        ) |>
-        as.character() |>
-        stringr::str_remove_all("\n|  ")
-
-      grid_prep <-
-        grid_prep |>
-        add_row(type = "corrs", group = paste0(var_set, "_ns"), code = corr_pair_ns)
+        add_row(type = "corrs", group = paste0(var_set, "_focus"), code = corrs_focused)
     }
 
     if(!is.null(data_attr)){
@@ -675,6 +677,7 @@ add_corrs <-
     attr(grid_prep, "base_df") <- data_chr
     grid_prep
   }
+
 
 #' Add Cronbach's Alpha to a multiverse pipeline
 #'
@@ -831,6 +834,8 @@ expand_decisions <- function(.grid){
     }) |>
     flatten()
 
+
+
   full_grid <-
     .grid |>
     group_split(type) |>
@@ -840,15 +845,20 @@ expand_decisions <- function(.grid){
     purrr::flatten() |>
     df_to_expand() |>
     dplyr::mutate(decision = 1:dplyr::n()) |>
-    dplyr::select(decision, dplyr::everything()) |>
-    tidyr::nest(data = any_of(matches(grid_components$variables))) |>
-    dplyr::mutate(
-      dplyr::across(
-        c(-data),
-        ~purrr::map2_chr(data, .x, function(x, y) glue::glue_data(x, y))
-      )
-    ) |>
-    tidyr::unnest(data)
+    dplyr::select(decision, dplyr::everything())
+
+  if(!is.null(grid_components$variables)){
+    full_grid <-
+      full_grid |>
+      tidyr::nest(data = dplyr::any_of(dplyr::matches(paste0("^",grid_components$variables,"$")))) |>
+      dplyr::mutate(
+        dplyr::across(
+          c(-data),
+          ~purrr::map2_chr(data, .x, function(x, y) glue::glue_data(x, y))
+        )
+      ) |>
+      tidyr::unnest(data)
+  }
 
   pipeline_expanded <-
     purrr::map2(grid_components, names(grid_components), function(x, y) {
@@ -875,6 +885,7 @@ expand_decisions <- function(.grid){
 #' @importFrom dplyr rename
 #' @importFrom dplyr select
 #' @importFrom dplyr summarize
+#' @importFrom correlation correlation
 #' @importFrom moments skewness
 #' @importFrom moments kurtosis
 #' @importFrom psych alpha

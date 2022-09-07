@@ -358,6 +358,7 @@ run_universe_cron_alphas <- function(.grid, decision_num){
 #' run_multiverse(data, grid)
 #' }
 run_multiverse <- function(.grid, save_model = FALSE, ncores = 1){
+
   if(ncores > 1){
     future::plan(future::multisession, workers = ncores)
     multiverse <-
@@ -416,7 +417,7 @@ run_multiverse <- function(.grid, save_model = FALSE, ncores = 1){
             multi_results$models <-
               run_universe_model(
                 .grid = .grid,
-                decision_num = x,
+                decision_num = .grid$decision[x],
                 save_model = save_model
               )
           }
@@ -425,7 +426,7 @@ run_multiverse <- function(.grid, save_model = FALSE, ncores = 1){
             multi_results$corrs <-
               run_universe_corrs(
                 .grid = .grid,
-                decision_num = x
+                decision_num =  .grid$decision[x]
               )
           }
 
@@ -433,7 +434,7 @@ run_multiverse <- function(.grid, save_model = FALSE, ncores = 1){
             multi_results$stats <-
               run_universe_summary_stats(
                 .grid = .grid,
-                decision_num = x
+                decision_num = .grid$decision[x]
               )
           }
 
@@ -441,7 +442,7 @@ run_multiverse <- function(.grid, save_model = FALSE, ncores = 1){
             multi_results$alphas <-
               run_universe_cron_alphas(
                 .grid = .grid,
-                decision_num = x
+                decision_num = .grid$decision[x]
               )
           }
 

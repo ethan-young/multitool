@@ -20,7 +20,19 @@ knitr::opts_chunk$set(
 [![CRAN status](https://www.r-pkg.org/badges/version/multitool)](https://CRAN.R-project.org/package=multitool)
 <!-- badges: end -->
 
-The goal of multitool is to ...
+The goal of multitool is to provide a set of tools for designing and running multiverse-style analyses. There are other packages that accomplish this goal well (e.g., specr, multiverse), but I've found navigating the multiverse can be a tricky. My goal with this package is to create an incremental workflow for slowly building up, keeping track, and unpacking multiverse analyses and results.
+
+multitool was designed to help users take a single use case (e.g., a single analysis pipeline) and expand this workflow to include alternative versions. For example, take some data, remove outliers, transform variables, pick a model, do a post-hoc analysis, and plot the results. The functions were designed to play nice with the tidyverse and require using the base R pipe (see below). This makes it easy to quickly convert a single analysis into a multiverse analysis, assuming you know the relevant alternatives.
+
+Our vision of a multiverse workflow contains three parts. 
+
+1. **Base data:** original data set waiting to processed further
+2. **Decision grid:** a multiverse blueprint/map/recipe (or whatever metaphor you like). These are the instructions for what to do.
+3. **Multiverse results:** a table of results after executing the decision grid over the base data.
+
+A defining feature of multitool is that it saves intermediate code, rather than objects or data. This allows the user to grab the *code that produces a result* and inspect it for accuracy, errors, or for simply peace of mind. By quickly grabbing code, the user can iterate between creating their decision grid and checking that the code works as intended.
+
+Finally, multitool allows the user tp model data however they'd like but we also extended the package to allow for descriptive, correlation, and reliability analysis alongside a particular model.
 
 ## Installation
 
@@ -32,8 +44,6 @@ devtools::install_github("ethan-young/multitool")
 ```
 
 ## Example
-
-This is a basic example which shows you how to solve a common problem:
 
 ```{r}
 library(tidyverse)
