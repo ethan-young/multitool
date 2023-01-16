@@ -1,4 +1,5 @@
 Package: multitool
+Date: 2022-10-05
 Title: Tools for Running Multiverse Style Analyses
 Version: 0.0.0.9000
 Authors@R: c(
