@@ -13,9 +13,11 @@
 #' @export
 #'
 #' @examples
+#'
 #' library(tidyverse)
 #' library(multitool)
 #'
+#' # Simulate some data
 #' the_data <-
 #'   data.frame(
 #'     id   = 1:500,
@@ -35,7 +37,7 @@
 #'   )
 #'
 #' the_data |>
-#'   add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5)
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5)
 add_filters <- function(.df, ...){
   data_chr <- dplyr::enexpr(.df) |> as.character()
   data_attr <- attr(.df, "base_df")
@@ -85,7 +87,7 @@ add_filters <- function(.df, ...){
     })
 
   if(!is.null(data_attr)){
-    grid_prep <- bind_rows(.df, grid_prep2)
+    grid_prep <- dplyr::bind_rows(.df, grid_prep2)
   } else{
     grid_prep <- grid_prep2
   }
@@ -114,9 +116,11 @@ add_filters <- function(.df, ...){
 #' @export
 #'
 #' @examples
+#'
 #' library(tidyverse)
 #' library(multitool)
 #'
+#' # Simulate some data
 #' the_data <-
 #'   data.frame(
 #'     id   = 1:500,
@@ -136,9 +140,9 @@ add_filters <- function(.df, ...){
 #'   )
 #'
 #' the_data |>
-#'   add_variables("ivs", iv1, iv2, iv3) |>
-#'   add_variables("dvs", dv1, dv2) |>
-#'   add_variables("mods", starts_with("mod"))
+#'  add_variables("ivs", iv1, iv2, iv3) |>
+#'  add_variables("dvs", dv1, dv2) |>
+#'  add_variables("mods", starts_with("mod"))
 add_variables <- function(.df, var_group, ...){
   data_chr <- dplyr::enexpr(.df) |> as.character()
   data_attr <- attr(.df, "base_df")
@@ -157,7 +161,7 @@ add_variables <- function(.df, var_group, ...){
     )
 
   if(!is.null(data_attr)){
-    grid_prep <- bind_rows(.df, grid_prep)
+    grid_prep <- dplyr::bind_rows(.df, grid_prep)
   } else{
     grid_prep <- grid_prep
   }
@@ -193,6 +197,7 @@ add_variables <- function(.df, var_group, ...){
 #' @export
 #'
 #' @examples
+#'
 #' library(tidyverse)
 #' library(multitool)
 #'
@@ -215,12 +220,11 @@ add_variables <- function(.df, var_group, ...){
 #'   )
 #'
 #' the_data |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
 #'   add_variables("ivs", iv1, iv2, iv3) |>
 #'   add_variables("dvs", dv1, dv2) |>
 #'   add_variables("mods", starts_with("mod")) |>
-#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
-#'   add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |> # can be quoted or unquoted
-#'   add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods})))
+#'   add_preprocess("scale_iv", 'mutate({ivs} = scale({ivs}))')
 add_preprocess <- function(.df, process_name, code){
   code <- dplyr::enexprs(code)
   code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
@@ -242,7 +246,7 @@ add_preprocess <- function(.df, process_name, code){
     )
 
   if(!is.null(data_attr)){
-    grid_prep <- bind_rows(.df, grid_prep)
+    grid_prep <- dplyr::bind_rows(.df, grid_prep)
   } else{
     grid_prep <- grid_prep
   }
@@ -273,6 +277,7 @@ add_preprocess <- function(.df, process_name, code){
 #' @export
 #'
 #' @examples
+#'
 #' library(tidyverse)
 #' library(multitool)
 #'
@@ -295,14 +300,12 @@ add_preprocess <- function(.df, process_name, code){
 #'   )
 #'
 #' the_data |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
 #'   add_variables("ivs", iv1, iv2, iv3) |>
 #'   add_variables("dvs", dv1, dv2) |>
 #'   add_variables("mods", starts_with("mod")) |>
-#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
-#'   add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
-#'   add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
-#'   add_model(lm({dvs} ~ {ivs} * {mods})) |>
-#'   add_model("lm({dvs} ~ {ivs} * {mods} + cov1)") # can be unquoted or quoted
+#'   add_preprocess("scale_iv", 'mutate({ivs} = scale({ivs}))') |>
+#'   add_model(lm({dvs} ~ {ivs} * {mods}))
 add_model <- function(.df, code){
   code <- dplyr::enexprs(code)
   code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
@@ -324,7 +327,7 @@ add_model <- function(.df, code){
     )
 
   if(!is.null(data_attr)){
-    grid_prep <- bind_rows(.df, grid_prep)
+    grid_prep <- dplyr::bind_rows(.df, grid_prep)
   } else{
     grid_prep <- grid_prep
   }
@@ -362,6 +365,7 @@ add_model <- function(.df, code){
 #' @export
 #'
 #' @examples
+#'
 #' library(tidyverse)
 #' library(multitool)
 #'
@@ -384,15 +388,12 @@ add_model <- function(.df, code){
 #'   )
 #'
 #' the_data |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
 #'   add_variables("ivs", iv1, iv2, iv3) |>
 #'   add_variables("dvs", dv1, dv2) |>
 #'   add_variables("mods", starts_with("mod")) |>
-#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
-#'   add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
-#'   add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
-#'   add_model(lm({dvs} ~ {ivs} * {mods})) |>
-#'   add_model(lm({dvs} ~ {ivs} * {mods} + cov1)) |>
-#'   add_postprocess("aov", aov())
+#'   add_preprocess("scale_iv", 'mutate({ivs} = scale({ivs}))') |>
+#'   add_model(lm({dvs} ~ {ivs} * {mods}))
 add_postprocess <- function(.df, postprocess_name, code){
 
   code <- dplyr::enexprs(code)
@@ -415,14 +416,13 @@ add_postprocess <- function(.df, postprocess_name, code){
     )
 
   if(!is.null(data_attr)){
-    grid_prep <- bind_rows(.df, grid_prep)
+    grid_prep <- dplyr::bind_rows(.df, grid_prep)
   } else{
     grid_prep <- grid_prep
   }
 
   attr(grid_prep, "base_df") <- data_chr
   grid_prep
-
 
 }
 
@@ -446,6 +446,7 @@ add_postprocess <- function(.df, postprocess_name, code){
 #' @export
 #'
 #' @examples
+#'
 #' library(tidyverse)
 #' library(multitool)
 #'
@@ -468,10 +469,12 @@ add_postprocess <- function(.df, postprocess_name, code){
 #'   )
 #'
 #' the_data |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
 #'   add_variables("ivs", iv1, iv2, iv3) |>
 #'   add_variables("dvs", dv1, dv2) |>
 #'   add_variables("mods", starts_with("mod")) |>
-#'   add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |>
+#'   add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
+#'   add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
 #'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
 #'   add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis"))
 add_summary_stats <- function(.df, var_set, variables, stats){
@@ -485,10 +488,10 @@ add_summary_stats <- function(.df, var_set, variables, stats){
 
   base_df <- rlang::parse_expr(data_chr) |> rlang::eval_tidy()
 
-  variables <- enexprs(variables) |> as.character()
+  variables <- dplyr::enexprs(variables) |> as.character()
 
   stats_list <-
-    map_chr(stats, function(x) glue::glue("{x} = {x}")) |>
+    purrr::map_chr(stats, function(x) glue::glue("{x} = {x}")) |>
     paste(collapse = ", ") |> paste0("list(", ... = _, ")")
 
   descriptives <-
@@ -514,7 +517,7 @@ add_summary_stats <- function(.df, var_set, variables, stats){
     )
 
   if(!is.null(data_attr)){
-    grid_prep <- bind_rows(.df, grid_prep)
+    grid_prep <- dplyr::bind_rows(.df, grid_prep)
   } else{
     grid_prep <- grid_prep
   }
@@ -532,19 +535,19 @@ add_summary_stats <- function(.df, var_set, variables, stats){
 #' @param var_set character string. Should be a descriptive name of the
 #'   correlation matrix.
 #' @param variables the variables for which you would like to correlations.
-#'   These variables will be passed to \code{link[corrr]{correlate}}. You can
-#'   also use tidyselect to select variables.
-#' @param focus the any variables for which you would like to run
-#'   \code{link[corrr]{focus}}.
-#' @param stretch logical. Whether or not you would like to add a long form
-#'   correlation list computed by \code{link[corrr]{stretch}}.
-#' @param pair_ns logical. Whether or not you would like to add sample sizes
-#'   table for each correlation computed by \code{link[corrr]{pair_n}}.
-#' @param use an optional character string indicating how to handle missing
-#'   values. Should be one of "everything", "all.obs", "complete.obs",
-#'   "na.or.complete", or "pairwise.complete.obs".
-#' @param method character string indicating the correlation method used in
-#'   \code{link[corrr]{correlate}}. The default is "peasron".
+#'   These variables will be passed to \code{link[correlation]{correlation}}.
+#'   You can also use tidyselect to select variables.
+#' @param focus_set variables to focus one in a table. This produces a table
+#'   where rows are each focused variables and columns are all other variables
+#' @param method a valid method of correlation supplied to
+#'   \code{link[correlation]{correlation}} (e.g., 'pearson' or 'kendall').
+#'   Defaults to \code{'auto'}. See \code{link[correlation]{correlation}} for
+#'   more details.
+#' @param redundant logical, should the result include repeated correlations?
+#'   Defaults to \code{TRUE} See \code{link[correlation]{correlation}} for
+#'   details.
+#' @param add_matrix logical, add a traditional correlation matrix to the
+#'   output. Defaults to \code{TRUE}.
 #'
 #' @return a data.frame with three columns: type, group, and code. Type
 #'   indicates the decision type, group is a decision, and the code is the
@@ -553,6 +556,7 @@ add_summary_stats <- function(.df, var_set, variables, stats){
 #' @export
 #'
 #' @examples
+#'
 #' library(tidyverse)
 #' library(multitool)
 #'
@@ -575,19 +579,11 @@ add_summary_stats <- function(.df, var_set, variables, stats){
 #'   )
 #'
 #' the_data |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
 #'   add_variables("ivs", iv1, iv2, iv3) |>
 #'   add_variables("dvs", dv1, dv2) |>
 #'   add_variables("mods", starts_with("mod")) |>
-#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
-#'   add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
-#'   add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
-#'   add_model(lm({dvs} ~ {ivs} * {mods})) |>
-#'   add_model(lm({dvs} ~ {ivs} * {mods} + cov1)) |>
-#'   add_postprocess("aov", aov()) |>
-#'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
-#'   add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis")) |>
-#'   add_correlations("predictors", matches("iv|mod|cov"), focus = c(cov1,cov2)) |>
-#'   add_correlations("outcomes", matches("dv"))
+#'   add_correlations("predictors", matches("iv|mod|cov"), focus_set = c(cov1,cov2))
 add_correlations <-
   function(
     .df,
@@ -608,8 +604,8 @@ add_correlations <-
 
     base_df <- rlang::parse_expr(data_chr) |> rlang::eval_tidy()
 
-    variables <- enexprs(variables) |> as.character()
-    focus_set <- base_df |> select({{focus_set}}) |> names()
+    variables <- dplyr::enexprs(variables) |> as.character()
+    focus_set <- base_df |> dplyr::select({{focus_set}}) |> names()
     focus_set_chr <-
       focus_set |>
       paste0("\"", ... = _, "\"") |>
@@ -646,7 +642,7 @@ add_correlations <-
 
       grid_prep <-
         grid_prep |>
-        add_row(type = "corrs", group = paste0(var_set, "_matrix"), code = corrs_matrix)
+        dplyr::add_row(type = "corrs", group = paste0(var_set, "_matrix"), code = corrs_matrix)
     }
 
     if(focus){
@@ -665,11 +661,11 @@ add_correlations <-
 
       grid_prep <-
         grid_prep |>
-        add_row(type = "corrs", group = paste0(var_set, "_focus"), code = corrs_focused)
+        dplyr::add_row(type = "corrs", group = paste0(var_set, "_focus"), code = corrs_focused)
     }
 
     if(!is.null(data_attr)){
-      grid_prep <- bind_rows(.df, grid_prep)
+      grid_prep <- dplyr::bind_rows(.df, grid_prep)
     } else{
       grid_prep <- grid_prep
     }
@@ -700,6 +696,7 @@ add_correlations <-
 #' @export
 #'
 #' @examples
+#'
 #' library(tidyverse)
 #' library(multitool)
 #'
@@ -722,11 +719,11 @@ add_correlations <-
 #'   )
 #'
 #' the_data |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
 #'   add_variables("ivs", iv1, iv2, iv3) |>
 #'   add_variables("dvs", dv1, dv2) |>
 #'   add_variables("mods", starts_with("mod")) |>
-#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
-#'   add_cron_alpha("my_scale", c(iv1,iv2,iv3))
+#'   add_cron_alpha("unp_scale", c(iv1,iv2,iv3))
 add_cron_alpha <- function(.df, scale_name, items, keys = NULL){
 
   data_chr <- dplyr::enexpr(.df) |> as.character()
@@ -738,7 +735,7 @@ add_cron_alpha <- function(.df, scale_name, items, keys = NULL){
 
   base_df <- rlang::parse_expr(data_chr) |> rlang::eval_tidy()
 
-  items <- enexprs(items) |> as.character()
+  items <- dplyr::enexprs(items) |> as.character()
 
   cronalpha_items <-
     glue::glue(
@@ -755,7 +752,7 @@ add_cron_alpha <- function(.df, scale_name, items, keys = NULL){
     )
 
   if(!is.null(data_attr)){
-    grid_prep <- bind_rows(.df, grid_prep)
+    grid_prep <- dplyr::bind_rows(.df, grid_prep)
   } else{
     grid_prep <- grid_prep
   }
@@ -779,6 +776,7 @@ add_cron_alpha <- function(.df, scale_name, items, keys = NULL){
 #' @export
 #'
 #' @examples
+#'
 #' library(tidyverse)
 #' library(multitool)
 #'
@@ -802,20 +800,21 @@ add_cron_alpha <- function(.df, scale_name, items, keys = NULL){
 #'
 #' full_pipeline <-
 #'   the_data |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
 #'   add_variables("ivs", iv1, iv2, iv3) |>
 #'   add_variables("dvs", dv1, dv2) |>
 #'   add_variables("mods", starts_with("mod")) |>
-#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
 #'   add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
 #'   add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
+#'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
+#'   add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis")) |>
+#'   add_correlations("predictors", matches("iv|mod|cov"), focus_set = c(cov1,cov2)) |>
+#'   add_correlations("outcomes", matches("dv|mod"), focus_set = matches("dv")) |>
+#'   add_cron_alpha("unp_scale", c(iv1,iv2,iv3)) |>
+#'   add_cron_alpha("vio_scale", starts_with("mod")) |>
 #'   add_model(lm({dvs} ~ {ivs} * {mods})) |>
 #'   add_model(lm({dvs} ~ {ivs} * {mods} + cov1)) |>
 #'   add_postprocess("aov", aov()) |>
-#'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
-#'   add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis")) |>
-#'   add_corrs("predictors", matches("iv|mod|cov"), focus = c(cov1,cov2)) |>
-#'   add_corrs("outcomes", matches("dv")) |>
-#'   add_alpha("unp_scale", c(iv1,iv2,iv3)) |>
 #'   expand_decisions()
 #'
 #' full_pipeline
@@ -825,21 +824,21 @@ expand_decisions <- function(.grid){
 
   grid_components <-
     .grid |>
-    group_split(type) |>
-    map(function(x) {
-      curr_name <- x |> pull(type) |> unique()
-      curr_set <- x |> pull(group) |> unique()
-      the_set <- list(curr_set) |> set_names(curr_name)
+    dplyr::group_split(type) |>
+    purrr::map(function(x) {
+      curr_name <- x |> dplyr::pull(type) |> unique()
+      curr_set <- x |> dplyr::pull(group) |> unique()
+      the_set <- list(curr_set) |> purrr::set_names(curr_name)
       the_set
     }) |>
-    flatten()
+    purrr::flatten()
 
 
 
   full_grid <-
     .grid |>
-    group_split(type) |>
-    map(function(x){
+    dplyr::group_split(type) |>
+    purrr::map(function(x){
       df_to_expand_prep(x, group, code)
     }) |>
     purrr::flatten() |>
@@ -863,13 +862,13 @@ expand_decisions <- function(.grid){
   pipeline_expanded <-
     purrr::map2(grid_components, names(grid_components), function(x, y) {
       full_grid |>
-        select(decision, x) |>
-        nest("{y}" := -decision)
+        dplyr::select(decision, x) |>
+        tidyr::nest("{y}" := -decision)
     }) |>
-    reduce(left_join, "decision") |>
-    select(
+    purrr::reduce(dplyr::left_join, "decision") |>
+    dplyr::select(
       decision,
-      any_of(c("variables", "filters", "preprocess","models","postprocess", "corrs", "summary_stats", "cron_alphas"))
+      dplyr::any_of(c("variables", "filters", "preprocess","models","postprocess", "corrs", "summary_stats", "cron_alphas"))
     )
 
   attr(pipeline_expanded, "base_df") <- data_chr

@@ -32,6 +32,7 @@ decisions will be appended as new rows.
 Add Cronbach's Alpha to a multiverse pipeline
 }
 \examples{
+
 library(tidyverse)
 library(multitool)
 
@@ -54,9 +55,9 @@ the_data <-
   )
 
 the_data |>
+  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
   add_variables("ivs", iv1, iv2, iv3) |>
   add_variables("dvs", dv1, dv2) |>
   add_variables("mods", starts_with("mod")) |>
-  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
-  add_cron_alpha("my_scale", c(iv1,iv2,iv3))
+  add_cron_alpha("unp_scale", c(iv1,iv2,iv3))
 }

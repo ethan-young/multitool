@@ -7,7 +7,7 @@
 run_universe_model(.grid, decision_num, save_model = FALSE)
 }
 \arguments{
-\item{.grid}{a \code{tibble} produced by \code{\link{combine_all_grids}}}
+\item{.grid}{a \code{tibble} produced by \code{\link{expand_decisions}}}
 
 \item{decision_num}{an single integer from 1 to \code{nrow(grid)} indicating
 which specific decision set to run}

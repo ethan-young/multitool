@@ -1,6 +1,6 @@
 #' Run a single set of arbitrary decisions and save the result
 #'
-#' @param .grid a \code{tibble} produced by \code{\link{combine_all_grids}}
+#' @param .grid a \code{tibble} produced by \code{\link{expand_decisions}}
 #' @param decision_num an single integer from 1 to \code{nrow(grid)} indicating
 #'   which specific decision set to run
 #' @param save_model logical, indicates whether to save the model object in its
@@ -189,7 +189,8 @@ run_universe_corrs <- function(.grid, decision_num){
 #'     add_variables("mods", starts_with("mod")) |>
 #'     add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |>
 #'     add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
-#'     add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis"))
+#'     add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis")) |>
+#'     expand_decisions()
 #'
 #' run_universe_summary_stats(summary_stats_grid, decision_num  = 12)
 run_universe_summary_stats <- function(.grid, decision_num){
@@ -334,7 +335,7 @@ run_universe_cron_alphas <- function(.grid, decision_num){
 
 #' Run a multiverse based on a complete decision grid
 #'
-#' @param .grid a \code{tibble} produced by \code{\link{combine_all_grids}}
+#' @param .grid a \code{tibble} produced by \code{\link{expand_decisions}}
 #' @param save_model logical, indicates whether to save the model object in its
 #'   entirety. The default is \code{FALSE} because model objects are usually
 #'   large and under the hood, \code{\link[broom]{tidy}} and
@@ -363,7 +364,7 @@ run_multiverse <- function(.grid, save_model = FALSE, ncores = 1){
     future::plan(future::multisession, workers = ncores)
     multiverse <-
       furrr::future_map_dfr(
-        1:nrow(.grid),
+        seq_len(nrow(.grid)),
         function(x){
           multi_results <- list()
 
@@ -400,7 +401,7 @@ run_multiverse <- function(.grid, save_model = FALSE, ncores = 1){
               )
           }
 
-          reduce(multi_results, left_join, by = "decision")
+          purrr::reduce(multi_results, left_join, by = "decision")
         },
         .options = furrr::furrr_options(seed = TRUE)
       )
@@ -409,7 +410,7 @@ run_multiverse <- function(.grid, save_model = FALSE, ncores = 1){
 
     multiverse <-
       purrr::map_df(
-        cli::cli_progress_along(1:nrow(.grid)),
+        cli::cli_progress_along(seq_len(nrow(.grid))),
         function(x){
           multi_results <- list()
 
@@ -446,7 +447,7 @@ run_multiverse <- function(.grid, save_model = FALSE, ncores = 1){
               )
           }
 
-          reduce(multi_results, left_join, by = "decision")
+          purrr::reduce(multi_results, dplyr::left_join, by = "decision")
 
         })
 
@@ -459,8 +460,8 @@ run_multiverse <- function(.grid, save_model = FALSE, ncores = 1){
     multiverse,
     by = "decision"
   ) |>
-    tidyr::nest(specifications = c(-decision, -matches("fitted$|computed$"))) |>
-    dplyr::select(decision, specifications, everything())
+    tidyr::nest(specifications = c(-decision, -dplyr::matches("fitted$|computed$"))) |>
+    dplyr::select(decision, specifications, dplyr::everything())
 }
 
 

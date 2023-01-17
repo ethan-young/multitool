@@ -1,6 +1,6 @@
 grid_to_list <- function(.grid){
 
-  purrr::map(1:nrow(.grid), function(x){
+  purrr::map(seq_len(nrow(.grid)), function(x){
 
     grid_data <- .grid |>
       dplyr::select(-dplyr::matches("filter_decision|decision"))
@@ -195,7 +195,7 @@ collect_quiet_results <- function(code, save_model = FALSE){
       "{model_func}_code" := code
     )
 
-  if(save_model | !is_tidy){
+  if(save_model || !is_tidy){
     results <-
       dplyr::bind_cols(
         results,

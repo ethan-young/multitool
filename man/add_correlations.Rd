@@ -23,24 +23,23 @@ as an attribute.}
 correlation matrix.}
 
 \item{variables}{the variables for which you would like to correlations.
-These variables will be passed to \code{link[corrr]{correlate}}. You can
-also use tidyselect to select variables.}
+These variables will be passed to \code{link[correlation]{correlation}}.
+You can also use tidyselect to select variables.}
 
-\item{method}{character string indicating the correlation method used in
-\code{link[corrr]{correlate}}. The default is "peasron".}
+\item{focus_set}{variables to focus one in a table. This produces a table
+where rows are each focused variables and columns are all other variables}
 
-\item{focus}{the any variables for which you would like to run
-\code{link[corrr]{focus}}.}
+\item{method}{a valid method of correlation supplied to
+\code{link[correlation]{correlation}} (e.g., 'pearson' or 'kendall').
+Defaults to \code{'auto'}. See \code{link[correlation]{correlation}} for
+more details.}
 
-\item{stretch}{logical. Whether or not you would like to add a long form
-correlation list computed by \code{link[corrr]{stretch}}.}
+\item{redundant}{logical, should the result include repeated correlations?
+Defaults to \code{TRUE} See \code{link[correlation]{correlation}} for
+details.}
 
-\item{pair_ns}{logical. Whether or not you would like to add sample sizes
-table for each correlation computed by \code{link[corrr]{pair_n}}.}
-
-\item{use}{an optional character string indicating how to handle missing
-values. Should be one of "everything", "all.obs", "complete.obs",
-"na.or.complete", or "pairwise.complete.obs".}
+\item{add_matrix}{logical, add a traditional correlation matrix to the
+output. Defaults to \code{TRUE}.}
 }
 \value{
 a data.frame with three columns: type, group, and code. Type
@@ -52,6 +51,7 @@ decisions will be appended as new rows.
 Add correlations from the {correlation} package in {easystats}
 }
 \examples{
+
 library(tidyverse)
 library(multitool)
 
@@ -74,17 +74,9 @@ the_data <-
   )
 
 the_data |>
+  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
   add_variables("ivs", iv1, iv2, iv3) |>
   add_variables("dvs", dv1, dv2) |>
   add_variables("mods", starts_with("mod")) |>
-  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
-  add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
-  add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
-  add_model(lm({dvs} ~ {ivs} * {mods})) |>
-  add_model(lm({dvs} ~ {ivs} * {mods} + cov1)) |>
-  add_postprocess("aov", aov()) |>
-  add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
-  add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis")) |>
-  add_correlations("predictors", matches("iv|mod|cov"), focus = c(cov1,cov2)) |>
-  add_correlations("outcomes", matches("dv"))
+  add_correlations("predictors", matches("iv|mod|cov"), focus_set = c(cov1,cov2))
 }

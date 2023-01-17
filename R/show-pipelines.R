@@ -1,17 +1,17 @@
-#'Show multiverse data code pipelines
+#' Show multiverse data code pipelines
 #'
-#'Each \code{show_code*} function should be self-explanatory - they indicate
-#'where along the multiverse pipeline to extract code. The goal of these
-#'functions is to create a window into each multiverse decision set
-#'context/results and allow the user to inspect specific decisions straight from
-#'the code that produced it.
+#' Each \code{show_code*} function should be self-explanatory - they indicate
+#' where along the multiverse pipeline to extract code. The goal of these
+#' functions is to create a window into each multiverse decision set
+#' context/results and allow the user to inspect specific decisions straight from
+#' the code that produced it.
 #'
-#'@param .grid a full decision grid created by \code{\link{combine_all_grids}}
-#'@param decision_num numeric. Indicates which 'universe' in the multiverse to
-#'  show underlying code.
-#'@param copy logical. Whether to copy the pipeline code to the clipboard using
-#'  \code{\link[clipr]{write_clip}}.
-#'@export
+#' @param .grid a full decision grid created by \code{\link{expand_decisions}}
+#' @param decision_num numeric. Indicates which 'universe' in the multiverse to
+#'   show underlying code.
+#' @param copy logical. Whether to copy the pipeline code to the clipboard using
+#'   \code{\link[clipr]{write_clip}}.
+#' @export
 show_code_filter <- function(.grid, decision_num, copy = F){
 
   data_chr <- attr(.grid,  "base_df")

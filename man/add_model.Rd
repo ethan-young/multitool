@@ -30,6 +30,7 @@ decisions will be appended as new rows.
 Add a model and formula to a multiverese pipeline
 }
 \examples{
+
 library(tidyverse)
 library(multitool)
 
@@ -52,12 +53,10 @@ the_data <-
   )
 
 the_data |>
+  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
   add_variables("ivs", iv1, iv2, iv3) |>
   add_variables("dvs", dv1, dv2) |>
   add_variables("mods", starts_with("mod")) |>
-  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
-  add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
-  add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
-  add_model(lm({dvs} ~ {ivs} * {mods})) |>
-  add_model("lm({dvs} ~ {ivs} * {mods} + cov1)") # can be unquoted or quoted
+  add_preprocess("scale_iv", 'mutate({ivs} = scale({ivs}))') |>
+  add_model(lm({dvs} ~ {ivs} * {mods}))
 }

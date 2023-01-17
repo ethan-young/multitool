@@ -25,7 +25,7 @@ show_code_corrs(.grid, decision_num, copy = F)
 show_code_cron_alpha(.grid, decision_num, copy = F)
 }
 \arguments{
-\item{.grid}{a full decision grid created by \code{\link{combine_all_grids}}}
+\item{.grid}{a full decision grid created by \code{\link{expand_decisions}}}
 
 \item{decision_num}{numeric. Indicates which 'universe' in the multiverse to
 show underlying code.}
@@ -42,17 +42,17 @@ the code that produced it.
 }
 \section{Functions}{
 \itemize{
-\item \code{show_code_preprocess}: Show the code up to the preprocessing stage
+\item \code{show_code_preprocess()}: Show the code up to the preprocessing stage
 
-\item \code{show_code_model}: Show the code up to the modeling stage
+\item \code{show_code_model()}: Show the code up to the modeling stage
 
-\item \code{show_code_postprocess}: Show the code up to the post-processing
+\item \code{show_code_postprocess()}: Show the code up to the post-processing
 stage
 
-\item \code{show_code_summary_stats}: Show the code for computing summary statistics
+\item \code{show_code_summary_stats()}: Show the code for computing summary statistics
 
-\item \code{show_code_corrs}: Show the code for computing correlations
+\item \code{show_code_corrs()}: Show the code for computing correlations
 
-\item \code{show_code_cron_alpha}: Show the code for computing correlations
+\item \code{show_code_cron_alpha()}: Show the code for computing correlations
+
 }}
-

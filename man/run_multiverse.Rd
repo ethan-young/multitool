@@ -7,7 +7,7 @@
 run_multiverse(.grid, save_model = FALSE, ncores = 1)
 }
 \arguments{
-\item{.grid}{a \code{tibble} produced by \code{\link{combine_all_grids}}}
+\item{.grid}{a \code{tibble} produced by \code{\link{expand_decisions}}}
 
 \item{save_model}{logical, indicates whether to save the model object in its
 entirety. The default is \code{FALSE} because model objects are usually

@@ -5,16 +5,16 @@ library(qualtRics)
 # Online Sample -----------------------------------------------------------
 icar_mturk <-
   fetch_survey(
-    surveyID ="SV_3t3VCcq88o8DE6F",
-    verbose  = T,
-    force_request = T,
-    label = F,
-    convert = F
+    surveyID = "SV_3t3VCcq88o8DE6F",
+    verbose  = TRUE,
+    force_request = TRUE,
+    label = FALSE,
+    convert = FALSE
   ) |>
   rename_with(~tolower(.x) |> str_replace(" ", "_")) |>
   mutate(
     sample              = "online",
-    time_condition      = ifelse(condition==0, computer_page_submit,recession_page_submit),
+    time_condition      = ifelse(condition == 0, computer_page_submit, recession_page_submit),
     time_icar           = across(matches("(ln|vr|mx|r3d)_\\d\\d_page_submit$")) |> rowSums(),
     time_ln             = across(matches("ln_\\d\\d_page_submit$")) |> rowSums(),
     time_mx             = across(matches("mx_\\d\\d_page_submit$")) |> rowSums(),
@@ -135,7 +135,23 @@ icar_data <-
     unp_obj_mean     = "Childhood unpredictability (objective) mean score",
     unp_changes_mean = "Childhood unpredictability (changes) mean score",
     unp_subj_mean    = "Childhood unpredictability (subjective) mean score",
-    ses_subj_mean    = "Childhood socioeconomic status (objective) mean score"
+    ses_subj_mean    = "Childhood socioeconomic status (objective) mean score",
+    vr_04  = "Verbal reasoning item 4",
+    vr_16  = "Verbal reasoning item 16",
+    vr_17  = "Verbal reasoning item 17",
+    vr_19  = "Verbal reasoning item 19",
+    ln_07  = "Letter-number item 7",
+    ln_33  = "Letter-number item 33",
+    ln_34  = "Letter-number item 34",
+    ln_58  = "Letter-number item 58",
+    mx_45  = "Matrix reasoning item 45",
+    mx_46  = "Matrix reasoning item 46",
+    mx_47  = "Matrix reasoning item 47",
+    mx_55  = "Matrix reasoning item 55",
+    r3d_03 = "Mental Rotation item 3",
+    r3d_04 = "Mental Rotation item 4",
+    r3d_06 = "Mental Rotation item 6",
+    r3d_08 = "Mental Rotation item 8"
   ) |>
   sjlabelled::set_labels(
     condition,

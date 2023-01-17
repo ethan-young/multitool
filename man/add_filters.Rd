@@ -24,9 +24,11 @@ decisions will be appended as new rows.
 Add filtering/exclusion criteria to a multiverse pipeline
 }
 \examples{
+
 library(tidyverse)
 library(multitool)
 
+# Simulate some data
 the_data <-
   data.frame(
     id   = 1:500,
@@ -46,5 +48,5 @@ the_data <-
   )
 
 the_data |>
-  add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5)
+  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5)
 }

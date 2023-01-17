@@ -47,7 +47,8 @@ summary_stats_grid <-
     add_variables("mods", starts_with("mod")) |>
     add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |>
     add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
-    add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis"))
+    add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis")) |>
+    expand_decisions()
 
 run_universe_summary_stats(summary_stats_grid, decision_num  = 12)
 }

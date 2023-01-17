@@ -36,6 +36,7 @@ decisions will be appended as new rows.
 Add arbitrary preprocessing code to a multiverse analysis pipeline
 }
 \examples{
+
 library(tidyverse)
 library(multitool)
 
@@ -58,10 +59,9 @@ the_data <-
   )
 
 the_data |>
+  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
   add_variables("ivs", iv1, iv2, iv3) |>
   add_variables("dvs", dv1, dv2) |>
   add_variables("mods", starts_with("mod")) |>
-  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
-  add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |> # can be quoted or unquoted
-  add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods})))
+  add_preprocess("scale_iv", 'mutate({ivs} = scale({ivs}))')
 }

@@ -87,3 +87,6 @@ icar_multiverse |>
     show.legend = T
   ) +
   facet_grid(rows = vars(ivs), cols = vars(dvs))
+
+icar_multiverse |>
+  reveal(sim_slopes_fitted, sim_slopes_tidy)

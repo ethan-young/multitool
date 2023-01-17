@@ -29,9 +29,11 @@ decisions will be appended as new rows.
 Add a set of variable alternatives to a multiverse pipeline
 }
 \examples{
+
 library(tidyverse)
 library(multitool)
 
+# Simulate some data
 the_data <-
   data.frame(
     id   = 1:500,
@@ -51,7 +53,7 @@ the_data <-
   )
 
 the_data |>
-  add_variables("ivs", iv1, iv2, iv3) |>
-  add_variables("dvs", dv1, dv2) |>
-  add_variables("mods", starts_with("mod"))
+ add_variables("ivs", iv1, iv2, iv3) |>
+ add_variables("dvs", dv1, dv2) |>
+ add_variables("mods", starts_with("mod"))
 }
