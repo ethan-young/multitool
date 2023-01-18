@@ -28,7 +28,7 @@ My goal with this package is to create an incremental workflow for slowly buildi
 
 I designed `multitool` to help users take a single use case (e.g., a single analysis pipeline) and expand it into a workflow to include alternative versions of the same analysis. 
 
-For example, imagine you would like to take some data, remove outliers, transform variables, run a linear model, do a post-hoc analysis, and plot the results. `multitool` can take theses tasks and transform them into a *specification grid*, which provides instructions for running your analysis pipeline.
+For example, imagine you would like to take some data, remove outliers, transform variables, run a linear model, do a post-hoc analysis, and plot the results. `multitool` can take theses tasks and transform them into a *specification blueprint*, which provides instructions for running your analysis pipeline.
 
 The functions were designed to play nice with the `tidyverse` and require using the base R pipe (see below). This makes it easy to quickly convert a single analysis into a multiverse analysis.
 
@@ -37,10 +37,10 @@ The functions were designed to play nice with the `tidyverse` and require using 
 My vision of a multiverse workflow contains three parts. 
 
 1. **Base data:** original dataset waiting for further processing
-2. **Decision grid:** (also termed specification grid) a blueprint/map/recipe. These are the instructions for what to do.
+2. **specification blueprint:** (also termed specification grid) a blueprint/map/recipe or whatever you want to call it. These are the instructions for what to do.
 3. **Multiverse results:** a table of results after feeding the base data to the blueprint.
 
-A defining feature of `multitool` is that it saves intermediate code. This allows the user to grab the *code that produces a result* and inspect it for accuracy, errors, or simpluy for peace of mind. By quickly grabbing code, the user can iterate between creating their blueprint and checking that the code works as intended.
+A defining feature of `multitool` is that it saves intermediate code. This allows the user to grab the *code that produces a result* and inspect it for accuracy, errors, or simply for peace of mind. By quickly grabbing code, the user can iterate between creating their blueprint and checking that the code works as intended.
 
 `multitool` allows the user to model data however they'd like. The user is responsible for loading the relevant modeling packages. Regardless of your model choice,  `multitool` will capture your code and build a pipeline. 
 
