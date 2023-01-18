@@ -75,11 +75,31 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>The goal of multitool is to …</p>
+<p>The goal of <code>multitool</code> is to provide a set of tools for designing and running multiverse-style analyses. There are other packages that accomplish this goal well (e.g., <code>specr</code>, <code>multiverse</code>), but I’ve found navigating the multiverse can be a tricky.</p>
+<p>My goal with this package is to create an incremental workflow for slowly building up, keeping track of, and unpacking multiverse analyses and results.</p>
+<p>I designed <code>multitool</code> to help users take a single use case (e.g., a single analysis pipeline) and expand it into a workflow to include alternative versions of the same analysis.</p>
+<p>For example, imagine you would like to take some data, remove outliers, transform variables, run a linear model, do a post-hoc analysis, and plot the results. <code>multitool</code> can take theses tasks and transform them into a <em>specification grid</em>, which provides instructions for running your analysis pipeline.</p>
+<p>The functions were designed to play nice with the <code>tidyverse</code> and require using the base R pipe (see below). This makes it easy to quickly convert a single analysis into a multiverse analysis.</p>
+<div class="section level2">
+<h2 id="basic-components">Basic components<a class="anchor" aria-label="anchor" href="#basic-components"></a>
+</h2>
+<p>My vision of a multiverse workflow contains three parts.</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Base data:</strong> original dataset waiting for further processing</li>
+<li>
+<strong>Decision grid:</strong> (also termed specification grid) a blueprint/map/recipe. These are the instructions for what to do.</li>
+<li>
+<strong>Multiverse results:</strong> a table of results after feeding the base data to the blueprint.</li>
+</ol>
+<p>A defining feature of <code>multitool</code> is that it saves intermediate code. This allows the user to grab the <em>code that produces a result</em> and inspect it for accuracy, errors, or simpluy for peace of mind. By quickly grabbing code, the user can iterate between creating their blueprint and checking that the code works as intended.</p>
+<p><code>multitool</code> allows the user to model data however they’d like. The user is responsible for loading the relevant modeling packages. Regardless of your model choice, <code>multitool</code> will capture your code and build a pipeline.</p>
+<p>Finally, multiverse analyses were originally intended to look at how model parameters shift as a function of arbitrary analysis decisions. However, any computation might change depending on how you slice and dice the data. For this reason, I also extended the package to allow for the computations of descriptive, correlation, and reliability analysis alongside a particular modelling pipeline.</p>
+</div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of multitool from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
+<p>You can install the development version of <code>multitool</code> from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"ethan-young/multitool"</span><span class="op">)</span></span></code></pre></div>
@@ -87,22 +107,16 @@
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p>This is a basic example which shows you how to solve a common problem:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──</span></span>
-<span><span class="co">#&gt; ✔ ggplot2 3.3.6     ✔ purrr   0.3.4</span></span>
-<span><span class="co">#&gt; ✔ tibble  3.1.7     ✔ dplyr   1.0.9</span></span>
-<span><span class="co">#&gt; ✔ tidyr   1.2.0     ✔ stringr 1.4.0</span></span>
-<span><span class="co">#&gt; ✔ readr   2.1.2     ✔ forcats 0.5.1</span></span>
-<span><span class="co">#&gt; ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──</span></span>
-<span><span class="co">#&gt; ✖ dplyr::filter() masks stats::filter()</span></span>
-<span><span class="co">#&gt; ✖ dplyr::lag()    masks stats::lag()</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ethan-young.github.io/multitool/" class="external-link">multitool</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="simulate-some-data">Simulate some data<a class="anchor" aria-label="anchor" href="#simulate-some-data"></a>
 </h2>
+<p>Image we have some data with several predictor variables, moderators, covariates, and dependent measures. We want to know if our predictors (<code>ivs</code>) interact with our moderators (<code>mods</code>) to predict the outcome (<code>dvs</code>).</p>
+<p>But we have three measures of our predictor, three measures of our moderator, and two versions of our outcome. Our predictors are different measures of the same construct and our moderators tap the same construct.</p>
+<p>In addition, because we collected messy data from the real world (not really but let’s pretend), we have some idea of exclusions we might need to make (e.g., <code>include1</code>, <code>include2</code>, <code>include3</code>).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">the_data</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -123,119 +137,480 @@
 <span>  <span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="create-a-variable-grid">Create a variable grid<a class="anchor" aria-label="anchor" href="#create-a-variable-grid"></a>
+<h2 id="create-a-blueprint">Create a blueprint<a class="anchor" aria-label="anchor" href="#create-a-blueprint"></a>
 </h2>
+<p>Say we don’t know much about this new and exciting area of research.</p>
+<p>We want to maximize our knowledge but we also want to be systematic. One approach would be to specify a reasonable analysis pipeline. Something that looks like the following:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">my_var_grid</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">create_var_grid</span><span class="op">(</span></span>
-<span>    .df <span class="op">=</span> <span class="va">the_data</span>,</span>
-<span>    iv  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">iv1</span>, <span class="va">iv2</span>, <span class="va">iv3</span><span class="op">)</span>,</span>
-<span>    mod <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">mod1</span>, <span class="va">mod2</span>, <span class="va">mod3</span><span class="op">)</span>,</span>
-<span>    dv  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">dv1</span>, <span class="va">dv2</span><span class="op">)</span>,</span>
-<span>    cov <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">cov1</span>, <span class="va">cov2</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Filter out exclusions</span></span>
+<span><span class="va">filtered_data</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">the_data</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
+<span>    <span class="va">include1</span> <span class="op">==</span> <span class="fl">0</span>,           <span class="co"># --</span></span>
+<span>    <span class="va">include2</span> <span class="op">!=</span> <span class="fl">3</span>,           <span class="co"># Exclusion criteria</span></span>
+<span>    <span class="va">include2</span> <span class="op">!=</span> <span class="fl">2</span>,           <span class="co"># </span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">include3</span><span class="op">)</span> <span class="op">&gt;</span> <span class="op">-</span><span class="fl">2.5</span>   <span class="co"># --</span></span>
 <span>  <span class="op">)</span></span>
-<span><span class="co">#&gt; cov variable group has 2 alternative variables</span></span>
-<span><span class="co">#&gt; dv variable group has 2 alternative variables</span></span>
-<span><span class="co">#&gt; iv variable group has 3 alternative variables</span></span>
-<span><span class="co">#&gt; mod variable group has 3 alternative variables</span></span>
-<span><span class="co">#&gt; 36 combinations (2*2*3*3 = 36)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="create-filter-grid">Create filter grid<a class="anchor" aria-label="anchor" href="#create-filter-grid"></a>
-</h2>
+<span></span>
+<span><span class="co"># Preprocess the data</span></span>
+<span><span class="va">preprocessed</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">filtered_data</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    iv1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">iv1</span><span class="op">)</span><span class="op">)</span>, <span class="co"># standardize predictor</span></span>
+<span>    mod1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">mod1</span><span class="op">)</span><span class="op">)</span> <span class="co"># standardize moderator</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Model the data</span></span>
+<span><span class="va">my_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">dv1</span> <span class="op">~</span> <span class="va">iv1</span> <span class="op">*</span> <span class="va">mod1</span>, data <span class="op">=</span> <span class="va">preprossed_data</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Post-process the data (e.g., for plotting)</span></span>
+<span><span class="va">my_model_points</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span></span>
+<span>    <span class="va">my_model</span>, </span>
+<span>    newdata <span class="op">=</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/expand_grid.html" class="external-link">expand_grid</a></span><span class="op">(</span>iv1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span>, mod1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>    interval <span class="op">=</span> <span class="st">"confidence"</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<p>But what if there are valid alternative alternatives to this pipeline?</p>
+<p>For example, using <code>iv2</code> instead of <code>iv1</code> or only using two exclusion criteria instead of three?</p>
+<p>A sensible approach would be to copy the code above, paste it, and edit with different decisions. However, this quickly become tedious. It adds many lines of code, many new objects, and is difficult to keep track of in a systematic way.</p>
+<p>Enter <code>multitool</code>.</p>
+<p>With <code>multitool</code>, the above analysis pipeline can be transformed into a grid – a specification blueprint – for exploring all combinations of sensible data decisions in a pipeline. It was designed to leverage already written code (e.g., the <code>filter</code> statement above) to create a multiverse of data analysis pipelines.</p>
+<div class="section level3">
+<h3 id="filtering-specifications">Filtering specifications<a class="anchor" aria-label="anchor" href="#filtering-specifications"></a>
+</h3>
+<p>Our example above has three exclusion criteria. If we don’t know which are important, for example, because they are based on arbitrary ‘rules of thumb’ (that may or may not have inherent wisdom) or we don’t know if including/excluding these cases is valid, we can generate all combinations:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">my_filter_grid</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">create_filter_grid</span><span class="op">(</span></span>
-<span>    .df <span class="op">=</span> <span class="va">the_data</span>,</span>
-<span>    <span class="va">include1</span> <span class="op">==</span> <span class="fl">0</span>,</span>
-<span>    <span class="va">include2</span> <span class="op">!=</span> <span class="fl">3</span>,</span>
-<span>    <span class="va">include2</span> <span class="op">!=</span> <span class="fl">2</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">include3</span><span class="op">)</span> <span class="op">&gt;</span> <span class="op">-</span><span class="fl">2.5</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="co">#&gt; filters involving include1 has 2 alternative filtering criteria</span></span>
-<span><span class="co">#&gt; filters involving include2 has 3 alternative filtering criteria</span></span>
-<span><span class="co">#&gt; filters involving include3 has 2 alternative filtering criteria</span></span>
-<span><span class="co">#&gt; 12 combinations (2*3*2 = 12)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">the_data</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/add_filters.html">add_filters</a></span><span class="op">(</span><span class="va">include1</span> <span class="op">==</span> <span class="fl">0</span>,<span class="va">include2</span> <span class="op">!=</span> <span class="fl">3</span>,<span class="va">include2</span> <span class="op">!=</span> <span class="fl">2</span>,<span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">include3</span><span class="op">)</span> <span class="op">&gt;</span> <span class="op">-</span><span class="fl">2.5</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 7 × 3</span></span>
+<span><span class="co">#&gt;   type    group    code                          </span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;                         </span></span>
+<span><span class="co">#&gt; 1 filters include1 include1 == 0                 </span></span>
+<span><span class="co">#&gt; 2 filters include1 include1 %in% unique(include1)</span></span>
+<span><span class="co">#&gt; 3 filters include2 include2 != 3                 </span></span>
+<span><span class="co">#&gt; 4 filters include2 include2 != 2                 </span></span>
+<span><span class="co">#&gt; 5 filters include2 include2 %in% unique(include2)</span></span>
+<span><span class="co">#&gt; 6 filters include3 scale(include3) &gt; -2.5        </span></span>
+<span><span class="co">#&gt; 7 filters include3 include3 %in% unique(include3)</span></span></code></pre></div>
+<p>The output above is a simple <code>tibble</code> (i.e., <code>data.frame</code>) containing three columns. Each row is a possible filter: the <code>type</code> column refers to the type of blueprint specification (see below for types other than filters), the <code>group</code> refers to the variable in the base data frame (in our case <code>the_data</code>) for which the filter applies, and the <code>code</code> column contains the code needed to execute the filter.</p>
+<p>For filtering decisions (e.g., exclusion criteria), a ‘do nothing’ alternative is always generated.</p>
+<p>For example, perhaps some observations belong to a subgroup, <code>include1 == 1</code>. We may or may not have good reason to exclude these cases (this depends on the specific situation).</p>
+<p>But imagine that we don’t know if we should include them or not. When <code>include1 == 1</code> is added to <code><a href="reference/add_filters.html">add_filters()</a></code>, the ‘do nothing’ alternative <code>include1 %in% unique(include1)</code> is automatically generated so you can compare including versus excluding cases based on a criterion.</p>
 </div>
-<div class="section level2">
-<h2 id="create-model-grid">Create model grid<a class="anchor" aria-label="anchor" href="#create-model-grid"></a>
-</h2>
+<div class="section level3">
+<h3 id="adding-alternative-analysis-variables">Adding alternative analysis variables<a class="anchor" aria-label="anchor" href="#adding-alternative-analysis-variables"></a>
+</h3>
+<p>Most multiverse-style analyses explore a range of exclusion criteria and their alternatives. However, sometimes alternative versions of a variable are also included.</p>
+<p>In the social sciences, it is fairly common to have many measures of roughly the same construct (i.e., measured variable). For example, a happiness researcher might measure positive mood, life satisfaction, and/or a single item measuring happiness (e.g., ‘how happy do your feel?’).</p>
+<p>If you want to explore the output of your pipeline with differing versions of a variable, you can use ‘add_variables()’.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">my_model_grid</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">create_model_grid</span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="op">{</span><span class="va">dv</span><span class="op">}</span> <span class="op">~</span> <span class="op">{</span><span class="va">iv</span><span class="op">}</span> <span class="op">*</span> <span class="op">{</span><span class="va">mod</span><span class="op">}</span><span class="op">)</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="op">{</span><span class="va">dv</span><span class="op">}</span> <span class="op">~</span> <span class="op">{</span><span class="va">iv</span><span class="op">}</span> <span class="op">*</span> <span class="op">{</span><span class="va">mod</span><span class="op">}</span> <span class="op">+</span> <span class="op">{</span><span class="va">cov</span><span class="op">}</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="co">#&gt; Your model has 2 alternatives</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">the_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/add_variables.html">add_variables</a></span><span class="op">(</span>var_group <span class="op">=</span> <span class="st">"ivs"</span>, <span class="va">iv1</span>, <span class="va">iv2</span>, <span class="va">iv3</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 3 × 3</span></span>
+<span><span class="co">#&gt;   type      group code </span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;     &lt;chr&gt; &lt;chr&gt;</span></span>
+<span><span class="co">#&gt; 1 variables ivs   iv1  </span></span>
+<span><span class="co">#&gt; 2 variables ivs   iv2  </span></span>
+<span><span class="co">#&gt; 3 variables ivs   iv3</span></span></code></pre></div>
+<p>The output above generates the same <code>tibble</code> as <code><a href="reference/add_filters.html">add_filters()</a></code>. Each row is a particular decision to use a particular variable in your pipeline.</p>
+<p>In contrast to filter, however, you need to tell <code><a href="reference/add_variables.html">add_variables()</a></code> what to call each set of variables with the <code>var_group</code> argument. This is how <code>multitool</code> knows that each variable name in the <code>code</code> column is a different alternative of a larger set.</p>
+<p>Here, <code>var_group = "ivs"</code> indicates that <code>iv1, iv2, iv3</code> are all different versions of <code>ivs</code>. I used “ivs” as way of indicating to myself that these are alternative versions of my main independent variable.</p>
 </div>
-<div class="section level2">
-<h2 id="add-arbitrary-code">Add arbitrary code<a class="anchor" aria-label="anchor" href="#add-arbitrary-code"></a>
-</h2>
+<div class="section level3">
+<h3 id="building-up-the-blueprint">Building up the blueprint<a class="anchor" aria-label="anchor" href="#building-up-the-blueprint"></a>
+</h3>
+<p>You can harness the real power of <code>multitool</code> by piping specification statements. For example, perhaps we want to explore our exclusion criteria alternatives across different versions of our predictor variable. We can simply pipe new blueprint specifications into each other like so:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#Add pre-processing code before model is fit (but after filtering)</span></span>
-<span><span class="va">my_preprocess</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">create_preprocess</span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="op">{</span><span class="va">iv</span><span class="op">}</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="op">{</span><span class="va">iv</span><span class="op">}</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="op">)</span>, <span class="op">{</span><span class="va">mod</span><span class="op">}</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="op">{</span><span class="va">mod</span><span class="op">}</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">the_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/add_filters.html">add_filters</a></span><span class="op">(</span><span class="va">include1</span> <span class="op">==</span> <span class="fl">0</span>,<span class="va">include2</span> <span class="op">!=</span> <span class="fl">3</span>,<span class="va">include2</span> <span class="op">!=</span> <span class="fl">2</span>,<span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">include3</span><span class="op">)</span> <span class="op">&gt;</span> <span class="op">-</span><span class="fl">2.5</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/add_variables.html">add_variables</a></span><span class="op">(</span>var_group <span class="op">=</span> <span class="st">"ivs"</span>, <span class="va">iv1</span>, <span class="va">iv2</span>, <span class="va">iv3</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 10 × 3</span></span>
+<span><span class="co">#&gt;    type      group    code                          </span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;                         </span></span>
+<span><span class="co">#&gt;  1 filters   include1 include1 == 0                 </span></span>
+<span><span class="co">#&gt;  2 filters   include1 include1 %in% unique(include1)</span></span>
+<span><span class="co">#&gt;  3 filters   include2 include2 != 3                 </span></span>
+<span><span class="co">#&gt;  4 filters   include2 include2 != 2                 </span></span>
+<span><span class="co">#&gt;  5 filters   include2 include2 %in% unique(include2)</span></span>
+<span><span class="co">#&gt;  6 filters   include3 scale(include3) &gt; -2.5        </span></span>
+<span><span class="co">#&gt;  7 filters   include3 include3 %in% unique(include3)</span></span>
+<span><span class="co">#&gt;  8 variables ivs      iv1                           </span></span>
+<span><span class="co">#&gt;  9 variables ivs      iv2                           </span></span>
+<span><span class="co">#&gt; 10 variables ivs      iv3</span></span></code></pre></div>
+<p>Notice that we now have a specification blueprint with both exclusion alternatives and variable alternatives.</p>
+</div>
+<div class="section level3">
+<h3 id="adding-a-model">Adding a model<a class="anchor" aria-label="anchor" href="#adding-a-model"></a>
+</h3>
+<p>The whole point of building a specification blueprint is to eventually feed it to a model and examine the results.</p>
+<p>You can add a model to your blueprint in a similar fashion to adding filtering decisions or variable alternatives by using <code><a href="reference/add_model.html">add_model()</a></code>.</p>
+<p>I designed <code><a href="reference/add_model.html">add_model()</a></code> so the user can simply paste a model function. For example, our call to <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm()</a></code> can be simply pasted into <code><a href="reference/add_model.html">add_model()</a></code>:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Code to execute after analysis is fit</span></span>
-<span><span class="va">my_postprocess</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">create_postprocess</span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/stats/aov.html" class="external-link">aov</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="combine-all-grids-together">Combine all grids together<a class="anchor" aria-label="anchor" href="#combine-all-grids-together"></a>
-</h2>
+<code class="sourceCode R"><span><span class="va">the_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/add_filters.html">add_filters</a></span><span class="op">(</span><span class="va">include1</span> <span class="op">==</span> <span class="fl">0</span>,<span class="va">include2</span> <span class="op">!=</span> <span class="fl">3</span>,<span class="va">include2</span> <span class="op">!=</span> <span class="fl">2</span>,<span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">include3</span><span class="op">)</span> <span class="op">&gt;</span> <span class="op">-</span><span class="fl">2.5</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/add_variables.html">add_variables</a></span><span class="op">(</span>var_group <span class="op">=</span> <span class="st">"ivs"</span>, <span class="va">iv1</span>, <span class="va">iv2</span>, <span class="va">iv3</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/add_model.html">add_model</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">dv1</span> <span class="op">~</span> <span class="va">iv1</span> <span class="op">*</span> <span class="va">mod1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 11 × 3</span></span>
+<span><span class="co">#&gt;    type      group    code                          </span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;                         </span></span>
+<span><span class="co">#&gt;  1 filters   include1 include1 == 0                 </span></span>
+<span><span class="co">#&gt;  2 filters   include1 include1 %in% unique(include1)</span></span>
+<span><span class="co">#&gt;  3 filters   include2 include2 != 3                 </span></span>
+<span><span class="co">#&gt;  4 filters   include2 include2 != 2                 </span></span>
+<span><span class="co">#&gt;  5 filters   include2 include2 %in% unique(include2)</span></span>
+<span><span class="co">#&gt;  6 filters   include3 scale(include3) &gt; -2.5        </span></span>
+<span><span class="co">#&gt;  7 filters   include3 include3 %in% unique(include3)</span></span>
+<span><span class="co">#&gt;  8 variables ivs      iv1                           </span></span>
+<span><span class="co">#&gt;  9 variables ivs      iv2                           </span></span>
+<span><span class="co">#&gt; 10 variables ivs      iv3                           </span></span>
+<span><span class="co">#&gt; 11 models    model    lm(dv1 ~ iv1 * mod1)</span></span></code></pre></div>
+<p>Above, the model is completely unquoted. It also has no <code>data</code> argument. This is intentional; <code>multitool</code> is tracking the base data set along the way (so you don’t have to).</p>
+<p>Note that you can still quote the model formula, if that is more your style.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">my_full_grid</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">combine_all_grids</span><span class="op">(</span></span>
-<span>    <span class="va">the_data</span>,</span>
-<span>    <span class="va">my_var_grid</span>,</span>
-<span>    <span class="va">my_filter_grid</span>,</span>
-<span>    <span class="va">my_model_grid</span>,</span>
-<span>    <span class="va">my_preprocess</span>,</span>
-<span>    <span class="va">my_postprocess</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="co">#&gt; cov (variable) has 2 alternatives</span></span>
-<span><span class="co">#&gt; dv (variable) has 2 alternatives</span></span>
-<span><span class="co">#&gt; iv (variable) has 3 alternatives</span></span>
-<span><span class="co">#&gt; mod (variable) has 3 alternatives</span></span>
-<span><span class="co">#&gt; include1 (filter) has 2 alternatives</span></span>
-<span><span class="co">#&gt; include2 (filter) has 3 alternatives</span></span>
-<span><span class="co">#&gt; include3 (filter) has 2 alternatives</span></span>
-<span><span class="co">#&gt; model has 2 alternatives</span></span>
-<span><span class="co">#&gt; 864 combinations (2*2*3*3*2*3*2*2 = 864)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="run-a-universe">Run a universe<a class="anchor" aria-label="anchor" href="#run-a-universe"></a>
-</h2>
+<code class="sourceCode R"><span><span class="va">the_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/add_filters.html">add_filters</a></span><span class="op">(</span><span class="va">include1</span> <span class="op">==</span> <span class="fl">0</span>,<span class="va">include2</span> <span class="op">!=</span> <span class="fl">3</span>,<span class="va">include2</span> <span class="op">!=</span> <span class="fl">2</span>,<span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">include3</span><span class="op">)</span> <span class="op">&gt;</span> <span class="op">-</span><span class="fl">2.5</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/add_variables.html">add_variables</a></span><span class="op">(</span>var_group <span class="op">=</span> <span class="st">"ivs"</span>, <span class="va">iv1</span>, <span class="va">iv2</span>, <span class="va">iv3</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/add_model.html">add_model</a></span><span class="op">(</span><span class="st">"lm(dv1 ~ iv1 * mod1)"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 11 × 3</span></span>
+<span><span class="co">#&gt;    type      group    code                          </span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;                         </span></span>
+<span><span class="co">#&gt;  1 filters   include1 include1 == 0                 </span></span>
+<span><span class="co">#&gt;  2 filters   include1 include1 %in% unique(include1)</span></span>
+<span><span class="co">#&gt;  3 filters   include2 include2 != 3                 </span></span>
+<span><span class="co">#&gt;  4 filters   include2 include2 != 2                 </span></span>
+<span><span class="co">#&gt;  5 filters   include2 include2 %in% unique(include2)</span></span>
+<span><span class="co">#&gt;  6 filters   include3 scale(include3) &gt; -2.5        </span></span>
+<span><span class="co">#&gt;  7 filters   include3 include3 %in% unique(include3)</span></span>
+<span><span class="co">#&gt;  8 variables ivs      iv1                           </span></span>
+<span><span class="co">#&gt;  9 variables ivs      iv2                           </span></span>
+<span><span class="co">#&gt; 10 variables ivs      iv3                           </span></span>
+<span><span class="co">#&gt; 11 models    model    lm(dv1 ~ iv1 * mod1)</span></span></code></pre></div>
+<p>To make sure your <code><a href="reference/add_variables.html">add_variables()</a></code> works properly, <code><a href="reference/add_model.html">add_model()</a></code> was designed to interpret <code><a href="https://glue.tidyverse.org/reference/glue.html" class="external-link">glue::glue()</a></code> syntax. For example:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">run_universe</span><span class="op">(</span><span class="va">my_full_grid</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 1 × 4</span></span>
-<span><span class="co">#&gt;   decision data_pipeline    lm               aov             </span></span>
-<span><span class="co">#&gt;      &lt;dbl&gt; &lt;list&gt;           &lt;list&gt;           &lt;list&gt;          </span></span>
-<span><span class="co">#&gt; 1        1 &lt;tibble [1 × 2]&gt; &lt;tibble [1 × 5]&gt; &lt;tibble [1 × 5]&gt;</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">the_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/add_filters.html">add_filters</a></span><span class="op">(</span><span class="va">include1</span> <span class="op">==</span> <span class="fl">0</span>, <span class="va">include2</span> <span class="op">!=</span> <span class="fl">3</span>, <span class="va">include2</span> <span class="op">!=</span> <span class="fl">2</span>, <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">include3</span><span class="op">)</span> <span class="op">&gt;</span> <span class="op">-</span><span class="fl">2.5</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/add_variables.html">add_variables</a></span><span class="op">(</span>var_group <span class="op">=</span> <span class="st">"ivs"</span>, <span class="va">iv1</span>, <span class="va">iv2</span>, <span class="va">iv3</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/add_model.html">add_model</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">dv1</span> <span class="op">~</span> <span class="op">{</span><span class="va">ivs</span><span class="op">}</span> <span class="op">*</span> <span class="va">mod1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 11 × 3</span></span>
+<span><span class="co">#&gt;    type      group    code                          </span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;                         </span></span>
+<span><span class="co">#&gt;  1 filters   include1 include1 == 0                 </span></span>
+<span><span class="co">#&gt;  2 filters   include1 include1 %in% unique(include1)</span></span>
+<span><span class="co">#&gt;  3 filters   include2 include2 != 3                 </span></span>
+<span><span class="co">#&gt;  4 filters   include2 include2 != 2                 </span></span>
+<span><span class="co">#&gt;  5 filters   include2 include2 %in% unique(include2)</span></span>
+<span><span class="co">#&gt;  6 filters   include3 scale(include3) &gt; -2.5        </span></span>
+<span><span class="co">#&gt;  7 filters   include3 include3 %in% unique(include3)</span></span>
+<span><span class="co">#&gt;  8 variables ivs      iv1                           </span></span>
+<span><span class="co">#&gt;  9 variables ivs      iv2                           </span></span>
+<span><span class="co">#&gt; 10 variables ivs      iv3                           </span></span>
+<span><span class="co">#&gt; 11 models    model    lm(dv1 ~ {ivs} * mod1)</span></span></code></pre></div>
+<p>This allows <code>multitool</code> to insert the correct version of each variable specified in a <code><a href="reference/add_variables.html">add_variables()</a></code> statement. Make sure to use embrace the variable with the <code>var_group</code> name from <code>add_variables</code>.</p>
+<p>Here, our model <code><a href="https://glue.tidyverse.org/reference/glue.html" class="external-link">glue::glue()</a></code> syntax is <code>lm(dv1 ~ {ivs} * mod1)</code>, where <a href="https://github.com/DavisVaughan/ivs" class="external-link">ivs</a> tells <code>multitool</code> to insert the current version of the <code>ivs</code> into the model.</p>
+</div>
+<div class="section level3">
+<h3 id="finalizing-the-specification-blueprint">Finalizing the specification blueprint<a class="anchor" aria-label="anchor" href="#finalizing-the-specification-blueprint"></a>
+</h3>
+<p>The final step in making your blueprint is expanding all your specifications into all possible combinations. You can do this by calling <code><a href="reference/expand_decisions.html">expand_decisions()</a></code> at the end of your blueprint pipeline:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">full_pipeline</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">the_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/add_filters.html">add_filters</a></span><span class="op">(</span><span class="va">include1</span> <span class="op">==</span> <span class="fl">0</span>, <span class="va">include2</span> <span class="op">!=</span> <span class="fl">3</span>, <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">include3</span><span class="op">)</span> <span class="op">&gt;</span> <span class="op">-</span><span class="fl">2.5</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/add_variables.html">add_variables</a></span><span class="op">(</span>var_group <span class="op">=</span> <span class="st">"ivs"</span>, <span class="va">iv1</span>, <span class="va">iv2</span>, <span class="va">iv3</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/add_model.html">add_model</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">dv1</span> <span class="op">~</span> <span class="op">{</span><span class="va">ivs</span><span class="op">}</span> <span class="op">*</span> <span class="va">mod1</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/expand_decisions.html">expand_decisions</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>The result is an expanded <code>tibble</code> with 1 row per unique decision and columns for each major blueprint category.</p>
+<p>In our example, we have alternative variables, filters, and a model to run. Note that we have 3 filtering decisions (each with two combinations) and 3 versions of our predictor. This means our blueprint should have <span class="math inline">2 * 2 * 2 * 3</span> rows.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fl">2</span><span class="op">*</span><span class="fl">2</span><span class="op">*</span><span class="fl">2</span><span class="op">*</span><span class="fl">3</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">full_pipeline</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
+<p>Our blueprint uses list columns to organize informatino. You can view each list column by using <code>tidyr::unnest(&lt;column name&gt;)</code>. For example, we can look at the filters:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">full_pipeline</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">filters</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 24 × 6</span></span>
+<span><span class="co">#&gt;    decision variables        include1      include2             inclu…¹ models  </span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;           &lt;chr&gt;         &lt;chr&gt;                &lt;chr&gt;   &lt;list&gt;  </span></span>
+<span><span class="co">#&gt;  1 1        &lt;tibble [1 × 1]&gt; include1 == 0 include2 != 3        scale(… &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  2 2        &lt;tibble [1 × 1]&gt; include1 == 0 include2 != 3        scale(… &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  3 3        &lt;tibble [1 × 1]&gt; include1 == 0 include2 != 3        scale(… &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  4 4        &lt;tibble [1 × 1]&gt; include1 == 0 include2 != 3        includ… &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  5 5        &lt;tibble [1 × 1]&gt; include1 == 0 include2 != 3        includ… &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  6 6        &lt;tibble [1 × 1]&gt; include1 == 0 include2 != 3        includ… &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  7 7        &lt;tibble [1 × 1]&gt; include1 == 0 include2 %in% uniqu… scale(… &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  8 8        &lt;tibble [1 × 1]&gt; include1 == 0 include2 %in% uniqu… scale(… &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  9 9        &lt;tibble [1 × 1]&gt; include1 == 0 include2 %in% uniqu… scale(… &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt; 10 10       &lt;tibble [1 × 1]&gt; include1 == 0 include2 %in% uniqu… includ… &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt; # … with 14 more rows, and abbreviated variable name ¹​include3</span></span></code></pre></div>
+<p>Or we could look at the models:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">full_pipeline</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">models</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 24 × 4</span></span>
+<span><span class="co">#&gt;    decision variables        filters          model               </span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;           &lt;list&gt;           &lt;chr&gt;               </span></span>
+<span><span class="co">#&gt;  1 1        &lt;tibble [1 × 1]&gt; &lt;tibble [1 × 3]&gt; lm(dv1 ~ iv1 * mod1)</span></span>
+<span><span class="co">#&gt;  2 2        &lt;tibble [1 × 1]&gt; &lt;tibble [1 × 3]&gt; lm(dv1 ~ iv2 * mod1)</span></span>
+<span><span class="co">#&gt;  3 3        &lt;tibble [1 × 1]&gt; &lt;tibble [1 × 3]&gt; lm(dv1 ~ iv3 * mod1)</span></span>
+<span><span class="co">#&gt;  4 4        &lt;tibble [1 × 1]&gt; &lt;tibble [1 × 3]&gt; lm(dv1 ~ iv1 * mod1)</span></span>
+<span><span class="co">#&gt;  5 5        &lt;tibble [1 × 1]&gt; &lt;tibble [1 × 3]&gt; lm(dv1 ~ iv2 * mod1)</span></span>
+<span><span class="co">#&gt;  6 6        &lt;tibble [1 × 1]&gt; &lt;tibble [1 × 3]&gt; lm(dv1 ~ iv3 * mod1)</span></span>
+<span><span class="co">#&gt;  7 7        &lt;tibble [1 × 1]&gt; &lt;tibble [1 × 3]&gt; lm(dv1 ~ iv1 * mod1)</span></span>
+<span><span class="co">#&gt;  8 8        &lt;tibble [1 × 1]&gt; &lt;tibble [1 × 3]&gt; lm(dv1 ~ iv2 * mod1)</span></span>
+<span><span class="co">#&gt;  9 9        &lt;tibble [1 × 1]&gt; &lt;tibble [1 × 3]&gt; lm(dv1 ~ iv3 * mod1)</span></span>
+<span><span class="co">#&gt; 10 10       &lt;tibble [1 × 1]&gt; &lt;tibble [1 × 3]&gt; lm(dv1 ~ iv1 * mod1)</span></span>
+<span><span class="co">#&gt; # … with 14 more rows</span></span></code></pre></div>
+<p>Notice that, with the <code><a href="https://glue.tidyverse.org/reference/glue.html" class="external-link">glue::glue()</a></code> syntax, different versions of our predictors were inserted appropriately. You can check their correspondence by using <code><a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link">unnest()</a></code> on both the models and variable list columns:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">full_pipeline</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">variables</span>, <span class="va">models</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 24 × 4</span></span>
+<span><span class="co">#&gt;    decision ivs   filters          model               </span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;chr&gt; &lt;list&gt;           &lt;chr&gt;               </span></span>
+<span><span class="co">#&gt;  1 1        iv1   &lt;tibble [1 × 3]&gt; lm(dv1 ~ iv1 * mod1)</span></span>
+<span><span class="co">#&gt;  2 2        iv2   &lt;tibble [1 × 3]&gt; lm(dv1 ~ iv2 * mod1)</span></span>
+<span><span class="co">#&gt;  3 3        iv3   &lt;tibble [1 × 3]&gt; lm(dv1 ~ iv3 * mod1)</span></span>
+<span><span class="co">#&gt;  4 4        iv1   &lt;tibble [1 × 3]&gt; lm(dv1 ~ iv1 * mod1)</span></span>
+<span><span class="co">#&gt;  5 5        iv2   &lt;tibble [1 × 3]&gt; lm(dv1 ~ iv2 * mod1)</span></span>
+<span><span class="co">#&gt;  6 6        iv3   &lt;tibble [1 × 3]&gt; lm(dv1 ~ iv3 * mod1)</span></span>
+<span><span class="co">#&gt;  7 7        iv1   &lt;tibble [1 × 3]&gt; lm(dv1 ~ iv1 * mod1)</span></span>
+<span><span class="co">#&gt;  8 8        iv2   &lt;tibble [1 × 3]&gt; lm(dv1 ~ iv2 * mod1)</span></span>
+<span><span class="co">#&gt;  9 9        iv3   &lt;tibble [1 × 3]&gt; lm(dv1 ~ iv3 * mod1)</span></span>
+<span><span class="co">#&gt; 10 10       iv1   &lt;tibble [1 × 3]&gt; lm(dv1 ~ iv1 * mod1)</span></span>
+<span><span class="co">#&gt; # … with 14 more rows</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
-<h2 id="run-a-multiverse">Run a multiverse<a class="anchor" aria-label="anchor" href="#run-a-multiverse"></a>
+<h2 id="validate-your-blueprint">Validate your blueprint<a class="anchor" aria-label="anchor" href="#validate-your-blueprint"></a>
 </h2>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/run_multiverse.html">run_multiverse</a></span><span class="op">(</span><span class="va">my_full_grid</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,<span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 10 × 9</span></span>
-<span><span class="co">#&gt;    decision variables        filters  preprocess model postprocess data_pipeline</span></span>
-<span><span class="co">#&gt;       &lt;int&gt; &lt;list&gt;           &lt;list&gt;   &lt;list&gt;     &lt;chr&gt; &lt;list&gt;      &lt;list&gt;       </span></span>
-<span><span class="co">#&gt;  1        1 &lt;tibble [1 × 4]&gt; &lt;tibble&gt; &lt;tibble&gt;   lm(d… &lt;tibble&gt;    &lt;tibble&gt;     </span></span>
-<span><span class="co">#&gt;  2        2 &lt;tibble [1 × 4]&gt; &lt;tibble&gt; &lt;tibble&gt;   lm(d… &lt;tibble&gt;    &lt;tibble&gt;     </span></span>
-<span><span class="co">#&gt;  3        3 &lt;tibble [1 × 4]&gt; &lt;tibble&gt; &lt;tibble&gt;   lm(d… &lt;tibble&gt;    &lt;tibble&gt;     </span></span>
-<span><span class="co">#&gt;  4        4 &lt;tibble [1 × 4]&gt; &lt;tibble&gt; &lt;tibble&gt;   lm(d… &lt;tibble&gt;    &lt;tibble&gt;     </span></span>
-<span><span class="co">#&gt;  5        5 &lt;tibble [1 × 4]&gt; &lt;tibble&gt; &lt;tibble&gt;   lm(d… &lt;tibble&gt;    &lt;tibble&gt;     </span></span>
-<span><span class="co">#&gt;  6        6 &lt;tibble [1 × 4]&gt; &lt;tibble&gt; &lt;tibble&gt;   lm(d… &lt;tibble&gt;    &lt;tibble&gt;     </span></span>
-<span><span class="co">#&gt;  7        7 &lt;tibble [1 × 4]&gt; &lt;tibble&gt; &lt;tibble&gt;   lm(d… &lt;tibble&gt;    &lt;tibble&gt;     </span></span>
-<span><span class="co">#&gt;  8        8 &lt;tibble [1 × 4]&gt; &lt;tibble&gt; &lt;tibble&gt;   lm(d… &lt;tibble&gt;    &lt;tibble&gt;     </span></span>
-<span><span class="co">#&gt;  9        9 &lt;tibble [1 × 4]&gt; &lt;tibble&gt; &lt;tibble&gt;   lm(d… &lt;tibble&gt;    &lt;tibble&gt;     </span></span>
-<span><span class="co">#&gt; 10       10 &lt;tibble [1 × 4]&gt; &lt;tibble&gt; &lt;tibble&gt;   lm(d… &lt;tibble&gt;    &lt;tibble&gt;     </span></span>
-<span><span class="co">#&gt; # … with 2 more variables: lm &lt;list&gt;, aov &lt;list&gt;</span></span></code></pre></div>
+<p><code>multitool</code> specification blueprint have a special feature: it captures and generates the code to run individual pipelines.</p>
+<p>A special set of functions with the <code>show_code_*</code> prefix allow you to see the code that will be executed for a single pipeline. For example, we can look at our filtering code for the first decision of our blueprint:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">full_pipeline</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/show_code_filter.html">show_code_filter</a></span><span class="op">(</span>decision_num <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; the_data |&gt; </span></span>
+<span><span class="co">#&gt;   filter(include1 == 0, include2 != 3, scale(include3) &gt; -2.5)</span></span></code></pre></div>
+<p>These functions allow you to generate the relevant code along the analysis pipeline. For example, we can look at our model pipeline for decision 17 using <code>show_code_model(decision_num = 17)</code>:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">full_pipeline</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/show_code_filter.html">show_code_model</a></span><span class="op">(</span>decision_num <span class="op">=</span> <span class="fl">17</span><span class="op">)</span></span>
+<span><span class="co">#&gt; the_data |&gt; </span></span>
+<span><span class="co">#&gt;   filter(include1 %in% unique(include1), include2 != 3, include3 %in% unique(include3)) |&gt; </span></span>
+<span><span class="co">#&gt;   lm(dv1 ~ iv2 * mod1, data = _)</span></span></code></pre></div>
+<p>Setting the <code>copy</code> argument to <code>TRUE</code> allows you to send the code straight to your clipboard. You can paste it into the script or console for testing/editing.</p>
+<p>You can also run individual decisions to test that they work. See below for details about the results.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/run_universe_model.html">run_universe_model</a></span><span class="op">(</span><span class="va">full_pipeline</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 1 × 2</span></span>
+<span><span class="co">#&gt;   decision lm_fitted       </span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;    &lt;list&gt;          </span></span>
+<span><span class="co">#&gt; 1 1        &lt;tibble [1 × 5]&gt;</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="implement-your-blueprint">Implement your blueprint<a class="anchor" aria-label="anchor" href="#implement-your-blueprint"></a>
+</h2>
+<p>Once you have built your full specification blueprint and feel comfortable with how the pipeline is executed, you can implement a full multiverse-style analysis.</p>
+<p>Simply use <code>run_multiverse(&lt;your pipeline object&gt;)</code>:</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/run_multiverse.html">run_multiverse</a></span><span class="op">(</span><span class="va">full_pipeline</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ■■■■■■■■■■■■■■■■■■■■■■■■■ 79% | ETA: 1s</span></span>
+<span><span class="co">#&gt; ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 92% | ETA: 0s</span></span>
+<span><span class="co">#&gt; ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 96% | ETA: 0s</span></span>
+<span></span>
+<span><span class="va">multiverse_results</span></span>
+<span><span class="co">#&gt; # A tibble: 24 × 3</span></span>
+<span><span class="co">#&gt;    decision specifications   lm_fitted       </span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;           &lt;list&gt;          </span></span>
+<span><span class="co">#&gt;  1 1        &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 5]&gt;</span></span>
+<span><span class="co">#&gt;  2 2        &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 5]&gt;</span></span>
+<span><span class="co">#&gt;  3 3        &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 5]&gt;</span></span>
+<span><span class="co">#&gt;  4 4        &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 5]&gt;</span></span>
+<span><span class="co">#&gt;  5 5        &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 5]&gt;</span></span>
+<span><span class="co">#&gt;  6 6        &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 5]&gt;</span></span>
+<span><span class="co">#&gt;  7 7        &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 5]&gt;</span></span>
+<span><span class="co">#&gt;  8 8        &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 5]&gt;</span></span>
+<span><span class="co">#&gt;  9 9        &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 5]&gt;</span></span>
+<span><span class="co">#&gt; 10 10       &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 5]&gt;</span></span>
+<span><span class="co">#&gt; # … with 14 more rows</span></span></code></pre></div>
+<p>The result will be another <code>tibble</code> with various list columns.</p>
+<p>It will always contain a list column named <code>specifications</code>. This contains all the information you generated in your blueprint. Next, there will be one list column per model fitted, labelled with a “_fitted” suffix like so<code>&lt;function name&gt;_fitted</code>.</p>
+<p>Here, we ran a <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm()</a></code> so our results are contained in <code>lm_fitted</code>.</p>
+<div class="section level3">
+<h3 id="unpacking-a-multiverse-analysis">Unpacking a multiverse analysis<a class="anchor" aria-label="anchor" href="#unpacking-a-multiverse-analysis"></a>
+</h3>
+<p>There are two main ways to unpack and examine <code>multitool</code> results. The first is by using <code><a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link">tidyr::unnest()</a></code> (similar to unpacking the specification blueprint earlier).</p>
+<div class="section level4">
+<h4 id="unnest">Unnest<a class="anchor" aria-label="anchor" href="#unnest"></a>
+</h4>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">lm_fitted</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 24 × 7</span></span>
+<span><span class="co">#&gt;    decision specifications   lm_code         lm_tidy  lm_gla…¹ lm_war…² lm_mes…³</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;           &lt;glue&gt;          &lt;list&gt;   &lt;list&gt;   &lt;list&gt;   &lt;list&gt;  </span></span>
+<span><span class="co">#&gt;  1 1        &lt;tibble [1 × 3]&gt; the_data |&gt; fi… &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  2 2        &lt;tibble [1 × 3]&gt; the_data |&gt; fi… &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  3 3        &lt;tibble [1 × 3]&gt; the_data |&gt; fi… &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  4 4        &lt;tibble [1 × 3]&gt; the_data |&gt; fi… &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  5 5        &lt;tibble [1 × 3]&gt; the_data |&gt; fi… &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  6 6        &lt;tibble [1 × 3]&gt; the_data |&gt; fi… &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  7 7        &lt;tibble [1 × 3]&gt; the_data |&gt; fi… &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  8 8        &lt;tibble [1 × 3]&gt; the_data |&gt; fi… &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  9 9        &lt;tibble [1 × 3]&gt; the_data |&gt; fi… &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt; 10 10       &lt;tibble [1 × 3]&gt; the_data |&gt; fi… &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt; # … with 14 more rows, and abbreviated variable names ¹​lm_glance, ²​lm_warnings,</span></span>
+<span><span class="co">#&gt; #   ³​lm_messages</span></span></code></pre></div>
+<p>Inside a <code>&lt;model function&gt;_fitted</code> column (here <code>lm_fitted</code>), <code>multitool</code> gives us 4 columns.</p>
+<p>The first column is always the full code pipeline executed to return that row’s set of results: <code>lm_code</code>. The next are results passed to <code>broom</code> (if <code>tidy</code> and/or <code>glance</code> methods exist). For <code>lm</code>, we have <code>lm_tidy</code> and <code>lm_glance</code>.</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">lm_fitted</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">lm_tidy</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 96 × 11</span></span>
+<span><span class="co">#&gt;    decision specificat…¹ lm_code term  estimate std.e…² stati…³ p.value lm_gla…⁴</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;       &lt;glue&gt;  &lt;chr&gt;    &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;list&gt;  </span></span>
+<span><span class="co">#&gt;  1 1        &lt;tibble&gt;     the_da… (Int…  0.00901  0.0572   0.158  0.875  &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  2 1        &lt;tibble&gt;     the_da… iv1    0.136    0.0582   2.34   0.0200 &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  3 1        &lt;tibble&gt;     the_da… mod1   0.00921  0.0543   0.170  0.865  &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  4 1        &lt;tibble&gt;     the_da… iv1:… -0.00608  0.0539  -0.113  0.910  &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  5 2        &lt;tibble&gt;     the_da… (Int…  0.00909  0.0568   0.160  0.873  &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  6 2        &lt;tibble&gt;     the_da… iv2    0.0579   0.0605   0.959  0.339  &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  7 2        &lt;tibble&gt;     the_da… mod1   0.0203   0.0549   0.370  0.711  &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  8 2        &lt;tibble&gt;     the_da… iv2:… -0.131    0.0549  -2.38   0.0180 &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  9 3        &lt;tibble&gt;     the_da… (Int…  0.00944  0.0578   0.163  0.870  &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt; 10 3        &lt;tibble&gt;     the_da… iv3   -0.00943  0.0596  -0.158  0.874  &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt; # … with 86 more rows, 2 more variables: lm_warnings &lt;list&gt;,</span></span>
+<span><span class="co">#&gt; #   lm_messages &lt;list&gt;, and abbreviated variable names ¹​specifications,</span></span>
+<span><span class="co">#&gt; #   ²​std.error, ³​statistic, ⁴​lm_glance</span></span></code></pre></div>
+<p>The <code>lm_tidy</code> (or <code>&lt;model function&gt;_tidy</code>) column gives us the main results of <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm()</a></code> per decision. These include terms, estimates, standard errors, and p-values. <code>lm_glance</code> (or <code>&lt;model function&gt;_glance</code>) column gives us model fit statistics (among other things):</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">lm_fitted</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">lm_glance</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 24 × 18</span></span>
+<span><span class="co">#&gt;    decision specificat…¹ lm_code lm_tidy  r.squ…² adj.r.…³ sigma stati…⁴ p.value</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;       &lt;glue&gt;  &lt;list&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 1        &lt;tibble&gt;     the_da… &lt;tibble&gt; 1.76e-2  0.00797 0.999  1.82    0.143 </span></span>
+<span><span class="co">#&gt;  2 2        &lt;tibble&gt;     the_da… &lt;tibble&gt; 2.01e-2  0.0105  0.998  2.09    0.102 </span></span>
+<span><span class="co">#&gt;  3 3        &lt;tibble&gt;     the_da… &lt;tibble&gt; 1.30e-4 -0.00970 1.01   0.0132  0.998 </span></span>
+<span><span class="co">#&gt;  4 4        &lt;tibble&gt;     the_da… &lt;tibble&gt; 1.77e-2  0.00815 0.998  1.85    0.138 </span></span>
+<span><span class="co">#&gt;  5 5        &lt;tibble&gt;     the_da… &lt;tibble&gt; 1.98e-2  0.0102  0.997  2.07    0.105 </span></span>
+<span><span class="co">#&gt;  6 6        &lt;tibble&gt;     the_da… &lt;tibble&gt; 2.64e-4 -0.00951 1.01   0.0270  0.994 </span></span>
+<span><span class="co">#&gt;  7 7        &lt;tibble&gt;     the_da… &lt;tibble&gt; 3.44e-3 -0.00319 0.993  0.519   0.669 </span></span>
+<span><span class="co">#&gt;  8 8        &lt;tibble&gt;     the_da… &lt;tibble&gt; 1.44e-2  0.00781 0.987  2.19    0.0883</span></span>
+<span><span class="co">#&gt;  9 9        &lt;tibble&gt;     the_da… &lt;tibble&gt; 1.59e-3 -0.00505 0.994  0.240   0.869 </span></span>
+<span><span class="co">#&gt; 10 10       &lt;tibble&gt;     the_da… &lt;tibble&gt; 3.79e-3 -0.00280 0.992  0.575   0.632 </span></span>
+<span><span class="co">#&gt; # … with 14 more rows, 9 more variables: df &lt;dbl&gt;, logLik &lt;dbl&gt;, AIC &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   BIC &lt;dbl&gt;, deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;,</span></span>
+<span><span class="co">#&gt; #   lm_warnings &lt;list&gt;, lm_messages &lt;list&gt;, and abbreviated variable names</span></span>
+<span><span class="co">#&gt; #   ¹​specifications, ²​r.squared, ³​adj.r.squared, ⁴​statistic</span></span></code></pre></div>
+</div>
+<div class="section level4">
+<h4 id="reveal">Reveal<a class="anchor" aria-label="anchor" href="#reveal"></a>
+</h4>
+<p>I wrote wrappers around the <code><a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link">unnest()</a></code> workflow. The main function is <code><a href="reference/reveal.html">reveal()</a></code>. Pass a multiverse results <code>tibble</code> to <code><a href="reference/reveal.html">reveal()</a></code> and tell it which columns to grab by indicating the column name in the <code>.what</code> argument:</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/reveal.html">reveal</a></span><span class="op">(</span>.what <span class="op">=</span> <span class="va">lm_fitted</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 24 × 7</span></span>
+<span><span class="co">#&gt;    decision specifications   lm_code         lm_tidy  lm_gla…¹ lm_war…² lm_mes…³</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;           &lt;glue&gt;          &lt;list&gt;   &lt;list&gt;   &lt;list&gt;   &lt;list&gt;  </span></span>
+<span><span class="co">#&gt;  1 1        &lt;tibble [1 × 3]&gt; the_data |&gt; fi… &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  2 2        &lt;tibble [1 × 3]&gt; the_data |&gt; fi… &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  3 3        &lt;tibble [1 × 3]&gt; the_data |&gt; fi… &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  4 4        &lt;tibble [1 × 3]&gt; the_data |&gt; fi… &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  5 5        &lt;tibble [1 × 3]&gt; the_data |&gt; fi… &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  6 6        &lt;tibble [1 × 3]&gt; the_data |&gt; fi… &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  7 7        &lt;tibble [1 × 3]&gt; the_data |&gt; fi… &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  8 8        &lt;tibble [1 × 3]&gt; the_data |&gt; fi… &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  9 9        &lt;tibble [1 × 3]&gt; the_data |&gt; fi… &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt; 10 10       &lt;tibble [1 × 3]&gt; the_data |&gt; fi… &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt; &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt; # … with 14 more rows, and abbreviated variable names ¹​lm_glance, ²​lm_warnings,</span></span>
+<span><span class="co">#&gt; #   ³​lm_messages</span></span></code></pre></div>
+<p>If you want to get straight to a tidied result you can specify a sub-list with the <code>.which</code> argument:</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/reveal.html">reveal</a></span><span class="op">(</span>.what <span class="op">=</span> <span class="va">lm_fitted</span>, .which <span class="op">=</span> <span class="va">lm_tidy</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 96 × 7</span></span>
+<span><span class="co">#&gt;    decision specifications   term        estimate std.error statistic p.value</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;           &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 1        &lt;tibble [1 × 3]&gt; (Intercept)  0.00901    0.0572     0.158  0.875 </span></span>
+<span><span class="co">#&gt;  2 1        &lt;tibble [1 × 3]&gt; iv1          0.136      0.0582     2.34   0.0200</span></span>
+<span><span class="co">#&gt;  3 1        &lt;tibble [1 × 3]&gt; mod1         0.00921    0.0543     0.170  0.865 </span></span>
+<span><span class="co">#&gt;  4 1        &lt;tibble [1 × 3]&gt; iv1:mod1    -0.00608    0.0539    -0.113  0.910 </span></span>
+<span><span class="co">#&gt;  5 2        &lt;tibble [1 × 3]&gt; (Intercept)  0.00909    0.0568     0.160  0.873 </span></span>
+<span><span class="co">#&gt;  6 2        &lt;tibble [1 × 3]&gt; iv2          0.0579     0.0605     0.959  0.339 </span></span>
+<span><span class="co">#&gt;  7 2        &lt;tibble [1 × 3]&gt; mod1         0.0203     0.0549     0.370  0.711 </span></span>
+<span><span class="co">#&gt;  8 2        &lt;tibble [1 × 3]&gt; iv2:mod1    -0.131      0.0549    -2.38   0.0180</span></span>
+<span><span class="co">#&gt;  9 3        &lt;tibble [1 × 3]&gt; (Intercept)  0.00944    0.0578     0.163  0.870 </span></span>
+<span><span class="co">#&gt; 10 3        &lt;tibble [1 × 3]&gt; iv3         -0.00943    0.0596    -0.158  0.874 </span></span>
+<span><span class="co">#&gt; # … with 86 more rows</span></span></code></pre></div>
+<p>You can also choose to expand your specification blueprint with <code>.unpack_specs = TRUE</code> to see which decisions produced what result:</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/reveal.html">reveal</a></span><span class="op">(</span>.what <span class="op">=</span> <span class="va">lm_fitted</span>, .which <span class="op">=</span> <span class="va">lm_tidy</span>, .unpack_specs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 96 × 11</span></span>
+<span><span class="co">#&gt;    decision ivs   include1  inclu…¹ inclu…² model term  estimate std.e…³ stati…⁴</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;chr&gt; &lt;chr&gt;     &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;    &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 1        iv1   include1… includ… scale(… lm(d… (Int…  0.00901  0.0572   0.158</span></span>
+<span><span class="co">#&gt;  2 1        iv1   include1… includ… scale(… lm(d… iv1    0.136    0.0582   2.34 </span></span>
+<span><span class="co">#&gt;  3 1        iv1   include1… includ… scale(… lm(d… mod1   0.00921  0.0543   0.170</span></span>
+<span><span class="co">#&gt;  4 1        iv1   include1… includ… scale(… lm(d… iv1:… -0.00608  0.0539  -0.113</span></span>
+<span><span class="co">#&gt;  5 2        iv2   include1… includ… scale(… lm(d… (Int…  0.00909  0.0568   0.160</span></span>
+<span><span class="co">#&gt;  6 2        iv2   include1… includ… scale(… lm(d… iv2    0.0579   0.0605   0.959</span></span>
+<span><span class="co">#&gt;  7 2        iv2   include1… includ… scale(… lm(d… mod1   0.0203   0.0549   0.370</span></span>
+<span><span class="co">#&gt;  8 2        iv2   include1… includ… scale(… lm(d… iv2:… -0.131    0.0549  -2.38 </span></span>
+<span><span class="co">#&gt;  9 3        iv3   include1… includ… scale(… lm(d… (Int…  0.00944  0.0578   0.163</span></span>
+<span><span class="co">#&gt; 10 3        iv3   include1… includ… scale(… lm(d… iv3   -0.00943  0.0596  -0.158</span></span>
+<span><span class="co">#&gt; # … with 86 more rows, 1 more variable: p.value &lt;dbl&gt;, and abbreviated variable</span></span>
+<span><span class="co">#&gt; #   names ¹​include2, ²​include3, ³​std.error, ⁴​statistic</span></span></code></pre></div>
+</div>
+<div class="section level4">
+<h4 id="condense">Condense<a class="anchor" aria-label="anchor" href="#condense"></a>
+</h4>
+<p>Unpacking specifications alongside specific results allows us to examine the effects of our pipeline decisions.</p>
+<p>A powerful way to organize these results is to <code>condense</code> a specific results column, say our predictor regression coefficient, over the entire multiverse. <code><a href="reference/condense.html">condense()</a></code> takes a result column and summarizes it with the <code>.how</code> argument, which takes a list in the form of <code>list(&lt;a name you pick&gt; = &lt;summary function&gt;)</code>.</p>
+<p><code>.how</code> will create a column named like so <code>&lt;column being condsensed&gt;_&lt;summary function name provided&gt;"</code>. For this case, we have <code>estimate_mean</code> and <code>estimate_median</code>.</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/reveal.html">reveal</a></span><span class="op">(</span>.what <span class="op">=</span> <span class="va">lm_fitted</span>, .which <span class="op">=</span> <span class="va">lm_tidy</span>, .unpack_specs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">term</span>, <span class="st">"iv"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/condense.html">condense</a></span><span class="op">(</span><span class="va">estimate</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="va">mean</span>, median <span class="op">=</span> <span class="va">median</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 1 × 2</span></span>
+<span><span class="co">#&gt;   estimate_mean estimate_median</span></span>
+<span><span class="co">#&gt;           &lt;dbl&gt;           &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1     -0.000789         0.00168</span></span></code></pre></div>
+<p>Here, we have filtered our multiverse results to look at our predictors <code>iv*</code> to see what the mean and median effect was (over all combinations of decisions) on our outcome.</p>
+<p>However, we had three versions of our predictor, so combining <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">dplyr::group_by()</a></code> with <code><a href="reference/condense.html">condense()</a></code> might be more informative:</p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/reveal.html">reveal</a></span><span class="op">(</span>.what <span class="op">=</span> <span class="va">lm_fitted</span>, .which <span class="op">=</span> <span class="va">lm_tidy</span>, .unpack_specs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">term</span>, <span class="st">"iv"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">ivs</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/condense.html">condense</a></span><span class="op">(</span><span class="va">estimate</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="va">mean</span>, median <span class="op">=</span> <span class="va">median</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 3 × 3</span></span>
+<span><span class="co">#&gt;   ivs   estimate_mean estimate_median</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;         &lt;dbl&gt;           &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1 iv1          0.0468         0.0351 </span></span>
+<span><span class="co">#&gt; 2 iv2         -0.0391        -0.0397 </span></span>
+<span><span class="co">#&gt; 3 iv3         -0.0100        -0.00870</span></span></code></pre></div>
+<p>If we were interested in all the terms of the model, we can leverage <code>group_by</code> further:</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/reveal.html">reveal</a></span><span class="op">(</span>.what <span class="op">=</span> <span class="va">lm_fitted</span>, .which <span class="op">=</span> <span class="va">lm_tidy</span>, .unpack_specs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">term</span>, <span class="va">ivs</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/condense.html">condense</a></span><span class="op">(</span><span class="va">estimate</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="va">mean</span>, median <span class="op">=</span> <span class="va">median</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 12 × 4</span></span>
+<span><span class="co">#&gt; # Groups:   term [8]</span></span>
+<span><span class="co">#&gt;    term        ivs   estimate_mean estimate_median</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;       &lt;chr&gt;         &lt;dbl&gt;           &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 (Intercept) iv1        -0.00653        -0.00717</span></span>
+<span><span class="co">#&gt;  2 (Intercept) iv2        -0.00746        -0.00790</span></span>
+<span><span class="co">#&gt;  3 (Intercept) iv3        -0.00602        -0.00653</span></span>
+<span><span class="co">#&gt;  4 iv1         iv1         0.0906          0.0878 </span></span>
+<span><span class="co">#&gt;  5 iv1:mod1    iv1         0.00303         0.00380</span></span>
+<span><span class="co">#&gt;  6 iv2         iv2         0.0327          0.0281 </span></span>
+<span><span class="co">#&gt;  7 iv2:mod1    iv2        -0.111          -0.109  </span></span>
+<span><span class="co">#&gt;  8 iv3         iv3        -0.0144         -0.0131 </span></span>
+<span><span class="co">#&gt;  9 iv3:mod1    iv3        -0.00568        -0.00342</span></span>
+<span><span class="co">#&gt; 10 mod1        iv1         0.00396         0.00300</span></span>
+<span><span class="co">#&gt; 11 mod1        iv2         0.0110          0.0105 </span></span>
+<span><span class="co">#&gt; 12 mod1        iv3        -0.00289        -0.00344</span></span></code></pre></div>
+</div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="learning-more">Learning more<a class="anchor" aria-label="anchor" href="#learning-more"></a>
+</h2>
+<p>There are many other features of <code>multitool</code>, such as including pre-processing steps and/or post-processing to your blueprint. You can also conduct multiverse-style descriptive analyses or measurement analyses.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">
