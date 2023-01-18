@@ -833,8 +833,6 @@ expand_decisions <- function(.grid){
     }) |>
     purrr::flatten()
 
-
-
   full_grid <-
     .grid |>
     dplyr::group_split(type) |>

@@ -45,13 +45,13 @@ the_multiverse <- run_multiverse(full_pipeline[1:10,])
 the_multiverse
 
 ## Show formatted code and copy ----
-show_code_filter(full_pipeline, decision_num = 120)
-show_code_preprocess(full_pipeline, decision_num = 120)
-show_code_model(full_pipeline, decision_num = 120)
-show_code_postprocess(full_pipeline, decision_num = 120)
-show_code_summary_stats(full_pipeline, decision_num = 120)
-show_code_corrs(full_pipeline, decision_num = 120)
-show_code_cron_alpha(full_pipeline, decision_num = 120)
+show_code_filter(full_pipeline, decision_num = 12)
+show_code_preprocess(full_pipeline, decision_num = 12)
+show_code_model(full_pipeline, decision_num = 12)
+show_code_postprocess(full_pipeline, decision_num = 12)
+show_code_summary_stats(full_pipeline, decision_num = 12)
+show_code_corrs(full_pipeline, decision_num = 12)
+show_code_cron_alpha(full_pipeline, decision_num = 12)
 
 ## Run a single decision set ----
 run_universe_model(full_pipeline, 120)

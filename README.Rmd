@@ -1,5 +1,6 @@
 ---
 output: github_document
+always_allow_html: yes
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -9,7 +10,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
-  out.width = "100%"
+  out.width = "100%",
+  asciicast_theme = "readme"
 )
 ```
 
@@ -20,23 +22,33 @@ knitr::opts_chunk$set(
 [![CRAN status](https://www.r-pkg.org/badges/version/multitool)](https://CRAN.R-project.org/package=multitool)
 <!-- badges: end -->
 
-The goal of multitool is to provide a set of tools for designing and running multiverse-style analyses. There are other packages that accomplish this goal well (e.g., specr, multiverse), but I've found navigating the multiverse can be a tricky. My goal with this package is to create an incremental workflow for slowly building up, keeping track, and unpacking multiverse analyses and results.
+The goal of `multitool` is to provide a set of tools for designing and running multiverse-style analyses. There are other packages that accomplish this goal well (e.g., `specr`, `multiverse`), but I've found navigating the multiverse can be a tricky. 
 
-multitool was designed to help users take a single use case (e.g., a single analysis pipeline) and expand this workflow to include alternative versions. For example, take some data, remove outliers, transform variables, pick a model, do a post-hoc analysis, and plot the results. The functions were designed to play nice with the tidyverse and require using the base R pipe (see below). This makes it easy to quickly convert a single analysis into a multiverse analysis, assuming you know the relevant alternatives.
+My goal with this package is to create an incremental workflow for slowly building up, keeping track of, and unpacking multiverse analyses and results.
 
-Our vision of a multiverse workflow contains three parts. 
+I designed `multitool` to help users take a single use case (e.g., a single analysis pipeline) and expand it into a workflow to include alternative versions of the same analysis. 
 
-1. **Base data:** original data set waiting to processed further
-2. **Decision grid:** a multiverse blueprint/map/recipe (or whatever metaphor you like). These are the instructions for what to do.
-3. **Multiverse results:** a table of results after executing the decision grid over the base data.
+For example, imagine you would like to take some data, remove outliers, transform variables, run a linear model, do a post-hoc analysis, and plot the results. `multitool` can take theses tasks and transform them into a *specification grid*, which provides instructions for running your analysis pipeline.
 
-A defining feature of multitool is that it saves intermediate code, rather than objects or data. This allows the user to grab the *code that produces a result* and inspect it for accuracy, errors, or for simply peace of mind. By quickly grabbing code, the user can iterate between creating their decision grid and checking that the code works as intended.
+The functions were designed to play nice with the `tidyverse` and require using the base R pipe (see below). This makes it easy to quickly convert a single analysis into a multiverse analysis.
 
-Finally, multitool allows the user tp model data however they'd like but we also extended the package to allow for descriptive, correlation, and reliability analysis alongside a particular model.
+## Basic components
+
+My vision of a multiverse workflow contains three parts. 
+
+1. **Base data:** original dataset waiting for further processing
+2. **Decision grid:** (also termed specification grid) a blueprint/map/recipe. These are the instructions for what to do.
+3. **Multiverse results:** a table of results after feeding the base data to the blueprint.
+
+A defining feature of `multitool` is that it saves intermediate code. This allows the user to grab the *code that produces a result* and inspect it for accuracy, errors, or simpluy for peace of mind. By quickly grabbing code, the user can iterate between creating their blueprint and checking that the code works as intended.
+
+`multitool` allows the user to model data however they'd like. The user is responsible for loading the relevant modeling packages. Regardless of your model choice,  `multitool` will capture your code and build a pipeline. 
+
+Finally, multiverse analyses were originally intended to look at how model parameters shift as a function of arbitrary analysis decisions. However, any computation might change depending on how you slice and dice the data. For this reason, I also extended the package to allow for the computations of descriptive, correlation, and reliability analysis alongside a particular modelling pipeline. 
 
 ## Installation
 
-You can install the development version of multitool from [GitHub](https://github.com/) with:
+You can install the development version of `multitool` from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
@@ -45,12 +57,18 @@ devtools::install_github("ethan-young/multitool")
 
 ## Example
 
-```{r}
+```{r message=FALSE}
 library(tidyverse)
 library(multitool)
 ```
 
 ## Simulate some data
+
+Image we have some data with several predictor variables, moderators, covariates, and dependent measures. We want to know if our predictors (`ivs`) interact with our moderators (`mods`) to predict the outcome (`dvs`). 
+
+But we have three measures of our predictor, three measures of our moderator, and two versions of our outcome. Our predictors are different measures of the same construct and our moderators tap the same construct.
+
+In addition, because we collected messy data from the real world (not really but let's pretend), we have some idea of exclusions we might need to make (e.g., `include1`, `include2`, `include3`). 
 
 ```{r data}
 the_data <-
@@ -72,83 +90,302 @@ the_data <-
   )
 ```
 
-## Create a variable grid
+## Create a blueprint
 
-```{r filter_grid}
-my_var_grid <-
-  create_var_grid(
-    .df = the_data,
-    iv  = c(iv1, iv2, iv3),
-    mod = c(mod1, mod2, mod3),
-    dv  = c(dv1, dv2),
-    cov = c(cov1, cov2)
+Say we don't know much about this new and exciting area of research.
+
+We want to maximize our knowledge but we also want to be systematic. One approach would be to specify a reasonable analysis pipeline. Something that looks like the following:
+
+```{r eval=FALSE}
+# Filter out exclusions
+filtered_data <- 
+  the_data |> 
+  filter(
+    include1 == 0,           # --
+    include2 != 3,           # Exclusion criteria
+    include2 != 2,           # 
+    scale(include3) > -2.5   # --
+  )
+
+# Preprocess the data
+preprocessed <- 
+  filtered_data |> 
+  mutate(
+    iv1 = as.numeric(scale(iv1)), # standardize predictor
+    mod1 = as.numeric(scale(mod1)) # standardize moderator
+  )
+
+# Model the data
+my_model <- lm(dv1 ~ iv1 * mod1, data = preprossed_data)
+
+# Post-process the data (e.g., for plotting)
+my_model_points <- 
+  predict(
+    my_model, 
+    newdata = expand_grid(iv1 = c(-1,1), mod1 = c(-1,1)), 
+    interval = "confidence"
   )
 ```
 
-## Create filter grid
+But what if there are valid alternative alternatives to this pipeline? 
 
-```{r variable_grid}
-my_filter_grid <-
-  create_filter_grid(
-    .df = the_data,
-    include1 == 0,
-    include2 != 3,
-    include2 != 2,
-    scale(include3) > -2.5
-  )
+For example, using `iv2` instead of `iv1` or only using two exclusion criteria instead of three? 
+
+A sensible approach would be to copy the code above, paste it, and edit with different decisions. However, this quickly become tedious. It adds many lines of code, many new objects, and is difficult to keep track of in a systematic way. 
+
+Enter `multitool`. 
+
+With `multitool`, the above analysis pipeline can be transformed into a grid -- a specification blueprint -- for exploring all combinations of sensible data decisions in a pipeline. It was designed to leverage already written code (e.g., the `filter` statement above) to create a multiverse of data analysis pipelines. 
+
+### Filtering specifications
+
+Our example above has three exclusion criteria. If we don't know which are important, for example, because they are based on arbitrary 'rules of thumb' (that may or may not have inherent wisdom) or we don't know if including/excluding these cases is valid, we can generate all combinations:
+
+```{r filters}
+the_data |> 
+  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5)
 ```
 
-## Create model grid
+The output above is a simple `tibble` (i.e., `data.frame`) containing three columns. Each row is a possible filter: the `type` column refers to the type of blueprint specification (see below for types other than filters), the `group` refers to the variable in the base data frame (in our case `the_data`) for which the filter applies, and the `code` column contains the code needed to execute the filter.
 
-```{r model_grid}
-my_model_grid <-
-  create_model_grid(
-    lm({dv} ~ {iv} * {mod}),
-    lm({dv} ~ {iv} * {mod} + {cov})
-  )
+For filtering decisions (e.g., exclusion criteria), a 'do nothing' alternative is always generated. 
+
+For example, perhaps some observations belong to a subgroup, `include1 == 1`. We may or may not have good reason to exclude these cases (this depends on the specific situation). 
+
+But imagine that we don't know if we should include them or not. When `include1 == 1` is added to `add_filters()`, the 'do nothing' alternative `include1 %in% unique(include1)` is automatically generated so you can compare including versus excluding cases based on a criterion.
+
+### Adding alternative analysis variables
+
+Most multiverse-style analyses explore a range of exclusion criteria and their alternatives. However, sometimes alternative versions of a variable are also included.
+
+In the social sciences, it is fairly common to have many measures of roughly the same construct (i.e., measured variable). For example, a happiness researcher might measure positive mood, life satisfaction, and/or a single item measuring happiness (e.g., 'how happy do your feel?').
+
+If you want to explore the output of your pipeline with differing versions of a variable, you can use 'add_variables()'. 
+
+```{r variables}
+the_data |>
+  add_variables(var_group = "ivs", iv1, iv2, iv3)
 ```
 
-## Add arbitrary code
+The output above generates the same `tibble` as `add_filters()`. Each row is a particular decision to use a particular variable in your pipeline. 
+
+In contrast to filter, however, you need to tell `add_variables()` what to call each set of variables with the `var_group` argument. This is how `multitool` knows that each variable name in the `code` column is a different alternative of a larger set. 
+
+Here, `var_group = "ivs"` indicates that `iv1, iv2, iv3` are all different versions of `ivs`. I used "ivs" as way of indicating to myself that these are alternative versions of my main independent variable.
+
+### Building up the blueprint
+
+You can harness the real power of `multitool` by piping specification statements. For example, perhaps we want to explore our exclusion criteria alternatives across different versions of our predictor variable. We can simply pipe new blueprint specifications into each other like so:
+
+```{r building}
+the_data |>
+  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |> 
+  add_variables(var_group = "ivs", iv1, iv2, iv3)
+```
+
+Notice that we now have a specification blueprint with both exclusion alternatives and variable alternatives.
+
+### Adding a model
+
+The whole point of building a specification blueprint is to eventually feed it to a model and examine the results. 
+
+You can add a model to your blueprint in a similar fashion to adding filtering decisions or variable alternatives by using `add_model()`. 
+
+I designed `add_model()` so the user can simply paste a model function. For example, our call to `lm()` can be simply pasted into `add_model()`:
+
+```{r model}
+the_data |>
+  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |> 
+  add_variables(var_group = "ivs", iv1, iv2, iv3) |> 
+  add_model(lm(dv1 ~ iv1 * mod1))
+```
+
+Above, the model is completely unquoted. It also has no `data` argument. This is intentional; `multitool` is tracking the base data set along the way (so you don't have to). 
+
+Note that you can still quote the model formula, if that is more your style.
 
 ```{r}
-#Add pre-processing code before model is fit (but after filtering)
-my_preprocess <-
-  create_preprocess(
-    mutate({iv} := scale({iv}) |> as.numeric(), {mod} := scale({mod}) |> as.numeric())
-  )
+the_data |>
+  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |> 
+  add_variables(var_group = "ivs", iv1, iv2, iv3) |> 
+  add_model("lm(dv1 ~ iv1 * mod1)")
 ```
+
+To make sure your `add_variables()` works properly, `add_model()` was designed to interpret `glue::glue()` syntax. For example:
 
 ```{r}
-# Code to execute after analysis is fit
-my_postprocess <-
-  create_postprocess(
-    aov()
-  )
+the_data |>
+  add_filters(include1 == 0, include2 != 3, include2 != 2, scale(include3) > -2.5) |> 
+  add_variables(var_group = "ivs", iv1, iv2, iv3) |> 
+  add_model(lm(dv1 ~ {ivs} * mod1))
 ```
 
-## Combine all grids together
+This allows `multitool` to insert the correct version of each variable specified in a `add_variables()` statement. Make sure to use embrace the variable with the `var_group` name from `add_variables`. 
 
-```{r combine_grids}
-my_full_grid <-
-  combine_all_grids(
-    the_data,
-    my_var_grid,
-    my_filter_grid,
-    my_model_grid,
-    my_preprocess,
-    my_postprocess
-  )
+Here, our model `glue::glue()` syntax is `lm(dv1 ~ {ivs} * mod1)`, where `{ivs}` tells `multitool` to insert the current version of the `ivs` into the model.
+
+### Finalizing the specification blueprint
+
+The final step in making your blueprint is expanding all your specifications into all possible combinations. You can do this by calling `expand_decisions()` at the end of your blueprint pipeline:
+
+```{r expand}
+full_pipeline <- 
+  the_data |>
+  add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |> 
+  add_variables(var_group = "ivs", iv1, iv2, iv3) |> 
+  add_model(lm(dv1 ~ {ivs} * mod1)) |> 
+  expand_decisions()
 ```
 
-## Run a universe
+The result is an expanded `tibble` with 1 row per unique decision and columns for each major blueprint category.
+
+In our example, we have alternative variables, filters, and a model to run. Note that we have 3 filtering decisions (each with two combinations) and 3 versions of our predictor. This means our blueprint should have $2*2*2*3$ rows.
 
 ```{r}
-run_universe(my_full_grid, 1)
+2*2*2*3 == nrow(full_pipeline)
 ```
 
-## Run a multiverse
+Our blueprint uses list columns to organize informatino. You can view each list column by using `tidyr::unnest(<column name>)`. For example, we can look at the filters:
 
 ```{r}
-run_multiverse(my_full_grid[1:10,])
+full_pipeline |> unnest(filters)
 ```
 
+Or we could look at the models:
+
+```{r}
+full_pipeline |> unnest(models)
+```
+
+Notice that, with the `glue::glue()` syntax, different versions of our predictors were inserted appropriately. You can check their correspondence by using `unnest()` on both the models and variable list columns:
+
+```{r}
+full_pipeline |> unnest(c(variables, models))
+```
+
+## Validate your blueprint
+
+`multitool` specification blueprint have a special feature: it captures and generates the code to run individual pipelines.
+
+A special set of functions with the `show_code_*` prefix allow you to see the code that will be executed for a single pipeline. For example, we can look at our filtering code for the first decision of our blueprint:
+
+```{r}
+full_pipeline |> show_code_filter(decision_num = 1)
+```
+
+These functions allow you to generate the relevant code along the analysis pipeline. For example, we can look at our model pipeline for decision 17 using `show_code_model(decision_num = 17)`:
+
+```{r}
+full_pipeline |> show_code_model(decision_num = 17)
+```
+
+Setting the `copy` argument to `TRUE` allows you to send the code straight to your clipboard. You can paste it into the script or console for testing/editing.
+
+You can also run individual decisions to test that they work. See below for details about the results. 
+
+```{r}
+run_universe_model(full_pipeline, 1)
+```
+
+## Implement your blueprint
+
+Once you have built your full specification blueprint and feel comfortable with how the pipeline is executed, you can implement a full multiverse-style analysis. 
+
+Simply use `run_multiverse(<your pipeline object>)`:
+
+```{r multiverse}
+multiverse_results <- run_multiverse(full_pipeline)
+
+multiverse_results
+```
+
+The result will be another `tibble` with various list columns. 
+
+It will always contain a list column named `specifications`. This contains all the information you generated in your blueprint. Next, there will be one list column per model fitted, labelled with a "_fitted" suffix like so`<function name>_fitted`. 
+
+Here, we ran a `lm()` so our results are contained in `lm_fitted`.
+
+### Unpacking a multiverse analysis
+
+There are two main ways to unpack and examine `multitool` results. The first is by using `tidyr::unnest()` (similar to unpacking the specification blueprint earlier).
+
+#### Unnest
+
+```{r unnest}
+multiverse_results |> unnest(lm_fitted)
+```
+
+Inside a `<model function>_fitted` column (here `lm_fitted`), `multitool` gives us 4 columns. 
+
+The first column is always the full code pipeline executed to return that row's set of results: `lm_code`. The next are results passed to `broom` (if `tidy` and/or `glance` methods exist). For `lm`, we have `lm_tidy` and `lm_glance`.
+
+```{r tidy}
+multiverse_results |> unnest(lm_fitted) |> unnest(lm_tidy)
+```
+
+The `lm_tidy` (or `<model function>_tidy`) column gives us the main results of `lm()` per decision. These include terms, estimates, standard errors, and p-values. `lm_glance` (or `<model function>_glance`) column gives us model fit statistics (among other things):
+
+```{r glance}
+multiverse_results |> unnest(lm_fitted) |> unnest(lm_glance)
+```
+
+#### Reveal
+
+I wrote wrappers around the `unnest()` workflow. The main function is `reveal()`. Pass a multiverse results `tibble` to `reveal()` and tell it which columns to grab by indicating the column name in the `.what` argument:
+
+```{r reveal}
+multiverse_results |> reveal(.what = lm_fitted)
+```
+
+If you want to get straight to a tidied result you can specify a sub-list with the `.which` argument:
+
+```{r which}
+multiverse_results |> reveal(.what = lm_fitted, .which = lm_tidy)
+```
+
+You can also choose to expand your specification blueprint with `.unpack_specs = TRUE` to see which decisions produced what result:
+
+```{r unpack-specs}
+multiverse_results |> 
+  reveal(.what = lm_fitted, .which = lm_tidy, .unpack_specs = TRUE)
+```
+
+#### Condense
+
+Unpacking specifications alongside specific results allows us to examine the effects of our pipeline decisions. 
+
+A powerful way to organize these results is to `condense` a specific results column, say our predictor regression coefficient, over the entire multiverse. `condense()` takes a result column and summarizes it with the `.how` argument, which takes a list in the form of `list(<a name you pick> = <summary function>)`.
+
+`.how` will create a column named like so `<column being condsensed>_<summary function name provided>"`. For this case, we have `estimate_mean` and `estimate_median`.
+
+```{r condense}
+multiverse_results |> 
+  reveal(.what = lm_fitted, .which = lm_tidy, .unpack_specs = TRUE) |> 
+  filter(str_detect(term, "iv")) |> 
+  condense(estimate, list(mean = mean, median = median))
+```
+
+Here, we have filtered our multiverse results to look at our predictors `iv*` to see what the mean and median effect was (over all combinations of decisions) on our outcome. 
+
+However, we had three versions of our predictor, so combining `dplyr::group_by()` with `condense()` might be more informative:
+
+```{r group_by-condense1}
+multiverse_results |> 
+  reveal(.what = lm_fitted, .which = lm_tidy, .unpack_specs = TRUE) |> 
+  filter(str_detect(term, "iv")) |>
+  group_by(ivs) |> 
+  condense(estimate, list(mean = mean, median = median))
+```
+
+If we were interested in all the terms of the model, we can leverage `group_by` further:
+
+```{r group_by-condense2}
+multiverse_results |> 
+  reveal(.what = lm_fitted, .which = lm_tidy, .unpack_specs = TRUE) |> 
+  group_by(term, ivs) |> 
+  condense(estimate, list(mean = mean, median = median))
+```
+
+## Learning more
+
+There are many other features of `multitool`, such as including pre-processing steps and/or post-processing to your blueprint. You can also conduct multiverse-style descriptive analyses or measurement analyses.
