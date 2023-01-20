@@ -423,20 +423,22 @@
 <p>Simply use <code>run_multiverse(&lt;your pipeline object&gt;)</code>:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/run_multiverse.html">run_multiverse</a></span><span class="op">(</span><span class="va">full_pipeline</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ■■■■■■■■■■■■■■ 44% | ETA: 3s ■■■■■■■■■■■■■■■</span></span>
-<span><span class="co">#&gt; 48% | ETA: 3s ■■■■■■■■■■■■■■■■■ 52% |</span></span>
-<span><span class="co">#&gt; ETA: 3s ■■■■■■■■■■■■■■■■■■ 56% | ETA:</span></span>
-<span><span class="co">#&gt; 2s ■■■■■■■■■■■■■■■■■■■ 60% | ETA: 2s</span></span>
-<span><span class="co">#&gt; ■■■■■■■■■■■■■■■■■■■■ 65% | ETA: 2s</span></span>
+<span><span class="co">#&gt; ■■■■■■■■■■■■■ 40% | ETA: 3s ■■■■■■■■■■■■■■■</span></span>
+<span><span class="co">#&gt; 46% | ETA: 3s ■■■■■■■■■■■■■■■ 48% |</span></span>
+<span><span class="co">#&gt; ETA: 3s ■■■■■■■■■■■■■■■■■ 52% | ETA:</span></span>
+<span><span class="co">#&gt; 3s ■■■■■■■■■■■■■■■■■■ 56% | ETA: 2s</span></span>
+<span><span class="co">#&gt; ■■■■■■■■■■■■■■■■■■■ 60% | ETA: 2s</span></span>
+<span><span class="co">#&gt; ■■■■■■■■■■■■■■■■■■■■ 62% | ETA: 2s</span></span>
 <span><span class="co">#&gt; ■■■■■■■■■■■■■■■■■■■■■ 67% | ETA: 2s</span></span>
 <span><span class="co">#&gt; ■■■■■■■■■■■■■■■■■■■■■■ 71% | ETA: 2s</span></span>
 <span><span class="co">#&gt; ■■■■■■■■■■■■■■■■■■■■■■■ 75% | ETA: 1s</span></span>
 <span><span class="co">#&gt; ■■■■■■■■■■■■■■■■■■■■■■■■ 77% | ETA: 1s</span></span>
 <span><span class="co">#&gt; ■■■■■■■■■■■■■■■■■■■■■■■■■ 81% | ETA: 1s</span></span>
 <span><span class="co">#&gt; ■■■■■■■■■■■■■■■■■■■■■■■■■■■ 85% | ETA: 1s</span></span>
-<span><span class="co">#&gt; ■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 90% | ETA: 1s</span></span>
+<span><span class="co">#&gt; ■■■■■■■■■■■■■■■■■■■■■■■■■■■ 88% | ETA: 1s</span></span>
 <span><span class="co">#&gt; ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 92% | ETA: 0s</span></span>
 <span><span class="co">#&gt; ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 96% | ETA: 0s</span></span>
+<span><span class="co">#&gt; ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 98% | ETA: 0s</span></span>
 <span></span>
 <span><span class="va">multiverse_results</span></span>
 <span><span class="co">#&gt; # A tibble: 48 × 3</span></span>
@@ -486,37 +488,37 @@
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">lm_fitted</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">lm_tidy</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 192 × 11</span></span>
-<span><span class="co">#&gt;    decision specificat…¹ lm_code term  estimate std.e…² stati…³ p.value lm_gla…⁴</span></span>
-<span><span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;       &lt;glue&gt;  &lt;chr&gt;    &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;list&gt;  </span></span>
-<span><span class="co">#&gt;  1 1        &lt;tibble&gt;     the_da… (Int…  1.17e-2  0.0642  0.181    0.856 &lt;tibble&gt;</span></span>
-<span><span class="co">#&gt;  2 1        &lt;tibble&gt;     the_da… iv1    6.87e-4  0.0668  0.0103   0.992 &lt;tibble&gt;</span></span>
-<span><span class="co">#&gt;  3 1        &lt;tibble&gt;     the_da… mod    1.33e-3  0.0637  0.0209   0.983 &lt;tibble&gt;</span></span>
-<span><span class="co">#&gt;  4 1        &lt;tibble&gt;     the_da… iv1:…  4.48e-2  0.0675  0.664    0.507 &lt;tibble&gt;</span></span>
-<span><span class="co">#&gt;  5 2        &lt;tibble&gt;     the_da… (Int… -4.44e-2  0.0637 -0.696    0.487 &lt;tibble&gt;</span></span>
-<span><span class="co">#&gt;  6 2        &lt;tibble&gt;     the_da… iv1    6.74e-3  0.0663  0.102    0.919 &lt;tibble&gt;</span></span>
-<span><span class="co">#&gt;  7 2        &lt;tibble&gt;     the_da… mod   -1.54e-2  0.0632 -0.244    0.807 &lt;tibble&gt;</span></span>
-<span><span class="co">#&gt;  8 2        &lt;tibble&gt;     the_da… iv1:…  1.70e-2  0.0670  0.255    0.799 &lt;tibble&gt;</span></span>
-<span><span class="co">#&gt;  9 3        &lt;tibble&gt;     the_da… (Int…  2.24e-2  0.0633  0.354    0.724 &lt;tibble&gt;</span></span>
-<span><span class="co">#&gt; 10 3        &lt;tibble&gt;     the_da… iv2    1.76e-2  0.0654  0.269    0.788 &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;    decision specificati…¹ lm_code term  estim…² std.e…³ stati…⁴ p.value lm_gla…⁵</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;        &lt;glue&gt;  &lt;chr&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;list&gt;  </span></span>
+<span><span class="co">#&gt;  1 1        &lt;tibble&gt;      the_da… (Int…  0.0611  0.0562   1.09   0.279  &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  2 1        &lt;tibble&gt;      the_da… iv1    0.0453  0.0536   0.844  0.399  &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  3 1        &lt;tibble&gt;      the_da… mod    0.101   0.0581   1.75   0.0819 &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  4 1        &lt;tibble&gt;      the_da… iv1:…  0.0469  0.0580   0.807  0.420  &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  5 2        &lt;tibble&gt;      the_da… (Int…  0.0706  0.0588   1.20   0.231  &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  6 2        &lt;tibble&gt;      the_da… iv1   -0.0267  0.0561  -0.475  0.635  &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  7 2        &lt;tibble&gt;      the_da… mod   -0.0465  0.0608  -0.765  0.445  &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  8 2        &lt;tibble&gt;      the_da… iv1:…  0.0114  0.0607   0.188  0.851  &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt;  9 3        &lt;tibble&gt;      the_da… (Int…  0.0567  0.0565   1.00   0.316  &lt;tibble&gt;</span></span>
+<span><span class="co">#&gt; 10 3        &lt;tibble&gt;      the_da… iv2   -0.0230  0.0572  -0.402  0.688  &lt;tibble&gt;</span></span>
 <span><span class="co">#&gt; # … with 182 more rows, 2 more variables: lm_warnings &lt;list&gt;,</span></span>
 <span><span class="co">#&gt; #   lm_messages &lt;list&gt;, and abbreviated variable names ¹​specifications,</span></span>
-<span><span class="co">#&gt; #   ²​std.error, ³​statistic, ⁴​lm_glance</span></span></code></pre></div>
+<span><span class="co">#&gt; #   ²​estimate, ³​std.error, ⁴​statistic, ⁵​lm_glance</span></span></code></pre></div>
 <p>The <code>lm_tidy</code> (or <code>&lt;model function&gt;_tidy</code>) column gives us the main results of <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm()</a></code> per decision. These include terms, estimates, standard errors, and p-values. <code>lm_glance</code> (or <code>&lt;model function&gt;_glance</code>) column gives us model fit statistics (among other things):</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">lm_fitted</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">lm_glance</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 48 × 18</span></span>
 <span><span class="co">#&gt;    decision specificat…¹ lm_code lm_tidy  r.squ…² adj.r.…³ sigma stati…⁴ p.value</span></span>
 <span><span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;       &lt;glue&gt;  &lt;list&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1 1        &lt;tibble&gt;     the_da… &lt;tibble&gt; 1.62e-3 -0.00923  1.06 0.150     0.930</span></span>
-<span><span class="co">#&gt;  2 2        &lt;tibble&gt;     the_da… &lt;tibble&gt; 5.13e-4 -0.0104   1.05 0.0472    0.986</span></span>
-<span><span class="co">#&gt;  3 3        &lt;tibble&gt;     the_da… &lt;tibble&gt; 7.75e-3 -0.00304  1.06 0.718     0.542</span></span>
-<span><span class="co">#&gt;  4 4        &lt;tibble&gt;     the_da… &lt;tibble&gt; 2.00e-3 -0.00885  1.05 0.184     0.907</span></span>
-<span><span class="co">#&gt;  5 5        &lt;tibble&gt;     the_da… &lt;tibble&gt; 7.06e-5 -0.0108   1.06 0.00650   0.999</span></span>
-<span><span class="co">#&gt;  6 6        &lt;tibble&gt;     the_da… &lt;tibble&gt; 1.07e-3 -0.00979  1.05 0.0983    0.961</span></span>
-<span><span class="co">#&gt;  7 7        &lt;tibble&gt;     the_da… &lt;tibble&gt; 1.85e-3 -0.00892  1.06 0.172     0.916</span></span>
-<span><span class="co">#&gt;  8 8        &lt;tibble&gt;     the_da… &lt;tibble&gt; 4.72e-4 -0.0103   1.05 0.0438    0.988</span></span>
-<span><span class="co">#&gt;  9 9        &lt;tibble&gt;     the_da… &lt;tibble&gt; 7.92e-3 -0.00278  1.06 0.740     0.529</span></span>
-<span><span class="co">#&gt; 10 10       &lt;tibble&gt;     the_da… &lt;tibble&gt; 1.84e-3 -0.00893  1.05 0.171     0.916</span></span>
+<span><span class="co">#&gt;  1 1        &lt;tibble&gt;     the_da… &lt;tibble&gt; 0.0146   4.51e-3 0.962   1.45   0.229 </span></span>
+<span><span class="co">#&gt;  2 2        &lt;tibble&gt;     the_da… &lt;tibble&gt; 0.00272 -7.46e-3 1.01    0.267  0.849 </span></span>
+<span><span class="co">#&gt;  3 3        &lt;tibble&gt;     the_da… &lt;tibble&gt; 0.0104   2.67e-4 0.964   1.03   0.381 </span></span>
+<span><span class="co">#&gt;  4 4        &lt;tibble&gt;     the_da… &lt;tibble&gt; 0.00353 -6.64e-3 1.01    0.347  0.791 </span></span>
+<span><span class="co">#&gt;  5 5        &lt;tibble&gt;     the_da… &lt;tibble&gt; 0.0326   2.27e-2 0.953   3.30   0.0207</span></span>
+<span><span class="co">#&gt;  6 6        &lt;tibble&gt;     the_da… &lt;tibble&gt; 0.0105   3.62e-4 1.00    1.04   0.377 </span></span>
+<span><span class="co">#&gt;  7 7        &lt;tibble&gt;     the_da… &lt;tibble&gt; 0.0137   3.75e-3 0.962   1.38   0.250 </span></span>
+<span><span class="co">#&gt;  8 8        &lt;tibble&gt;     the_da… &lt;tibble&gt; 0.00275 -7.35e-3 1.01    0.272  0.845 </span></span>
+<span><span class="co">#&gt;  9 9        &lt;tibble&gt;     the_da… &lt;tibble&gt; 0.0105   4.66e-4 0.963   1.05   0.372 </span></span>
+<span><span class="co">#&gt; 10 10       &lt;tibble&gt;     the_da… &lt;tibble&gt; 0.00382 -6.28e-3 1.01    0.378  0.769 </span></span>
 <span><span class="co">#&gt; # … with 38 more rows, 9 more variables: df &lt;dbl&gt;, logLik &lt;dbl&gt;, AIC &lt;dbl&gt;,</span></span>
 <span><span class="co">#&gt; #   BIC &lt;dbl&gt;, deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;,</span></span>
 <span><span class="co">#&gt; #   lm_warnings &lt;list&gt;, lm_messages &lt;list&gt;, and abbreviated variable names</span></span>
@@ -547,38 +549,38 @@
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/reveal.html">reveal</a></span><span class="op">(</span>.what <span class="op">=</span> <span class="va">lm_fitted</span>, .which <span class="op">=</span> <span class="va">lm_tidy</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 192 × 7</span></span>
-<span><span class="co">#&gt;    decision specifications   term         estimate std.error statistic p.value</span></span>
-<span><span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;           &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1 1        &lt;tibble [1 × 3]&gt; (Intercept)  0.0117      0.0642    0.181    0.856</span></span>
-<span><span class="co">#&gt;  2 1        &lt;tibble [1 × 3]&gt; iv1          0.000687    0.0668    0.0103   0.992</span></span>
-<span><span class="co">#&gt;  3 1        &lt;tibble [1 × 3]&gt; mod          0.00133     0.0637    0.0209   0.983</span></span>
-<span><span class="co">#&gt;  4 1        &lt;tibble [1 × 3]&gt; iv1:mod      0.0448      0.0675    0.664    0.507</span></span>
-<span><span class="co">#&gt;  5 2        &lt;tibble [1 × 3]&gt; (Intercept) -0.0444      0.0637   -0.696    0.487</span></span>
-<span><span class="co">#&gt;  6 2        &lt;tibble [1 × 3]&gt; iv1          0.00674     0.0663    0.102    0.919</span></span>
-<span><span class="co">#&gt;  7 2        &lt;tibble [1 × 3]&gt; mod         -0.0154      0.0632   -0.244    0.807</span></span>
-<span><span class="co">#&gt;  8 2        &lt;tibble [1 × 3]&gt; iv1:mod      0.0170      0.0670    0.255    0.799</span></span>
-<span><span class="co">#&gt;  9 3        &lt;tibble [1 × 3]&gt; (Intercept)  0.0224      0.0633    0.354    0.724</span></span>
-<span><span class="co">#&gt; 10 3        &lt;tibble [1 × 3]&gt; iv2          0.0176      0.0654    0.269    0.788</span></span>
+<span><span class="co">#&gt;    decision specifications   term        estimate std.error statistic p.value</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;           &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 1        &lt;tibble [1 × 3]&gt; (Intercept)   0.0611    0.0562     1.09   0.279 </span></span>
+<span><span class="co">#&gt;  2 1        &lt;tibble [1 × 3]&gt; iv1           0.0453    0.0536     0.844  0.399 </span></span>
+<span><span class="co">#&gt;  3 1        &lt;tibble [1 × 3]&gt; mod           0.101     0.0581     1.75   0.0819</span></span>
+<span><span class="co">#&gt;  4 1        &lt;tibble [1 × 3]&gt; iv1:mod       0.0469    0.0580     0.807  0.420 </span></span>
+<span><span class="co">#&gt;  5 2        &lt;tibble [1 × 3]&gt; (Intercept)   0.0706    0.0588     1.20   0.231 </span></span>
+<span><span class="co">#&gt;  6 2        &lt;tibble [1 × 3]&gt; iv1          -0.0267    0.0561    -0.475  0.635 </span></span>
+<span><span class="co">#&gt;  7 2        &lt;tibble [1 × 3]&gt; mod          -0.0465    0.0608    -0.765  0.445 </span></span>
+<span><span class="co">#&gt;  8 2        &lt;tibble [1 × 3]&gt; iv1:mod       0.0114    0.0607     0.188  0.851 </span></span>
+<span><span class="co">#&gt;  9 3        &lt;tibble [1 × 3]&gt; (Intercept)   0.0567    0.0565     1.00   0.316 </span></span>
+<span><span class="co">#&gt; 10 3        &lt;tibble [1 × 3]&gt; iv2          -0.0230    0.0572    -0.402  0.688 </span></span>
 <span><span class="co">#&gt; # … with 182 more rows</span></span></code></pre></div>
 <p>You can also choose to expand your specification blueprint with <code>.unpack_specs = TRUE</code> to see which decisions produced what result:</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="reference/reveal.html">reveal</a></span><span class="op">(</span>.what <span class="op">=</span> <span class="va">lm_fitted</span>, .which <span class="op">=</span> <span class="va">lm_tidy</span>, .unpack_specs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 192 × 12</span></span>
-<span><span class="co">#&gt;    decision ivs   dvs   include1    inclu…¹ inclu…² model term  estimate std.e…³</span></span>
-<span><span class="co">#&gt;    &lt;chr&gt;    &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;       &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;    &lt;dbl&gt;   &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1 1        iv1   dv1   include1 =… includ… scale(… lm(d… (Int…  1.17e-2  0.0642</span></span>
-<span><span class="co">#&gt;  2 1        iv1   dv1   include1 =… includ… scale(… lm(d… iv1    6.87e-4  0.0668</span></span>
-<span><span class="co">#&gt;  3 1        iv1   dv1   include1 =… includ… scale(… lm(d… mod    1.33e-3  0.0637</span></span>
-<span><span class="co">#&gt;  4 1        iv1   dv1   include1 =… includ… scale(… lm(d… iv1:…  4.48e-2  0.0675</span></span>
-<span><span class="co">#&gt;  5 2        iv1   dv2   include1 =… includ… scale(… lm(d… (Int… -4.44e-2  0.0637</span></span>
-<span><span class="co">#&gt;  6 2        iv1   dv2   include1 =… includ… scale(… lm(d… iv1    6.74e-3  0.0663</span></span>
-<span><span class="co">#&gt;  7 2        iv1   dv2   include1 =… includ… scale(… lm(d… mod   -1.54e-2  0.0632</span></span>
-<span><span class="co">#&gt;  8 2        iv1   dv2   include1 =… includ… scale(… lm(d… iv1:…  1.70e-2  0.0670</span></span>
-<span><span class="co">#&gt;  9 3        iv2   dv1   include1 =… includ… scale(… lm(d… (Int…  2.24e-2  0.0633</span></span>
-<span><span class="co">#&gt; 10 3        iv2   dv1   include1 =… includ… scale(… lm(d… iv2    1.76e-2  0.0654</span></span>
+<span><span class="co">#&gt;    decision ivs   dvs   include1     inclu…¹ inclu…² model term  estim…³ std.e…⁴</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;        &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;   &lt;dbl&gt;   &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 1        iv1   dv1   include1 ==… includ… scale(… lm(d… (Int…  0.0611  0.0562</span></span>
+<span><span class="co">#&gt;  2 1        iv1   dv1   include1 ==… includ… scale(… lm(d… iv1    0.0453  0.0536</span></span>
+<span><span class="co">#&gt;  3 1        iv1   dv1   include1 ==… includ… scale(… lm(d… mod    0.101   0.0581</span></span>
+<span><span class="co">#&gt;  4 1        iv1   dv1   include1 ==… includ… scale(… lm(d… iv1:…  0.0469  0.0580</span></span>
+<span><span class="co">#&gt;  5 2        iv1   dv2   include1 ==… includ… scale(… lm(d… (Int…  0.0706  0.0588</span></span>
+<span><span class="co">#&gt;  6 2        iv1   dv2   include1 ==… includ… scale(… lm(d… iv1   -0.0267  0.0561</span></span>
+<span><span class="co">#&gt;  7 2        iv1   dv2   include1 ==… includ… scale(… lm(d… mod   -0.0465  0.0608</span></span>
+<span><span class="co">#&gt;  8 2        iv1   dv2   include1 ==… includ… scale(… lm(d… iv1:…  0.0114  0.0607</span></span>
+<span><span class="co">#&gt;  9 3        iv2   dv1   include1 ==… includ… scale(… lm(d… (Int…  0.0567  0.0565</span></span>
+<span><span class="co">#&gt; 10 3        iv2   dv1   include1 ==… includ… scale(… lm(d… iv2   -0.0230  0.0572</span></span>
 <span><span class="co">#&gt; # … with 182 more rows, 2 more variables: statistic &lt;dbl&gt;, p.value &lt;dbl&gt;, and</span></span>
-<span><span class="co">#&gt; #   abbreviated variable names ¹​include2, ²​include3, ³​std.error</span></span></code></pre></div>
+<span><span class="co">#&gt; #   abbreviated variable names ¹​include2, ²​include3, ³​estimate, ⁴​std.error</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="condense">Condense<a class="anchor" aria-label="anchor" href="#condense"></a>
@@ -594,7 +596,7 @@
 <span><span class="co">#&gt; # A tibble: 1 × 2</span></span>
 <span><span class="co">#&gt;   estimate_mean estimate_median</span></span>
 <span><span class="co">#&gt;           &lt;dbl&gt;           &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1     -0.000738         0.00872</span></span></code></pre></div>
+<span><span class="co">#&gt; 1       -0.0167         -0.0169</span></span></code></pre></div>
 <p>Here, we have filtered our multiverse results to look at our predictors <code>iv*</code> to see what the mean and median effect was (over all combinations of decisions) on our outcomes.</p>
 <p>However, we had three versions of our predictor and two outcomes, so combining <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">dplyr::group_by()</a></code> with <code><a href="reference/condense.html">condense()</a></code> might be more informative:</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
@@ -607,12 +609,12 @@
 <span><span class="co">#&gt; # Groups:   ivs [3]</span></span>
 <span><span class="co">#&gt;   ivs   dvs   estimate_mean estimate_median</span></span>
 <span><span class="co">#&gt;   &lt;chr&gt; &lt;chr&gt;         &lt;dbl&gt;           &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1 iv1   dv1         0.0268          0.0174 </span></span>
-<span><span class="co">#&gt; 2 iv1   dv2         0.00558         0.00846</span></span>
-<span><span class="co">#&gt; 3 iv2   dv1        -0.0583         -0.0697 </span></span>
-<span><span class="co">#&gt; 4 iv2   dv2         0.00365         0.00650</span></span>
-<span><span class="co">#&gt; 5 iv3   dv1         0.00886         0.00812</span></span>
-<span><span class="co">#&gt; 6 iv3   dv2         0.00901         0.00748</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 iv1   dv1         0.0353          0.0391 </span></span>
+<span><span class="co">#&gt; 2 iv1   dv2        -0.0236         -0.0261 </span></span>
+<span><span class="co">#&gt; 3 iv2   dv1        -0.0354         -0.0283 </span></span>
+<span><span class="co">#&gt; 4 iv2   dv2        -0.0305         -0.0250 </span></span>
+<span><span class="co">#&gt; 5 iv3   dv1        -0.0555         -0.0417 </span></span>
+<span><span class="co">#&gt; 6 iv3   dv2         0.00937         0.00468</span></span></code></pre></div>
 <p>If we were interested in all the terms of the model, we can leverage <code>group_by</code> further:</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
@@ -623,16 +625,16 @@
 <span><span class="co">#&gt; # Groups:   term, ivs [12]</span></span>
 <span><span class="co">#&gt;    term        ivs   dvs   estimate_mean estimate_median</span></span>
 <span><span class="co">#&gt;    &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt;         &lt;dbl&gt;           &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1 (Intercept) iv1   dv1        -0.00112       -0.00111 </span></span>
-<span><span class="co">#&gt;  2 (Intercept) iv1   dv2         0.00997        0.0148  </span></span>
-<span><span class="co">#&gt;  3 (Intercept) iv2   dv1         0.00675        0.00692 </span></span>
-<span><span class="co">#&gt;  4 (Intercept) iv2   dv2         0.00885        0.0135  </span></span>
-<span><span class="co">#&gt;  5 (Intercept) iv3   dv1         0.00695        0.00657 </span></span>
-<span><span class="co">#&gt;  6 (Intercept) iv3   dv2         0.0102         0.0147  </span></span>
-<span><span class="co">#&gt;  7 iv1         iv1   dv1         0.0120         0.0117  </span></span>
-<span><span class="co">#&gt;  8 iv1         iv1   dv2         0.00958        0.00846 </span></span>
-<span><span class="co">#&gt;  9 iv1:mod     iv1   dv1         0.0416         0.0382  </span></span>
-<span><span class="co">#&gt; 10 iv1:mod     iv1   dv2         0.00159        0.000963</span></span>
+<span><span class="co">#&gt;  1 (Intercept) iv1   dv1         0.0416          0.0423 </span></span>
+<span><span class="co">#&gt;  2 (Intercept) iv1   dv2         0.0830          0.0818 </span></span>
+<span><span class="co">#&gt;  3 (Intercept) iv2   dv1         0.0398          0.0401 </span></span>
+<span><span class="co">#&gt;  4 (Intercept) iv2   dv2         0.0807          0.0792 </span></span>
+<span><span class="co">#&gt;  5 (Intercept) iv3   dv1         0.0437          0.0453 </span></span>
+<span><span class="co">#&gt;  6 (Intercept) iv3   dv2         0.0829          0.0822 </span></span>
+<span><span class="co">#&gt;  7 iv1         iv1   dv1         0.0305          0.0305 </span></span>
+<span><span class="co">#&gt;  8 iv1         iv1   dv2        -0.0399         -0.0346 </span></span>
+<span><span class="co">#&gt;  9 iv1:mod     iv1   dv1         0.0402          0.0413 </span></span>
+<span><span class="co">#&gt; 10 iv1:mod     iv1   dv2        -0.00737        -0.00783</span></span>
 <span><span class="co">#&gt; # … with 14 more rows</span></span></code></pre></div>
 </div>
 </div>
@@ -680,6 +682,7 @@
 <ul class="list-unstyled">
 <li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
 <li><a href="https://CRAN.R-project.org/package=multitool" class="external-link"><img src="https://www.r-pkg.org/badges/version/multitool" alt="CRAN status"></a></li>
+<li><a href="https://github.com/ethan-young/multiverse_tools/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/ethan-young/multiverse_tools/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 </ul>
 </div>
 
