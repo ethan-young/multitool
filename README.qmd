@@ -223,11 +223,11 @@ full_pipeline <-
   add_variables(var_group = "dvs", dv1, dv2) |> 
   add_model("linear model", lm({dvs} ~ {ivs} * mod))
 
-my_blueprint <- blueprint(full_pipeline, height = 800)
+my_blueprint <- blueprint(full_pipeline)
 ```
 
 ```{r, results='asis', echo=FALSE, fig.height=8}
-cat("```{dot}\n", my_blueprint$x$diagram, "\n```")
+cat("```{dot}\n//| fig-height: 7\n\n", my_blueprint$x$diagram, "\n```")
 ```
 
 
