@@ -215,7 +215,7 @@ There are two steps in finalizing your bluerpint. The first is to visualize your
 
 You can automate making a chart with `blueprint()`. Feed your pipeline to `blueprint()` to see a chart of your multiverse pipeline plan:
 
-```{r blueprint-chart, dpi=300, fig.width=5}
+```{r blueprint-chart}
 full_pipeline <- 
   the_data |>
   add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |> 
@@ -226,8 +226,8 @@ full_pipeline <-
 my_blueprint <- blueprint(full_pipeline)
 ```
 
-```{r, results='asis', echo=FALSE}
-cat("```{dot}\n", my_blueprint$x$diagram, "\n```")
+```{r, results='asis', echo=FALSE, fig.height=8}
+cat("```{dot}\n//| fig-height 7:\n", my_blueprint$x$diagram, "\n```")
 ```
 
 
