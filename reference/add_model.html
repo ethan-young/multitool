@@ -50,7 +50,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">add_model</span><span class="op">(</span><span class="va">.df</span>, <span class="va">code</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">add_model</span><span class="op">(</span><span class="va">.df</span>, <span class="va">model_desc</span>, <span class="va">code</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -59,6 +59,10 @@
 <dd><p>The original data.frame (e.g., base data set). If part of set of
 add_* decision functions in a pipeline, the base data will be passed along
 as an attribute.</p></dd>
+
+
+<dt>model_desc</dt>
+<dd><p>a human readable name you would like to give the model.</p></dd>
 
 
 <dt>code</dt>
@@ -112,7 +116,7 @@ decisions will be appended as new rows.</p>
 <span class="r-in"><span>  <span class="fu"><a href="add_variables.html">add_variables</a></span><span class="op">(</span><span class="st">"dvs"</span>, <span class="va">dv1</span>, <span class="va">dv2</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="add_variables.html">add_variables</a></span><span class="op">(</span><span class="st">"mods"</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"mod"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="add_preprocess.html">add_preprocess</a></span><span class="op">(</span><span class="st">"scale_iv"</span>, <span class="st">'mutate({ivs} = scale({ivs}))'</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu">add_model</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="op">{</span><span class="va">dvs</span><span class="op">}</span> <span class="op">~</span> <span class="op">{</span><span class="va">ivs</span><span class="op">}</span> <span class="op">*</span> <span class="op">{</span><span class="va">mods</span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">add_model</span><span class="op">(</span><span class="st">"linear model"</span>, <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="op">{</span><span class="va">dvs</span><span class="op">}</span> <span class="op">~</span> <span class="op">{</span><span class="va">ivs</span><span class="op">}</span> <span class="op">*</span> <span class="op">{</span><span class="va">mods</span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in rlang::eval_tidy(rlang::parse_expr(data_chr)):</span> object 'the_data' not found</span>
 </code></pre></div>
     </div>
