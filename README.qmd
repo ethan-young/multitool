@@ -227,7 +227,7 @@ my_blueprint <- blueprint(full_pipeline)
 ```
 
 ```{r, results='asis', echo=FALSE, fig.height=8}
-cat("```{dot}\n//| fig-height: 7\n\n", my_blueprint$x$diagram, "\n```")
+cat("```{dot}\n//| fig-height: 6.5\n\n", my_blueprint$x$diagram, "\n```")
 ```
 
 
