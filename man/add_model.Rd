@@ -4,12 +4,14 @@
 \alias{add_model}
 \title{Add a model and formula to a multiverese pipeline}
 \usage{
-add_model(.df, code)
+add_model(.df, model_desc, code)
 }
 \arguments{
 \item{.df}{The original data.frame (e.g., base data set). If part of set of
 add_* decision functions in a pipeline, the base data will be passed along
 as an attribute.}
+
+\item{model_desc}{a human readable name you would like to give the model.}
 
 \item{code}{literal model syntax you would like to run. You can
 use \code{glue} inside formulas to dynamically generate variable names
@@ -58,5 +60,5 @@ the_data |>
   add_variables("dvs", dv1, dv2) |>
   add_variables("mods", starts_with("mod")) |>
   add_preprocess("scale_iv", 'mutate({ivs} = scale({ivs}))') |>
-  add_model(lm({dvs} ~ {ivs} * {mods}))
+  add_model("linear model", lm({dvs} ~ {ivs} * {mods}))
 }

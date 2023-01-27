@@ -117,7 +117,8 @@ show_code_model <- function(.grid, decision_num, copy = F){
   if("models" %in% names(universe)){
     code$model <-
       universe |>
-      dplyr::pull(models) |>
+      tidyr::unnest(models) |>
+      dplyr::pull(model) |>
       unlist() |>
       stringr::str_replace(string = _ ,"\\)$", ", data = _)")
   } else{
@@ -167,7 +168,8 @@ show_code_postprocess <- function(.grid, decision_num, copy = F){
   if("models" %in% names(universe)){
     code$model <-
       universe |>
-      dplyr::pull(models) |>
+      tidyr::unnest(models) |>
+      dplyr::pull(model) |>
       unlist() |>
       stringr::str_replace(string = _ ,"\\)$", ", data = _)")
   }

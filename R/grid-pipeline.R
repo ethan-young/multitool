@@ -261,6 +261,7 @@ add_preprocess <- function(.df, process_name, code){
 #' @param .df The original data.frame (e.g., base data set). If part of set of
 #'   add_* decision functions in a pipeline, the base data will be passed along
 #'   as an attribute.
+#' @param model_desc a human readable name you would like to give the model.
 #' @param code literal model syntax you would like to run. You can
 #'   use \code{glue} inside formulas to dynamically generate variable names
 #'   based on a variable grid. For example, if you make variable grid with two
@@ -305,8 +306,8 @@ add_preprocess <- function(.df, process_name, code){
 #'   add_variables("dvs", dv1, dv2) |>
 #'   add_variables("mods", starts_with("mod")) |>
 #'   add_preprocess("scale_iv", 'mutate({ivs} = scale({ivs}))') |>
-#'   add_model(lm({dvs} ~ {ivs} * {mods}))
-add_model <- function(.df, code){
+#'   add_model("linear model", lm({dvs} ~ {ivs} * {mods}))
+add_model <- function(.df, model_desc, code){
   code <- dplyr::enexprs(code)
   code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
 
@@ -322,7 +323,7 @@ add_model <- function(.df, code){
   grid_prep <-
     tibble::tibble(
       type  = "models",
-      group = "model",
+      group = model_desc,
       code  = code_chr
     )
 
@@ -393,7 +394,8 @@ add_model <- function(.df, code){
 #'   add_variables("dvs", dv1, dv2) |>
 #'   add_variables("mods", starts_with("mod")) |>
 #'   add_preprocess("scale_iv", 'mutate({ivs} = scale({ivs}))') |>
-#'   add_model(lm({dvs} ~ {ivs} * {mods}))
+#'   add_model("linear model", lm({dvs} ~ {ivs} * {mods})) |>
+#'   add_postprocess("analysis of variance", aov())
 add_postprocess <- function(.df, postprocess_name, code){
 
   code <- dplyr::enexprs(code)
@@ -739,7 +741,7 @@ add_cron_alpha <- function(.df, scale_name, items, keys = NULL){
 
   cronalpha_items <-
     glue::glue(
-      'select(c({items})) |> alpha()'
+      'select({items}) |> alpha()'
     ) |>
     as.character() |>
     stringr::str_remove_all("\n|  ")
@@ -812,8 +814,8 @@ add_cron_alpha <- function(.df, scale_name, items, keys = NULL){
 #'   add_correlations("outcomes", matches("dv|mod"), focus_set = matches("dv")) |>
 #'   add_cron_alpha("unp_scale", c(iv1,iv2,iv3)) |>
 #'   add_cron_alpha("vio_scale", starts_with("mod")) |>
-#'   add_model(lm({dvs} ~ {ivs} * {mods})) |>
-#'   add_model(lm({dvs} ~ {ivs} * {mods} + cov1)) |>
+#'   add_model("no covariates", lm({dvs} ~ {ivs} * {mods})) |>
+#'   add_model("with covariates", lm({dvs} ~ {ivs} * {mods} + cov1)) |>
 #'   add_postprocess("aov", aov()) |>
 #'   expand_decisions()
 #'
@@ -824,25 +826,59 @@ expand_decisions <- function(.grid){
 
   grid_components <-
     .grid |>
+    dplyr::mutate(group = stringr::str_replace_all(group, " ", "_") |> tolower()) |>
     dplyr::group_split(type) |>
     purrr::map(function(x) {
-      curr_name <- x |> dplyr::pull(type) |> unique()
-      curr_set <- x |> dplyr::pull(group) |> unique()
-      the_set <- list(curr_set) |> purrr::set_names(curr_name)
-      the_set
+      if(x |> dplyr::pull(type) |> unique() == "models"){
+        list(
+          models = c("model")
+        )
+      } else{
+        curr_name <- x |> dplyr::pull(type) |> unique()
+        curr_set <- x |> dplyr::pull(group) |> unique()
+        the_set <- list(curr_set) |> purrr::set_names(curr_name)
+        the_set
+      }
     }) |>
     purrr::flatten()
 
   full_grid <-
     .grid |>
+    dplyr::mutate(group = stringr::str_replace_all(group, " ", "_") |> tolower()) |>
     dplyr::group_split(type) |>
     purrr::map(function(x){
-      df_to_expand_prep(x, group, code)
+      if(x |> pull(type) |> unique() == "models"){
+        model_tibble <-
+          bind_rows(
+            tibble(
+              type = "models",
+              group = "model",
+              code = x |> pull(code)
+            )
+          )
+        df_to_expand_prep(model_tibble, group, code)
+      } else{
+        df_to_expand_prep(x, group, code)
+      }
     }) |>
     purrr::flatten() |>
     df_to_expand() |>
     dplyr::mutate(decision = 1:dplyr::n()) |>
     dplyr::select(decision, dplyr::everything())
+
+  if(!is.null(grid_components$model)){
+    full_grid <-
+      full_grid |>
+      dplyr::left_join(
+        .grid |>
+          filter(type == "models") |>
+          transmute(
+            model_meta = group,
+            model = code
+          ),
+        by = "model"
+      )
+  }
 
   if(!is.null(grid_components$variables)){
     full_grid <-
@@ -859,9 +895,15 @@ expand_decisions <- function(.grid){
 
   pipeline_expanded <-
     purrr::map2(grid_components, names(grid_components), function(x, y) {
-      full_grid |>
-        dplyr::select(decision, x) |>
-        tidyr::nest("{y}" := -decision)
+      if(y == "models"){
+        full_grid |>
+          dplyr::select(decision, x, model_meta) |>
+          tidyr::nest("{y}" := -decision)
+      }else{
+        full_grid |>
+          dplyr::select(decision, x) |>
+          tidyr::nest("{y}" := -decision)
+      }
     }) |>
     purrr::reduce(dplyr::left_join, "decision") |>
     dplyr::select(

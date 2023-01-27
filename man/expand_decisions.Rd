@@ -58,8 +58,8 @@ full_pipeline <-
   add_correlations("outcomes", matches("dv|mod"), focus_set = matches("dv")) |>
   add_cron_alpha("unp_scale", c(iv1,iv2,iv3)) |>
   add_cron_alpha("vio_scale", starts_with("mod")) |>
-  add_model(lm({dvs} ~ {ivs} * {mods})) |>
-  add_model(lm({dvs} ~ {ivs} * {mods} + cov1)) |>
+  add_model("no covariates", lm({dvs} ~ {ivs} * {mods})) |>
+  add_model("with covariates", lm({dvs} ~ {ivs} * {mods} + cov1)) |>
   add_postprocess("aov", aov()) |>
   expand_decisions()
 

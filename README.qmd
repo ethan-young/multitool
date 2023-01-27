@@ -177,14 +177,14 @@ Notice that we now have a specification blueprint with both exclusion alternativ
 
 The whole point of building a specification blueprint is to eventually feed it to a model and examine the results. 
 
-You can add a model to your blueprint by using `add_model()`. I designed `add_model()` so the user can simply paste a model function. For example, our call to `lm()` can be simply pasted into `add_model()`:
+You can add a model to your blueprint by using `add_model()`. I designed `add_model()` so the user can simply paste a model function. For example, our call to `lm()` can be simply pasted into `add_model()`. Make sure to give your model a label with the `model_desc` argument. 
 
 ```{r model}
 the_data |>
   add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |> 
   add_variables(var_group = "ivs", iv1, iv2, iv3) |> 
   add_variables(var_group = "dvs", dv1, dv2) |> 
-  add_model(lm(dv1 ~ iv1 * mod))
+  add_model("linear model", lm(dv1 ~ iv1 * mod))
 ```
 
 Above, the model is completely unquoted. It also has no `data` argument. This is intentional; `multitool` is tracking the base dataset along the way (so you don't have to). Note that you can still quote the model formula, if that is more your style.
@@ -204,25 +204,40 @@ the_data |>
   add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |> 
   add_variables(var_group = "ivs", iv1, iv2, iv3) |> 
   add_variables(var_group = "dvs", dv1, dv2) |> 
-  add_model(lm({dvs} ~ {ivs} * mod))
+  add_model("linear model",lm({dvs} ~ {ivs} * mod))
 ```
 
 This allows `multitool` to insert the correct version of each variable specified in a `add_variables()` step. Make sure to use embrace the variable with the `var_group` argument from `add_variables()`, for example `add_model(lm({dvs} ~ {ivs} * mod))`. Here, `{dvs}` and `{ivs}` tells `multitool` to insert the current version of the `ivs` and `dvs` into the model.
 
 ## Finalizing the specification blueprint
 
-The final step in making your blueprint is expanding all your specifications into all possible combinations. You can do this by calling `expand_decisions()` at the end of your blueprint pipeline:
+There are two steps in finalizing your bluerpint. The first is to visualize your pipeline with a graph. This is optional, but I think it is helpful. 
 
-```{r expand}
+You can automate making a chart with `blueprint()`. Feed your pipeline to `blueprint()` to see a chart of your multiverse pipeline plan:
+
+```{r blueprint-chart, dpi=300, fig.width=5}
 full_pipeline <- 
   the_data |>
   add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |> 
   add_variables(var_group = "ivs", iv1, iv2, iv3) |> 
   add_variables(var_group = "dvs", dv1, dv2) |> 
-  add_model(lm({dvs} ~ {ivs} * mod)) |> 
-  expand_decisions()
+  add_model("linear model", lm({dvs} ~ {ivs} * mod))
 
-full_pipeline
+my_blueprint <- blueprint(full_pipeline)
+```
+
+```{r, results='asis', echo=FALSE}
+cat("```{dot}\n", my_blueprint$x$diagram, "\n```")
+```
+
+
+
+The final step in making your blueprint is expanding all your specifications into all possible combinations. You can do this by calling `expand_decisions()` at the end of your blueprint pipeline:
+
+```{r expand}
+expanded_pipeline <- expand_decisions(full_pipeline)
+
+expanded_pipeline
 ```
 
 The result is an expanded `tibble` with 1 row per unique decision and columns for each major blueprint category. In our example, we have alternative variables (predictors and outcomes), filters (three exclusion alternatives), and a model to run. 
@@ -236,19 +251,19 @@ Note that we have 3 exclusions (each with two combinations), 3 versions of our p
 Our blueprint uses list columns to organize information. You can view each list column by using `tidyr::unnest(<column name>)`. For example, we can look at the filters:
 
 ```{r}
-full_pipeline |> unnest(filters)
+expanded_pipeline |> unnest(filters)
 ```
 
 Or we could look at the models:
 
 ```{r}
-full_pipeline |> unnest(models)
+expanded_pipeline |> unnest(models)
 ```
 
 Notice that, with the `glue::glue()` syntax, different versions of our predictors and outcomes were inserted appropriately. You can check their correspondence by using `unnest()` on both the models and variable list columns:
 
 ```{r}
-full_pipeline |> unnest(c(variables, models))
+expanded_pipeline |> unnest(c(variables, models))
 ```
 
 ## Validate your blueprint
@@ -258,13 +273,13 @@ A `multitool` specification blueprint has a special feature: it captures your co
 A special set of functions with the `show_code_*` prefix allow you to see the code that will be executed for a single pipeline. For example, we can look at our filtering code for the first decision of our blueprint:
 
 ```{r}
-full_pipeline |> show_code_filter(decision_num = 1)
+expanded_pipeline |> show_code_filter(decision_num = 1)
 ```
 
 These functions allow you to generate the relevant code along the analysis pipeline. For example, we can look at our model pipeline for decision 17 using `show_code_model(decision_num = 17)`:
 
 ```{r}
-full_pipeline |> show_code_model(decision_num = 17)
+expanded_pipeline |> show_code_model(decision_num = 17)
 ```
 
 Setting the `copy` argument to `TRUE` allows you to send the code straight to your clipboard. You can paste it into the source or console for testing/editing.
@@ -272,7 +287,7 @@ Setting the `copy` argument to `TRUE` allows you to send the code straight to yo
 You can also run individual decisions to test that they work. See below for details about the results. 
 
 ```{r}
-run_universe_model(full_pipeline, decision_num = 1)
+run_universe_model(expanded_pipeline, decision_num = 1)
 ```
 
 ## Implement your blueprint
@@ -282,7 +297,7 @@ Once you have built your full specification blueprint and feel comfortable with 
 Simply use `run_multiverse(<your pipeline object>)`:
 
 ```{r multiverse}
-multiverse_results <- run_multiverse(full_pipeline)
+multiverse_results <- run_multiverse(expanded_pipeline)
 
 multiverse_results
 ```

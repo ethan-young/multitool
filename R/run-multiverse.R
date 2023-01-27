@@ -61,8 +61,8 @@ run_universe_model <- function(.grid, decision_num, save_model = FALSE){
 
   universe_pipeline$model_code <-
     universe |>
-    dplyr::pull(models) |>
-    unlist() |>
+    tidyr::unnest(models) |>
+    dplyr::pull(model) |>
     stringr::str_replace(string = _ ,"\\)$", ", data = _)")
 
   universe_analyses$model <- list_to_pipeline(universe_pipeline)

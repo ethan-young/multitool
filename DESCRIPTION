@@ -30,6 +30,7 @@ Imports:
   clipr,
   corrr,
   correlation,
+  DiagrammeR,
   dplyr,
   furrr,
   future,

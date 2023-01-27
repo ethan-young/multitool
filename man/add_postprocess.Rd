@@ -66,5 +66,6 @@ the_data |>
   add_variables("dvs", dv1, dv2) |>
   add_variables("mods", starts_with("mod")) |>
   add_preprocess("scale_iv", 'mutate({ivs} = scale({ivs}))') |>
-  add_model(lm({dvs} ~ {ivs} * {mods}))
+  add_model("linear model", lm({dvs} ~ {ivs} * {mods})) |>
+  add_postprocess("analysis of variance", aov())
 }
