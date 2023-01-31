@@ -1,6 +1,8 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+# multitool <a href="https://ethan-young.github.io/multitool/"><img src="man/figures/logo.jpeg" align="right" height="139" /></a>
+
 # multitool
 
 <!-- badges: start -->
@@ -561,7 +563,7 @@ Simply use `run_multiverse(<your pipeline object>)`:
 
 ``` r
 multiverse_results <- run_multiverse(expanded_pipeline)
-#> ■■■■■■■■■■■■■■■■■                 54% | ETA:  3s
+#> ■■■■■■■■■■■■■■■■                  50% | ETA:  3s
 
 multiverse_results
 #> # A tibble: 48 × 3
@@ -629,21 +631,21 @@ naming convention: `<model function>_tidy` and
 ``` r
 multiverse_results |> unnest(lm_fitted) |> unnest(lm_tidy)
 #> # A tibble: 192 × 11
-#>    decision specificat…¹ lm_code term  estimate std.e…² stati…³ p.value lm_gla…⁴
-#>    <chr>    <list>       <glue>  <chr>    <dbl>   <dbl>   <dbl>   <dbl> <list>  
-#>  1 1        <tibble>     the_da… (Int… -0.0299   0.0588 -0.508  6.12e-1 <tibble>
-#>  2 1        <tibble>     the_da… iv1   -0.106    0.0607 -1.75   8.20e-2 <tibble>
-#>  3 1        <tibble>     the_da… mod    0.0716   0.0610  1.17   2.42e-1 <tibble>
-#>  4 1        <tibble>     the_da… iv1:… -0.237    0.0629 -3.77   1.95e-4 <tibble>
-#>  5 2        <tibble>     the_da… (Int…  0.0769   0.0536  1.43   1.53e-1 <tibble>
-#>  6 2        <tibble>     the_da… iv1   -0.0632   0.0554 -1.14   2.55e-1 <tibble>
-#>  7 2        <tibble>     the_da… mod   -0.0457   0.0557 -0.820  4.13e-1 <tibble>
-#>  8 2        <tibble>     the_da… iv1:…  0.0526   0.0574  0.917  3.60e-1 <tibble>
-#>  9 3        <tibble>     the_da… (Int… -0.0341   0.0603 -0.565  5.73e-1 <tibble>
-#> 10 3        <tibble>     the_da… iv2   -0.00464  0.0606 -0.0766 9.39e-1 <tibble>
+#>    decision specificati…¹ lm_code term  estim…² std.e…³ stati…⁴ p.value lm_gla…⁵
+#>    <chr>    <list>        <glue>  <chr>   <dbl>   <dbl>   <dbl>   <dbl> <list>  
+#>  1 1        <tibble>      the_da… (Int… 0.0767   0.0541  1.42     0.157 <tibble>
+#>  2 1        <tibble>      the_da… iv1   0.0325   0.0581  0.559    0.576 <tibble>
+#>  3 1        <tibble>      the_da… mod   0.00180  0.0505  0.0356   0.972 <tibble>
+#>  4 1        <tibble>      the_da… iv1:… 0.00984  0.0538  0.183    0.855 <tibble>
+#>  5 2        <tibble>      the_da… (Int… 0.0184   0.0584  0.315    0.753 <tibble>
+#>  6 2        <tibble>      the_da… iv1   0.0875   0.0626  1.40     0.164 <tibble>
+#>  7 2        <tibble>      the_da… mod   0.0251   0.0545  0.460    0.646 <tibble>
+#>  8 2        <tibble>      the_da… iv1:… 0.0670   0.0581  1.15     0.250 <tibble>
+#>  9 3        <tibble>      the_da… (Int… 0.0745   0.0539  1.38     0.168 <tibble>
+#> 10 3        <tibble>      the_da… iv2   0.0119   0.0532  0.224    0.823 <tibble>
 #> # … with 182 more rows, 2 more variables: lm_warnings <list>,
 #> #   lm_messages <list>, and abbreviated variable names ¹​specifications,
-#> #   ²​std.error, ³​statistic, ⁴​lm_glance
+#> #   ²​estimate, ³​std.error, ⁴​statistic, ⁵​lm_glance
 ```
 
 The `lm_tidy` (or `<model function>_tidy`) column gives us the main
@@ -656,16 +658,16 @@ multiverse_results |> unnest(lm_fitted) |> unnest(lm_glance)
 #> # A tibble: 48 × 18
 #>    decision specificat…¹ lm_code lm_tidy  r.squ…² adj.r.…³ sigma stati…⁴ p.value
 #>    <chr>    <list>       <glue>  <list>     <dbl>    <dbl> <dbl>   <dbl>   <dbl>
-#>  1 1        <tibble>     the_da… <tibble> 0.0511   4.17e-2 1.03    5.42  0.00121
-#>  2 2        <tibble>     the_da… <tibble> 0.0108   9.32e-4 0.936   1.09  0.352  
-#>  3 3        <tibble>     the_da… <tibble> 0.00323 -6.68e-3 1.05    0.326 0.807  
-#>  4 4        <tibble>     the_da… <tibble> 0.0128   3.01e-3 0.935   1.31  0.272  
-#>  5 5        <tibble>     the_da… <tibble> 0.00960 -2.42e-4 1.05    0.975 0.405  
-#>  6 6        <tibble>     the_da… <tibble> 0.00592 -3.96e-3 0.938   0.599 0.616  
-#>  7 7        <tibble>     the_da… <tibble> 0.0476   3.83e-2 1.04    5.12  0.00182
-#>  8 8        <tibble>     the_da… <tibble> 0.0101   3.81e-4 0.944   1.04  0.375  
-#>  9 9        <tibble>     the_da… <tibble> 0.00362 -6.12e-3 1.06    0.372 0.774  
-#> 10 10       <tibble>     the_da… <tibble> 0.00790 -1.80e-3 0.945   0.815 0.487  
+#>  1 1        <tibble>     the_da… <tibble> 0.00128 -0.00930 0.915   0.121   0.948
+#>  2 2        <tibble>     the_da… <tibble> 0.0126   0.00210 0.987   1.20    0.310
+#>  3 3        <tibble>     the_da… <tibble> 0.00654 -0.00399 0.913   0.621   0.602
+#>  4 4        <tibble>     the_da… <tibble> 0.00884 -0.00166 0.989   0.842   0.472
+#>  5 5        <tibble>     the_da… <tibble> 0.0204   0.0100  0.906   1.97    0.119
+#>  6 6        <tibble>     the_da… <tibble> 0.0115   0.00105 0.987   1.10    0.349
+#>  7 7        <tibble>     the_da… <tibble> 0.00313 -0.00736 0.917   0.299   0.826
+#>  8 8        <tibble>     the_da… <tibble> 0.0128   0.00239 0.986   1.23    0.299
+#>  9 9        <tibble>     the_da… <tibble> 0.00759 -0.00286 0.915   0.726   0.537
+#> 10 10       <tibble>     the_da… <tibble> 0.00815 -0.00229 0.988   0.780   0.506
 #> # … with 38 more rows, 9 more variables: df <dbl>, logLik <dbl>, AIC <dbl>,
 #> #   BIC <dbl>, deviance <dbl>, df.residual <int>, nobs <int>,
 #> #   lm_warnings <list>, lm_messages <list>, and abbreviated variable names
@@ -704,18 +706,18 @@ sub-list with the `.which` argument:
 ``` r
 multiverse_results |> reveal(.what = lm_fitted, .which = lm_tidy)
 #> # A tibble: 192 × 7
-#>    decision specifications   term        estimate std.error statistic  p.value
-#>    <chr>    <list>           <chr>          <dbl>     <dbl>     <dbl>    <dbl>
-#>  1 1        <tibble [1 × 3]> (Intercept) -0.0299     0.0588   -0.508  0.612   
-#>  2 1        <tibble [1 × 3]> iv1         -0.106      0.0607   -1.75   0.0820  
-#>  3 1        <tibble [1 × 3]> mod          0.0716     0.0610    1.17   0.242   
-#>  4 1        <tibble [1 × 3]> iv1:mod     -0.237      0.0629   -3.77   0.000195
-#>  5 2        <tibble [1 × 3]> (Intercept)  0.0769     0.0536    1.43   0.153   
-#>  6 2        <tibble [1 × 3]> iv1         -0.0632     0.0554   -1.14   0.255   
-#>  7 2        <tibble [1 × 3]> mod         -0.0457     0.0557   -0.820  0.413   
-#>  8 2        <tibble [1 × 3]> iv1:mod      0.0526     0.0574    0.917  0.360   
-#>  9 3        <tibble [1 × 3]> (Intercept) -0.0341     0.0603   -0.565  0.573   
-#> 10 3        <tibble [1 × 3]> iv2         -0.00464    0.0606   -0.0766 0.939   
+#>    decision specifications   term        estimate std.error statistic p.value
+#>    <chr>    <list>           <chr>          <dbl>     <dbl>     <dbl>   <dbl>
+#>  1 1        <tibble [1 × 3]> (Intercept)  0.0767     0.0541    1.42     0.157
+#>  2 1        <tibble [1 × 3]> iv1          0.0325     0.0581    0.559    0.576
+#>  3 1        <tibble [1 × 3]> mod          0.00180    0.0505    0.0356   0.972
+#>  4 1        <tibble [1 × 3]> iv1:mod      0.00984    0.0538    0.183    0.855
+#>  5 2        <tibble [1 × 3]> (Intercept)  0.0184     0.0584    0.315    0.753
+#>  6 2        <tibble [1 × 3]> iv1          0.0875     0.0626    1.40     0.164
+#>  7 2        <tibble [1 × 3]> mod          0.0251     0.0545    0.460    0.646
+#>  8 2        <tibble [1 × 3]> iv1:mod      0.0670     0.0581    1.15     0.250
+#>  9 3        <tibble [1 × 3]> (Intercept)  0.0745     0.0539    1.38     0.168
+#> 10 3        <tibble [1 × 3]> iv2          0.0119     0.0532    0.224    0.823
 #> # … with 182 more rows
 ```
 
@@ -726,21 +728,21 @@ You can also choose to expand your specification blueprint with
 multiverse_results |> 
   reveal(.what = lm_fitted, .which = lm_tidy, .unpack_specs = TRUE)
 #> # A tibble: 192 × 13
-#>    decision ivs   dvs   include1    inclu…¹ inclu…² model model…³ term  estimate
-#>    <chr>    <chr> <chr> <chr>       <chr>   <chr>   <chr> <chr>   <chr>    <dbl>
-#>  1 1        iv1   dv1   include1 =… includ… scale(… lm(d… linear… (Int… -0.0299 
-#>  2 1        iv1   dv1   include1 =… includ… scale(… lm(d… linear… iv1   -0.106  
-#>  3 1        iv1   dv1   include1 =… includ… scale(… lm(d… linear… mod    0.0716 
-#>  4 1        iv1   dv1   include1 =… includ… scale(… lm(d… linear… iv1:… -0.237  
-#>  5 2        iv1   dv2   include1 =… includ… scale(… lm(d… linear… (Int…  0.0769 
-#>  6 2        iv1   dv2   include1 =… includ… scale(… lm(d… linear… iv1   -0.0632 
-#>  7 2        iv1   dv2   include1 =… includ… scale(… lm(d… linear… mod   -0.0457 
-#>  8 2        iv1   dv2   include1 =… includ… scale(… lm(d… linear… iv1:…  0.0526 
-#>  9 3        iv2   dv1   include1 =… includ… scale(… lm(d… linear… (Int… -0.0341 
-#> 10 3        iv2   dv1   include1 =… includ… scale(… lm(d… linear… iv2   -0.00464
+#>    decision ivs   dvs   include1     inclu…¹ inclu…² model model…³ term  estim…⁴
+#>    <chr>    <chr> <chr> <chr>        <chr>   <chr>   <chr> <chr>   <chr>   <dbl>
+#>  1 1        iv1   dv1   include1 ==… includ… scale(… lm(d… linear… (Int… 0.0767 
+#>  2 1        iv1   dv1   include1 ==… includ… scale(… lm(d… linear… iv1   0.0325 
+#>  3 1        iv1   dv1   include1 ==… includ… scale(… lm(d… linear… mod   0.00180
+#>  4 1        iv1   dv1   include1 ==… includ… scale(… lm(d… linear… iv1:… 0.00984
+#>  5 2        iv1   dv2   include1 ==… includ… scale(… lm(d… linear… (Int… 0.0184 
+#>  6 2        iv1   dv2   include1 ==… includ… scale(… lm(d… linear… iv1   0.0875 
+#>  7 2        iv1   dv2   include1 ==… includ… scale(… lm(d… linear… mod   0.0251 
+#>  8 2        iv1   dv2   include1 ==… includ… scale(… lm(d… linear… iv1:… 0.0670 
+#>  9 3        iv2   dv1   include1 ==… includ… scale(… lm(d… linear… (Int… 0.0745 
+#> 10 3        iv2   dv1   include1 ==… includ… scale(… lm(d… linear… iv2   0.0119 
 #> # … with 182 more rows, 3 more variables: std.error <dbl>, statistic <dbl>,
 #> #   p.value <dbl>, and abbreviated variable names ¹​include2, ²​include3,
-#> #   ³​model_meta
+#> #   ³​model_meta, ⁴​estimate
 ```
 
 ### Condense
@@ -766,7 +768,7 @@ multiverse_results |>
 #> # A tibble: 1 × 2
 #>   estimate_mean estimate_median
 #>           <dbl>           <dbl>
-#> 1       -0.0246         -0.0156
+#> 1        0.0220          0.0252
 ```
 
 Here, we have filtered our multiverse results to look at our predictors
@@ -787,12 +789,12 @@ multiverse_results |>
 #> # Groups:   ivs [3]
 #>   ivs   dvs   estimate_mean estimate_median
 #>   <chr> <chr>         <dbl>           <dbl>
-#> 1 iv1   dv1        -0.130         -0.120   
-#> 2 iv1   dv2        -0.00115       -0.000446
-#> 3 iv2   dv1         0.00236        0.0131  
-#> 4 iv2   dv2         0.0320         0.0407  
-#> 5 iv3   dv1        -0.0263        -0.0324  
-#> 6 iv3   dv2        -0.0243        -0.0173
+#> 1 iv1   dv1         0.00239        0.000205
+#> 2 iv1   dv2         0.0599         0.0629  
+#> 3 iv2   dv1         0.0388         0.0409  
+#> 4 iv2   dv2         0.0354         0.0284  
+#> 5 iv3   dv1        -0.0374        -0.0330  
+#> 6 iv3   dv2         0.0328         0.0377
 ```
 
 If we were interested in all the terms of the model, we can leverage
@@ -807,16 +809,16 @@ multiverse_results |>
 #> # Groups:   term, ivs [12]
 #>    term        ivs   dvs   estimate_mean estimate_median
 #>    <chr>       <chr> <chr>         <dbl>           <dbl>
-#>  1 (Intercept) iv1   dv1         -0.0294         -0.0296
-#>  2 (Intercept) iv1   dv2          0.0510          0.0550
-#>  3 (Intercept) iv2   dv1         -0.0281         -0.0277
-#>  4 (Intercept) iv2   dv2          0.0532          0.0570
-#>  5 (Intercept) iv3   dv1         -0.0252         -0.0257
-#>  6 (Intercept) iv3   dv2          0.0517          0.0555
-#>  7 iv1         iv1   dv1         -0.0843         -0.0848
-#>  8 iv1         iv1   dv2         -0.0450         -0.0481
-#>  9 iv1:mod     iv1   dv1         -0.176          -0.169 
-#> 10 iv1:mod     iv1   dv2          0.0427          0.0436
+#>  1 (Intercept) iv1   dv1         0.0326          0.0300 
+#>  2 (Intercept) iv1   dv2         0.0201          0.0239 
+#>  3 (Intercept) iv2   dv1         0.0319          0.0298 
+#>  4 (Intercept) iv2   dv2         0.0160          0.0199 
+#>  5 (Intercept) iv3   dv1         0.0347          0.0328 
+#>  6 (Intercept) iv3   dv2         0.0151          0.0186 
+#>  7 iv1         iv1   dv1         0.00659         0.00548
+#>  8 iv1         iv1   dv2         0.0748          0.0753 
+#>  9 iv1:mod     iv1   dv1        -0.00181        -0.00177
+#> 10 iv1:mod     iv1   dv2         0.0450          0.0445 
 #> # … with 14 more rows
 ```
 
