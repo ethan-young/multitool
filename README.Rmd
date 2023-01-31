@@ -1,5 +1,5 @@
 ---
-format: gfm
+output: github_document
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -14,8 +14,6 @@ knitr::opts_chunk$set(
 ```
 
 # multitool <a href="https://ethan-young.github.io/multitool/"><img src="man/figures/logo.jpeg" align="right" height="139" /></a>
-
-# multitool
 
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
@@ -225,13 +223,8 @@ full_pipeline <-
   add_variables(var_group = "dvs", dv1, dv2) |> 
   add_model("linear model", lm({dvs} ~ {ivs} * mod))
 
-my_blueprint <- blueprint(full_pipeline)
+blueprint(full_pipeline)
 ```
-
-```{r, results='asis', echo=FALSE, fig.height=8}
-cat("```{dot}\n//| fig-height: 6.5\n\n", my_blueprint$x$diagram, "\n```")
-```
-
 
 
 The final step in making your blueprint is expanding all your specifications into all possible combinations. You can do this by calling `expand_decisions()` at the end of your blueprint pipeline:
