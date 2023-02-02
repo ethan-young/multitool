@@ -1,4 +1,8 @@
 url: https://ethan-young.github.io/multitool/
 template:
   bootstrap: 5
+  bootswatch: flatly
+  bslib:
+    base_font: {google: "Lato"}
+    font-size-base: ".85rem"
 
