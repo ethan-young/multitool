@@ -418,7 +418,7 @@ expanded_pipeline
 #>  8 8        <tibble [1 × 2]> <tibble [1 × 3]> <tibble [1 × 2]>
 #>  9 9        <tibble [1 × 2]> <tibble [1 × 3]> <tibble [1 × 2]>
 #> 10 10       <tibble [1 × 2]> <tibble [1 × 3]> <tibble [1 × 2]>
-#> # … with 38 more rows
+#> # ℹ 38 more rows
 ```
 
 The result is an expanded `tibble` with 1 row per unique decision and
@@ -454,7 +454,7 @@ expanded_pipeline |> unnest(filters)
 #>  8 8        <tibble [1 × 2]> include1 == 0 include2 != 3 include3 %in%… <tibble>
 #>  9 9        <tibble [1 × 2]> include1 == 0 include2 != 3 include3 %in%… <tibble>
 #> 10 10       <tibble [1 × 2]> include1 == 0 include2 != 3 include3 %in%… <tibble>
-#> # … with 38 more rows
+#> # ℹ 38 more rows
 ```
 
 Or we could look at the models:
@@ -474,7 +474,7 @@ expanded_pipeline |> unnest(models)
 #>  8 8        <tibble [1 × 2]> <tibble [1 × 3]> lm(dv2 ~ iv1 * mod) linear model
 #>  9 9        <tibble [1 × 2]> <tibble [1 × 3]> lm(dv1 ~ iv2 * mod) linear model
 #> 10 10       <tibble [1 × 2]> <tibble [1 × 3]> lm(dv2 ~ iv2 * mod) linear model
-#> # … with 38 more rows
+#> # ℹ 38 more rows
 ```
 
 Notice that, with the `glue::glue()` syntax, different versions of our
@@ -497,7 +497,7 @@ expanded_pipeline |> unnest(c(variables, models))
 #>  8 8        iv1   dv2   <tibble [1 × 3]> lm(dv2 ~ iv1 * mod) linear model
 #>  9 9        iv2   dv1   <tibble [1 × 3]> lm(dv1 ~ iv2 * mod) linear model
 #> 10 10       iv2   dv2   <tibble [1 × 3]> lm(dv2 ~ iv2 * mod) linear model
-#> # … with 38 more rows
+#> # ℹ 38 more rows
 ```
 
 ## Validate your blueprint
@@ -536,10 +536,10 @@ for details about the results.
 
 ``` r
 run_universe_model(expanded_pipeline, decision_num = 1)
-#> # A tibble: 1 × 2
-#>   decision lm_fitted       
-#>   <chr>    <list>          
-#> 1 1        <tibble [1 × 5]>
+#> # A tibble: 1 × 3
+#>   decision filter_code                                              model_fitted
+#>   <chr>    <glue>                                                   <list>      
+#> 1 1        the_data |> filter(include1 == 0, include2 != 3, scale(… <tibble>
 ```
 
 ## Implement your blueprint
@@ -552,31 +552,28 @@ Simply use `run_multiverse(<your pipeline object>)`:
 
 ``` r
 multiverse_results <- run_multiverse(expanded_pipeline)
-#> ■■■■■■■■■■■■ 38% | ETA: 4s■■■■■■■■■■■■■■ 44% | ETA: 3s■■■■■■■■■■■■■■■ 48% |
-#> ETA: 3s■■■■■■■■■■■■■■■■ 50% | ETA: 3s■■■■■■■■■■■■■■■■■ 54% | ETA:
-#> 3s■■■■■■■■■■■■■■■■■■■ 58% | ETA: 3s■■■■■■■■■■■■■■■■■■■ 60% | ETA:
-#> 2s■■■■■■■■■■■■■■■■■■■■ 65% | ETA: 2s■■■■■■■■■■■■■■■■■■■■■ 67% | ETA:
-#> 2s■■■■■■■■■■■■■■■■■■■■■■ 71% | ETA: 2s■■■■■■■■■■■■■■■■■■■■■■■ 75% | ETA:
-#> 2s■■■■■■■■■■■■■■■■■■■■■■■■ 77% | ETA: 1s■■■■■■■■■■■■■■■■■■■■■■■■■ 81% | ETA:
-#> 1s■■■■■■■■■■■■■■■■■■■■■■■■■■ 83% | ETA: 1s■■■■■■■■■■■■■■■■■■■■■■■■■■■ 88% |
-#> ETA: 1s■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 90% | ETA: 1s■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-#> 94% | ETA: 0s■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 96% | ETA: 0s
+#> ■■■■■■■■■■■■■■■ 46% | ETA: 2s■■■■■■■■■■■■■■■■■■ 56% | ETA:
+#> 2s■■■■■■■■■■■■■■■■■■■ 58% | ETA: 2s■■■■■■■■■■■■■■■■■■■■ 62% | ETA:
+#> 2s■■■■■■■■■■■■■■■■■■■■■ 67% | ETA: 2s■■■■■■■■■■■■■■■■■■■■■■■ 73% | ETA:
+#> 1s■■■■■■■■■■■■■■■■■■■■■■■■ 77% | ETA: 1s■■■■■■■■■■■■■■■■■■■■■■■■■ 81% | ETA:
+#> 1s■■■■■■■■■■■■■■■■■■■■■■■■■■■ 85% | ETA: 1s■■■■■■■■■■■■■■■■■■■■■■■■■■■ 88% |
+#> ETA: 1s■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ 94% | ETA: 0s
 
 multiverse_results
 #> # A tibble: 48 × 3
-#>    decision specifications   lm_fitted       
+#>    decision specifications   model_fitted    
 #>    <chr>    <list>           <list>          
-#>  1 1        <tibble [1 × 3]> <tibble [1 × 5]>
-#>  2 2        <tibble [1 × 3]> <tibble [1 × 5]>
-#>  3 3        <tibble [1 × 3]> <tibble [1 × 5]>
-#>  4 4        <tibble [1 × 3]> <tibble [1 × 5]>
-#>  5 5        <tibble [1 × 3]> <tibble [1 × 5]>
-#>  6 6        <tibble [1 × 3]> <tibble [1 × 5]>
-#>  7 7        <tibble [1 × 3]> <tibble [1 × 5]>
-#>  8 8        <tibble [1 × 3]> <tibble [1 × 5]>
-#>  9 9        <tibble [1 × 3]> <tibble [1 × 5]>
-#> 10 10       <tibble [1 × 3]> <tibble [1 × 5]>
-#> # … with 38 more rows
+#>  1 1        <tibble [1 × 4]> <tibble [1 × 5]>
+#>  2 2        <tibble [1 × 4]> <tibble [1 × 5]>
+#>  3 3        <tibble [1 × 4]> <tibble [1 × 5]>
+#>  4 4        <tibble [1 × 4]> <tibble [1 × 5]>
+#>  5 5        <tibble [1 × 4]> <tibble [1 × 5]>
+#>  6 6        <tibble [1 × 4]> <tibble [1 × 5]>
+#>  7 7        <tibble [1 × 4]> <tibble [1 × 5]>
+#>  8 8        <tibble [1 × 4]> <tibble [1 × 5]>
+#>  9 9        <tibble [1 × 4]> <tibble [1 × 5]>
+#> 10 10       <tibble [1 × 4]> <tibble [1 × 5]>
+#> # ℹ 38 more rows
 ```
 
 The result will be another `tibble` with various list columns.
@@ -584,9 +581,10 @@ The result will be another `tibble` with various list columns.
 It will always contain a list column named `specifications` containing
 all the information you generated in your blueprint. Next, there will be
 one list column per model fitted, labelled with a suffix like so
-`<function name>_fitted`.
+`<your model name>_fitted`.
 
-Here, we ran a `lm()` so our results are contained in `lm_fitted`.
+Here, our model used `lm()` so inside our `model_fitted` list column, we
+have our results are contained in `lm_*` columns.
 
 ## Unpacking a multiverse analysis
 
@@ -597,52 +595,50 @@ specification blueprint earlier).
 ### Unnest
 
 ``` r
-multiverse_results |> unnest(lm_fitted)
+multiverse_results |> unnest(model_fitted)
 #> # A tibble: 48 × 7
-#>    decision specifications   lm_code         lm_tidy  lm_gla…¹ lm_war…² lm_mes…³
-#>    <chr>    <list>           <glue>          <list>   <list>   <list>   <list>  
-#>  1 1        <tibble [1 × 3]> the_data |> fi… <tibble> <tibble> <tibble> <tibble>
-#>  2 2        <tibble [1 × 3]> the_data |> fi… <tibble> <tibble> <tibble> <tibble>
-#>  3 3        <tibble [1 × 3]> the_data |> fi… <tibble> <tibble> <tibble> <tibble>
-#>  4 4        <tibble [1 × 3]> the_data |> fi… <tibble> <tibble> <tibble> <tibble>
-#>  5 5        <tibble [1 × 3]> the_data |> fi… <tibble> <tibble> <tibble> <tibble>
-#>  6 6        <tibble [1 × 3]> the_data |> fi… <tibble> <tibble> <tibble> <tibble>
-#>  7 7        <tibble [1 × 3]> the_data |> fi… <tibble> <tibble> <tibble> <tibble>
-#>  8 8        <tibble [1 × 3]> the_data |> fi… <tibble> <tibble> <tibble> <tibble>
-#>  9 9        <tibble [1 × 3]> the_data |> fi… <tibble> <tibble> <tibble> <tibble>
-#> 10 10       <tibble [1 × 3]> the_data |> fi… <tibble> <tibble> <tibble> <tibble>
-#> # … with 38 more rows, and abbreviated variable names ¹​lm_glance, ²​lm_warnings,
-#> #   ³​lm_messages
+#>    decision specifications   lm_code  lm_tidy  lm_glance lm_warnings lm_messages
+#>    <chr>    <list>           <glue>   <list>   <list>    <list>      <list>     
+#>  1 1        <tibble [1 × 4]> the_dat… <tibble> <tibble>  <tibble>    <tibble>   
+#>  2 2        <tibble [1 × 4]> the_dat… <tibble> <tibble>  <tibble>    <tibble>   
+#>  3 3        <tibble [1 × 4]> the_dat… <tibble> <tibble>  <tibble>    <tibble>   
+#>  4 4        <tibble [1 × 4]> the_dat… <tibble> <tibble>  <tibble>    <tibble>   
+#>  5 5        <tibble [1 × 4]> the_dat… <tibble> <tibble>  <tibble>    <tibble>   
+#>  6 6        <tibble [1 × 4]> the_dat… <tibble> <tibble>  <tibble>    <tibble>   
+#>  7 7        <tibble [1 × 4]> the_dat… <tibble> <tibble>  <tibble>    <tibble>   
+#>  8 8        <tibble [1 × 4]> the_dat… <tibble> <tibble>  <tibble>    <tibble>   
+#>  9 9        <tibble [1 × 4]> the_dat… <tibble> <tibble>  <tibble>    <tibble>   
+#> 10 10       <tibble [1 × 4]> the_dat… <tibble> <tibble>  <tibble>    <tibble>   
+#> # ℹ 38 more rows
 ```
 
-Inside a `<model function>_fitted` column (here `lm_fitted`),
-`multitool` gives us 4 columns.
+Inside the `model_fitted` column, `multitool` gives us 4 columns using
+the model function you ran as a prefix.
 
 The first column is always the full code pipeline that produced the
-results: `lm_code`. The next are results passed to
-[`broom`](https://broom.tidymodels.org/) (if `tidy` and/or `glance`
+results. In our example, this is `lm_code`. The next are results passed
+to [`broom`](https://broom.tidymodels.org/) (if `tidy` and/or `glance`
 methods exist). For `lm`, we have `lm_tidy` and `lm_glance`. Notice the
 naming convention: `<model function>_tidy` and
 `<model function>_glance`.
 
 ``` r
-multiverse_results |> unnest(lm_fitted) |> unnest(lm_tidy)
+multiverse_results |> unnest(model_fitted) |> unnest(lm_tidy)
 #> # A tibble: 192 × 11
-#>    decision specificat…¹ lm_code term  estimate std.e…² stati…³ p.value lm_gla…⁴
-#>    <chr>    <list>       <glue>  <chr>    <dbl>   <dbl>   <dbl>   <dbl> <list>  
-#>  1 1        <tibble>     the_da… (Int… -0.0118   0.0581 -0.203  0.839   <tibble>
-#>  2 1        <tibble>     the_da… iv1   -0.0594   0.0625 -0.950  0.343   <tibble>
-#>  3 1        <tibble>     the_da… mod   -0.0127   0.0550 -0.232  0.817   <tibble>
-#>  4 1        <tibble>     the_da… iv1:…  0.148    0.0549  2.70   0.00738 <tibble>
-#>  5 2        <tibble>     the_da… (Int…  0.0178   0.0577  0.308  0.758   <tibble>
-#>  6 2        <tibble>     the_da… iv1    0.0372   0.0620  0.600  0.549   <tibble>
-#>  7 2        <tibble>     the_da… mod    0.00435  0.0546  0.0797 0.937   <tibble>
-#>  8 2        <tibble>     the_da… iv1:… -0.0288   0.0545 -0.528  0.598   <tibble>
-#>  9 3        <tibble>     the_da… (Int…  0.0112   0.0580  0.194  0.846   <tibble>
-#> 10 3        <tibble>     the_da… iv2   -0.0196   0.0566 -0.346  0.730   <tibble>
-#> # … with 182 more rows, 2 more variables: lm_warnings <list>,
-#> #   lm_messages <list>, and abbreviated variable names ¹​specifications,
-#> #   ²​std.error, ³​statistic, ⁴​lm_glance
+#>    decision specifications   lm_code  term  estimate std.error statistic p.value
+#>    <chr>    <list>           <glue>   <chr>    <dbl>     <dbl>     <dbl>   <dbl>
+#>  1 1        <tibble [1 × 4]> the_dat… (Int…  -0.0274    0.0573    -0.478   0.633
+#>  2 1        <tibble [1 × 4]> the_dat… iv1     0.0623    0.0613     1.02    0.310
+#>  3 1        <tibble [1 × 4]> the_dat… mod    -0.0146    0.0557    -0.263   0.793
+#>  4 1        <tibble [1 × 4]> the_dat… iv1:…   0.0307    0.0585     0.524   0.600
+#>  5 2        <tibble [1 × 4]> the_dat… (Int…   0.0227    0.0587     0.386   0.699
+#>  6 2        <tibble [1 × 4]> the_dat… iv1    -0.0294    0.0628    -0.469   0.640
+#>  7 2        <tibble [1 × 4]> the_dat… mod     0.0489    0.0571     0.856   0.393
+#>  8 2        <tibble [1 × 4]> the_dat… iv1:…   0.0644    0.0600     1.07    0.283
+#>  9 3        <tibble [1 × 4]> the_dat… (Int…  -0.0154    0.0572    -0.269   0.788
+#> 10 3        <tibble [1 × 4]> the_dat… iv2     0.0563    0.0544     1.04    0.301
+#> # ℹ 182 more rows
+#> # ℹ 3 more variables: lm_glance <list>, lm_warnings <list>, lm_messages <list>
 ```
 
 The `lm_tidy` (or `<model function>_tidy`) column gives us the main
@@ -651,24 +647,24 @@ errors, and p-values. `lm_glance` (or `<model function>_glance`) column
 gives us model fit statistics (among other things):
 
 ``` r
-multiverse_results |> unnest(lm_fitted) |> unnest(lm_glance)
+multiverse_results |> unnest(model_fitted) |> unnest(lm_glance)
 #> # A tibble: 48 × 18
-#>    decision specificat…¹ lm_code lm_tidy  r.squ…² adj.r.…³ sigma stati…⁴ p.value
-#>    <chr>    <list>       <glue>  <list>     <dbl>    <dbl> <dbl>   <dbl>   <dbl>
-#>  1 1        <tibble>     the_da… <tibble> 0.0257   1.59e-2 0.988   2.61   0.0515
-#>  2 2        <tibble>     the_da… <tibble> 0.00178 -8.30e-3 0.980   0.177  0.912 
-#>  3 3        <tibble>     the_da… <tibble> 0.00946 -5.50e-4 0.996   0.945  0.419 
-#>  4 4        <tibble>     the_da… <tibble> 0.0132   3.23e-3 0.974   1.32   0.267 
-#>  5 5        <tibble>     the_da… <tibble> 0.00859 -1.43e-3 0.996   0.857  0.464 
-#>  6 6        <tibble>     the_da… <tibble> 0.00566 -4.38e-3 0.978   0.564  0.639 
-#>  7 7        <tibble>     the_da… <tibble> 0.0256   1.58e-2 0.988   2.61   0.0514
-#>  8 8        <tibble>     the_da… <tibble> 0.00180 -8.25e-3 0.978   0.179  0.910 
-#>  9 9        <tibble>     the_da… <tibble> 0.00927 -7.04e-4 0.996   0.929  0.427 
-#> 10 10       <tibble>     the_da… <tibble> 0.0131   3.20e-3 0.973   1.32   0.267 
-#> # … with 38 more rows, 9 more variables: df <dbl>, logLik <dbl>, AIC <dbl>,
-#> #   BIC <dbl>, deviance <dbl>, df.residual <int>, nobs <int>,
-#> #   lm_warnings <list>, lm_messages <list>, and abbreviated variable names
-#> #   ¹​specifications, ²​r.squared, ³​adj.r.squared, ⁴​statistic
+#>    decision specifications   lm_code      lm_tidy  r.squared adj.r.squared sigma
+#>    <chr>    <list>           <glue>       <list>       <dbl>         <dbl> <dbl>
+#>  1 1        <tibble [1 × 4]> the_data |>… <tibble>   0.00514     -0.00516  0.978
+#>  2 2        <tibble [1 × 4]> the_data |>… <tibble>   0.00751     -0.00276  1.00 
+#>  3 3        <tibble [1 × 4]> the_data |>… <tibble>   0.0107       0.000467 0.975
+#>  4 4        <tibble [1 × 4]> the_data |>… <tibble>   0.00598     -0.00430  1.00 
+#>  5 5        <tibble [1 × 4]> the_data |>… <tibble>   0.0141       0.00392  0.973
+#>  6 6        <tibble [1 × 4]> the_data |>… <tibble>   0.0187       0.00854  0.996
+#>  7 7        <tibble [1 × 4]> the_data |>… <tibble>   0.00558     -0.00464  0.976
+#>  8 8        <tibble [1 × 4]> the_data |>… <tibble>   0.00755     -0.00265  0.999
+#>  9 9        <tibble [1 × 4]> the_data |>… <tibble>   0.0106       0.000392 0.974
+#> 10 10       <tibble [1 × 4]> the_data |>… <tibble>   0.00595     -0.00426  0.999
+#> # ℹ 38 more rows
+#> # ℹ 11 more variables: statistic <dbl>, p.value <dbl>, df <dbl>, logLik <dbl>,
+#> #   AIC <dbl>, BIC <dbl>, deviance <dbl>, df.residual <int>, nobs <int>,
+#> #   lm_warnings <list>, lm_messages <list>
 ```
 
 ### Reveal
@@ -679,43 +675,42 @@ which columns to grab by indicating the column name in the `.what`
 argument:
 
 ``` r
-multiverse_results |> reveal(.what = lm_fitted)
+multiverse_results |> reveal(.what = model_fitted)
 #> # A tibble: 48 × 7
-#>    decision specifications   lm_code         lm_tidy  lm_gla…¹ lm_war…² lm_mes…³
-#>    <chr>    <list>           <glue>          <list>   <list>   <list>   <list>  
-#>  1 1        <tibble [1 × 3]> the_data |> fi… <tibble> <tibble> <tibble> <tibble>
-#>  2 2        <tibble [1 × 3]> the_data |> fi… <tibble> <tibble> <tibble> <tibble>
-#>  3 3        <tibble [1 × 3]> the_data |> fi… <tibble> <tibble> <tibble> <tibble>
-#>  4 4        <tibble [1 × 3]> the_data |> fi… <tibble> <tibble> <tibble> <tibble>
-#>  5 5        <tibble [1 × 3]> the_data |> fi… <tibble> <tibble> <tibble> <tibble>
-#>  6 6        <tibble [1 × 3]> the_data |> fi… <tibble> <tibble> <tibble> <tibble>
-#>  7 7        <tibble [1 × 3]> the_data |> fi… <tibble> <tibble> <tibble> <tibble>
-#>  8 8        <tibble [1 × 3]> the_data |> fi… <tibble> <tibble> <tibble> <tibble>
-#>  9 9        <tibble [1 × 3]> the_data |> fi… <tibble> <tibble> <tibble> <tibble>
-#> 10 10       <tibble [1 × 3]> the_data |> fi… <tibble> <tibble> <tibble> <tibble>
-#> # … with 38 more rows, and abbreviated variable names ¹​lm_glance, ²​lm_warnings,
-#> #   ³​lm_messages
+#>    decision specifications   lm_code  lm_tidy  lm_glance lm_warnings lm_messages
+#>    <chr>    <list>           <glue>   <list>   <list>    <list>      <list>     
+#>  1 1        <tibble [1 × 4]> the_dat… <tibble> <tibble>  <tibble>    <tibble>   
+#>  2 2        <tibble [1 × 4]> the_dat… <tibble> <tibble>  <tibble>    <tibble>   
+#>  3 3        <tibble [1 × 4]> the_dat… <tibble> <tibble>  <tibble>    <tibble>   
+#>  4 4        <tibble [1 × 4]> the_dat… <tibble> <tibble>  <tibble>    <tibble>   
+#>  5 5        <tibble [1 × 4]> the_dat… <tibble> <tibble>  <tibble>    <tibble>   
+#>  6 6        <tibble [1 × 4]> the_dat… <tibble> <tibble>  <tibble>    <tibble>   
+#>  7 7        <tibble [1 × 4]> the_dat… <tibble> <tibble>  <tibble>    <tibble>   
+#>  8 8        <tibble [1 × 4]> the_dat… <tibble> <tibble>  <tibble>    <tibble>   
+#>  9 9        <tibble [1 × 4]> the_dat… <tibble> <tibble>  <tibble>    <tibble>   
+#> 10 10       <tibble [1 × 4]> the_dat… <tibble> <tibble>  <tibble>    <tibble>   
+#> # ℹ 38 more rows
 ```
 
 If you want to get straight to a tidied result you can specify a
 sub-list with the `.which` argument:
 
 ``` r
-multiverse_results |> reveal(.what = lm_fitted, .which = lm_tidy)
+multiverse_results |> reveal(.what = model_fitted, .which = lm_tidy)
 #> # A tibble: 192 × 7
 #>    decision specifications   term        estimate std.error statistic p.value
 #>    <chr>    <list>           <chr>          <dbl>     <dbl>     <dbl>   <dbl>
-#>  1 1        <tibble [1 × 3]> (Intercept) -0.0118     0.0581   -0.203  0.839  
-#>  2 1        <tibble [1 × 3]> iv1         -0.0594     0.0625   -0.950  0.343  
-#>  3 1        <tibble [1 × 3]> mod         -0.0127     0.0550   -0.232  0.817  
-#>  4 1        <tibble [1 × 3]> iv1:mod      0.148      0.0549    2.70   0.00738
-#>  5 2        <tibble [1 × 3]> (Intercept)  0.0178     0.0577    0.308  0.758  
-#>  6 2        <tibble [1 × 3]> iv1          0.0372     0.0620    0.600  0.549  
-#>  7 2        <tibble [1 × 3]> mod          0.00435    0.0546    0.0797 0.937  
-#>  8 2        <tibble [1 × 3]> iv1:mod     -0.0288     0.0545   -0.528  0.598  
-#>  9 3        <tibble [1 × 3]> (Intercept)  0.0112     0.0580    0.194  0.846  
-#> 10 3        <tibble [1 × 3]> iv2         -0.0196     0.0566   -0.346  0.730  
-#> # … with 182 more rows
+#>  1 1        <tibble [1 × 4]> (Intercept)  -0.0274    0.0573    -0.478   0.633
+#>  2 1        <tibble [1 × 4]> iv1           0.0623    0.0613     1.02    0.310
+#>  3 1        <tibble [1 × 4]> mod          -0.0146    0.0557    -0.263   0.793
+#>  4 1        <tibble [1 × 4]> iv1:mod       0.0307    0.0585     0.524   0.600
+#>  5 2        <tibble [1 × 4]> (Intercept)   0.0227    0.0587     0.386   0.699
+#>  6 2        <tibble [1 × 4]> iv1          -0.0294    0.0628    -0.469   0.640
+#>  7 2        <tibble [1 × 4]> mod           0.0489    0.0571     0.856   0.393
+#>  8 2        <tibble [1 × 4]> iv1:mod       0.0644    0.0600     1.07    0.283
+#>  9 3        <tibble [1 × 4]> (Intercept)  -0.0154    0.0572    -0.269   0.788
+#> 10 3        <tibble [1 × 4]> iv2           0.0563    0.0544     1.04    0.301
+#> # ℹ 182 more rows
 ```
 
 You can also choose to expand your specification blueprint with
@@ -723,23 +718,23 @@ You can also choose to expand your specification blueprint with
 
 ``` r
 multiverse_results |> 
-  reveal(.what = lm_fitted, .which = lm_tidy, .unpack_specs = TRUE)
-#> # A tibble: 192 × 13
-#>    decision ivs   dvs   include1    inclu…¹ inclu…² model model…³ term  estimate
-#>    <chr>    <chr> <chr> <chr>       <chr>   <chr>   <chr> <chr>   <chr>    <dbl>
-#>  1 1        iv1   dv1   include1 =… includ… scale(… lm(d… linear… (Int… -0.0118 
-#>  2 1        iv1   dv1   include1 =… includ… scale(… lm(d… linear… iv1   -0.0594 
-#>  3 1        iv1   dv1   include1 =… includ… scale(… lm(d… linear… mod   -0.0127 
-#>  4 1        iv1   dv1   include1 =… includ… scale(… lm(d… linear… iv1:…  0.148  
-#>  5 2        iv1   dv2   include1 =… includ… scale(… lm(d… linear… (Int…  0.0178 
-#>  6 2        iv1   dv2   include1 =… includ… scale(… lm(d… linear… iv1    0.0372 
-#>  7 2        iv1   dv2   include1 =… includ… scale(… lm(d… linear… mod    0.00435
-#>  8 2        iv1   dv2   include1 =… includ… scale(… lm(d… linear… iv1:… -0.0288 
-#>  9 3        iv2   dv1   include1 =… includ… scale(… lm(d… linear… (Int…  0.0112 
-#> 10 3        iv2   dv1   include1 =… includ… scale(… lm(d… linear… iv2   -0.0196 
-#> # … with 182 more rows, 3 more variables: std.error <dbl>, statistic <dbl>,
-#> #   p.value <dbl>, and abbreviated variable names ¹​include2, ²​include3,
-#> #   ³​model_meta
+  reveal(.what = model_fitted, .which = lm_tidy, .unpack_specs = TRUE)
+#> # A tibble: 192 × 14
+#>    decision ivs   dvs   include1  include2 include3 model model_meta filter_code
+#>    <chr>    <chr> <chr> <chr>     <chr>    <chr>    <chr> <chr>      <glue>     
+#>  1 1        iv1   dv1   include1… include… scale(i… lm(d… linear mo… the_data |…
+#>  2 1        iv1   dv1   include1… include… scale(i… lm(d… linear mo… the_data |…
+#>  3 1        iv1   dv1   include1… include… scale(i… lm(d… linear mo… the_data |…
+#>  4 1        iv1   dv1   include1… include… scale(i… lm(d… linear mo… the_data |…
+#>  5 2        iv1   dv2   include1… include… scale(i… lm(d… linear mo… the_data |…
+#>  6 2        iv1   dv2   include1… include… scale(i… lm(d… linear mo… the_data |…
+#>  7 2        iv1   dv2   include1… include… scale(i… lm(d… linear mo… the_data |…
+#>  8 2        iv1   dv2   include1… include… scale(i… lm(d… linear mo… the_data |…
+#>  9 3        iv2   dv1   include1… include… scale(i… lm(d… linear mo… the_data |…
+#> 10 3        iv2   dv1   include1… include… scale(i… lm(d… linear mo… the_data |…
+#> # ℹ 182 more rows
+#> # ℹ 5 more variables: term <chr>, estimate <dbl>, std.error <dbl>,
+#> #   statistic <dbl>, p.value <dbl>
 ```
 
 ### Condense
@@ -759,13 +754,13 @@ case, we have `estimate_mean` and `estimate_median`.
 
 ``` r
 multiverse_results |> 
-  reveal(.what = lm_fitted, .which = lm_tidy, .unpack_specs = TRUE) |> 
+  reveal(.what = model_fitted, .which = lm_tidy, .unpack_specs = TRUE) |> 
   filter(str_detect(term, "iv")) |> 
   condense(estimate, list(mean = mean, median = median))
 #> # A tibble: 1 × 2
 #>   estimate_mean estimate_median
 #>           <dbl>           <dbl>
-#> 1       -0.0107         -0.0226
+#> 1        0.0172          0.0295
 ```
 
 Here, we have filtered our multiverse results to look at our predictors
@@ -778,7 +773,7 @@ informative:
 
 ``` r
 multiverse_results |> 
-  reveal(.what = lm_fitted, .which = lm_tidy, .unpack_specs = TRUE) |> 
+  reveal(.what = model_fitted, .which = lm_tidy, .unpack_specs = TRUE) |> 
   filter(str_detect(term, "iv")) |>
   group_by(ivs, dvs) |> 
   condense(estimate, list(mean = mean, median = median))
@@ -786,12 +781,12 @@ multiverse_results |>
 #> # Groups:   ivs [3]
 #>   ivs   dvs   estimate_mean estimate_median
 #>   <chr> <chr>         <dbl>           <dbl>
-#> 1 iv1   dv1         0.0414          0.0455 
-#> 2 iv1   dv2         0.00767         0.00743
-#> 3 iv2   dv1        -0.0327         -0.0427 
-#> 4 iv2   dv2        -0.0357         -0.0380 
-#> 5 iv3   dv1        -0.0136         -0.00601
-#> 6 iv3   dv2        -0.0313         -0.0365
+#> 1 iv1   dv1         0.0466          0.0341 
+#> 2 iv1   dv2         0.0138          0.0124 
+#> 3 iv2   dv1        -0.0280         -0.0391 
+#> 4 iv2   dv2         0.0173          0.0306 
+#> 5 iv3   dv1         0.0472          0.0441 
+#> 6 iv3   dv2         0.00641        -0.00843
 ```
 
 If we were interested in all the terms of the model, we can leverage
@@ -799,24 +794,24 @@ If we were interested in all the terms of the model, we can leverage
 
 ``` r
 multiverse_results |> 
-  reveal(.what = lm_fitted, .which = lm_tidy, .unpack_specs = TRUE) |> 
+  reveal(.what = model_fitted, .which = lm_tidy, .unpack_specs = TRUE) |> 
   group_by(term, ivs, dvs) |> 
   condense(estimate, list(mean = mean, median = median))
 #> # A tibble: 24 × 5
 #> # Groups:   term, ivs [12]
 #>    term        ivs   dvs   estimate_mean estimate_median
 #>    <chr>       <chr> <chr>         <dbl>           <dbl>
-#>  1 (Intercept) iv1   dv1        -0.0246         -0.0256 
-#>  2 (Intercept) iv1   dv2        -0.00580        -0.0107 
-#>  3 (Intercept) iv2   dv1        -0.00931        -0.00977
-#>  4 (Intercept) iv2   dv2        -0.00840        -0.0127 
-#>  5 (Intercept) iv3   dv1        -0.00938        -0.00968
-#>  6 (Intercept) iv3   dv2        -0.0121         -0.0164 
-#>  7 iv1         iv1   dv1        -0.0716         -0.0741 
-#>  8 iv1         iv1   dv2         0.0386          0.0383 
-#>  9 iv1:mod     iv1   dv1         0.154           0.154  
-#> 10 iv1:mod     iv1   dv2        -0.0233         -0.0226 
-#> # … with 14 more rows
+#>  1 (Intercept) iv1   dv1         0.00862         0.00881
+#>  2 (Intercept) iv1   dv2         0.0201          0.0261 
+#>  3 (Intercept) iv2   dv1         0.0170          0.0172 
+#>  4 (Intercept) iv2   dv2         0.0193          0.0248 
+#>  5 (Intercept) iv3   dv1         0.0139          0.0140 
+#>  6 (Intercept) iv3   dv2         0.0214          0.0271 
+#>  7 iv1         iv1   dv1         0.0630          0.0611 
+#>  8 iv1         iv1   dv2        -0.00887        -0.0101 
+#>  9 iv1:mod     iv1   dv1         0.0301          0.0309 
+#> 10 iv1:mod     iv1   dv2         0.0365          0.0357 
+#> # ℹ 14 more rows
 ```
 
 ## Learning more

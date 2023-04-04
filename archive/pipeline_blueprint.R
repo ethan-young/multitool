@@ -1,4 +1,7 @@
-pipeline_blueprint <- function(.grid, y_scale = 1, x_scale = 1){
+pipeline_blueprint <- function(.grid){
+
+  decision_types <-
+    .grid |> pull(type) |> unique()
 
   data_combos <-
     .grid |>
@@ -111,7 +114,6 @@ pipeline_blueprint <- function(.grid, y_scale = 1, x_scale = 1){
           )
       }
       my_nodes
-
     }) |>
     list_rbind() |>
     transmute(
@@ -128,31 +130,6 @@ pipeline_blueprint <- function(.grid, y_scale = 1, x_scale = 1){
                              nodes == "total_models" ~ 7,
                              nodes == "postprocess" ~ 8),
            rank = order,
-    ) |>
-    group_by(order) |>
-    mutate(
-      n_steps = n(),
-      y = cur_group_id() * -1,
-    ) |>
-    ungroup() |>
-    mutate(
-      x = case_when(nodes %in% c("base_df", "total_dfs") ~ 0,
-                    n_steps > 1 & nodes == "filters" ~ 1,
-                    n_steps > 1 & nodes == "variables" ~ -1,
-                    n_steps == 1 & nodes %in% c("filters", "variables") ~ 0,
-                    nodes == "preprocess" ~ 0,
-                    nodes == "descriptive" ~ 1,
-                    n_steps == 1 & nodes == "descriptive" ~ 0,
-                    TRUE~ -99),
-      x = ifelse(nodes == "model_1", -1, x),
-      x = ifelse(str_detect(nodes, "model_[2-9]") , lag(x) - 1, x),
-      x = ifelse(nodes == "total_models", lag(x), x),
-      x = ifelse(nodes == "postprocess", lag(x), x),
-      x = ifelse(nodes == "filters_set", lag(x) + 1, x),
-      x = ifelse(nodes == "variables_set", lag(x) - 1, x),
-      id = 1:n(),
-      x = x*x_scale,
-      y = y*y_scale
     ) |>
     as.data.frame()
 
@@ -217,100 +194,71 @@ pipeline_blueprint <- function(.grid, y_scale = 1, x_scale = 1){
     drop_na() |>
     as.data.frame()
 
-  the_graph <-
+  a_graph <-
     create_graph() |>
-    add_node_df(pipeline_nodes) |>
+    add_node_df(pipeline_nodes)
+
+  if("filters" %in% decision_types & "variables" %in% decision_types){
+    invis_nodes <-
+      a_graph |>
+      select_nodes(conditions = str_detect(nodes, "filters|variables")) |>
+      get_node_df_ws() |>
+      mutate(
+        new_order = case_when(nodes == "variables_set" ~ 1,
+                              nodes == "variables" ~ 2,
+                              nodes == "filters" ~ 3,
+                              nodes == "filters_set" ~ 4)
+      ) |>
+      arrange(new_order) |>
+      pull(id)
+
+    invis_edges <-
+      invis_nodes |>
+      tibble(
+        v1 = _
+      ) |>
+      mutate(
+        v2 = lead(v1)
+      ) |>
+      drop_na() |>
+      rename(from = v1, to = v2) |>
+      mutate(
+        color = "purple",
+        style = "invis"
+      )
+  }
+
+  the_graph <-
+    a_graph |>
+    add_edge_df(invis_edges) |>
     add_edge_df(pipeline_edges) |>
     add_global_graph_attrs("layout", "dot", "graph") |>
     add_global_graph_attrs("overlap", "false", "graph") |>
-    add_global_graph_attrs("fixedsize", 'false', 'node') |>
-    add_global_graph_attrs("shape", 'rect', 'node') |>
+    add_global_graph_attrs("fixedsize", "false", "node") |>
+    add_global_graph_attrs("shape", "rect", "node") |>
     add_global_graph_attrs("tailport", "s", "edge") |>
-    add_global_graph_attrs("headport", "n", "edge")
+    add_global_graph_attrs("headport", "n", "edge") |>
+    add_global_graph_attrs("concentrate", "false", "edge") |>
+    select_edges(my_to == "filters_set") |>
+    set_edge_attrs_ws("arrowhead", "none") |>
+    set_edge_attrs_ws("arrowtail", "none") |>
+    set_edge_attrs_ws("style", "solid") |>
+    set_edge_attrs_ws("headport", "w") |>
+    set_edge_attrs_ws("tailport", "e") |>
+    clear_selection() |>
+    select_edges(my_from == "variables_set") |>
+    set_edge_attrs_ws("arrowhead", "none") |>
+    set_edge_attrs_ws("arrowtail", "none") |>
+    set_edge_attrs_ws("style", "solid") |>
+    set_edge_attrs_ws("headport", "w") |>
+    set_edge_attrs_ws("tailport", "e") |>
+    clear_selection()
 
-  invis_nodes <-
-    the_graph |>
-    select_nodes(conditions = str_detect(nodes, "filters|variables")) |>
-    get_node_df_ws() |>
-    mutate(
-      new_order = case_when(nodes == "variables_set" ~ 1,
-                            nodes == "variables" ~ 2,
-                            nodes == "filters" ~ 3,
-                            nodes == "filters_set" ~ 4)
-    ) |>
-    arrange(new_order) |>
-    pull(id)
-
-  invis_edges <-
-    invis_nodes |>
-    tibble(
-      v1 = _
-    ) |>
-    mutate(
-      v2 = lead(v1)
-    ) |>
-    drop_na() |>
-    glue::glue_data("{v1}->{v2}") |>
-    paste(collapse = " ")
-
-  the_graph |>
-    add_edges_w_string(invis_edges, rel = "invisible") |>
-    select_edges(condition = rel == "invisible") |>
-    set_edge_attrs_ws(edge_attr = "color",value =  "#FFFFFF00")
-
-  if("filters" %in% unique(pipeline_nodes$nodes)){
-
+  the_graph
 }
 
-d <- pipeline_blueprint(stm_pipeline)
+pipeline_blueprint(stm_pipeline) |> render_graph()
+pipeline_blueprint(stm_pipeline) |> generate_dot() |> cat()
 
-d |> render_graph()
-d |> get_node_df()
-d |> get_edge_df()
-
-
-d |>
-  select_edges(conditions = my_to == 'filters_set') |>
-  set_edge_attrs_ws(edge_attr = "tailport", value = "w") |>
-  set_edge_attrs_ws("headport", "e") |>
-  clear_selection() |>
-  select_edges(conditions = my_from == 'variables_set') |>
-  set_edge_attrs_ws(edge_attr = "tailport", value = "e") |>
-  set_edge_attrs_ws("headport", "w") |>
-  render_graph()
-
-invis_nodes <-
-  d |>
-  select_nodes(conditions = str_detect(nodes, "filters|variables")) |>
-  get_node_df_ws() |>
-  mutate(
-    new_order = case_when(nodes == "variables_set" ~ 1,
-                          nodes == "variables" ~ 2,
-                          nodes == "filters" ~ 3,
-                          nodes == "filters_set" ~ 4)
-  ) |>
-  arrange(new_order) |>
-  pull(id)
-
-invis_edges <-
-  invis_nodes |>
-  tibble(
-    v1 = _
-  ) |>
-  mutate(
-    v2 = lead(v1)
-  ) |>
-  drop_na() |>
-  glue::glue_data("{v1}->{v2}") |>
-  paste(collapse = " ")
-
-
-
-subgraph <-
-  d |>
-  add_edges_w_string(invis_edges, rel = "invisible") |>
-  select_edges(condition = rel == "invisible") |>
-  set_edge_attrs_ws(edge_attr = "color",value =  "#FFFFFF00")
-
-subgraph |> render_graph()
-
+get_node_df(pipeline_blueprint(stm_pipeline))
+get_edge_df(pipeline_blueprint(stm_pipeline))

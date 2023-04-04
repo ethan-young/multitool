@@ -82,10 +82,11 @@ run_universe_model <- function(.grid, decision_num, save_model = FALSE){
   }
 
   universe_results$model_results <-
-    purrr::map_dfc(
-      universe_analyses,
-      function(x){
-        collect_quiet_results(x, save_model = save_model)
+    purrr::map2_dfc(
+      universe_analyses, names(universe_analyses),
+      function(x, y){
+        results <- collect_quiet_results(x, save_model = save_model)
+        tibble("{y}_fitted" := list(results))
       })
 
   universe_results |>
@@ -93,7 +94,7 @@ run_universe_model <- function(.grid, decision_num, save_model = FALSE){
     dplyr::mutate(
       decision = decision_num |> as.character(),
     ) |>
-    dplyr::select(decision, dplyr::ends_with("fitted"))
+    dplyr::select(decision, dplyr::everything())
 }
 
 run_universe_corrs <- function(.grid, decision_num){

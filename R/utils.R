@@ -223,8 +223,7 @@ collect_quiet_results <- function(code, save_model = FALSE){
     mutate(
       "{model_func}_warnings" := list(warnings),
       "{model_func}_messages" := list(messages)
-    ) |>
-    tidyr::nest("{model_func}_fitted" := dplyr::starts_with(model_func))
+    )
 }
 
 

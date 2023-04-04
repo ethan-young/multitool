@@ -91,7 +91,7 @@ run_universe_summary_stats(full_pipeline, 120) |> unnest(summary_stats_computed)
 
 ## Unpack the multiverse ----
 the_multiverse |>
-  reveal(lm_fitted, matches("tidy"), T)
+  reveal(model, matches("tidy"), T)
 
 the_multiverse |>
   reveal(cron_alphas_computed)

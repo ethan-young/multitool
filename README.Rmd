@@ -299,9 +299,9 @@ multiverse_results
 
 The result will be another `tibble` with various list columns. 
 
-It will always contain a list column named `specifications` containing all the information you generated in your blueprint. Next, there will be one list column per model fitted, labelled with a suffix like so `<function name>_fitted`. 
+It will always contain a list column named `specifications` containing all the information you generated in your blueprint. Next, there will be one list column per model fitted, labelled with a suffix like so `<your model name>_fitted`. 
 
-Here, we ran a `lm()` so our results are contained in `lm_fitted`.
+Here, our model used `lm()` so inside our `model_fitted` list column, we have our results are contained in `lm_*` columns.
 
 ## Unpacking a multiverse analysis
 
@@ -310,21 +310,21 @@ There are two main ways to unpack and examine `multitool` results. The first is 
 ### Unnest
 
 ```{r unnest}
-multiverse_results |> unnest(lm_fitted)
+multiverse_results |> unnest(model_fitted)
 ```
 
-Inside a `<model function>_fitted` column (here `lm_fitted`), `multitool` gives us 4 columns. 
+Inside the `model_fitted` column, `multitool` gives us 4 columns using the model function you ran as a prefix. 
 
-The first column is always the full code pipeline that produced the results: `lm_code`. The next are results passed to [`broom`](https://broom.tidymodels.org/) (if `tidy` and/or `glance` methods exist). For `lm`, we have `lm_tidy` and `lm_glance`. Notice the naming convention: `<model function>_tidy` and `<model function>_glance`.
+The first column is always the full code pipeline that produced the results. In our example, this is `lm_code`. The next are results passed to [`broom`](https://broom.tidymodels.org/) (if `tidy` and/or `glance` methods exist). For `lm`, we have `lm_tidy` and `lm_glance`. Notice the naming convention: `<model function>_tidy` and `<model function>_glance`.
 
 ```{r tidy}
-multiverse_results |> unnest(lm_fitted) |> unnest(lm_tidy)
+multiverse_results |> unnest(model_fitted) |> unnest(lm_tidy)
 ```
 
 The `lm_tidy` (or `<model function>_tidy`) column gives us the main results of `lm()` per decision. These include terms, estimates, standard errors, and p-values. `lm_glance` (or `<model function>_glance`) column gives us model fit statistics (among other things):
 
 ```{r glance}
-multiverse_results |> unnest(lm_fitted) |> unnest(lm_glance)
+multiverse_results |> unnest(model_fitted) |> unnest(lm_glance)
 ```
 
 ### Reveal
@@ -332,20 +332,20 @@ multiverse_results |> unnest(lm_fitted) |> unnest(lm_glance)
 I wrote wrappers around the `unnest()` workflow. The main function is `reveal()`. Pass a multiverse results `tibble` to `reveal()` and tell it which columns to grab by indicating the column name in the `.what` argument:
 
 ```{r reveal}
-multiverse_results |> reveal(.what = lm_fitted)
+multiverse_results |> reveal(.what = model_fitted)
 ```
 
 If you want to get straight to a tidied result you can specify a sub-list with the `.which` argument:
 
 ```{r which}
-multiverse_results |> reveal(.what = lm_fitted, .which = lm_tidy)
+multiverse_results |> reveal(.what = model_fitted, .which = lm_tidy)
 ```
 
 You can also choose to expand your specification blueprint with `.unpack_specs = TRUE` to see which decisions produced what result:
 
 ```{r unpack-specs}
 multiverse_results |> 
-  reveal(.what = lm_fitted, .which = lm_tidy, .unpack_specs = TRUE)
+  reveal(.what = model_fitted, .which = lm_tidy, .unpack_specs = TRUE)
 ```
 
 ### Condense
@@ -358,7 +358,7 @@ A powerful way to organize these results is to `condense` a specific results col
 
 ```{r condense}
 multiverse_results |> 
-  reveal(.what = lm_fitted, .which = lm_tidy, .unpack_specs = TRUE) |> 
+  reveal(.what = model_fitted, .which = lm_tidy, .unpack_specs = TRUE) |> 
   filter(str_detect(term, "iv")) |> 
   condense(estimate, list(mean = mean, median = median))
 ```
@@ -369,7 +369,7 @@ However, we had three versions of our predictor and two outcomes, so combining `
 
 ```{r group_by-condense1}
 multiverse_results |> 
-  reveal(.what = lm_fitted, .which = lm_tidy, .unpack_specs = TRUE) |> 
+  reveal(.what = model_fitted, .which = lm_tidy, .unpack_specs = TRUE) |> 
   filter(str_detect(term, "iv")) |>
   group_by(ivs, dvs) |> 
   condense(estimate, list(mean = mean, median = median))
@@ -379,7 +379,7 @@ If we were interested in all the terms of the model, we can leverage `group_by` 
 
 ```{r group_by-condense2}
 multiverse_results |> 
-  reveal(.what = lm_fitted, .which = lm_tidy, .unpack_specs = TRUE) |> 
+  reveal(.what = model_fitted, .which = lm_tidy, .unpack_specs = TRUE) |> 
   group_by(term, ivs, dvs) |> 
   condense(estimate, list(mean = mean, median = median))
 ```
