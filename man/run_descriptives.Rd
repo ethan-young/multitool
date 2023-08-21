@@ -15,6 +15,10 @@ descriptive analyses.}
 
 \item{show_progress}{logical, whether to show a progress bar while running.}
 }
+\value{
+single \code{tibble} containing tidied results for all descriptive
+analyses specified
+}
 \description{
 Run a multiverse-style descriptive analysis based on a complete decision grid
 }

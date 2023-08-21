@@ -427,7 +427,8 @@ run_multiverse <- function(.grid, save_model = FALSE, ncores = 1, show_progress 
 #'   descriptive analyses.
 #' @param show_progress logical, whether to show a progress bar while running.
 #'
-#' @return
+#' @return  single \code{tibble} containing tidied results for all descriptive
+#'   analyses specified
 #' @export
 #'
 #' @examples

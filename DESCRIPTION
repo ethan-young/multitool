@@ -43,7 +43,8 @@ Imports:
   tibble,
   tidyr,
   lme4,
-  parameters
+  parameters,
+  performance
 Suggests: 
     knitr,
     rmarkdown,
