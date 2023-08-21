@@ -10,22 +10,28 @@
     <loc>https://ethan-young.github.io/multitool/LICENSE.html</loc>
   </url>
   <url>
-    <loc>https://ethan-young.github.io/multitool/articles/decision-grids.html</loc>
-  </url>
-  <url>
-    <loc>https://ethan-young.github.io/multitool/articles/filtering-grids.html</loc>
+    <loc>https://ethan-young.github.io/multitool/articles/create-your-blueprint.html</loc>
   </url>
   <url>
     <loc>https://ethan-young.github.io/multitool/articles/index.html</loc>
   </url>
   <url>
-    <loc>https://ethan-young.github.io/multitool/articles/variable-grids.html</loc>
+    <loc>https://ethan-young.github.io/multitool/articles/run-your-pipeline.html</loc>
+  </url>
+  <url>
+    <loc>https://ethan-young.github.io/multitool/articles/validate-your-blueprint.html</loc>
   </url>
   <url>
     <loc>https://ethan-young.github.io/multitool/authors.html</loc>
   </url>
   <url>
     <loc>https://ethan-young.github.io/multitool/index.html</loc>
+  </url>
+  <url>
+    <loc>https://ethan-young.github.io/multitool/multiverse-primer/multiverse-primer.html</loc>
+  </url>
+  <url>
+    <loc>https://ethan-young.github.io/multitool/multiverse-primer/multiverse-primer_files/libs/revealjs/plugin/notes/speaker-view.html</loc>
   </url>
   <url>
     <loc>https://ethan-young.github.io/multitool/reference/add_correlations.html</loc>
@@ -52,10 +58,22 @@
     <loc>https://ethan-young.github.io/multitool/reference/add_variables.html</loc>
   </url>
   <url>
-    <loc>https://ethan-young.github.io/multitool/reference/blueprint.html</loc>
+    <loc>https://ethan-young.github.io/multitool/reference/condense.html</loc>
   </url>
   <url>
-    <loc>https://ethan-young.github.io/multitool/reference/condense.html</loc>
+    <loc>https://ethan-young.github.io/multitool/reference/create_blueprint_graph.html</loc>
+  </url>
+  <url>
+    <loc>https://ethan-young.github.io/multitool/reference/detect_multiverse_n.html</loc>
+  </url>
+  <url>
+    <loc>https://ethan-young.github.io/multitool/reference/detect_n_filters.html</loc>
+  </url>
+  <url>
+    <loc>https://ethan-young.github.io/multitool/reference/detect_n_models.html</loc>
+  </url>
+  <url>
+    <loc>https://ethan-young.github.io/multitool/reference/detect_n_variables.html</loc>
   </url>
   <url>
     <loc>https://ethan-young.github.io/multitool/reference/expand_decisions.html</loc>
@@ -85,6 +103,9 @@
     <loc>https://ethan-young.github.io/multitool/reference/reveal_summary_stats.html</loc>
   </url>
   <url>
+    <loc>https://ethan-young.github.io/multitool/reference/run_descriptives.html</loc>
+  </url>
+  <url>
     <loc>https://ethan-young.github.io/multitool/reference/run_multiverse.html</loc>
   </url>
   <url>
@@ -95,5 +116,8 @@
   </url>
   <url>
     <loc>https://ethan-young.github.io/multitool/reference/show_code_filter.html</loc>
+  </url>
+  <url>
+    <loc>https://ethan-young.github.io/multitool/reference/summarize_filter_ns.html</loc>
   </url>
 </urlset>
