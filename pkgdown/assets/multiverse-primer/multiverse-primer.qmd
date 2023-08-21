@@ -1,0 +1,76 @@
+---
+title: "Multiverse Analysis"
+title-slide-attributes:
+      data-background-image: title.png
+      data-background-color: "black"
+format: revealjs
+---
+
+## Garden of Forking Paths {.smaller}
+
+All data analysis projects must choose between different ways to analyze data. This is known as the garden of forking paths:
+
+![](1-forking.png){fig-align="center" with=100%}
+
+## Garden of Forking Data {.smaller}
+
+In practice, this means we must choose between many possible versions of our dataset. Every data processing step leads to a different final dataset.
+
+Enter the _**multiverse**_:
+
+![](2-forking-data.png){fig-align="center" with=100%}
+
+## Why Care About the Multiverse?{.smaller}
+
+Ignoring the multiverse can lead to undesirable actions/outcomes:
+
+:::: {.columns}
+
+::: {.column width="50%"}
+_**Cherry Picking**_
+
+![](3-cherry.png)
+:::
+
+::: {.column width="50%"}
+_**Pigeonholes**_
+
+![](4-pidgeons.png)
+:::
+
+::::
+
+## Why Care About the Multiverse? {.smaller}
+
+Ignoring the multiverse can lead to undesirable actions/outcomes:
+
+:::: {.columns}
+::: {.column width="50%"}
+_**Cherry Picking**_
+
+Selectively reporting the analysis that shows your preferred result
+:::
+
+::: {.column width="50%"}
+_**Pigeonholes**_
+
+Becoming constrained by overly rigid analysis criteria
+:::
+::::
+
+![](5-dangers.png){fig-align="center" with=100%}
+
+## Multiverse Analysis
+
+:::: {.columns}
+::: {.column width="50%"}
+- _**Transparently and systematically**_ analyze the whole multiverse
+- Transparency reduces cherry-picking
+- Systematically handling decisions reduces pigeonholing
+
+:::
+
+::: {.column width="50%"}
+![](6-multiverse.png)
+:::
+::::

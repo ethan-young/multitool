@@ -1,0 +1,148 @@
+---
+title: "Run your Pipeline"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{run-your-pipeline}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Once you have built your full specification blueprint and feel comfortable with how the pipeline is executed, you can implement a full multiverse-style analysis. 
+
+Simply use `run_multiverse(<your pipeline object>)`:
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(multitool)
+
+# create some data
+the_data <-
+  data.frame(
+    id  = 1:500,
+    iv1 = rnorm(500),
+    iv2 = rnorm(500),
+    iv3 = rnorm(500),
+    mod = rnorm(500),
+    dv1 = rnorm(500),
+    dv2 = rnorm(500),
+    include1 = rbinom(500, size = 1, prob = .1),
+    include2 = sample(1:3, size = 500, replace = TRUE),
+    include3 = rnorm(500)
+  )
+
+# create a pipeline blueprint
+full_pipeline <- 
+  the_data |>
+  add_filters(include1 == 0, include2 != 3, include3 > -2.5) |> 
+  add_variables(var_group = "ivs", iv1, iv2, iv3) |> 
+  add_variables(var_group = "dvs", dv1, dv2) |> 
+  add_model("linear model", lm({dvs} ~ {ivs} * mod))
+
+# expand the pipeline
+expanded_pipeline <- expand_decisions(full_pipeline)
+
+# Run the multiverse
+multiverse_results <- run_multiverse(expanded_pipeline)
+
+multiverse_results
+```
+
+The result will be another `tibble` with various list columns. 
+
+It will always contain a list column named `specifications` containing all the information you generated in your blueprint. Next, there will be one list column per model fitted, labelled with a suffix like so `<your model name>_fitted`. 
+
+Here, our model used `lm()` so inside our `model_fitted` list column, we have our results are contained in `lm_*` columns.
+
+## Unpacking a multiverse analysis
+
+There are two main ways to unpack and examine `multitool` results. The first is by using `tidyr::unnest()` (similar to unpacking the specification blueprint earlier).
+
+### Unnest
+
+```{r unnest}
+multiverse_results |> unnest(model_fitted)
+```
+
+Inside the `model_fitted` column, `multitool` gives us 4 columns using the model function you ran as a prefix. 
+
+The first column is always the full code pipeline that produced the results. In our example, this is `lm_code`. The next are results passed to [`broom`](https://broom.tidymodels.org/) (if `tidy` and/or `glance` methods exist). For `lm`, we have `lm_tidy` and `lm_glance`. Notice the naming convention: `<model function>_params` and `<model function>_performance`.
+
+```{r tidy}
+multiverse_results |> 
+  unnest(model_fitted) |> 
+  unnest(lm_params)
+```
+
+The `lm_params` (or `<model function>_params`) column gives us the main results of `lm()` per decision. These include terms, estimates, standard errors, and p-values. `lm_performance` (or `<model function>_performance`) column gives us model fit statistics (among other things):
+
+```{r glance}
+multiverse_results |> 
+  unnest(model_fitted) |>
+  unnest(lm_performance)
+```
+
+### Reveal
+
+I wrote wrappers around the `unnest()` workflow. The main function is `reveal()`. Pass a multiverse results `tibble` to `reveal()` and tell it which columns to grab by indicating the column name in the `.what` argument:
+
+```{r reveal}
+multiverse_results |> 
+  reveal(.what = model_fitted)
+```
+
+If you want to get straight to a tidied result you can specify a sub-list with the `.which` argument:
+
+```{r which}
+multiverse_results |> 
+  reveal(.what = model_fitted, .which = lm_params)
+```
+
+You can also choose to expand your specification blueprint with `.unpack_specs = TRUE` to see which decisions produced what result:
+
+```{r unpack-specs}
+multiverse_results |> 
+  reveal(.what = model_fitted, .which = lm_params, .unpack_specs = TRUE)
+```
+
+### Condense
+
+Unpacking specifications alongside specific results allows us to examine the effects of our pipeline decisions. 
+
+A powerful way to organize these results is to `condense` a specific results column, say our predictor regression coefficient, over the entire multiverse. `condense()` takes a result column and summarizes it with the `.how` argument, which takes a list in the form of `list(<a name you pick> = <summary function>)`.
+
+`.how` will create a column named like so `<column being condsensed>_<summary function name provided>"`. For this case, we have `coefficient_mean` and `coefficient_median`.
+
+```{r condense}
+multiverse_results |> 
+  reveal(.what = model_fitted, .which = lm_params, .unpack_specs = TRUE) |> 
+  filter(str_detect(parameter, "iv")) |> 
+  condense(coefficient, list(mean = mean, median = median))
+```
+
+Here, we have filtered our multiverse results to look at our predictors `iv*` to see what the mean and median effect was (over all combinations of decisions) on our outcomes. 
+
+However, we had three versions of our predictor and two outcomes, so combining `dplyr::group_by()` with `condense()` might be more informative:
+
+```{r group_by-condense1}
+multiverse_results |> 
+  reveal(.what = model_fitted, .which = lm_params, .unpack_specs = TRUE) |> 
+  filter(str_detect(parameter, "iv")) |>
+  group_by(ivs, dvs) |> 
+  condense(coefficient, list(mean = mean, median = median))
+```
+
+If we were interested in all the terms of the model, we can leverage `group_by` further:
+
+```{r group_by-condense2}
+multiverse_results |> 
+  reveal(.what = model_fitted, .which = lm_params, .unpack_specs = TRUE) |> 
+  group_by(parameter, ivs, dvs) |> 
+  condense(coefficient, list(mean = mean, median = median))
+```

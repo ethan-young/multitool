@@ -1,8 +1,85 @@
 url: https://ethan-young.github.io/multitool/
+
 template:
   bootstrap: 5
-  bootswatch: flatly
+  theme:  pygments
+  navbar:
+    type: light
   bslib:
     base_font: {google: "Lato"}
-    font-size-base: ".85rem"
+    font-size-base: ".90rem"
+    line-height-base: "1.35"
+    headings-font-weight: "bold"
+    code_font: {google: "Fira Code"}
+    bg: "#fff"
+    code-bg: "#ecf0f1"
+    pre-bg: "#ecf0f1"
+    pre-border: "#ecf0f1"
+    fg: "#000"
+    primary: "#1e87f0"
+    secondary: "#ecf0f1"
+    light: "white"
+
+articles:
+- title: Get started
+  navbar: ~
+  contents:
+  - create-your-blueprint
+  - validate-your-blueprint
+  - run-your-pipeline
+
+reference:
+- title: Creating a Pipeline
+  desc: >
+    Add your analysis pipeline steps
+  contents:
+  - add_filters
+  - add_variables
+  - add_model
+  - add_preprocess
+  - add_postprocess
+  - add_summary_stats
+  - add_cron_alpha
+  - add_correlations
+  - expand_decisions
+
+- title: View, Check, and Test
+  desc: >
+    View metadata, check the code, and test the pipeline
+  contents:
+  - create_blueprint_graph
+  - detect_multiverse_n
+  - detect_n_filters
+  - detect_n_variables
+  - detect_n_models
+  - summarize_filter_ns
+  - show_code_filter
+  - run_universe_model
+  - run_universe_summary_stats
+
+- title: Run your Pipeline
+  desc: >
+    Execute the whole pipeline and all alternatives
+  contents:
+  - run_multiverse
+  - run_descriptives
+  - report_universe_console
+
+- title: Unpack Results
+  desc: >
+    Unpack your results for viewing, plotting, and understanding
+  contents:
+  - reveal
+  - reveal_alphas
+  - reveal_corrs
+  - reveal_summary_stats
+  - condense
+
+- title: Examples
+  desc: >
+    Example data
+  contents:
+  - icar_data_codebook
+  - icar_data
+
 

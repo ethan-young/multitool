@@ -233,7 +233,7 @@ show_code_summary_stats <- function(.grid, decision_num, copy = F){
       tidyr::unnest(summary_stats) |>
       as.list() |>
       purrr::map(
-        function(x) paste0(list_to_pipeline(code, for_print = TRUE), " |> \n  ", x)
+        function(x) paste0(list_to_pipeline(code, for_print = TRUE), " |> \n  ", x |> str_replace_all(" \\|\\> ", " |> \n  "))
       )
   } else{
     rlang::warn("You don't have any summary statistics in your pipeline...")

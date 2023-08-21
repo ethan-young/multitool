@@ -85,7 +85,7 @@ run_universe_model <- function(.grid, decision_num, save_model = FALSE){
     purrr::map2_dfc(
       universe_analyses, names(universe_analyses),
       function(x, y){
-        results <- collect_quiet_results(x, save_model = save_model)
+        results <- collect_quiet_results_easy(x, save_model = save_model)
         tibble("{y}_fitted" := list(results))
       })
 
@@ -339,27 +339,29 @@ run_universe_cron_alphas <- function(.grid, decision_num){
 #' @param .grid a \code{tibble} produced by \code{\link{expand_decisions}}
 #' @param save_model logical, indicates whether to save the model object in its
 #'   entirety. The default is \code{FALSE} because model objects are usually
-#'   large and under the hood, \code{\link[broom]{tidy}} and
-#'   \code{\link[broom]{glance}} is used to summarize the most useful model
-#'   information.
+#'   large and under the hood, \code{\link[parameters]{parameters}} and
+#'   \code{\link[performance]{performance}} is used to summarize the most useful
+#'   model information.
 #' @param ncores numeric. The number of cores you want to use for parallel
 #'   processing.
+#' @param show_progress logical, whether to show a progress bar while running.
 #'
 #' @return a single \code{tibble} containing tidied results for the model and
 #'   any post-processing tests/tasks. For each unique test (e.g., an \code{lm}
 #'   or \code{aov} called on an \code{lm}), a list column with the function name
-#'   is created with \code{\link[broom]{tidy}} and \code{\link[broom]{glance}}
-#'   and any warnings or messages printed while fitting the models. Internally,
-#'   modeling and post-processing functions are checked to see if there are tidy
-#'   or glance methods available. If not, \code{summary} will be called instead.
+#'   is created with \code{\link[parameters]{parameters}} and
+#'   \code{\link[performance]{performance}} and any warnings or messages printed
+#'   while fitting the models. Internally, modeling and post-processing
+#'   functions are checked to see if there are tidy or glance methods available.
+#'   If not, \code{summary} will be called instead.
 #' @export
 #'
 #' @examples
 #'
 #' \dontrun{
-#' run_multiverse(data, grid)
+#' run_multiverse(grid)
 #' }
-run_multiverse <- function(.grid, save_model = FALSE, ncores = 1){
+run_multiverse <- function(.grid, save_model = FALSE, ncores = 1, show_progress = FALSE){
 
   if(ncores > 1){
     future::plan(future::multisession, workers = ncores)
@@ -377,31 +379,6 @@ run_multiverse <- function(.grid, save_model = FALSE, ncores = 1){
                 save_model = save_model
               )
           }
-
-          if("corrs" %in% names(.grid)){
-            multi_results$corrs <-
-              run_universe_corrs(
-                .grid = .grid,
-                decision_num = x
-              )
-          }
-
-          if("summary_stats" %in% names(.grid)){
-            multi_results$stats <-
-              run_universe_summary_stats(
-                .grid = .grid,
-                decision_num = x
-              )
-          }
-
-          if("cron_alphas" %in% names(.grid)){
-            multi_results$alphas <-
-              run_universe_cron_alphas(
-                .grid = .grid,
-                decision_num = x
-              )
-          }
-
           purrr::reduce(multi_results, left_join, by = "decision")
         },
         .options = furrr::furrr_options(seed = TRUE)
@@ -410,8 +387,9 @@ run_multiverse <- function(.grid, save_model = FALSE, ncores = 1){
   } else{
 
     multiverse <-
-      purrr::map_df(
-        cli::cli_progress_along(seq_len(nrow(.grid))),
+      purrr::map(
+        seq_len(nrow(.grid)),
+        .progress = show_progress,
         function(x){
           multi_results <- list()
 
@@ -423,35 +401,9 @@ run_multiverse <- function(.grid, save_model = FALSE, ncores = 1){
                 save_model = save_model
               )
           }
-
-          if("corrs" %in% names(.grid)){
-            multi_results$corrs <-
-              run_universe_corrs(
-                .grid = .grid,
-                decision_num =  .grid$decision[x]
-              )
-          }
-
-          if("summary_stats" %in% names(.grid)){
-            multi_results$stats <-
-              run_universe_summary_stats(
-                .grid = .grid,
-                decision_num = .grid$decision[x]
-              )
-          }
-
-          if("cron_alphas" %in% names(.grid)){
-            multi_results$alphas <-
-              run_universe_cron_alphas(
-                .grid = .grid,
-                decision_num = .grid$decision[x]
-              )
-          }
-
           purrr::reduce(multi_results, dplyr::left_join, by = "decision")
-
-        })
-
+        }) |>
+      purrr::list_rbind()
   }
 
   dplyr::full_join(
@@ -466,4 +418,73 @@ run_multiverse <- function(.grid, save_model = FALSE, ncores = 1){
 }
 
 
+#' Run a multiverse-style descriptive analysis based on a complete decision grid
+#'
+#' @param .pipeline a \code{tibble} produced by a series of \code{add_*} calls.
+#'   Importantly, this needs to be a pre-expanded pipeline because descriptive
+#'   analyses only change when the underlying cases change. Thus, only filtering
+#'   decisions will be used and internally expanded before calculating various
+#'   descriptive analyses.
+#' @param show_progress logical, whether to show a progress bar while running.
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' run_descriptives(pipeline)
+#' }
+run_descriptives <- function(.pipeline, show_progress = FALSE){
 
+  filter_grid <-
+    .pipeline |>
+    dplyr::filter(stringr::str_detect(type, "filters|corrs|summary_stats|cron_alphas")) |>
+    expand_decisions()
+
+  multi_descriptives <-
+    purrr::map(
+      seq_len(nrow(filter_grid)),
+      .progress = TRUE,
+      function(x){
+        multi_results <- list()
+
+        if("corrs" %in% names(filter_grid)){
+          multi_results$corrs <-
+            run_universe_corrs(
+              .grid = filter_grid,
+              decision_num =  filter_grid$decision[x]
+            )
+        }
+
+        if("summary_stats" %in% names(filter_grid)){
+          multi_results$stats <-
+            run_universe_summary_stats(
+              .grid = filter_grid,
+              decision_num = filter_grid$decision[x]
+            )
+        }
+
+        if("cron_alphas" %in% names(filter_grid)){
+          multi_results$alphas <-
+            run_universe_cron_alphas(
+              .grid = filter_grid,
+              decision_num = filter_grid$decision[x]
+            )
+        }
+
+        purrr::reduce(multi_results, dplyr::left_join, by = "decision")
+
+      }) |>
+    purrr::list_rbind()
+
+  dplyr::full_join(
+    filter_grid |>
+      dplyr::select(-dplyr::contains("code")) |>
+      mutate(decision = as.character(decision)),
+    multi_descriptives,
+    by = "decision"
+  ) |>
+    tidyr::nest(specifications = c(-decision, -dplyr::matches("fitted$|computed$"))) |>
+    dplyr::select(decision, specifications, dplyr::everything())
+
+}

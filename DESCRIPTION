@@ -41,7 +41,9 @@ Imports:
   rlang,
   stringr,
   tibble,
-  tidyr
+  tidyr,
+  lme4,
+  parameters
 Suggests: 
     knitr,
     rmarkdown,

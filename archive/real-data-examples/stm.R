@@ -2,6 +2,7 @@ library(tidyverse)
 library(multitool)
 library(ggeffects)
 library(DiagrammeR)
+library(gt)
 
 load("data-raw/stm-exp1.Rdata")
 
@@ -70,15 +71,55 @@ stm_pipeline <-
   add_variables("dvs", stm_agg, stm_round2, ifr_agg) |>
   add_preprocess("standardize", "mutate({ivs} = scale({ivs}) |> as.numeric())") |>
   add_preprocess("center_cond", "mutate(condition = ifelse(condition == 0, -1, 1))") |>
-  add_model("linear model",lm({dvs} ~ {ivs} * condition)) |>
+  add_model("linear model1",lm({dvs} ~ {ivs} * condition)) |>
+  add_model("linear model2",lm({dvs} ~ {ivs} * condition + dems_sex)) |>
   add_correlations("childhood", ends_with("mean")) |>
   add_correlations("memory_vars", matches("round$|agg$"), method = "pearson")
 
-
 blueprint(stm_pipeline)
 blueprint(stm_pipeline, show_code = T)
+create_blueprint_graph(stm_pipeline, render = T, show_code = F)
 
-pipeline_blueprint(stm_pipeline)
+
+stm_pipeline_expanded <-
+  stm_pipeline |>
+  expand_decisions()
+
+stm_multiverse <- run_multiverse(stm_pipeline_expanded)
+stm_descriptives <- run_descriptives(stm_pipeline)
+
+stm_descriptives |>
+  reveal(corrs_computed, childhood_matrix, .unpack_specs = T) |>
+  group_by(variable) |>
+  condense(c(childses_mean, cstress_mean, unp_mean), median)
+
+
+
+stm_descriptives |>
+  reveal(corrs_computed, childhood_rs, .unpack_specs = T) |>
+  mutate(r = ifelse(r == 1,  NA, r)) |>
+  ggplot(aes(x = r, y = factor(1))) +
+  ggdist::stat_pointinterval() +
+  facet_grid(vars(Parameter1), vars(Parameter2),drop = T)
+
+
+stm_descriptives |>
+  reveal(corrs_computed, childhood_rs, .unpack_specs = T) |>
+  group_by(Parameter1,Parameter2) |>
+  condense(r, list(median = median, sd = sd, list = list)) |>
+  filter(r_median != 1) |>
+  ungroup() |>
+  distinct(r_median, .keep_all = T) |>
+  gt() |>
+  gt::fmt_number() |>
+  my_gt_dist(r_list, type = "histogram",bw = .02, custom_range = c(-1,1))
+
+# stm_descriptives |>
+  reveal(corrs_computed, childhood_rs) |>
+  filter(r != 1, Parameter1 == "cstress_mean", Parameter2 == "unp_mean") |>
+  inspect_iccs(.estimate = r)
+
+inspect_corr_iccs(stm_descriptives, childhood_rs, "childses_mean", "unp_mean")
 
 # Plots -------------------------------------------------------------------
 

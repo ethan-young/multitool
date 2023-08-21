@@ -46,7 +46,9 @@ add_filters <- function(.df, ...){
     data_chr <- attr(.df, "base_df")
   }
 
-  base_df <- rlang::parse_expr(data_chr) |> rlang::eval_tidy()
+  base_df <-
+    rlang::parse_expr(data_chr) |>
+    rlang::eval_tidy(env = parent.frame())
 
   filter_exprs <- dplyr::enexprs(...)
   filter_exprs_chr <- as.character(filter_exprs)
@@ -151,7 +153,9 @@ add_variables <- function(.df, var_group, ...){
     data_chr <- attr(.df, "base_df")
   }
 
-  base_df <- rlang::parse_expr(data_chr) |> rlang::eval_tidy()
+  base_df <-
+    rlang::parse_expr(data_chr) |>
+    rlang::eval_tidy(env = parent.frame())
 
   grid_prep <-
     tibble::tibble(
@@ -236,7 +240,9 @@ add_preprocess <- function(.df, process_name, code){
     data_chr <- attr(.df, "base_df")
   }
 
-  base_df <- rlang::parse_expr(data_chr) |> rlang::eval_tidy()
+  base_df <-
+    rlang::parse_expr(data_chr) |>
+    rlang::eval_tidy(env = parent.frame())
 
   grid_prep <-
     tibble::tibble(
@@ -318,7 +324,9 @@ add_model <- function(.df, model_desc, code){
     data_chr <- attr(.df, "base_df")
   }
 
-  base_df <- rlang::parse_expr(data_chr) |> rlang::eval_tidy()
+  base_df <-
+    rlang::parse_expr(data_chr) |>
+    rlang::eval_tidy(env = parent.frame())
 
   grid_prep <-
     tibble::tibble(
@@ -408,7 +416,9 @@ add_postprocess <- function(.df, postprocess_name, code){
     data_chr <- attr(.df, "base_df")
   }
 
-  base_df <- rlang::parse_expr(data_chr) |> rlang::eval_tidy()
+  base_df <-
+    rlang::parse_expr(data_chr) |>
+    rlang::eval_tidy(env = parent.frame())
 
   grid_prep <-
     tibble::tibble(
@@ -488,23 +498,19 @@ add_summary_stats <- function(.df, var_set, variables, stats){
     data_chr <- attr(.df, "base_df")
   }
 
-  base_df <- rlang::parse_expr(data_chr) |> rlang::eval_tidy()
+  base_df <-
+    rlang::parse_expr(data_chr) |>
+    rlang::eval_tidy(env = parent.frame())
 
   variables <- dplyr::enexprs(variables) |> as.character()
 
   stats_list <-
-    purrr::map_chr(stats, function(x) glue::glue("{x} = {x}")) |>
+    purrr::map_chr(stats, function(x) glue::glue("{x} = ~ {x}(.x, na.rm = TRUE)")) |>
     paste(collapse = ", ") |> paste0("list(", ... = _, ")")
 
   descriptives <-
     glue::glue(
-      'summarize(
-        across(
-          c([variables]),
-          [stats_list],
-          na.rm = TRUE
-        )
-      )',
+      'select(c([variables])) |> summarize(across(everything(), [stats_list]))',
       .open = "[",
       .close = "]"
     ) |>
@@ -604,7 +610,9 @@ add_correlations <-
       data_chr <- attr(.df, "base_df")
     }
 
-    base_df <- rlang::parse_expr(data_chr) |> rlang::eval_tidy()
+    base_df <-
+      rlang::parse_expr(data_chr) |>
+      rlang::eval_tidy(env = parent.frame())
 
     variables <- dplyr::enexprs(variables) |> as.character()
     focus_set <- base_df |> dplyr::select({{focus_set}}) |> names()
@@ -735,7 +743,9 @@ add_cron_alpha <- function(.df, scale_name, items, keys = NULL){
     data_chr <- attr(.df, "base_df")
   }
 
-  base_df <- rlang::parse_expr(data_chr) |> rlang::eval_tidy()
+  base_df <-
+    rlang::parse_expr(data_chr) |>
+    rlang::eval_tidy(env = parent.frame())
 
   items <- dplyr::enexprs(items) |> as.character()
 
@@ -847,13 +857,13 @@ expand_decisions <- function(.grid){
     dplyr::mutate(group = stringr::str_replace_all(group, " ", "_") |> tolower()) |>
     dplyr::group_split(type) |>
     purrr::map(function(x){
-      if(x |> pull(type) |> unique() == "models"){
+      if(x |> dplyr::pull(type) |> unique() == "models"){
         model_tibble <-
-          bind_rows(
-            tibble(
+          dplyr::bind_rows(
+            tibble::tibble(
               type = "models",
               group = "model",
-              code = x |> pull(code)
+              code = x |> dplyr::pull(code)
             )
           )
         df_to_expand_prep(model_tibble, group, code)
@@ -871,8 +881,8 @@ expand_decisions <- function(.grid){
       full_grid |>
       dplyr::left_join(
         .grid |>
-          filter(type == "models") |>
-          transmute(
+          dplyr::filter(type == "models") |>
+          dplyr::transmute(
             model_meta = group,
             model = code
           ),
