@@ -3,6 +3,8 @@
 
 <div style="text-align: center;">
 
+<br>
+
 <div>
 
 <span style="font-size: 32px; font-weight: bold;">Plan · </span>
@@ -47,7 +49,7 @@ unpacking multiverse analyses and results.
 
 For those unfamiliar with multiverse analysis, here is a short primer:
 
-<iframe width="100%" height="600" src="multiverse-primer.html" style="border: 2px #dee2e6 solid; border-radius: 5px;">
+<iframe width="100%" height="600" src="multiverse-primer/multiverse-primer.html" style="border: 2px #dee2e6 solid; border-radius: 5px;">
 </iframe>
 
 ## Beyond Multiverse
@@ -224,7 +226,7 @@ multiverse_results |>
 #> # A tibble: 1 × 2
 #>   coefficient_mean coefficient_median
 #>              <dbl>              <dbl>
-#> 1         -0.00802            -0.0319
+#> 1           0.0476             0.0270
 
 # Plot your effects
 multiverse_results |> 
