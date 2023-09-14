@@ -7,7 +7,7 @@
 \alias{show_code_postprocess}
 \alias{show_code_summary_stats}
 \alias{show_code_corrs}
-\alias{show_code_cron_alpha}
+\alias{show_code_reliabilities}
 \title{Show multiverse data code pipelines}
 \usage{
 show_code_filter(.grid, decision_num, copy = F)
@@ -22,7 +22,7 @@ show_code_summary_stats(.grid, decision_num, copy = F)
 
 show_code_corrs(.grid, decision_num, copy = F)
 
-show_code_cron_alpha(.grid, decision_num, copy = F)
+show_code_reliabilities(.grid, decision_num, copy = F)
 }
 \arguments{
 \item{.grid}{a full decision grid created by \code{\link{expand_decisions}}}
@@ -53,6 +53,6 @@ stage
 
 \item \code{show_code_corrs()}: Show the code for computing correlations
 
-\item \code{show_code_cron_alpha()}: Show the code for computing correlations
+\item \code{show_code_reliabilities()}: Show the code for computing scale reliability
 
 }}

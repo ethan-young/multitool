@@ -1,5 +1,5 @@
 library(tidyverse)
-#library(multitool)
+library(multitool)
 library(ggeffects)
 library(DiagrammeR)
 
@@ -57,13 +57,6 @@ show_code_summary_stats(pipeline_expanded, decision_num = 1)
 show_code_corrs(pipeline_expanded, decision_num = 1)
 show_code_cron_alpha(pipeline_expanded, decision_num = 1)
 
-## Run a single decision set ----
-run_universe_model(pipeline_expanded, 1)
-run_universe_corrs(pipeline_expanded, 120)
-
-run_universe_cron_alphas(pipeline_expanded, decision_num = 2)
-run_universe_summary_stats(pipeline_expanded, 120) |> unnest(summary_stats_computed)
-
 ## Run the whole multiverse ----
 the_multiverse <- run_multiverse(pipeline_expanded[1:5,])
 the_multiverse
@@ -74,26 +67,33 @@ descriptive_mulitverse
 
 ## Unpack the multiverse ----
 the_multiverse |>
-  reveal(model_fitted, lm_params, .unpack_specs =  T)
+  reveal(model_fitted, model_parameters)
 
-the_multiverse |>
+descriptive_mulitverse |>
   reveal(cron_alphas_computed)
 
-the_multiverse |>
-  reveal(corrs_computed, predictors_rs)
+descriptive_mulitverse |>
+  reveal(corrs_computed, between_predictors_rs)
+
+descriptive_mulitverse |>
+  reveal_summary_stats(iv_summary_stats)
 
 the_multiverse |>
-  reveal_summary_stats(iv_stats)
+  reveal_model_parameters(.unpack_specs = "wide") |>
+  condense(c(coefficient, p), list(mean = mean, min = ~min(.x), max = ~max(.x, na.rm = T)), .group = dvs)
 
 the_multiverse |>
-  reveal_corrs(predictors_rs)
+  reveal_model_parameters(.unpack_specs = "wide") |>
+  summarize(across(coefficient, list(min = min)))
 
 the_multiverse |>
-  reveal_corrs(predictors_focus, .unpack_specs = T) |>
-  group_by(variable, include1) |>
-  summarize(across(c(cov1,cov2), list(mean = mean, median = median)))
-
-the_multiverse |>
-  reveal(model_fitted, lm_params, T) |>
-  group_by(ivs, dvs) |>
-  condense(coefficient, list(mn = mean, med = median))
+  reveal_model_parameters(.unpack_specs = "wide") |>
+  dplyr::summarize(
+    dplyr::across(c(coefficient,p),list(min = min),.names = "{.col}_{.fn}"),
+    dplyr::across(
+      .cols = coefficient,
+      .fns = list,
+      .names = "{.col}_list"
+    ),
+    .by = dvs
+  )

@@ -52,12 +52,6 @@
 #'   add_variables("mods", starts_with("mod")) |>
 #'   add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
 #'   add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
-#'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
-#'   add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis")) |>
-#'   add_correlations("predictors", matches("iv|mod|cov"), focus_set = c(cov1,cov2)) |>
-#'   add_correlations("outcomes", matches("dv|mod"), focus_set = matches("dv")) |>
-#'   add_cron_alpha("unp_scale", c(iv1,iv2,iv3)) |>
-#'   add_cron_alpha("vio_scale", starts_with("mod")) |>
 #'   add_model("no covariates",lm({dvs} ~ {ivs} * {mods})) |>
 #'   add_model("covariate", lm({dvs} ~ {ivs} * {mods} + cov1)) |>
 #'   add_postprocess("aov", aov())
@@ -84,7 +78,7 @@ run_multiverse <- function(.grid, ncores = 1, save_model = FALSE, show_progress 
                 save_model = save_model
               )
           }
-          purrr::reduce(multi_results, left_join, by = "decision")
+          purrr::reduce(multi_results, dplyr::left_join, by = "decision")
         },
         .options = furrr::furrr_options(seed = TRUE)
       ) |>
@@ -174,15 +168,15 @@ run_multiverse <- function(.grid, ncores = 1, save_model = FALSE, show_progress 
 #'   add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis")) |>
 #'   add_correlations("predictors", matches("iv|mod|cov"), focus_set = c(cov1,cov2)) |>
 #'   add_correlations("outcomes", matches("dv|mod"), focus_set = matches("dv")) |>
-#'   add_cron_alpha("unp_scale", c(iv1,iv2,iv3)) |>
-#'   add_cron_alpha("vio_scale", starts_with("mod"))
+#'   add_reliabilities("unp_scale", c(iv1,iv2,iv3)) |>
+#'   add_reliabilities("vio_scale", starts_with("mod"))
 #'
 #' run_descriptives(full_pipeline)
 run_descriptives <- function(.pipeline, show_progress = TRUE){
 
   filter_grid <-
     .pipeline |>
-    dplyr::filter(stringr::str_detect(type, "filters|corrs|summary_stats|cron_alphas")) |>
+    dplyr::filter(stringr::str_detect(type, "filters|corrs|summary_stats|reliabilities")) |>
     expand_decisions()
 
   multi_descriptives <-
@@ -208,9 +202,9 @@ run_descriptives <- function(.pipeline, show_progress = TRUE){
             )
         }
 
-        if("cron_alphas" %in% names(filter_grid)){
-          multi_results$alphas <-
-            run_universe_cron_alphas(
+        if("reliabilities" %in% names(filter_grid)){
+          multi_results$reliabilities <-
+            run_universe_reliabilities(
               .grid = filter_grid,
               decision_num = filter_grid$decision[x]
             )

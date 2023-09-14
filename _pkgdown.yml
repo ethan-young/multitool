@@ -40,7 +40,7 @@ reference:
   - add_preprocess
   - add_postprocess
   - add_summary_stats
-  - add_cron_alpha
+  - add_reliabilities
   - add_correlations
   - add_parameter_keys
   - expand_decisions
@@ -63,7 +63,6 @@ reference:
   contents:
   - run_multiverse
   - run_descriptives
-  - report_universe_console
 
 - title: Unpack Results
   desc: >
@@ -74,7 +73,7 @@ reference:
   - reveal_model_performance
   - reveal_model_warnings
   - reveal_model_messages
-  - reveal_alphas
+  - reveal_reliabilities
   - reveal_corrs
   - reveal_summary_stats
   - condense

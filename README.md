@@ -195,18 +195,18 @@ multiverse_results
 multiverse_results |> 
   reveal_model_parameters()
 #> # A tibble: 192 × 16
-#>    decision specifications   model_function parameter   coefficient     se    ci
-#>    <chr>    <list>           <chr>          <chr>             <dbl>  <dbl> <dbl>
-#>  1 1        <tibble [1 × 3]> lm             (Intercept)    0.208    0.131   0.95
-#>  2 1        <tibble [1 × 3]> lm             iv1           -0.152    0.123   0.95
-#>  3 1        <tibble [1 × 3]> lm             mod           -0.236    0.144   0.95
-#>  4 1        <tibble [1 × 3]> lm             iv1:mod       -0.0713   0.160   0.95
-#>  5 2        <tibble [1 × 3]> lm             (Intercept)   -0.170    0.102   0.95
-#>  6 2        <tibble [1 × 3]> lm             iv1            0.000704 0.0957  0.95
-#>  7 2        <tibble [1 × 3]> lm             mod            0.146    0.112   0.95
-#>  8 2        <tibble [1 × 3]> lm             iv1:mod       -0.0899   0.124   0.95
-#>  9 3        <tibble [1 × 3]> lm             (Intercept)    0.231    0.130   0.95
-#> 10 3        <tibble [1 × 3]> lm             iv2            0.116    0.124   0.95
+#>    decision specifications   model_function parameter   coefficient    se    ci
+#>    <chr>    <list>           <chr>          <chr>             <dbl> <dbl> <dbl>
+#>  1 1        <tibble [1 × 3]> lm             (Intercept)      0.0309 0.115  0.95
+#>  2 1        <tibble [1 × 3]> lm             iv1              0.163  0.119  0.95
+#>  3 1        <tibble [1 × 3]> lm             mod             -0.0615 0.112  0.95
+#>  4 1        <tibble [1 × 3]> lm             iv1:mod         -0.235  0.123  0.95
+#>  5 2        <tibble [1 × 3]> lm             (Intercept)      0.140  0.124  0.95
+#>  6 2        <tibble [1 × 3]> lm             iv1             -0.203  0.128  0.95
+#>  7 2        <tibble [1 × 3]> lm             mod             -0.215  0.120  0.95
+#>  8 2        <tibble [1 × 3]> lm             iv1:mod         -0.223  0.132  0.95
+#>  9 3        <tibble [1 × 3]> lm             (Intercept)      0.0486 0.121  0.95
+#> 10 3        <tibble [1 × 3]> lm             iv2             -0.0384 0.143  0.95
 #> # ℹ 182 more rows
 #> # ℹ 9 more variables: ci_low <dbl>, ci_high <dbl>, t <dbl>, df_error <int>,
 #> #   p <dbl>, model_performance <list>, model_warnings <list>,
@@ -218,16 +218,16 @@ multiverse_results |>
 #> # A tibble: 48 × 14
 #>    decision specifications   model_function model_parameters     aic  aicc   bic
 #>    <chr>    <list>           <chr>          <list>             <dbl> <dbl> <dbl>
-#>  1 1        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  184.  186.  195.
-#>  2 2        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  153.  154.  164.
-#>  3 3        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  183.  184.  193.
-#>  4 4        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  151.  152.  161.
-#>  5 5        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  184.  185.  195.
-#>  6 6        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  153.  154.  164.
-#>  7 7        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  184.  186.  195.
-#>  8 8        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  153.  154.  164.
-#>  9 9        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  183.  184.  193.
-#> 10 10       <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  151.  152.  161.
+#>  1 1        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  157.  158.  167.
+#>  2 2        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  165.  166.  176.
+#>  3 3        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  161.  162.  171.
+#>  4 4        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  173.  175.  184.
+#>  5 5        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  153.  154.  163.
+#>  6 6        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  172.  173.  183.
+#>  7 7        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  157.  158.  167.
+#>  8 8        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  165.  166.  176.
+#>  9 9        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  161.  162.  171.
+#> 10 10       <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  173.  175.  184.
 #> # ℹ 38 more rows
 #> # ℹ 7 more variables: r2 <dbl>, r2_adjusted <dbl>, rmse <dbl>, sigma <dbl>,
 #> #   model_warnings <list>, model_messages <list>, pipeline_code <list>
@@ -240,14 +240,14 @@ multiverse_results |>
 #> # A tibble: 8 × 5
 #>   parameter  coefficient_mean coefficient_median coefficient_sd coefficient_list
 #>   <chr>                 <dbl>              <dbl>          <dbl> <list>          
-#> 1 (Intercep…         -0.00625            0.00395         0.197  <dbl [48]>      
-#> 2 iv1                -0.0415            -0.0338          0.0746 <dbl [16]>      
-#> 3 iv1:mod            -0.0829            -0.0779          0.0206 <dbl [16]>      
-#> 4 iv2                 0.129              0.131           0.0246 <dbl [16]>      
-#> 5 iv2:mod             0.108              0.0972          0.0789 <dbl [16]>      
-#> 6 iv3                 0.116              0.127           0.0684 <dbl [16]>      
-#> 7 iv3:mod             0.0300             0.0488          0.0841 <dbl [16]>      
-#> 8 mod                 0.0374             0.0605          0.158  <dbl [48]>
+#> 1 (Intercep…           0.0826             0.0726         0.0506 <dbl [48]>      
+#> 2 iv1                 -0.0186            -0.0134         0.179  <dbl [16]>      
+#> 3 iv1:mod             -0.209             -0.225          0.0324 <dbl [16]>      
+#> 4 iv2                  0.0356             0.0397         0.0489 <dbl [16]>      
+#> 5 iv2:mod             -0.0232            -0.0213         0.0292 <dbl [16]>      
+#> 6 iv3                  0.0479             0.0413         0.113  <dbl [16]>      
+#> 7 iv3:mod              0.145              0.132          0.128  <dbl [16]>      
+#> 8 mod                 -0.116             -0.119          0.0911 <dbl [48]>
 
 # Summarize fit statistics
 multiverse_results |> 
@@ -256,5 +256,5 @@ multiverse_results |>
 #> # A tibble: 1 × 3
 #>   r2_mean  r2_sd r2_list   
 #>     <dbl>  <dbl> <list>    
-#> 1  0.0581 0.0209 <dbl [48]>
+#> 1  0.0695 0.0447 <dbl [48]>
 ```

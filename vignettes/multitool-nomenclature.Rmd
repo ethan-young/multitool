@@ -49,7 +49,7 @@ digraph boxes_and_circles {
   7 [label = 'run_multiverse()']
   8 [label = 'reveal(), reveal_model_*()']
   9 [label = 'condense()']
-  10 [label = 'reveal_corrs(), reveal_alphas(), reveal_summary_stats()']
+  10 [label = 'reveal_corrs(), reveal_reliabilities(), reveal_summary_stats()']
   11 [label = 'column_plot(), custom plotting/tables']
   12 [label = 'detect_*(), summarize_filter_ns()']
 

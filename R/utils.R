@@ -53,42 +53,6 @@ list_to_pipeline <- function(pipeline, for_print = FALSE, execute = FALSE){
   }
 }
 
-check_tidiers <- function(code){
-
-  tidiers <-
-    utils::methods(broom.mixed::tidy) |>
-    as.character() |>
-    stringr::str_remove("^tidy\\.")
-
-  can_be_tidied <-
-    stringr::str_remove_all(code, "(\\(.*|^.*\\:\\:)")
-
-  if(can_be_tidied %in% c("lmer","glmer")){
-    can_be_tidied <- "merMod"
-  }
-
-  str_detect(tidiers, can_be_tidied) |> sum() > 0
-
-}
-
-check_glance <- function(code){
-
-  glancers <-
-    utils::methods(broom.mixed::glance) |>
-    as.character() |>
-    stringr::str_remove("^glance\\.")
-
-  can_be_glanced <-
-    stringr::str_remove_all(code, "(\\(.*|^.*\\:\\:)")
-
-  if(can_be_glanced %in% c("lmer","glmer")){
-    can_be_glanced <- "merMod"
-  }
-
-  str_detect(glancers, can_be_glanced) |> sum() > 0
-
-}
-
 run_universe_code_quietly <-
   purrr::quietly(
     function(code){
@@ -96,77 +60,6 @@ run_universe_code_quietly <-
         rlang::eval_tidy()
     }
   )
-
-collect_quiet_results <- function(code, save_model = FALSE){
-
-  quiet_results <- list()
-
-  model_func <-
-    code |>
-    stringr::str_extract("\\|\\>[^\\|\\>].*$") |>
-    stringr::str_remove(".*\\|\\> ") |>
-    stringr::str_remove("\\(.*\\)")
-
-  is_tidy <- check_tidiers(model_func)
-  is_glance <- check_glance(model_func)
-
-  quiet_results$model <- run_universe_code_quietly(code)
-
-  if(is_tidy){
-    quiet_results$tidy <-
-      code |>
-      paste("|> broom.mixed::tidy()", collapse = " ") |>
-      run_universe_code_quietly()
-  }
-  if(is_glance){
-    quiet_results$glance <-
-      code |>
-      paste("|> broom.mixed::glance()", collapse = " ") |>
-      run_universe_code_quietly()
-  }
-
-  warnings <-
-    purrr::map_df(quiet_results, "warnings") |>
-    dplyr::rename_with(~paste0("warning_", .x))
-  messages <-
-    purrr::map_df(quiet_results, "messages") |>
-    dplyr::rename_with(~paste0("message_", .x))
-
-  results <-
-    tibble::tibble(
-      "{model_func}_code" := code
-    )
-
-  if(save_model || !is_tidy){
-    results <-
-      dplyr::bind_cols(
-        results,
-        tibble::tibble("{model_func}_full" := list(quiet_results$model$result))
-      )
-  }
-
-  if(is_tidy){
-    results <-
-      dplyr::bind_cols(
-        results,
-        tibble::tibble("{model_func}_tidy" := list(quiet_results$tidy$result))
-      )
-  }
-
-  if(is_glance){
-    results <-
-      dplyr::bind_cols(
-        results,
-        tibble::tibble("{model_func}_glance" := list(quiet_results$glance$result))
-      )
-  }
-
-  results |>
-    mutate(
-      "{model_func}_warnings" := list(warnings),
-      "{model_func}_messages" := list(messages)
-    )
-}
 
 collect_quiet_results_easy <- function(code, save_model = FALSE){
 
@@ -314,7 +207,7 @@ run_universe_model <- function(.grid, decision_num, save_model = FALSE){
         tibble(
           "{y}_fitted" := list(results |> dplyr::select(-dplyr::ends_with("code")))
         ) |>
-          bind_cols(results |> dplyr::select(dplyr::ends_with("code")))
+          dplyr::bind_cols(results |> dplyr::select(dplyr::ends_with("code")))
       })
 
   if(stringr::str_detect(grid_elements, "parameter_keys")){
@@ -329,7 +222,7 @@ run_universe_model <- function(.grid, decision_num, save_model = FALSE){
       tidyr::unnest(model_parameters) |>
       dplyr::left_join(custom_param_keys, by = "parameter") |>
       dplyr::relocate(parameter_key, .before = parameter) |>
-      tidyr::nest(model_parameters = -matches("^model_|_code$")) |>
+      tidyr::nest(model_parameters = -dplyr::matches("^model_|_code$")) |>
       dplyr::relocate(model_parameters, .after = model_function) |>
       tidyr::nest(model_fitted = -dplyr::ends_with("code"))
   }
@@ -461,7 +354,7 @@ run_universe_summary_stats <- function(.grid, decision_num){
 
 }
 
-run_universe_cron_alphas <- function(.grid, decision_num){
+run_universe_reliabilities <- function(.grid, decision_num){
 
   data_chr <- attr(.grid, "base_df")
   grid_elements <- paste(names(.grid), collapse = " ")
@@ -484,15 +377,15 @@ run_universe_cron_alphas <- function(.grid, decision_num){
 
   item_sets <-
     universe |>
-    dplyr::select(cron_alphas) |>
-    tidyr::unnest(cron_alphas) |>
+    dplyr::select(reliabilities) |>
+    tidyr::unnest(reliabilities) |>
     names() |>
     unique()
 
-  universe_alphas <-
+  universe_reliabilities <-
     universe |>
-    dplyr::select(cron_alphas) |>
-    tidyr::unnest(cron_alphas) |>
+    dplyr::select(reliabilities) |>
+    tidyr::unnest(reliabilities) |>
     as.list() |>
     purrr::map(
       function(x) paste0(list_to_pipeline(universe_pipeline), " |> ", x)
@@ -500,39 +393,18 @@ run_universe_cron_alphas <- function(.grid, decision_num){
 
   universe_results <-
     purrr::map2_dfc(
-      universe_alphas, item_sets,
+      universe_reliabilities, item_sets,
       function(x, y){
-        alpha_results <- run_universe_code_quietly(x)
-        suppressMessages({
-          alpha_total <-
-            alpha_results$result$total |>
-            tibble::tibble(.name_repair = "universal") |>
-            dplyr::rename_with(tolower)
-
-          alpha_dropped <-
-            alpha_results$result$alpha.drop |>
-            tibble::tibble(.name_repair = "universal") |>
-            dplyr::rename_with(tolower)
-        })
-
-        alpha_item_stats <-
-          alpha_results$result$item.stats |>
-          tibble::tibble() |>
-          dplyr::rename_with(tolower)
-
-        alpha_results <-
-          tibble::tibble(
-            "{y}_total"      := list(alpha_total),
-            "{y}_dropped"    := list(alpha_dropped),
-            "{y}_item_stats" := list(alpha_item_stats)
-          )
+        reliability_results <- run_universe_code_quietly(x)
+        reliability <-
+          tibble::tibble("{y}" := list(reliability_results$result))
       })
 
   universe_results |>
     dplyr::mutate(
       decision = decision_num |> as.character(),
     ) |>
-    tidyr::nest(cron_alphas_computed = c(-decision)) |>
+    tidyr::nest(reliabilities_computed = c(-decision)) |>
     dplyr::select(decision, dplyr::everything())
 
 
@@ -645,7 +517,7 @@ create_datasets_node <- function(.grid){
       ) |>
       dplyr::distinct(type, each) |>
       dplyr::summarize(
-        description = glue::glue(" _ {n_datasets} datasets __  -| {paste0(type, ' (', each, ')', collapse = ' * ')} - ") |> as.character(),
+        description = glue::glue(" _ {n_datasets} analysis datasets __  --| {paste0(type, ' (', each, ')', collapse = ' * ')} - ") |> as.character(),
         type        = "total_dfs"
       )
 
@@ -662,10 +534,10 @@ create_descriptive_node <- function(.grid){
 
   descriptives <-
     .grid |>
-    dplyr::filter(type %in% c("summary_stats", "corrs", "cron_alphas")) |>
-    dplyr::filter(!stringr::str_detect(group, "_(matrix|focus)$")) |>
+    dplyr::filter(type %in% c("summary_stats", "corrs", "reliabilities")) |>
+    dplyr::filter(!stringr::str_detect(group, "_(matrix|focus|inter_corr|if_dropped)$")) |>
     dplyr::mutate(
-      group = stringr::str_remove(group, "_rs$"),
+      group = stringr::str_remove(group, "_(rs|alpha)$"),
       code_pipe = glue::glue("{attr(.grid, 'base_df')} |> {stringr::str_extract(code, '^.*\\\\|\\\\>')} ncol()"),
       code_names = ifelse(type == "summary_stats", glue::glue("{attr(.grid, 'base_df')} |> {code} |> names() |> stringr::str_remove('^.*_') |> unique() |> paste(collapse = ', ')"), "c()"),
     ) |>
@@ -679,13 +551,13 @@ create_descriptive_node <- function(.grid){
       dplyr::group_by(type) |>
       dplyr::summarize(
         description =
-          glue::glue(" _ {group} __  - {code_result} {ifelse(type == 'cron_alphas','items', 'variables')}{ifelse(type == 'summary_stats', paste0(' - ', ' (',code_names,')'), '')}") |>
+          glue::glue(" _ {group} __  - {code_result} {ifelse(type == 'reliabilities','items', 'variables')}{ifelse(type == 'summary_stats', paste0(' - ', ' (',code_names,')'), '')}") |>
           paste(collapse = " -- ") |> paste0(... = _, " - ")
       ) |>
       mutate(
         type_pretty = dplyr::case_when(type == "corrs" ~ "Correlations",
                                        type == "summary_stats" ~ "Descriptive Statistics",
-                                       type == "cron_alphas" ~ "Internal Consistencies"),
+                                       type == "reliabilities" ~ "Reliabilities"),
         description = glue::glue(" _ {type_pretty} __  --| {description}")
       )
     # summarize(
@@ -747,7 +619,7 @@ create_model_nodes <- function(.grid){
       dplyr::group_by(code) |>
       dplyr::summarize(
         type = glue::glue("model"),
-        description = glue::glue(" _ {group} __  -| {code} - ") |> paste(collapse = "\n")
+        description = glue::glue(" _ {group} __  --| {code} - ") |> paste(collapse = "\n")
       ) |>
       dplyr::select(type,description) |>
       dplyr::mutate(
@@ -773,7 +645,7 @@ create_nmodels_node <- function(.grid){
       dplyr::ungroup() |>
       dplyr::summarize(
         type        = "total_models",
-        description = glue::glue(" _ {n_models} fitted models __  - {paste(n, collapse = '*')} -| ",) |> as.character()
+        description = glue::glue(" _ {n_models} fitted models __  -- {paste0('(', paste(n, collapse = '*'), ')')} -| ",) |> as.character()
       )
   } else{
     message("You don't have any models in your pipeline")
@@ -802,7 +674,7 @@ create_pipeline_ndf <- function(.grid){
                                            nodes %in% c("filters","variables","filters_set","variables_set") ~ 2,
                                            nodes == "total_dfs" ~ 3,
                                            nodes == "descriptives" ~ 3,
-                                           nodes %in% c("corrs", "cron_alphas", "summary_stats") ~ 3,
+                                           nodes %in% c("corrs", "reliabilities", "summary_stats") ~ 3,
                                            nodes == "preprocess" ~ 4,
                                            stringr::str_detect(nodes, "model_") ~ 5,
                                            nodes == "total_models" ~ 6,
@@ -814,59 +686,59 @@ create_pipeline_ndf <- function(.grid){
 
 
 multi_tab_interval <- function(x, range){
-  tibble(stat = x) |>
-    ggplot(aes(x = stat)) +
+  tibble::tibble(stat = x) |>
+    ggplot2::ggplot(ggplot2::aes(x = stat)) +
     ggdist::stat_pointinterval() +
-    scale_x_continuous(limits = range) +
-    theme_void()
+    ggplot2::scale_x_continuous(limits = range) +
+    ggplot2::theme_void()
 }
 
 multi_tab_dots <- function(x, range){
-  tibble(stat = x) |>
-    ggplot(aes(x = stat)) +
+  tibble::tibble(stat = x) |>
+    ggplot2::ggplot(ggplot2::aes(x = stat)) +
     ggdist::geom_dots() +
-    scale_x_continuous(limits = range) +
-    theme_void()
+    ggplot2::scale_x_continuous(limits = range) +
+    ggplot2::theme_void()
 }
 
 multi_tab_dotinterval <- function(x, range){
-  tibble(stat = x) |>
-    ggplot(aes(x = stat)) +
+  tibble::tibble(stat = x) |>
+    ggplot2::ggplot(ggplot2::aes(x = stat)) +
     ggdist::stat_dotsinterval() +
-    scale_x_continuous(limits = range) +
-    theme_void()
+    ggplot2::scale_x_continuous(limits = range) +
+    ggplot2::theme_void()
 }
 
 multi_tab_slab <- function(x, range){
-  tibble(stat = x) |>
-    ggplot(aes(x = stat)) +
+  tibble::tibble(stat = x) |>
+    ggplot2::ggplot(ggplot2::aes(x = stat)) +
     ggdist::stat_slab() +
-    scale_x_continuous(limits = range) +
-    theme_void()
+    ggplot2::scale_x_continuous(limits = range) +
+    ggplot2::theme_void()
 }
 
 multi_tab_slabinterval <- function(x, range){
-  tibble(stat = x) |>
-    ggplot(aes(x = stat)) +
+  tibble::tibble(stat = x) |>
+    ggplot2::ggplot(ggplot2::aes(x = stat)) +
     ggdist::stat_slabinterval() +
-    scale_x_continuous(limits = range) +
-    theme_void()
+    ggplot2::scale_x_continuous(limits = range) +
+    ggplot2::theme_void()
 }
 
 multi_tab_curve <- function(x, range){
   tibble(stat = sort(x), x = 1:length(x)) |>
-    ggplot(aes(x = x, y = stat)) +
-    geom_line() +
-    scale_y_continuous(limits = range) +
-    theme_void()
+    ggplot2::ggplot(ggplot2::aes(x = x, y = stat)) +
+    ggplot2::geom_line() +
+    ggplot2::scale_y_continuous(limits = range) +
+    ggplot2::theme_void()
 }
 
 multi_tab_boxplot <- function(x, range){
-  tibble(stat = x) |>
-    ggplot(aes(x = stat)) +
-    geom_boxplot() +
-    scale_x_continuous(limits = range) +
-    theme_void()
+  tibble::tibble(stat = x) |>
+    ggplot2::ggplot(ggplot2::aes(x = stat)) +
+    ggplot2::geom_boxplot() +
+    ggplot2::scale_x_continuous(limits = range) +
+    ggplot2::theme_void()
 }
 
 ## Not using
@@ -924,4 +796,111 @@ multi_tab_boxplot <- function(x, range){
 #     })
 #
 #   multi_data_list
+# }
+#
+# check_tidiers <- function(code){
+#
+#   tidiers <-
+#     utils::methods(broom.mixed::tidy) |>
+#     as.character() |>
+#     stringr::str_remove("^tidy\\.")
+#
+#   can_be_tidied <-
+#     stringr::str_remove_all(code, "(\\(.*|^.*\\:\\:)")
+#
+#   if(can_be_tidied %in% c("lmer","glmer")){
+#     can_be_tidied <- "merMod"
+#   }
+#
+#   str_detect(tidiers, can_be_tidied) |> sum() > 0
+#
+# }
+#
+# check_glance <- function(code){
+#
+#   glancers <-
+#     utils::methods(broom.mixed::glance) |>
+#     as.character() |>
+#     stringr::str_remove("^glance\\.")
+#
+#   can_be_glanced <-
+#     stringr::str_remove_all(code, "(\\(.*|^.*\\:\\:)")
+#
+#   if(can_be_glanced %in% c("lmer","glmer")){
+#     can_be_glanced <- "merMod"
+#   }
+#
+#   str_detect(glancers, can_be_glanced) |> sum() > 0
+#
+# }
+#
+# collect_quiet_results <- function(code, save_model = FALSE){
+#
+#   quiet_results <- list()
+#
+#   model_func <-
+#     code |>
+#     stringr::str_extract("\\|\\>[^\\|\\>].*$") |>
+#     stringr::str_remove(".*\\|\\> ") |>
+#     stringr::str_remove("\\(.*\\)")
+#
+#   is_tidy <- check_tidiers(model_func)
+#   is_glance <- check_glance(model_func)
+#
+#   quiet_results$model <- run_universe_code_quietly(code)
+#
+#   if(is_tidy){
+#     quiet_results$tidy <-
+#       code |>
+#       paste("|> broom.mixed::tidy()", collapse = " ") |>
+#       run_universe_code_quietly()
+#   }
+#   if(is_glance){
+#     quiet_results$glance <-
+#       code |>
+#       paste("|> broom.mixed::glance()", collapse = " ") |>
+#       run_universe_code_quietly()
+#   }
+#
+#   warnings <-
+#     purrr::map_df(quiet_results, "warnings") |>
+#     dplyr::rename_with(~paste0("warning_", .x))
+#   messages <-
+#     purrr::map_df(quiet_results, "messages") |>
+#     dplyr::rename_with(~paste0("message_", .x))
+#
+#   results <-
+#     tibble::tibble(
+#       "{model_func}_code" := code
+#     )
+#
+#   if(save_model || !is_tidy){
+#     results <-
+#       dplyr::bind_cols(
+#         results,
+#         tibble::tibble("{model_func}_full" := list(quiet_results$model$result))
+#       )
+#   }
+#
+#   if(is_tidy){
+#     results <-
+#       dplyr::bind_cols(
+#         results,
+#         tibble::tibble("{model_func}_tidy" := list(quiet_results$tidy$result))
+#       )
+#   }
+#
+#   if(is_glance){
+#     results <-
+#       dplyr::bind_cols(
+#         results,
+#         tibble::tibble("{model_func}_glance" := list(quiet_results$glance$result))
+#       )
+#   }
+#
+#   results |>
+#     mutate(
+#       "{model_func}_warnings" := list(warnings),
+#       "{model_func}_messages" := list(messages)
+#     )
 # }

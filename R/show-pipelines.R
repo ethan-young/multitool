@@ -233,7 +233,7 @@ show_code_summary_stats <- function(.grid, decision_num, copy = F){
       tidyr::unnest(summary_stats) |>
       as.list() |>
       purrr::map(
-        function(x) paste0(list_to_pipeline(code, for_print = TRUE), " |> \n  ", x |> str_replace_all(" \\|\\> ", " |> \n  "))
+        function(x) paste0(list_to_pipeline(code, for_print = TRUE), " |> \n  ", x |> stringr::str_replace_all(" \\|\\> ", " |> \n  "))
       )
   } else{
     rlang::warn("You don't have any summary statistics in your pipeline...")
@@ -286,7 +286,7 @@ show_code_corrs <- function(.grid, decision_num, copy = F){
       tidyr::unnest(corrs) |>
       as.list() |>
       purrr::map(
-        function(x) paste0(list_to_pipeline(code, for_print = TRUE), " |> \n  ", x |> str_replace_all(" \\|\\> ", " |> \n  "))
+        function(x) paste0(list_to_pipeline(code, for_print = TRUE), " |> \n  ", x |> stringr::str_replace_all(" \\|\\> ", " |> \n  "))
       )
   } else{
     rlang::warn("You didn't specify any correlations in your pipeline...")
@@ -311,9 +311,9 @@ show_code_corrs <- function(.grid, decision_num, copy = F){
 
 }
 
-#' @describeIn show_code_filter Show the code for computing correlations
+#' @describeIn show_code_filter Show the code for computing scale reliability
 #' @export
-show_code_cron_alpha <- function(.grid, decision_num, copy = F){
+show_code_reliabilities <- function(.grid, decision_num, copy = F){
 
   data_chr <- attr(.grid,  "base_df")
 
@@ -332,28 +332,28 @@ show_code_cron_alpha <- function(.grid, decision_num, copy = F){
       paste0("filter(", ... =  _, ")")
   }
 
-  if("cron_alphas" %in% names(universe)){
-    cron_alphas <-
+  if("reliabilities" %in% names(universe)){
+    reliabilities <-
       universe |>
-      dplyr::select(cron_alphas) |>
-      tidyr::unnest(cron_alphas) |>
+      dplyr::select(reliabilities) |>
+      tidyr::unnest(reliabilities) |>
       as.list() |>
       purrr::map(
-        function(x) paste0(list_to_pipeline(code, for_print = TRUE), " |> \n  ", x |> str_replace_all(" \\|\\> ", " |> \n  "))
+        function(x) paste0(list_to_pipeline(code, for_print = TRUE), " |> \n  ", x |> stringr::str_replace_all(" \\|\\> ", " |> \n  "))
       )
   } else{
-    rlang::warn("You didn't specify any cronbach alpha reports in your pipeline...")
+    rlang::warn("You didn't specify any reliabilities calculations in your pipeline...")
   }
 
-  if("cron_alphas" %in% names(universe)){
+  if("reliabilities" %in% names(universe)){
 
     if(copy){
-      suppressWarnings({clipr::write_clip(corrs)})
-      message("Cronbach's Alpha pipeline copied!")
+      suppressWarnings({clipr::write_clip(reliabilities)})
+      message("Reliability pipeline copied!")
     }
 
-    purrr::iwalk(cron_alphas,function(x,y){
-      cat(glue::glue("---- Cronbach's Alpha: {str_replace(y, 'set', 'set ')} ---- \n\n"))
+    purrr::iwalk(reliabilities,function(x,y){
+      cat(glue::glue("---- Reliabilities: {str_replace(y, 'set', 'set ')} ---- \n\n"))
       cat(x, "\n\n")
     })
   } else{

@@ -61,7 +61,7 @@ full_pipeline <-
   add_variables(var_group = "dvs", dv1, dv2) |>
   add_correlations("predictor correlations", starts_with("iv")) |>
   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
-  add_cron_alpha("vio_scale", starts_with("iv")) |>
+  add_reliabilities("vio_scale", starts_with("iv")) |>
   add_model("linear model", lm({dvs} ~ {ivs} * mod))
 
 my_descriptives <- run_descriptives(full_pipeline)

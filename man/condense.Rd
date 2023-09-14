@@ -4,7 +4,7 @@
 \alias{condense}
 \title{Summarize multiverse parameters}
 \usage{
-condense(.unpacked, .what, .how, list_cols = TRUE, ...)
+condense(.unpacked, .what, .how, .group = NULL, list_cols = TRUE)
 }
 \arguments{
 \item{.unpacked}{an unpacked (with \code{\link{reveal}} or
@@ -18,11 +18,12 @@ multiverse.}
 mean or median) the user would like to compute over the individual
 estimates from the multiverse}
 
+\item{.group}{an optional variable to group the results. This argument is
+passed directly to the \code{.by} argument used in \code{dplyr::across}}
+
 \item{list_cols}{logical, whether to create list columns for the raw values
 of any summarized columns. Useful for creating visualizations and tables.
 Default is TRUE.}
-
-\item{...}{additional arguments passed to \code{dplyr::summarize()}}
 }
 \value{
 a summarized \code{tibble} containing a column for each summary

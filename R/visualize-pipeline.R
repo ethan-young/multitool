@@ -46,7 +46,7 @@ create_blueprint_graph <- function(.pipeline, splines = "line", render = TRUE, s
   grid_ndf <- create_pipeline_ndf(.pipeline)
 
   possible_edges <-
-    tribble(
+    tibble::tribble(
       ~my_from,        ~my_to,
       "base_df",       "filters",
       "base_df",       "variables",
@@ -55,7 +55,7 @@ create_blueprint_graph <- function(.pipeline, splines = "line", render = TRUE, s
       "variables",     "total_dfs",
       "filters",       "total_dfs",
       "total_dfs",     "preprocess",
-      "filters_set",   "cron_alphas",
+      "filters_set",   "reliabilities",
       "filters_set",   "summary_stats",
       "filters_set",   "corrs",
       "total_models",  "postprocess"
@@ -86,12 +86,6 @@ create_blueprint_graph <- function(.pipeline, splines = "line", render = TRUE, s
         model_to
       )
   }
-
-  # if(!"preprocess" %in% unique(grid_ndf$nodes)){
-  #   possible_edges <-
-  #     possible_edges |>
-  #     dplyr::add_row(my_from = c("variables","filters"), my_to = c("total_dfs","total_dfs"))
-  # }
 
   pipeline_edges <-
     possible_edges |>
@@ -137,7 +131,6 @@ create_blueprint_graph <- function(.pipeline, splines = "line", render = TRUE, s
       tidyr::drop_na() |>
       dplyr::rename(from = v1, to = v2) |>
       dplyr::mutate(
-        color = "purple",
         style = "invis"
       )
   }

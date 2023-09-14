@@ -3,7 +3,7 @@ inspect_model_iccs <- function(.multiverse, .part, .type, .estimate, term_filter
   zoomed_multi <-
     .multiverse |>
     reveal({{.part}}, {{.type}}) |>
-    dplyr::select(specifications, any_of("term"), {{.estimate}})
+    dplyr::select(specifications, dplyr::any_of("term"), {{.estimate}})
 
   outcome <- zoomed_multi |> dplyr::select({{.estimate}}) |> names()
 
@@ -17,7 +17,7 @@ inspect_model_iccs <- function(.multiverse, .part, .type, .estimate, term_filter
     zoomed_multi |>
     tidyr::unnest(c(specifications)) |>
     dplyr::select(dplyr::any_of(c("variables", "filters")), {{.estimate}}) |>
-    tidyr::unnest(everything())
+    tidyr::unnest(dplyr::everything())
 
   multi_icc_formula <-
     multi_icc_data |>
@@ -56,7 +56,7 @@ inspect_corr_iccs <- function(.corrs, .set, .var1, .var2){
     zoomed_multi |>
     tidyr::unnest(c(specifications)) |>
     dplyr::select(dplyr::any_of(c("variables", "filters")), r) |>
-    tidyr::unnest(everything())
+    tidyr::unnest(dplyr::everything())
 
   multi_icc_formula <-
     multi_icc_data |>

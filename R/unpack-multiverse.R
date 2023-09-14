@@ -77,7 +77,7 @@ reveal <- function(.multi, .what, .which = NULL, .unpack_specs = "no"){
       tidyr::unnest(specifications) |>
       dplyr::select(
         -dplyr::any_of(
-          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+          c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::any_of(c("variables","filters","models")))
   }
@@ -89,11 +89,11 @@ reveal <- function(.multi, .what, .which = NULL, .unpack_specs = "no"){
       tidyr::unnest(specifications) |>
       dplyr::select(
         -dplyr::any_of(
-          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+          c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::any_of(c("variables","filters","models"))) |>
       dplyr::select(-dplyr::any_of("model")) |>
-      dplyr::rename_with(~ str_remove(.x, "_.*"), dplyr::any_of("model_meta")) |>
+      dplyr::rename_with(~ stringr::str_remove(.x, "_.*"), dplyr::any_of("model_meta")) |>
       tidyr::pivot_longer(-decision, names_to = "decision_set", values_to = "alternatives")
 
     print(unpacked_and_stacked)
@@ -187,7 +187,7 @@ reveal_model_parameters <- function(.multi, parameter_key = NULL, .unpack_specs 
       tidyr::unnest(specifications) |>
       dplyr::select(
         -dplyr::any_of(
-          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+          c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::any_of(c("variables","filters","models")))
   }
@@ -199,7 +199,7 @@ reveal_model_parameters <- function(.multi, parameter_key = NULL, .unpack_specs 
       tidyr::unnest(specifications) |>
       dplyr::select(
         -dplyr::any_of(
-          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+          c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::any_of(c("variables","filters","models"))) |>
       dplyr::select(-model) |>
@@ -290,7 +290,7 @@ reveal_model_performance <- function(.multi, .unpack_specs = "no"){
       tidyr::unnest(specifications) |>
       dplyr::select(
         -dplyr::any_of(
-          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+          c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::everything())
   }
@@ -302,7 +302,7 @@ reveal_model_performance <- function(.multi, .unpack_specs = "no"){
       tidyr::unnest(specifications) |>
       dplyr::select(
         -dplyr::any_of(
-          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+          c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::any_of(c("variables","filters","models"))) |>
       dplyr::select(-model) |>
@@ -391,7 +391,7 @@ reveal_model_warnings <- function(.multi, .unpack_specs = "no"){
       tidyr::unnest(specifications) |>
       dplyr::select(
         -dplyr::any_of(
-          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+          c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::everything())
   }
@@ -403,7 +403,7 @@ reveal_model_warnings <- function(.multi, .unpack_specs = "no"){
       tidyr::unnest(specifications) |>
       dplyr::select(
         -dplyr::any_of(
-          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+          c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::any_of(c("variables","filters","models"))) |>
       dplyr::select(-model) |>
@@ -493,7 +493,7 @@ reveal_model_messages <- function(.multi, .unpack_specs = "no"){
       tidyr::unnest(specifications) |>
       dplyr::select(
         -dplyr::any_of(
-          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+          c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::everything())
   }
@@ -505,7 +505,7 @@ reveal_model_messages <- function(.multi, .unpack_specs = "no"){
       tidyr::unnest(specifications) |>
       dplyr::select(
         -dplyr::any_of(
-          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+          c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::any_of(c("variables","filters","models"))) |>
       dplyr::select(-model) |>
@@ -580,7 +580,7 @@ reveal_model_messages <- function(.multi, .unpack_specs = "no"){
 #'   add_variables(var_group = "dvs", dv1, dv2) |>
 #'   add_correlations("predictor correlations", starts_with("iv")) |>
 #'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
-#'   add_cron_alpha("vio_scale", starts_with("iv")) |>
+#'   add_reliabilities("vio_scale", starts_with("iv")) |>
 #'   add_model("linear model", lm({dvs} ~ {ivs} * mod))
 #'
 #' my_descriptives <- run_descriptives(full_pipeline)
@@ -602,7 +602,7 @@ reveal_summary_stats <- function(.descriptives, .which, .unpack_specs = "no"){
       tidyr::unnest(specifications) |>
       dplyr::select(
         -dplyr::any_of(
-          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+          c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::any_of(c("variables","filters","models")))
   }
@@ -614,11 +614,11 @@ reveal_summary_stats <- function(.descriptives, .which, .unpack_specs = "no"){
       tidyr::unnest(specifications) |>
       dplyr::select(
         -dplyr::any_of(
-          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+          c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::any_of(c("variables","filters","models"))) |>
       dplyr::select(-dplyr::any_of("model")) |>
-      dplyr::rename_with(~ str_remove(.x, "_.*"), dplyr::any_of("model_meta")) |>
+      dplyr::rename_with(~ stringr::str_remove(.x, "_.*"), dplyr::any_of("model_meta")) |>
       tidyr::pivot_longer(-decision, names_to = "decision_set", values_to = "alternatives")
 
     unpacked <-
@@ -685,7 +685,7 @@ reveal_summary_stats <- function(.descriptives, .which, .unpack_specs = "no"){
 #'   add_variables(var_group = "dvs", dv1, dv2) |>
 #'   add_correlations("predictors", starts_with("iv")) |>
 #'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
-#'   add_cron_alpha("vio_scale", starts_with("iv")) |>
+#'   add_reliabilities("vio_scale", starts_with("iv")) |>
 #'   add_model("linear model", lm({dvs} ~ {ivs} * mod))
 #'
 #' my_descriptives <- run_descriptives(full_pipeline)
@@ -707,7 +707,7 @@ reveal_corrs <- function(.descriptives, .which, .unpack_specs = "no"){
       tidyr::unnest(specifications) |>
       dplyr::select(
         -dplyr::any_of(
-          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+          c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::any_of(c("variables","filters","models")))
   }
@@ -719,11 +719,11 @@ reveal_corrs <- function(.descriptives, .which, .unpack_specs = "no"){
       tidyr::unnest(specifications) |>
       dplyr::select(
         -dplyr::any_of(
-          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+          c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::any_of(c("variables","filters","models"))) |>
       dplyr::select(-dplyr::any_of("model")) |>
-      dplyr::rename_with(~ str_remove(.x, "_.*"), dplyr::any_of("model_meta")) |>
+      dplyr::rename_with(~ stringr::str_remove(.x, "_.*"), dplyr::any_of("model_meta")) |>
       tidyr::pivot_longer(-decision, names_to = "decision_set", values_to = "alternatives")
 
     unpacked <-
@@ -789,20 +789,20 @@ reveal_corrs <- function(.descriptives, .which, .unpack_specs = "no"){
 #'   add_variables(var_group = "dvs", dv1, dv2) |>
 #'   add_correlations("predictor correlations", starts_with("iv")) |>
 #'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
-#'   add_cron_alpha("vio_scale", starts_with("iv")) |>
+#'   add_reliabilities("vio_scale", starts_with("iv")) |>
 #'   add_model("linear model", lm({dvs} ~ {ivs} * mod))
 #'
 #' my_descriptives <- run_descriptives(full_pipeline)
 #'
 #' my_descriptives |>
-#'   reveal_alphas(vio_scale_total)
-reveal_alphas <- function(.descriptives, .which, .unpack_specs = "no"){
+#'   reveal_reliabilities(vio_scale_alpha)
+reveal_reliabilities <- function(.descriptives, .which, .unpack_specs = "no"){
   which_sublist <- dplyr::enexprs(.which) |> as.character()
   which_sublist <- which_sublist != "NULL"
 
   unpacked <-
     .descriptives |>
-    tidyr::unnest(cron_alphas_computed) |>
+    tidyr::unnest(reliabilities_computed) |>
     tidyr::unnest({{.which}})
 
   if(.unpack_specs == "wide"){
@@ -811,7 +811,7 @@ reveal_alphas <- function(.descriptives, .which, .unpack_specs = "no"){
       tidyr::unnest(specifications) |>
       dplyr::select(
         -dplyr::any_of(
-          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+          c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::any_of(c("variables","filters","models")))
   }
@@ -823,11 +823,11 @@ reveal_alphas <- function(.descriptives, .which, .unpack_specs = "no"){
       tidyr::unnest(specifications) |>
       dplyr::select(
         -dplyr::any_of(
-          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+          c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::any_of(c("variables","filters","models"))) |>
       dplyr::select(-dplyr::any_of("model")) |>
-      dplyr::rename_with(~ str_remove(.x, "_.*"), dplyr::any_of("model_meta")) |>
+      dplyr::rename_with(~ stringr::str_remove(.x, "_.*"), dplyr::any_of("model_meta")) |>
       tidyr::pivot_longer(-decision, names_to = "decision_set", values_to = "alternatives")
 
     unpacked <-
@@ -852,10 +852,11 @@ reveal_alphas <- function(.descriptives, .which, .unpack_specs = "no"){
 #' @param .how a named list. The list should contain summary functions (e.g.,
 #'   mean or median) the user would like to compute over the individual
 #'   estimates from the multiverse
+#' @param .group an optional variable to group the results. This argument is
+#'   passed directly to the \code{.by} argument used in \code{dplyr::across}
 #' @param list_cols logical, whether to create list columns for the raw values
 #'   of any summarized columns. Useful for creating visualizations and tables.
 #'   Default is TRUE.
-#' @param ... additional arguments passed to \code{dplyr::summarize()}
 #'
 #' @return a summarized \code{tibble} containing a column for each summary
 #'   method from \code{.how}
@@ -904,7 +905,7 @@ reveal_alphas <- function(.descriptives, .which, .unpack_specs = "no"){
 #'   reveal_model_parameters() |>
 #'   filter(str_detect(parameter, "iv")) |>
 #'   condense(coefficient, list(mean = mean, median = median))
-condense <- function(.unpacked, .what, .how, list_cols = TRUE, ...){
+condense <- function(.unpacked, .what, .how, .group = NULL, list_cols = TRUE){
 
   if(list_cols){
     .unpacked |>
@@ -912,14 +913,14 @@ condense <- function(.unpacked, .what, .how, list_cols = TRUE, ...){
         dplyr::across(
           .cols = {{.what}},
           .fns = {{.how}},
-          .names = "{.col}_{.fn}",
+          .names = "{.col}_{.fn}"
         ),
         dplyr::across(
           .cols = {{.what}},
           .fns = list,
           .names = "{.col}_list"
         ),
-        ...
+        .by = {{.group}}
       )
   } else{
     .unpacked |>
@@ -927,9 +928,9 @@ condense <- function(.unpacked, .what, .how, list_cols = TRUE, ...){
         dplyr::across(
           .cols = {{.what}},
           .fns = {{.how}},
-          .names = "{.col}_{.fn}",
+          .names = "{.col}_{.fn}"
         ),
-        ...
+        .by = {{.group}}
       )
   }
 }

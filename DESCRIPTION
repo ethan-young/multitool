@@ -22,19 +22,17 @@ Description: Multiverse analyses run the same analysis over a
     model your data with all possible analysis pipelines and summarize the results.
 License: MIT + file LICENSE
 Imports:
-  broom.mixed,
-  cli,
   clipr,
-  corrr,
   correlation,
   DiagrammeR,
   dplyr,
+  flextable,
   furrr,
   future,
   ggdist,
   glue,
+  ggplot2,
   moments,
-  psych,
   purrr,
   rlang,
   stringr,

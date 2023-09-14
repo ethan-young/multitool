@@ -725,10 +725,10 @@ add_correlations <-
       corrs_matrix <-
         glue::glue(
           'select({variables}) |> ',
-           'correlation(method = "{method}", redundant = {redundant}) |> ',
-           'select(1:3) |> ',
-           'pivot_wider(names_from = Parameter2, values_from = r) |> ',
-           'rename(variable = Parameter1)',
+          'correlation(method = "{method}", redundant = {redundant}) |> ',
+          'select(1:3) |> ',
+          'pivot_wider(names_from = Parameter2, values_from = r) |> ',
+          'rename(variable = Parameter1)',
           .trim = FALSE
         ) |>
         as.character() |>
@@ -781,7 +781,7 @@ add_correlations <-
   }
 
 
-#' Add Cronbach's Alpha to a multiverse pipeline
+#' Add item reliabilities to a multiverse pipeline
 #'
 #' @param .df the original \code{data.frame}(e.g., base data set). If part of
 #'   set of add_* decision functions in a pipeline, the base data will be passed
@@ -789,11 +789,10 @@ add_correlations <-
 #' @param scale_name a character string. Indicates the name of the scale or
 #'   measure measured by the items or indicators in \code{items}.
 #' @param items the items (variables) that comprise a scale or measure. These
-#'   variables will be passed to \code{link[psych]{alpha}}. You can also use
-#'   tidyselect to select variables.
-#' @param keys an optional numeric vector indicating how to score items. A 1 is
-#'   keyed normal directino and a -1 is reverse scored. The length of the
-#'   \code{keys} must be the same as \code{items}.
+#'   variables will be passed to \code{link[performance]{cronbachs_alpha}},
+#'   \code{link[performance]{item_intercor}}, and
+#'   \code{link[performance]{item_reliability}}. You can also use tidyselect to
+#'   select variables.
 #'
 #' @return a \code{data.frame}with three columns: type, group, and code. Type
 #'   indicates the decision type, group is a decision, and the code is the
@@ -829,8 +828,8 @@ add_correlations <-
 #'   add_variables("ivs", iv1, iv2, iv3) |>
 #'   add_variables("dvs", dv1, dv2) |>
 #'   add_variables("mods", starts_with("mod")) |>
-#'   add_cron_alpha("unp_scale", c(iv1,iv2,iv3))
-add_cron_alpha <- function(.df, scale_name, items, keys = NULL){
+#'   add_reliabilities("unp_scale", c(iv1,iv2,iv3))
+add_reliabilities <- function(.df, scale_name, items){
 
   data_chr <- dplyr::enexpr(.df) |> as.character()
   data_attr <- attr(.df, "base_df")
@@ -845,18 +844,32 @@ add_cron_alpha <- function(.df, scale_name, items, keys = NULL){
 
   items <- dplyr::enexprs(items) |> as.character()
 
-  cronalpha_items <-
+  items_alpha <-
     glue::glue(
-      'select({items}) |> alpha()'
+      'select({items}) |> cronbachs_alpha()'
+    ) |>
+    as.character() |>
+    stringr::str_remove_all("\n|  ")
+
+  items_avg_intercorr <-
+    glue::glue(
+      'select({items}) |> item_intercor()'
+    ) |>
+    as.character() |>
+    stringr::str_remove_all("\n|  ")
+
+  items_alpha_if_dropped <-
+    glue::glue(
+      'select({items}) |> item_reliability()'
     ) |>
     as.character() |>
     stringr::str_remove_all("\n|  ")
 
   grid_prep <-
     tibble::tibble(
-      type  = "cron_alphas",
-      group = scale_name,
-      code  = cronalpha_items
+      type  = "reliabilities",
+      group = paste0(scale_name,c("_alpha", "_inter_corr","_if_dropped")),
+      code  = c(items_alpha, items_avg_intercorr, items_alpha_if_dropped)
     )
 
   if(!is.null(data_attr)){
@@ -918,8 +931,7 @@ add_cron_alpha <- function(.df, scale_name, items, keys = NULL){
 #'   add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis")) |>
 #'   add_correlations("predictors", matches("iv|mod|cov"), focus_set = c(cov1,cov2)) |>
 #'   add_correlations("outcomes", matches("dv|mod"), focus_set = matches("dv")) |>
-#'   add_cron_alpha("unp_scale", c(iv1,iv2,iv3)) |>
-#'   add_cron_alpha("vio_scale", starts_with("mod")) |>
+#'   add_reliabilities("unp_scale", c(iv1,iv2,iv3)) |>
 #'   add_model("no covariates", lm({dvs} ~ {ivs} * {mods})) |>
 #'   add_model("with covariates", lm({dvs} ~ {ivs} * {mods} + cov1)) |>
 #'   add_postprocess("aov", aov())
@@ -1056,7 +1068,7 @@ expand_decisions <- function(.pipeline){
           "postprocess",
           "corrs",
           "summary_stats",
-          "cron_alphas",
+          "reliabilities",
           "parameter_keys"
         )
       )
@@ -1065,18 +1077,3 @@ expand_decisions <- function(.pipeline){
   attr(pipeline_expanded, "base_df") <- data_chr
   pipeline_expanded
 }
-#' @importFrom corrr correlate
-#' @importFrom corrr focus
-#' @importFrom corrr pair_n
-#' @importFrom corrr stretch
-#' @importFrom dplyr filter
-#' @importFrom dplyr mutate
-#' @importFrom dplyr across
-#' @importFrom dplyr rename
-#' @importFrom dplyr select
-#' @importFrom dplyr summarize
-#' @importFrom correlation correlation
-#' @importFrom moments skewness
-#' @importFrom moments kurtosis
-#' @importFrom psych alpha
-NULL
