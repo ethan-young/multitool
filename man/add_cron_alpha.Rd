@@ -7,9 +7,9 @@
 add_cron_alpha(.df, scale_name, items, keys = NULL)
 }
 \arguments{
-\item{.df}{the original data.frame (e.g., base data set). If part of set of
-add_* decision functions in a pipeline, the base data will be passed along
-as an attribute.}
+\item{.df}{the original \code{data.frame}(e.g., base data set). If part of
+set of add_* decision functions in a pipeline, the base data will be passed
+along as an attribute.}
 
 \item{scale_name}{a character string. Indicates the name of the scale or
 measure measured by the items or indicators in \code{items}.}
@@ -23,7 +23,7 @@ keyed normal directino and a -1 is reverse scored. The length of the
 \code{keys} must be the same as \code{items}.}
 }
 \value{
-a data.frame with three columns: type, group, and code. Type
+a \code{data.frame}with three columns: type, group, and code. Type
 indicates the decision type, group is a decision, and the code is the
 actual code that will be executed. If part of a pipe, the current set of
 decisions will be appended as new rows.
@@ -55,7 +55,7 @@ the_data <-
   )
 
 the_data |>
-  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+  add_filters(include1 == 0,include2 != 3,include2 != 2, include3 > -2.5) |>
   add_variables("ivs", iv1, iv2, iv3) |>
   add_variables("dvs", dv1, dv2) |>
   add_variables("mods", starts_with("mod")) |>

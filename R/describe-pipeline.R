@@ -1,10 +1,11 @@
 #' Detect total number of analysis pipelines
 #'
-#'@param .grid a full decision grid created by \code{\link{expand_decisions}}
+#'@param .pipeline a \code{data.frame} produced by calling a series of add_*
+#'   functions.
 #' @param include_models Whether to count alternative models if you have more
 #'   than one \code{add_model()} call.
 #'
-#' @return a numeric, the total number of unique analyis pipelines
+#' @return a numeric, the total number of unique analysis pipelines
 #' @export
 #'
 #' @examples
@@ -29,16 +30,16 @@
 #' # create a pipeline blueprint
 #' full_pipeline <-
 #'   the_data |>
-#'   add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |>
+#'   add_filters(include1 == 0, include2 != 3, include3 > -2.5) |>
 #'   add_variables(var_group = "ivs", iv1, iv2, iv3) |>
 #'   add_variables(var_group = "dvs", dv1, dv2) |>
 #'   add_model("linear model", lm({dvs} ~ {ivs} * mod))
 #'
 #' detect_multiverse_n(full_pipeline)
-detect_multiverse_n <- function(.grid, include_models = TRUE){
+detect_multiverse_n <- function(.pipeline, include_models = TRUE){
 
   if(include_models){
-    .grid |>
+    .pipeline |>
       dplyr::filter(type %in% c("filters","variables", "models")) |>
       dplyr::mutate(group = ifelse(type=="models", "model", group)) |>
       dplyr::group_by(group) |>
@@ -47,7 +48,7 @@ detect_multiverse_n <- function(.grid, include_models = TRUE){
       cumprod() |>
       max()
   } else{
-    .grid |>
+    .pipeline |>
       dplyr::filter(type %in% c("filters","variables")) |>
       dplyr::group_by(group) |>
       dplyr::count() |>
@@ -60,7 +61,8 @@ detect_multiverse_n <- function(.grid, include_models = TRUE){
 
 #' Detect total number of variable sets in your pipelines
 #'
-#'@param .grid a full decision grid created by \code{\link{expand_decisions}}
+#'@param .pipeline a \code{data.frame} produced by calling a series of add_*
+#'   functions.
 #'
 #' @return a numeric, the total number of unique variable sets
 #' @export
@@ -87,15 +89,15 @@ detect_multiverse_n <- function(.grid, include_models = TRUE){
 #' # create a pipeline blueprint
 #' full_pipeline <-
 #'   the_data |>
-#'   add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |>
+#'   add_filters(include1 == 0, include2 != 3, include3 > -2.5) |>
 #'   add_variables(var_group = "ivs", iv1, iv2, iv3) |>
 #'   add_variables(var_group = "dvs", dv1, dv2) |>
 #'   add_model("linear model", lm({dvs} ~ {ivs} * mod))
 #'
 #' detect_n_variables(full_pipeline)
-detect_n_variables <- function(.grid){
+detect_n_variables <- function(.pipeline){
 
-  .grid |>
+  .pipeline |>
     dplyr::filter(type == "variables") |>
     dplyr::group_by(type, group) |>
     dplyr::count() |>
@@ -106,7 +108,8 @@ detect_n_variables <- function(.grid){
 
 #' Detect total number of filtering expressions your pipelines
 #'
-#'@param .grid a full decision grid created by \code{\link{expand_decisions}}
+#'@param .pipeline a \code{data.frame} produced by calling a series of add_*
+#'   functions.
 #'
 #' @return a numeric, the total number of filtering expressions
 #' @export
@@ -133,15 +136,15 @@ detect_n_variables <- function(.grid){
 #' # create a pipeline blueprint
 #' full_pipeline <-
 #'   the_data |>
-#'   add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |>
+#'   add_filters(include1 == 0, include2 != 3, include3 > -2.5) |>
 #'   add_variables(var_group = "ivs", iv1, iv2, iv3) |>
 #'   add_variables(var_group = "dvs", dv1, dv2) |>
 #'   add_model("linear model", lm({dvs} ~ {ivs} * mod))
 #'
 #' detect_n_filters(full_pipeline)
-detect_n_filters <- function(.grid){
+detect_n_filters <- function(.pipeline){
 
-  .grid |>
+  .pipeline |>
     dplyr::filter(type == "filters") |>
     dplyr::group_by(type, group) |>
     dplyr::count() |>
@@ -152,12 +155,13 @@ detect_n_filters <- function(.grid){
 
 #' Detect total number of models in your pipelines
 #'
-#'@param .grid a full decision grid created by \code{\link{expand_decisions}}
+#'@param .pipeline a \code{data.frame} produced by calling a series of add_*
+#'   functions.
 #'
-#' @return a numeric, the total number of unique models
-#' @export
+#'@return a numeric, the total number of unique models
+#'@export
 #'
-#' @examples
+#'@examples
 #' library(tidyverse)
 #' library(multitool)
 #'
@@ -179,14 +183,14 @@ detect_n_filters <- function(.grid){
 #' # create a pipeline blueprint
 #' full_pipeline <-
 #'   the_data |>
-#'   add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |>
+#'   add_filters(include1 == 0, include2 != 3, include3 > -2.5) |>
 #'   add_variables(var_group = "ivs", iv1, iv2, iv3) |>
 #'   add_variables(var_group = "dvs", dv1, dv2) |>
 #'   add_model("linear model", lm({dvs} ~ {ivs} * mod))
 #'
 #' detect_n_models(full_pipeline)
-detect_n_models <- function(.grid){
-  .grid |>
+detect_n_models <- function(.pipeline){
+  .pipeline |>
     dplyr::filter(type == "models") |>
     dplyr::group_by(type, group) |>
     dplyr::count() |>
@@ -198,8 +202,8 @@ detect_n_models <- function(.grid){
 
 #'Summarize samples sizes for each unique filtering expression
 #'
-#'@param .grid a full decision grid created by
-#'  \code{\link{expand_decisions}}
+#'@param .pipeline a \code{data.frame} produced by calling a series of add_*
+#'   functions.
 #'
 #'@return a \code{tibble} with each row representing a filtering expression and
 #'  four columns: \code{filter_expression}, \code{variable}, \code{n_retained},
@@ -207,7 +211,7 @@ detect_n_models <- function(.grid){
 #'
 #'@export
 #'
-#' @examples
+#'@examples
 #' library(tidyverse)
 #' library(multitool)
 #'
@@ -229,27 +233,27 @@ detect_n_models <- function(.grid){
 #' # create a pipeline blueprint
 #' full_pipeline <-
 #'   the_data |>
-#'   add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |>
+#'   add_filters(include1 == 0, include2 != 3, include3 > -2.5) |>
 #'   add_variables(var_group = "ivs", iv1, iv2, iv3) |>
 #'   add_variables(var_group = "dvs", dv1, dv2) |>
 #'   add_model("linear model", lm({dvs} ~ {ivs} * mod))
 #'
 #' summarize_filter_ns(full_pipeline)
-summarize_filter_ns <- function(.grid){
+summarize_filter_ns <- function(.pipeline){
 
-  data_chr <- attr(.grid, "base_df")
+  data_chr <- attr(.pipeline, "base_df")
 
   base_df <-
     rlang::parse_expr(data_chr) |>
     rlang::eval_tidy(env = parent.frame())
 
   filter_exprs <-
-    .grid |>
+    .pipeline |>
     dplyr::filter(type == "filters") |>
     dplyr::pull(code)
 
   filter_vars <-
-    .grid |>
+    .pipeline |>
     dplyr::filter(type == "filters") |>
     dplyr::pull(group)
 
@@ -257,9 +261,11 @@ summarize_filter_ns <- function(.grid){
 
     tibble::tibble(
       filter_expression = x,
-      variable          = y,
-      n_retained        = base_df |> dplyr::filter(rlang::parse_expr(x) |> rlang::eval_tidy()) |> nrow(),
-      n_excluded        = nrow(base_df) - n_retained
+      variable = y,
+      n_retained = base_df |>
+        dplyr::filter(rlang::parse_expr(x) |> rlang::eval_tidy()) |>
+        nrow(),
+      n_excluded = nrow(base_df) - n_retained
     )
 
   }) |>

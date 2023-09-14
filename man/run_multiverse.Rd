@@ -4,19 +4,19 @@
 \alias{run_multiverse}
 \title{Run a multiverse based on a complete decision grid}
 \usage{
-run_multiverse(.grid, save_model = FALSE, ncores = 1, show_progress = FALSE)
+run_multiverse(.grid, ncores = 1, save_model = FALSE, show_progress = TRUE)
 }
 \arguments{
 \item{.grid}{a \code{tibble} produced by \code{\link{expand_decisions}}}
+
+\item{ncores}{numeric. The number of cores you want to use for parallel
+processing.}
 
 \item{save_model}{logical, indicates whether to save the model object in its
 entirety. The default is \code{FALSE} because model objects are usually
 large and under the hood, \code{\link[parameters]{parameters}} and
 \code{\link[performance]{performance}} is used to summarize the most useful
 model information.}
-
-\item{ncores}{numeric. The number of cores you want to use for parallel
-processing.}
 
 \item{show_progress}{logical, whether to show a progress bar while running.}
 }
@@ -34,8 +34,49 @@ If not, \code{summary} will be called instead.
 Run a multiverse based on a complete decision grid
 }
 \examples{
+library(tidyverse)
+library(multitool)
 
-\dontrun{
-run_multiverse(grid)
-}
+# Simulate some data
+the_data <-
+  data.frame(
+    id   = 1:500,
+    iv1  = rnorm(500),
+    iv2  = rnorm(500),
+    iv3  = rnorm(500),
+    mod1 = rnorm(500),
+    mod2 = rnorm(500),
+    mod3 = rnorm(500),
+    cov1 = rnorm(500),
+    cov2 = rnorm(500),
+    dv1  = rnorm(500),
+    dv2  = rnorm(500),
+    include1 = rbinom(500, size = 1, prob = .1),
+    include2 = sample(1:3, size = 500, replace = TRUE),
+    include3 = rnorm(500)
+  )
+
+# Decision pipeline
+full_pipeline <-
+  the_data |>
+  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+  add_variables("ivs", iv1, iv2, iv3) |>
+  add_variables("dvs", dv1, dv2) |>
+  add_variables("mods", starts_with("mod")) |>
+  add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
+  add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
+  add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
+  add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis")) |>
+  add_correlations("predictors", matches("iv|mod|cov"), focus_set = c(cov1,cov2)) |>
+  add_correlations("outcomes", matches("dv|mod"), focus_set = matches("dv")) |>
+  add_cron_alpha("unp_scale", c(iv1,iv2,iv3)) |>
+  add_cron_alpha("vio_scale", starts_with("mod")) |>
+  add_model("no covariates",lm({dvs} ~ {ivs} * {mods})) |>
+  add_model("covariate", lm({dvs} ~ {ivs} * {mods} + cov1)) |>
+  add_postprocess("aov", aov())
+
+pipeline_grid <- expand_decisions(full_pipeline)
+
+# Run the whole multiverse
+the_multiverse <- run_multiverse(pipeline_grid[1:10,])
 }

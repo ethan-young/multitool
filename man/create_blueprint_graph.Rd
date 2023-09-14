@@ -5,7 +5,7 @@
 \title{Create a Analysis Pipeline diagram}
 \usage{
 create_blueprint_graph(
-  .grid,
+  .pipeline,
   splines = "line",
   render = TRUE,
   show_code = FALSE,
@@ -13,7 +13,7 @@ create_blueprint_graph(
 )
 }
 \arguments{
-\item{.grid}{a \code{data.frame} produced by calling a series of add_*
+\item{.pipeline}{a \code{data.frame} produced by calling a series of add_*
 functions.}
 
 \item{splines}{options for how to draw edges (lines) for a grViz diagram}

@@ -4,11 +4,11 @@
 \alias{summarize_filter_ns}
 \title{Summarize samples sizes for each unique filtering expression}
 \usage{
-summarize_filter_ns(.grid)
+summarize_filter_ns(.pipeline)
 }
 \arguments{
-\item{.grid}{a full decision grid created by
-\code{\link{expand_decisions}}}
+\item{.pipeline}{a \code{data.frame} produced by calling a series of add_*
+functions.}
 }
 \value{
 a \code{tibble} with each row representing a filtering expression and
@@ -40,7 +40,7 @@ the_data <-
 # create a pipeline blueprint
 full_pipeline <-
   the_data |>
-  add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |>
+  add_filters(include1 == 0, include2 != 3, include3 > -2.5) |>
   add_variables(var_group = "ivs", iv1, iv2, iv3) |>
   add_variables(var_group = "dvs", dv1, dv2) |>
   add_model("linear model", lm({dvs} ~ {ivs} * mod))

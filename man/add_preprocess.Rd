@@ -7,9 +7,9 @@
 add_preprocess(.df, process_name, code)
 }
 \arguments{
-\item{.df}{The original data.frame (e.g., base data set). If part of set of
-add_* decision functions in a pipeline, the base data will be passed along
-as an attribute.}
+\item{.df}{The original \code{data.frame}(e.g., base data set). If part of
+set of add_* decision functions in a pipeline, the base data will be passed
+along as an attribute.}
 
 \item{process_name}{a character string. A descriptive name for what the
 preprocessing step accomplishes.}
@@ -23,11 +23,11 @@ The code should be written to work with pipes (i.e., \code{|>} or
 \code{\%>\%}). Pre-processing code will eventually take the base data along
 with any filters applied to the data. This means
 \code{\link[dplyr]{mutate}} calls are the most natural but other functions
-that take a data.frame as the first argument should work as well (as long
-as they also return a data.frame).}
+that take a \code{data.frame} as the first argument should work as well (as
+long as they also return a \code{data.frame}).}
 }
 \value{
-a data.frame with three columns: type, group, and code. Type
+a \code{data.frame} with three columns: type, group, and code. Type
 indicates the decision type, group is a decision, and the code is the
 actual code that will be executed. If part of a pipe, the current set of
 decisions will be appended as new rows.
@@ -59,7 +59,7 @@ the_data <-
   )
 
 the_data |>
-  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+  add_filters(include1 == 0,include2 != 3,include2 != 2, include3 > -2.5) |>
   add_variables("ivs", iv1, iv2, iv3) |>
   add_variables("dvs", dv1, dv2) |>
   add_variables("mods", starts_with("mod")) |>

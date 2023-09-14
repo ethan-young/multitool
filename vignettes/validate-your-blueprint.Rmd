@@ -47,7 +47,6 @@ full_pipeline <-
   add_variables(var_group = "ivs", iv1, iv2, iv3) |> 
   add_variables(var_group = "dvs", dv1, dv2) |> 
   add_model("linear model", lm({dvs} ~ {ivs} * mod))
-
 ```
 
 ## Blueprint metadata
@@ -98,9 +97,3 @@ expanded_pipeline |> show_code_model(decision_num = 17)
 ```
 
 Setting the `copy` argument to `TRUE` allows you to send the code straight to your clipboard. You can paste it into the source or console for testing/editing.
-
-You can also run individual decisions to test that they work.
-
-```{r}
-run_universe_model(expanded_pipeline, decision_num = 1)
-```

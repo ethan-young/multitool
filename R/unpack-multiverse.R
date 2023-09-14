@@ -4,8 +4,12 @@
 #'   \code{\link{run_multiverse}}.
 #' @param .what the name of a list-column you would like to unpack
 #' @param .which any sub-list columns you would like to unpack
-#' @param .unpack_specs logical, whether to unnest the specifications that built
-#'   the multiverse grid. Defaults to FALSE.
+#' @param .unpack_specs character, options are \code{"no"}, \code{"wide"}, or
+#'   \code{"long"}. \code{"no"} (default) keeps specifications in a list column,
+#'   \code{wide} unnests specifications with each specification category as a
+#'   column. \code{"long"} unnests specifications and stacks them into long
+#'   format, which stacks specifications into a \code{decision_set} and
+#'   \code{alternatives} columns. This is mainly useful for plotting.
 #'
 #' @return the unnested part of the multiverse requested. This usually contains
 #'   the particular estimates or statistics you would like to analyze over the
@@ -13,7 +17,7 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#'
 #' library(tidyverse)
 #' library(multitool)
 #'
@@ -43,43 +47,244 @@
 #'   add_variables("ivs", iv1, iv2, iv3) |>
 #'   add_variables("dvs", dv1, dv2) |>
 #'   add_variables("mods", starts_with("mod")) |>
-#'   add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
-#'   add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
-#'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
-#'   add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis")) |>
-#'   add_correlations("predictors", matches("iv|mod|cov"), focus_set = c(cov1,cov2)) |>
-#'   add_correlations("outcomes", matches("dv|mod"), focus_set = matches("dv")) |>
-#'   add_cron_alpha("unp_scale", c(iv1,iv2,iv3)) |>
-#'   add_cron_alpha("vio_scale", starts_with("mod")) |>
-#'   add_model(lm({dvs} ~ {ivs} * {mods})) |>
-#'   add_model(lm({dvs} ~ {ivs} * {mods} + cov1)) |>
-#'   add_postprocess("aov", aov()) |>
-#'   expand_decisions()
+#'   add_model("linear_model", lm({dvs} ~ {ivs} * {mods} + cov1))
+#'
+#' pipeline_grid <- expand_decisions(full_pipeline)
 #'
 #' # Run the whole multiverse
-#' the_multiverse <- run_multiverse(full_pipeline[1:10,])
+#' the_multiverse <- run_multiverse(pipeline_grid[1:10,])
 #'
 #' # Reveal results of the linear model
-#' the_multiverse |> reveal(lm_fitted, matches("tidy"), .unpack_specs = TRUE)
-#' }
-reveal <- function(.multi, .what, .which = NULL, .unpack_specs = FALSE){
+#' the_multiverse |> reveal(model_fitted, model_parameters)
+reveal <- function(.multi, .what, .which = NULL, .unpack_specs = "no"){
 
   which_sublist <- dplyr::enexprs(.which) |> as.character()
   which_sublist <- which_sublist != "NULL"
 
   unpacked <-
     .multi |>
-    dplyr::select(decision, specifications,{{.what}}) |>
     tidyr::unnest({{.what}})
 
   if(which_sublist){
     unpacked <-
       unpacked |>
-      dplyr::select(decision, specifications, {{.which}}) |>
       tidyr::unnest({{.which}})
   }
 
-  if(.unpack_specs){
+  if(.unpack_specs == "wide"){
+    unpacked <-
+      unpacked |>
+      tidyr::unnest(specifications) |>
+      dplyr::select(
+        -dplyr::any_of(
+          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+      ) |>
+      tidyr::unnest(dplyr::any_of(c("variables","filters","models")))
+  }
+
+  if(.unpack_specs == "long"){
+    unpacked_and_stacked <-
+      unpacked |>
+      dplyr::select(decision, specifications) |>
+      tidyr::unnest(specifications) |>
+      dplyr::select(
+        -dplyr::any_of(
+          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+      ) |>
+      tidyr::unnest(dplyr::any_of(c("variables","filters","models"))) |>
+      dplyr::select(-dplyr::any_of("model")) |>
+      dplyr::rename_with(~ str_remove(.x, "_.*"), dplyr::any_of("model_meta")) |>
+      tidyr::pivot_longer(-decision, names_to = "decision_set", values_to = "alternatives")
+
+    print(unpacked_and_stacked)
+
+    unpacked <-
+      dplyr::left_join(
+        unpacked_and_stacked,
+        unpacked |> dplyr::select(-specifications),
+        dplyr::join_by(decision == decision)
+      )
+
+  }
+
+  unpacked
+}
+
+#' Reveal the model parameters of a multiverse analysis
+#'
+#' @param .multi a multiverse list-column \code{tibble} produced by
+#'   \code{\link{run_multiverse}}.
+#' @param parameter_key character, if you added parameter keys to your pipeline,
+#'   you can specify if you would like filter the parameters using one of your
+#'   parameter keys. This is useful when different variables are being switched
+#'   out across the multiverse but represent the same effect of interest.
+#' @param .unpack_specs character, options are \code{"no"}, \code{"wide"}, or
+#'   \code{"long"}. \code{"no"} (default) keeps specifications in a list column,
+#'   \code{wide} unnests specifications with each specification category as a
+#'   column. \code{"long"} unnests specifications and stacks them into long
+#'   format, which stacks specifications into a \code{decision_set} and
+#'   \code{alternatives} columns. This is mainly useful for plotting.
+#'
+#' @return the unnested model paramerters from the multiverse.
+#' @export
+#'
+#' @examples
+#'
+#' library(tidyverse)
+#' library(multitool)
+#'
+#' # Simulate some data
+#' the_data <-
+#'   data.frame(
+#'     id   = 1:500,
+#'     iv1  = rnorm(500),
+#'     iv2  = rnorm(500),
+#'     iv3  = rnorm(500),
+#'     mod1 = rnorm(500),
+#'     mod2 = rnorm(500),
+#'     mod3 = rnorm(500),
+#'     cov1 = rnorm(500),
+#'     cov2 = rnorm(500),
+#'     dv1  = rnorm(500),
+#'     dv2  = rnorm(500),
+#'     include1 = rbinom(500, size = 1, prob = .1),
+#'     include2 = sample(1:3, size = 500, replace = TRUE),
+#'     include3 = rnorm(500)
+#'   )
+#'
+#' # Decision pipeline
+#' full_pipeline <-
+#'   the_data |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+#'   add_variables("ivs", iv1, iv2, iv3) |>
+#'   add_variables("dvs", dv1, dv2) |>
+#'   add_variables("mods", starts_with("mod")) |>
+#'   add_model("linear_model", lm({dvs} ~ {ivs} * {mods} + cov1))
+#'
+#' pipeline_grid <- expand_decisions(full_pipeline)
+#'
+#' # Run the whole multiverse
+#' the_multiverse <- run_multiverse(pipeline_grid[1:10,])
+#'
+#' # Reveal results of the linear model
+#' the_multiverse |>
+#'   reveal_model_parameters()
+reveal_model_parameters <- function(.multi, parameter_key = NULL, .unpack_specs = "no"){
+  unpacked <-
+    .multi |>
+    tidyr::unnest(model_fitted) |>
+    tidyr::unnest(model_parameters)
+
+  if(!is.null(parameter_key)){
+    unpacked <-
+      unpacked |>
+      dplyr::filter(parameter_key == parameter_key)
+  }
+
+  if(.unpack_specs == "wide"){
+    unpacked <-
+      unpacked |>
+      tidyr::unnest(specifications) |>
+      dplyr::select(
+        -dplyr::any_of(
+          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+      ) |>
+      tidyr::unnest(dplyr::any_of(c("variables","filters","models")))
+  }
+
+  if(.unpack_specs == "long"){
+    unpacked_and_stacked <-
+      unpacked |>
+      dplyr::select(decision, specifications) |>
+      tidyr::unnest(specifications) |>
+      dplyr::select(
+        -dplyr::any_of(
+          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+      ) |>
+      tidyr::unnest(dplyr::any_of(c("variables","filters","models"))) |>
+      dplyr::select(-model) |>
+      dplyr::rename(model = model_meta) |>
+      tidyr::pivot_longer(
+        -decision,
+        names_to = "decision_set",
+        values_to = "alternatives"
+      )
+
+    unpacked <-
+      dplyr::left_join(
+        unpacked_and_stacked,
+        unpacked |> dplyr::select(-specifications),
+        dplyr::join_by(decision == decision)
+      )
+
+  }
+
+  unpacked
+}
+
+#' Reveal the model performance/fit indices from a multiverse analysis
+#'
+#' @param .multi a multiverse list-column \code{tibble} produced by
+#'   \code{\link{run_multiverse}}.
+#' @param .unpack_specs character, options are \code{"no"}, \code{"wide"}, or
+#'   \code{"long"}. \code{"no"} (default) keeps specifications in a list column,
+#'   \code{wide} unnests specifications with each specification category as a
+#'   column. \code{"long"} unnests specifications and stacks them into long
+#'   format, which stacks specifications into a \code{decision_set} and
+#'   \code{alternatives} columns. This is mainly useful for plotting.
+#'
+#' @return the unnested model performance/fit indices from a multiverse
+#'   analysis.
+#' @export
+#'
+#' @examples
+#'
+#' library(tidyverse)
+#' library(multitool)
+#'
+#' # Simulate some data
+#' the_data <-
+#'   data.frame(
+#'     id   = 1:500,
+#'     iv1  = rnorm(500),
+#'     iv2  = rnorm(500),
+#'     iv3  = rnorm(500),
+#'     mod1 = rnorm(500),
+#'     mod2 = rnorm(500),
+#'     mod3 = rnorm(500),
+#'     cov1 = rnorm(500),
+#'     cov2 = rnorm(500),
+#'     dv1  = rnorm(500),
+#'     dv2  = rnorm(500),
+#'     include1 = rbinom(500, size = 1, prob = .1),
+#'     include2 = sample(1:3, size = 500, replace = TRUE),
+#'     include3 = rnorm(500)
+#'   )
+#'
+#' # Decision pipeline
+#' full_pipeline <-
+#'   the_data |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+#'   add_variables("ivs", iv1, iv2, iv3) |>
+#'   add_variables("dvs", dv1, dv2) |>
+#'   add_variables("mods", starts_with("mod")) |>
+#'   add_model("linear_model", lm({dvs} ~ {ivs} * {mods} + cov1))
+#'
+#' pipeline_grid <- expand_decisions(full_pipeline)
+#'
+#' # Run the whole multiverse
+#' the_multiverse <- run_multiverse(pipeline_grid[1:10,])
+#'
+#' # Reveal results of the linear model
+#' the_multiverse |>
+#'   reveal_model_performance()
+reveal_model_performance <- function(.multi, .unpack_specs = "no"){
+  unpacked <-
+    .multi |>
+    tidyr::unnest(model_fitted) |>
+    tidyr::unnest(model_performance)
+
+  if(.unpack_specs == "wide"){
     unpacked <-
       unpacked |>
       tidyr::unnest(specifications) |>
@@ -88,6 +293,236 @@ reveal <- function(.multi, .what, .which = NULL, .unpack_specs = FALSE){
           c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
       ) |>
       tidyr::unnest(dplyr::everything())
+  }
+
+  if(.unpack_specs == "long"){
+    unpacked_and_stacked <-
+      unpacked |>
+      dplyr::select(decision, specifications) |>
+      tidyr::unnest(specifications) |>
+      dplyr::select(
+        -dplyr::any_of(
+          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+      ) |>
+      tidyr::unnest(dplyr::any_of(c("variables","filters","models"))) |>
+      dplyr::select(-model) |>
+      dplyr::rename(model = model_meta) |>
+      tidyr::pivot_longer(
+        -decision,
+        names_to = "decision_set",
+        values_to = "alternatives"
+      )
+
+    unpacked <-
+      dplyr::left_join(
+        unpacked_and_stacked,
+        unpacked |> dplyr::select(-specifications),
+        dplyr::join_by(decision == decision)
+      )
+  }
+
+  unpacked
+}
+
+#' Reveal any warnings about your models during a multiverse analysis
+#'
+#' @param .multi a multiverse list-column \code{tibble} produced by
+#'   \code{\link{run_multiverse}}.
+#' @param .unpack_specs character, options are \code{"no"}, \code{"wide"}, or
+#'   \code{"long"}. \code{"no"} (default) keeps specifications in a list column,
+#'   \code{wide} unnests specifications with each specification category as a
+#'   column. \code{"long"} unnests specifications and stacks them into long
+#'   format, which stacks specifications into a \code{decision_set} and
+#'   \code{alternatives} columns. This is mainly useful for plotting.
+#'
+#' @return the unnested model warnings captured during analysis
+#' @export
+#'
+#' @examples
+#'
+#' library(tidyverse)
+#' library(multitool)
+#'
+#' # Simulate some data
+#' the_data <-
+#'   data.frame(
+#'     id   = 1:500,
+#'     iv1  = rnorm(500),
+#'     iv2  = rnorm(500),
+#'     iv3  = rnorm(500),
+#'     mod1 = rnorm(500),
+#'     mod2 = rnorm(500),
+#'     mod3 = rnorm(500),
+#'     cov1 = rnorm(500),
+#'     cov2 = rnorm(500),
+#'     dv1  = rnorm(500),
+#'     dv2  = rnorm(500),
+#'     include1 = rbinom(500, size = 1, prob = .1),
+#'     include2 = sample(1:3, size = 500, replace = TRUE),
+#'     include3 = rnorm(500)
+#'   )
+#'
+#' # Decision pipeline
+#' full_pipeline <-
+#'   the_data |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+#'   add_variables("ivs", iv1, iv2, iv3) |>
+#'   add_variables("dvs", dv1, dv2) |>
+#'   add_variables("mods", starts_with("mod")) |>
+#'   add_model("linear_model", lm({dvs} ~ {ivs} * {mods} + cov1))
+#'
+#' pipeline_grid <- expand_decisions(full_pipeline)
+#'
+#' # Run the whole multiverse
+#' the_multiverse <- run_multiverse(pipeline_grid[1:10,])
+#'
+#' # Reveal results of the linear model
+#' the_multiverse |>
+#'   reveal_model_warnings()
+reveal_model_warnings <- function(.multi, .unpack_specs = "no"){
+  unpacked <-
+    .multi |>
+    tidyr::unnest(model_fitted) |>
+    tidyr::unnest(model_warnings)
+
+  if(.unpack_specs == "wide"){
+    unpacked <-
+      unpacked |>
+      tidyr::unnest(specifications) |>
+      dplyr::select(
+        -dplyr::any_of(
+          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+      ) |>
+      tidyr::unnest(dplyr::everything())
+  }
+
+  if(.unpack_specs == "long"){
+    unpacked_and_stacked <-
+      unpacked |>
+      dplyr::select(decision, specifications) |>
+      tidyr::unnest(specifications) |>
+      dplyr::select(
+        -dplyr::any_of(
+          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+      ) |>
+      tidyr::unnest(dplyr::any_of(c("variables","filters","models"))) |>
+      dplyr::select(-model) |>
+      dplyr::rename(model = model_meta) |>
+      tidyr::pivot_longer(
+        -decision,
+        names_to = "decision_set",
+        values_to = "alternatives"
+      )
+
+    unpacked <-
+      dplyr::left_join(
+        unpacked_and_stacked,
+        unpacked |> dplyr::select(-specifications),
+        dplyr::join_by(decision == decision)
+      )
+
+  }
+
+  unpacked
+}
+
+#' Reveal any messages about your models during a multiverse analysis
+#'
+#' @param .multi a multiverse list-column \code{tibble} produced by
+#'   \code{\link{run_multiverse}}.
+#' @param .unpack_specs character, options are \code{"no"}, \code{"wide"}, or
+#'   \code{"long"}. \code{"no"} (default) keeps specifications in a list column,
+#'   \code{wide} unnests specifications with each specification category as a
+#'   column. \code{"long"} unnests specifications and stacks them into long
+#'   format, which stacks specifications into a \code{decision_set} and
+#'   \code{alternatives} columns. This is mainly useful for plotting.
+#'
+#' @return the unnested model messages captured during analysis.
+#' @export
+#'
+#' @examples
+#'
+#' library(tidyverse)
+#' library(multitool)
+#'
+#' # Simulate some data
+#' the_data <-
+#'   data.frame(
+#'     id   = 1:500,
+#'     iv1  = rnorm(500),
+#'     iv2  = rnorm(500),
+#'     iv3  = rnorm(500),
+#'     mod1 = rnorm(500),
+#'     mod2 = rnorm(500),
+#'     mod3 = rnorm(500),
+#'     cov1 = rnorm(500),
+#'     cov2 = rnorm(500),
+#'     dv1  = rnorm(500),
+#'     dv2  = rnorm(500),
+#'     include1 = rbinom(500, size = 1, prob = .1),
+#'     include2 = sample(1:3, size = 500, replace = TRUE),
+#'     include3 = rnorm(500)
+#'   )
+#'
+#' # Decision pipeline
+#' full_pipeline <-
+#'   the_data |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+#'   add_variables("ivs", iv1, iv2, iv3) |>
+#'   add_variables("dvs", dv1, dv2) |>
+#'   add_variables("mods", starts_with("mod")) |>
+#'   add_model("linear_model", lm({dvs} ~ {ivs} * {mods} + cov1))
+#'
+#' pipeline_grid <- expand_decisions(full_pipeline)
+#'
+#' # Run the whole multiverse
+#' the_multiverse <- run_multiverse(pipeline_grid[1:10,])
+#'
+#' # Reveal results of the linear model
+#' the_multiverse |>
+#'   reveal_model_messages()
+reveal_model_messages <- function(.multi, .unpack_specs = "no"){
+  unpacked <-
+    .multi |>
+    tidyr::unnest(model_fitted) |>
+    tidyr::unnest(model_messages)
+
+  if(.unpack_specs == "wide"){
+    unpacked <-
+      unpacked |>
+      tidyr::unnest(specifications) |>
+      dplyr::select(
+        -dplyr::any_of(
+          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+      ) |>
+      tidyr::unnest(dplyr::everything())
+  }
+
+  if(.unpack_specs == "long"){
+    unpacked_and_stacked <-
+      unpacked |>
+      dplyr::select(decision, specifications) |>
+      tidyr::unnest(specifications) |>
+      dplyr::select(
+        -dplyr::any_of(
+          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+      ) |>
+      tidyr::unnest(dplyr::any_of(c("variables","filters","models"))) |>
+      dplyr::select(-model) |>
+      dplyr::rename(model = model_meta) |>
+      tidyr::pivot_longer(
+        -decision,
+        names_to = "decision_set",
+        values_to = "alternatives"
+      )
+
+    unpacked <-
+      dplyr::left_join(
+        unpacked_and_stacked,
+        unpacked |> dplyr::select(-specifications),
+        dplyr::join_by(decision == decision)
+      )
+
   }
 
   unpacked
@@ -95,11 +530,15 @@ reveal <- function(.multi, .what, .which = NULL, .unpack_specs = FALSE){
 
 #' Reveal a set of summary statistics from a multiverse analysis
 #'
-#' @param .multi a multiverse list-column \code{tibble} produced by
-#'   \code{\link{run_multiverse}}.
+#' @param .descriptives a descriptive multiverse list-column \code{tibble}
+#'   produced by \code{\link{run_descriptives}}.
 #' @param .which the specific name of the summary statistics
-#' @param .unpack_specs logical, whether to unnest the specifications that built
-#'   the multiverse grid. Defaults to FALSE.
+#' @param .unpack_specs character, options are \code{"no"}, \code{"wide"}, or
+#'   \code{"long"}. \code{"no"} (default) keeps specifications in a list column,
+#'   \code{wide} unnests specifications with each specification category as a
+#'   column. \code{"long"} unnests specifications and stacks them into long
+#'   format, which stacks specifications into a \code{decision_set} and
+#'   \code{alternatives} columns. This is mainly useful for plotting.
 #'
 #' @return an unnested set of summary statistics per decision from the
 #'   multiverse.
@@ -107,66 +546,57 @@ reveal <- function(.multi, .what, .which = NULL, .unpack_specs = FALSE){
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#'
 #' library(tidyverse)
 #' library(multitool)
 #'
-#' # Simulate some data
+#' # create some data
 #' the_data <-
 #'   data.frame(
-#'     id   = 1:500,
-#'     iv1  = rnorm(500),
-#'     iv2  = rnorm(500),
-#'     iv3  = rnorm(500),
-#'     mod1 = rnorm(500),
-#'     mod2 = rnorm(500),
-#'     mod3 = rnorm(500),
-#'     cov1 = rnorm(500),
-#'     cov2 = rnorm(500),
-#'     dv1  = rnorm(500),
-#'     dv2  = rnorm(500),
+#'     id  = 1:500,
+#'     iv1 = rnorm(500),
+#'     iv2 = rnorm(500),
+#'     iv3 = rnorm(500),
+#'     mod = rnorm(500),
+#'     dv1 = rnorm(500),
+#'     dv2 = rnorm(500),
 #'     include1 = rbinom(500, size = 1, prob = .1),
 #'     include2 = sample(1:3, size = 500, replace = TRUE),
 #'     include3 = rnorm(500)
 #'   )
 #'
-#' # Decision pipeline
+#' # create a pipeline blueprint
 #' full_pipeline <-
 #'   the_data |>
-#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
-#'   add_variables("ivs", iv1, iv2, iv3) |>
-#'   add_variables("dvs", dv1, dv2) |>
-#'   add_variables("mods", starts_with("mod")) |>
-#'   add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
-#'   add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
+#'   add_filters(
+#'     include1 == 0,
+#'     include2 != 3,
+#'     include2 != 2,
+#'     include3 > -2.5,
+#'     include3 < 2.5,
+#'     between(include3, -2.5, 2.5)
+#'   ) |>
+#'   add_variables(var_group = "ivs", iv1, iv2, iv3) |>
+#'   add_variables(var_group = "dvs", dv1, dv2) |>
+#'   add_correlations("predictor correlations", starts_with("iv")) |>
 #'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
-#'   add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis")) |>
-#'   add_correlations("predictors", matches("iv|mod|cov"), focus_set = c(cov1,cov2)) |>
-#'   add_correlations("outcomes", matches("dv|mod"), focus_set = matches("dv")) |>
-#'   add_cron_alpha("unp_scale", c(iv1,iv2,iv3)) |>
-#'   add_cron_alpha("vio_scale", starts_with("mod")) |>
-#'   add_model(lm({dvs} ~ {ivs} * {mods})) |>
-#'   add_model(lm({dvs} ~ {ivs} * {mods} + cov1)) |>
-#'   add_postprocess("aov", aov()) |>
-#'   expand_decisions()
+#'   add_cron_alpha("vio_scale", starts_with("iv")) |>
+#'   add_model("linear model", lm({dvs} ~ {ivs} * mod))
 #'
-#' # Run the whole multiverse
-#' the_multiverse <- run_multiverse(full_pipeline[1:10,])
+#' my_descriptives <- run_descriptives(full_pipeline)
 #'
-#' # Reveal summary statistics
-#' the_multiverse |> reveal_summary_stats(iv_stats)
-#' }
-reveal_summary_stats <- function(.multi, .which, .unpack_specs = FALSE){
+#' my_descriptives |>
+#'   reveal_summary_stats(iv_stats)
+reveal_summary_stats <- function(.descriptives, .which, .unpack_specs = "no"){
   which_sublist <- dplyr::enexprs(.which) |> as.character()
   which_sublist <- which_sublist != "NULL"
 
   unpacked <-
-    .multi |>
+    .descriptives |>
     tidyr::unnest(summary_stats_computed) |>
-    dplyr::select(decision, specifications, {{.which}}) |>
     tidyr::unnest({{.which}})
 
-  if(.unpack_specs){
+  if(.unpack_specs == "wide"){
     unpacked <-
       unpacked |>
       tidyr::unnest(specifications) |>
@@ -174,7 +604,30 @@ reveal_summary_stats <- function(.multi, .which, .unpack_specs = FALSE){
         -dplyr::any_of(
           c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
       ) |>
-      tidyr::unnest(dplyr::everything())
+      tidyr::unnest(dplyr::any_of(c("variables","filters","models")))
+  }
+
+  if(.unpack_specs == "long"){
+    unpacked_and_stacked <-
+      unpacked |>
+      dplyr::select(decision, specifications) |>
+      tidyr::unnest(specifications) |>
+      dplyr::select(
+        -dplyr::any_of(
+          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+      ) |>
+      tidyr::unnest(dplyr::any_of(c("variables","filters","models"))) |>
+      dplyr::select(-dplyr::any_of("model")) |>
+      dplyr::rename_with(~ str_remove(.x, "_.*"), dplyr::any_of("model_meta")) |>
+      tidyr::pivot_longer(-decision, names_to = "decision_set", values_to = "alternatives")
+
+    unpacked <-
+      dplyr::left_join(
+        unpacked_and_stacked,
+        unpacked |> dplyr::select(-specifications),
+        dplyr::join_by(decision == decision)
+      )
+
   }
 
   unpacked
@@ -182,11 +635,15 @@ reveal_summary_stats <- function(.multi, .which, .unpack_specs = FALSE){
 
 #' Reveal a set of multiverse correlations
 #'
-#' @param .multi a multiverse list-column \code{tibble} produced by
-#'   \code{\link{run_multiverse}}.
+#' @param .descriptives a descriptive multiverse list-column \code{tibble}
+#'   produced by \code{\link{run_descriptives}}.
 #' @param .which the specific name of the correlations requested
-#' @param .unpack_specs logical, whether to unnest the specifications that built
-#'   the multiverse grid. Defaults to FALSE.
+#' @param .unpack_specs character, options are \code{"no"}, \code{"wide"}, or
+#'   \code{"long"}. \code{"no"} (default) keeps specifications in a list column,
+#'   \code{wide} unnests specifications with each specification category as a
+#'   column. \code{"long"} unnests specifications and stacks them into long
+#'   format, which stacks specifications into a \code{decision_set} and
+#'   \code{alternatives} columns. This is mainly useful for plotting.
 #'
 #' @return an unnested set of correlations per decision from the
 #'   multiverse.
@@ -194,66 +651,57 @@ reveal_summary_stats <- function(.multi, .which, .unpack_specs = FALSE){
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#'
 #' library(tidyverse)
 #' library(multitool)
 #'
-#' # Simulate some data
+#' # create some data
 #' the_data <-
 #'   data.frame(
-#'     id   = 1:500,
-#'     iv1  = rnorm(500),
-#'     iv2  = rnorm(500),
-#'     iv3  = rnorm(500),
-#'     mod1 = rnorm(500),
-#'     mod2 = rnorm(500),
-#'     mod3 = rnorm(500),
-#'     cov1 = rnorm(500),
-#'     cov2 = rnorm(500),
-#'     dv1  = rnorm(500),
-#'     dv2  = rnorm(500),
+#'     id  = 1:500,
+#'     iv1 = rnorm(500),
+#'     iv2 = rnorm(500),
+#'     iv3 = rnorm(500),
+#'     mod = rnorm(500),
+#'     dv1 = rnorm(500),
+#'     dv2 = rnorm(500),
 #'     include1 = rbinom(500, size = 1, prob = .1),
 #'     include2 = sample(1:3, size = 500, replace = TRUE),
 #'     include3 = rnorm(500)
 #'   )
 #'
-#' # Decision pipeline
+#' # create a pipeline blueprint
 #' full_pipeline <-
 #'   the_data |>
-#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
-#'   add_variables("ivs", iv1, iv2, iv3) |>
-#'   add_variables("dvs", dv1, dv2) |>
-#'   add_variables("mods", starts_with("mod")) |>
-#'   add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
-#'   add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
+#'   add_filters(
+#'     include1 == 0,
+#'     include2 != 3,
+#'     include2 != 2,
+#'     include3 > -2.5,
+#'     include3 < 2.5,
+#'     between(include3, -2.5, 2.5)
+#'   ) |>
+#'   add_variables(var_group = "ivs", iv1, iv2, iv3) |>
+#'   add_variables(var_group = "dvs", dv1, dv2) |>
+#'   add_correlations("predictors", starts_with("iv")) |>
 #'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
-#'   add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis")) |>
-#'   add_correlations("predictors", matches("iv|mod|cov"), focus_set = c(cov1,cov2)) |>
-#'   add_correlations("outcomes", matches("dv|mod"), focus_set = matches("dv")) |>
-#'   add_cron_alpha("unp_scale", c(iv1,iv2,iv3)) |>
-#'   add_cron_alpha("vio_scale", starts_with("mod")) |>
-#'   add_model(lm({dvs} ~ {ivs} * {mods})) |>
-#'   add_model(lm({dvs} ~ {ivs} * {mods} + cov1)) |>
-#'   add_postprocess("aov", aov()) |>
-#'   expand_decisions()
+#'   add_cron_alpha("vio_scale", starts_with("iv")) |>
+#'   add_model("linear model", lm({dvs} ~ {ivs} * mod))
 #'
-#' # Run the whole multiverse
-#' the_multiverse <- run_multiverse(full_pipeline[1:10,])
+#' my_descriptives <- run_descriptives(full_pipeline)
 #'
-#' # Reveal correlations among predictor across decision set
-#' the_multiverse |> reveal_corrs(predictors_rs)
-#' }
-reveal_corrs <- function(.multi, .which, .unpack_specs = FALSE){
+#' my_descriptives |>
+#'   reveal_corrs(predictors_rs)
+reveal_corrs <- function(.descriptives, .which, .unpack_specs = "no"){
   which_sublist <- dplyr::enexprs(.which) |> as.character()
   which_sublist <- which_sublist != "NULL"
 
   unpacked <-
-    .multi |>
+    .descriptives |>
     tidyr::unnest(corrs_computed) |>
-    dplyr::select(decision, specifications, {{.which}}) |>
     tidyr::unnest({{.which}})
 
-  if(.unpack_specs){
+  if(.unpack_specs == "wide"){
     unpacked <-
       unpacked |>
       tidyr::unnest(specifications) |>
@@ -261,7 +709,30 @@ reveal_corrs <- function(.multi, .which, .unpack_specs = FALSE){
         -dplyr::any_of(
           c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
       ) |>
-      tidyr::unnest(dplyr::everything())
+      tidyr::unnest(dplyr::any_of(c("variables","filters","models")))
+  }
+
+  if(.unpack_specs == "long"){
+    unpacked_and_stacked <-
+      unpacked |>
+      dplyr::select(decision, specifications) |>
+      tidyr::unnest(specifications) |>
+      dplyr::select(
+        -dplyr::any_of(
+          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+      ) |>
+      tidyr::unnest(dplyr::any_of(c("variables","filters","models"))) |>
+      dplyr::select(-dplyr::any_of("model")) |>
+      dplyr::rename_with(~ str_remove(.x, "_.*"), dplyr::any_of("model_meta")) |>
+      tidyr::pivot_longer(-decision, names_to = "decision_set", values_to = "alternatives")
+
+    unpacked <-
+      dplyr::left_join(
+        unpacked_and_stacked,
+        unpacked |> dplyr::select(-specifications),
+        dplyr::join_by(decision == decision)
+      )
+
   }
 
   unpacked
@@ -269,78 +740,72 @@ reveal_corrs <- function(.multi, .which, .unpack_specs = FALSE){
 
 #' Reveal a set of multiverse cronbach's alpha statistics
 #'
-#' @param .multi a multiverse list-column \code{tibble} produced by
-#'   \code{\link{run_multiverse}}.
+#' @param .descriptives a descriptive multiverse list-column \code{tibble}
+#'   produced by \code{\link{run_descriptives}}.
 #' @param .which the specific name of the alphas
-#' @param .unpack_specs logical, whether to unnest the specifications that built
-#'   the multiverse grid. Defaults to FALSE.
+#' @param .unpack_specs character, options are \code{"no"}, \code{"wide"}, or
+#'   \code{"long"}. \code{"no"} (default) keeps specifications in a list column,
+#'   \code{wide} unnests specifications with each specification category as a
+#'   column. \code{"long"} unnests specifications and stacks them into long
+#'   format, which stacks specifications into a \code{decision_set} and
+#'   \code{alternatives} columns. This is mainly useful for plotting.
 #'
-#' @return an unnested set of correlations per decision from the
-#'   multiverse.
+#' @return an unnested set of correlations per decision from the multiverse.
 #'
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#'
 #' library(tidyverse)
 #' library(multitool)
 #'
-#' # Simulate some data
+#' # create some data
 #' the_data <-
 #'   data.frame(
-#'     id   = 1:500,
-#'     iv1  = rnorm(500),
-#'     iv2  = rnorm(500),
-#'     iv3  = rnorm(500),
-#'     mod1 = rnorm(500),
-#'     mod2 = rnorm(500),
-#'     mod3 = rnorm(500),
-#'     cov1 = rnorm(500),
-#'     cov2 = rnorm(500),
-#'     dv1  = rnorm(500),
-#'     dv2  = rnorm(500),
+#'     id  = 1:500,
+#'     iv1 = rnorm(500),
+#'     iv2 = rnorm(500),
+#'     iv3 = rnorm(500),
+#'     mod = rnorm(500),
+#'     dv1 = rnorm(500),
+#'     dv2 = rnorm(500),
 #'     include1 = rbinom(500, size = 1, prob = .1),
 #'     include2 = sample(1:3, size = 500, replace = TRUE),
 #'     include3 = rnorm(500)
 #'   )
 #'
-#' # Decision pipeline
+#' # create a pipeline blueprint
 #' full_pipeline <-
 #'   the_data |>
-#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
-#'   add_variables("ivs", iv1, iv2, iv3) |>
-#'   add_variables("dvs", dv1, dv2) |>
-#'   add_variables("mods", starts_with("mod")) |>
-#'   add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
-#'   add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
+#'   add_filters(
+#'     include1 == 0,
+#'     include2 != 3,
+#'     include2 != 2,
+#'     include3 > -2.5,
+#'     include3 < 2.5,
+#'     between(include3, -2.5, 2.5)
+#'   ) |>
+#'   add_variables(var_group = "ivs", iv1, iv2, iv3) |>
+#'   add_variables(var_group = "dvs", dv1, dv2) |>
+#'   add_correlations("predictor correlations", starts_with("iv")) |>
 #'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
-#'   add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis")) |>
-#'   add_correlations("predictors", matches("iv|mod|cov"), focus_set = c(cov1,cov2)) |>
-#'   add_correlations("outcomes", matches("dv|mod"), focus_set = matches("dv")) |>
-#'   add_cron_alpha("unp_scale", c(iv1,iv2,iv3)) |>
-#'   add_cron_alpha("vio_scale", starts_with("mod")) |>
-#'   add_model(lm({dvs} ~ {ivs} * {mods})) |>
-#'   add_model(lm({dvs} ~ {ivs} * {mods} + cov1)) |>
-#'   add_postprocess("aov", aov()) |>
-#'   expand_decisions()
+#'   add_cron_alpha("vio_scale", starts_with("iv")) |>
+#'   add_model("linear model", lm({dvs} ~ {ivs} * mod))
 #'
-#' # Run the whole multiverse
-#' the_multiverse <- run_multiverse(full_pipeline[1:10,])
+#' my_descriptives <- run_descriptives(full_pipeline)
 #'
-#' # Reveal multiverse reliability analyses
-#' the_multiverse |> reveal(cron_alphas_computed)
-#' }
-reveal_alphas <- function(.multi, .which, .unpack_specs = FALSE){
+#' my_descriptives |>
+#'   reveal_alphas(vio_scale_total)
+reveal_alphas <- function(.descriptives, .which, .unpack_specs = "no"){
   which_sublist <- dplyr::enexprs(.which) |> as.character()
   which_sublist <- which_sublist != "NULL"
 
   unpacked <-
-    .multi |>
+    .descriptives |>
     tidyr::unnest(cron_alphas_computed) |>
-    dplyr::select(decision, specifications, {{.which}}) |>
     tidyr::unnest({{.which}})
 
-  if(.unpack_specs){
+  if(.unpack_specs == "wide"){
     unpacked <-
       unpacked |>
       tidyr::unnest(specifications) |>
@@ -348,12 +813,34 @@ reveal_alphas <- function(.multi, .which, .unpack_specs = FALSE){
         -dplyr::any_of(
           c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
       ) |>
-      tidyr::unnest(dplyr::everything())
+      tidyr::unnest(dplyr::any_of(c("variables","filters","models")))
+  }
+
+  if(.unpack_specs == "long"){
+    unpacked_and_stacked <-
+      unpacked |>
+      dplyr::select(decision, specifications) |>
+      tidyr::unnest(specifications) |>
+      dplyr::select(
+        -dplyr::any_of(
+          c("preprocess","postprocess","corrs","summary_stats","cron_alphas"))
+      ) |>
+      tidyr::unnest(dplyr::any_of(c("variables","filters","models"))) |>
+      dplyr::select(-dplyr::any_of("model")) |>
+      dplyr::rename_with(~ str_remove(.x, "_.*"), dplyr::any_of("model_meta")) |>
+      tidyr::pivot_longer(-decision, names_to = "decision_set", values_to = "alternatives")
+
+    unpacked <-
+      dplyr::left_join(
+        unpacked_and_stacked,
+        unpacked |> dplyr::select(-specifications),
+        dplyr::join_by(decision == decision)
+      )
+
   }
 
   unpacked
 }
-
 
 #' Summarize multiverse parameters
 #'
@@ -365,13 +852,16 @@ reveal_alphas <- function(.multi, .which, .unpack_specs = FALSE){
 #' @param .how a named list. The list should contain summary functions (e.g.,
 #'   mean or median) the user would like to compute over the individual
 #'   estimates from the multiverse
+#' @param list_cols logical, whether to create list columns for the raw values
+#'   of any summarized columns. Useful for creating visualizations and tables.
+#'   Default is TRUE.
+#' @param ... additional arguments passed to \code{dplyr::summarize()}
 #'
 #' @return a summarized \code{tibble} containing a column for each summary
 #'   method from \code{.how}
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #'
 #' library(tidyverse)
 #' library(multitool)
@@ -402,35 +892,45 @@ reveal_alphas <- function(.multi, .which, .unpack_specs = FALSE){
 #'   add_variables("ivs", iv1, iv2, iv3) |>
 #'   add_variables("dvs", dv1, dv2) |>
 #'   add_variables("mods", starts_with("mod")) |>
-#'   add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
-#'   add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
-#'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
-#'   add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis")) |>
-#'   add_correlations("predictors", matches("iv|mod|cov"), focus_set = c(cov1,cov2)) |>
-#'   add_correlations("outcomes", matches("dv|mod"), focus_set = matches("dv")) |>
-#'   add_cron_alpha("unp_scale", c(iv1,iv2,iv3)) |>
-#'   add_cron_alpha("vio_scale", starts_with("mod")) |>
-#'   add_model(lm({dvs} ~ {ivs} * {mods})) |>
-#'   add_model(lm({dvs} ~ {ivs} * {mods} + cov1)) |>
-#'   add_postprocess("aov", aov()) |>
-#'   expand_decisions()
+#'   add_model("linear_model", lm({dvs} ~ {ivs} * {mods} + cov1))
+#'
+#' pipeline_grid <- expand_decisions(full_pipeline)
 #'
 #' # Run the whole multiverse
-#' the_multiverse <- run_multiverse(full_pipeline[1:10,])
-#'
-#' # Reveal results of the linear model
-#' the_multiverse |> reveal(lm_fitted, matches("tidy"), .unpack_specs = TRUE)
+#' the_multiverse <- run_multiverse(pipeline_grid[1:10,])
 #'
 #' # Reveal and condense
 #' the_multiverse |>
-#'   reveal(lm_fitted, matches("tidy"), .unpack_specs = TRUE) |>
-#'   group_by(term, dvs) |>
-#'   condense(estimate, list(mn = mean, med = median))
-#'   }
-condense <- function(.unpacked, .what, .how){
+#'   reveal_model_parameters() |>
+#'   filter(str_detect(parameter, "iv")) |>
+#'   condense(coefficient, list(mean = mean, median = median))
+condense <- function(.unpacked, .what, .how, list_cols = TRUE, ...){
 
-  .unpacked |>
-    dplyr::summarize(dplyr::across(.cols = {{.what}}, .fns = {{.how}}, .names = "{.col}_{.fn}"))
-
+  if(list_cols){
+    .unpacked |>
+      dplyr::summarize(
+        dplyr::across(
+          .cols = {{.what}},
+          .fns = {{.how}},
+          .names = "{.col}_{.fn}",
+        ),
+        dplyr::across(
+          .cols = {{.what}},
+          .fns = list,
+          .names = "{.col}_list"
+        ),
+        ...
+      )
+  } else{
+    .unpacked |>
+      dplyr::summarize(
+        dplyr::across(
+          .cols = {{.what}},
+          .fns = {{.how}},
+          .names = "{.col}_{.fn}",
+        ),
+        ...
+      )
+  }
 }
 

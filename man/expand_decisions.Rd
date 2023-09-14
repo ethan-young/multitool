@@ -4,10 +4,10 @@
 \alias{expand_decisions}
 \title{Expand a set of multiverse decisions into all possible combinations}
 \usage{
-expand_decisions(.grid)
+expand_decisions(.pipeline)
 }
 \arguments{
-\item{.grid}{a d\code{data.frame} produced by calling a series of add_*
+\item{.pipeline}{a \code{data.frame} produced by calling a series of add_*
 functions.}
 }
 \value{
@@ -46,7 +46,7 @@ the_data <-
 
 full_pipeline <-
   the_data |>
-  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+  add_filters(include1 == 0,include2 != 3,include2 != 2, include3 > -2.5) |>
   add_variables("ivs", iv1, iv2, iv3) |>
   add_variables("dvs", dv1, dv2) |>
   add_variables("mods", starts_with("mod")) |>
@@ -60,8 +60,7 @@ full_pipeline <-
   add_cron_alpha("vio_scale", starts_with("mod")) |>
   add_model("no covariates", lm({dvs} ~ {ivs} * {mods})) |>
   add_model("with covariates", lm({dvs} ~ {ivs} * {mods} + cov1)) |>
-  add_postprocess("aov", aov()) |>
-  expand_decisions()
+  add_postprocess("aov", aov())
 
-full_pipeline
+pipeline_expanded <- expand_decisions(full_pipeline)
 }

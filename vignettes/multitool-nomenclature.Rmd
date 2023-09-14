@@ -1,0 +1,71 @@
+---
+title: "multitool Nomenclature"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{multitool Nomenclature}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+`multitool` uses a set of argument naming conventions to help users. 
+
+Whereas multitool function names are meant to describe what they do, the first argument of each function is meant to help users understand **_which_** multitool objects should be passed to a particular function.
+
+I designed first argument names to follow the steps for setting up, building, running, unpacking, and summarizing a multiverse-style analysis. They are as follows:
+
+1. `.df` = the original data set 
+2. `.pipeline` = a data analysis pipeline blueprint produced by calling a series of add_* functions 
+3. `.grid` = a data analysis pipeline fully expanded into all possible combinations of decisions outlined by the `.pipeline` blueprint
+4. `.multi` = a set of results produced by running an analysis across all rows of a `.grid`
+5. `.unpacked` = a specific set of results that have been unnested for plotting or summarizing
+6. `.condensed` = a specific set of results that have been summarized
+
+These conventions make more sense when visualized across a typical `multitool` workflow:
+
+```{r, echo=FALSE, fig.width=5.75, fig.height=6}
+DiagrammeR::grViz("
+digraph boxes_and_circles {
+
+  # a 'graph' statement
+  graph [overlap = true, fontsize = 10]
+
+  # several 'node' statements
+  node [shape = box,
+        fill = gray,
+        fontname = Helvetica]
+  1 [label = 'base data']
+  2 [label = 'add_*() functions']
+  3 [label = 'expand_decisions()']
+  4 [label = 'create_blueprint_graph()']
+  5 [label = 'run_descriptives()']
+  6 [label = 'show_code_*()']
+  7 [label = 'run_multiverse()']
+  8 [label = 'reveal(), reveal_model_*()']
+  9 [label = 'condense()']
+  10 [label = 'reveal_corrs(), reveal_alphas(), reveal_summary_stats()']
+  11 [label = 'column_plot(), custom plotting/tables']
+  12 [label = 'detect_*(), summarize_filter_ns()']
+
+  # several 'edge' statements
+  1->2 [label = '.df']
+  2->3 [label = '.pipeline']
+  2->4 [label = '.pipeline']
+  2->5 [label = '.pipeline']
+  3->6 [label = '.grid']
+  3->7 [label = '.grid']
+  7->8 [label = '.multi']
+  8->9 [label = '.unpacked']
+  5->10 [label = '.descriptives']
+  10->9 [label = '.unpacked']
+  9->11 [label = '.condensed']
+  2->12 [label = '.pipeline']
+}
+")
+```

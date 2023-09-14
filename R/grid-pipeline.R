@@ -1,12 +1,12 @@
 #' Add filtering/exclusion criteria to a multiverse pipeline
 #'
-#' @param .df The original data.frame (e.g., base data set). If part of set of
-#'   add_* decision functions in a pipeline, the base data will be passed along
-#'   as an attribute.
+#' @param .df The original \code{data.frame}(e.g., base data set). If part of
+#'   set of add_* decision functions in a pipeline, the base data will be passed
+#'   along as an attribute.
 #' @param ... logical expressions to be used with \code{\link[dplyr]{filter}}
 #'   separated by commas. Expressions should not be quoted.
 #'
-#' @return a data.frame with three columns: type, group, and code. Type
+#' @return a \code{data.frame} with three columns: type, group, and code. Type
 #'   indicates the decision type, group is a decision, and the code is the
 #'   actual code that will be executed. If part of a pipe, the current set of
 #'   decisions will be appended as new rows.
@@ -37,7 +37,7 @@
 #'   )
 #'
 #' the_data |>
-#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5)
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2, include3 > -2.5)
 add_filters <- function(.df, ...){
   data_chr <- dplyr::enexpr(.df) |> as.character()
   data_attr <- attr(.df, "base_df")
@@ -101,9 +101,9 @@ add_filters <- function(.df, ...){
 
 #' Add a set of variable alternatives to a multiverse pipeline
 #'
-#' @param .df The original data.frame (e.g., base data set). If part of set of
-#'   add_* decision functions in a pipeline, the base data will be passed along
-#'   as an attribute.
+#' @param .df The original \code{data.frame}(e.g., base data set). If part of
+#'   set of add_* decision functions in a pipeline, the base data will be passed
+#'   along as an attribute.
 #' @param var_group a character string. Indicates the name of the current set.
 #'   For example, "primary_iv" could indicate this set are alternatives of the
 #'   main predictor in an analysis.
@@ -111,7 +111,7 @@ add_filters <- function(.df, ...){
 #'   options for this variable set. You can also use tidyselect to select
 #'   variables.
 #'
-#' @return a data.frame with three columns: type, group, and code. Type
+#' @return a \code{data.frame} with three columns: type, group, and code. Type
 #'   indicates the decision type, group is a decision, and the code is the
 #'   actual code that will be executed. If part of a pipe, the current set of
 #'   decisions will be appended as new rows.
@@ -177,9 +177,9 @@ add_variables <- function(.df, var_group, ...){
 
 #' Add arbitrary preprocessing code to a multiverse analysis pipeline
 #'
-#' @param .df The original data.frame (e.g., base data set). If part of set of
-#'   add_* decision functions in a pipeline, the base data will be passed along
-#'   as an attribute.
+#' @param .df The original \code{data.frame}(e.g., base data set). If part of
+#'   set of add_* decision functions in a pipeline, the base data will be passed
+#'   along as an attribute.
 #' @param process_name a character string. A descriptive name for what the
 #'   preprocessing step accomplishes.
 #' @param code the literal code you would like to execute after data are
@@ -191,10 +191,10 @@ add_variables <- function(.df, var_group, ...){
 #'   \code{\%>\%}). Pre-processing code will eventually take the base data along
 #'   with any filters applied to the data. This means
 #'   \code{\link[dplyr]{mutate}} calls are the most natural but other functions
-#'   that take a data.frame as the first argument should work as well (as long
-#'   as they also return a data.frame).
+#'   that take a \code{data.frame} as the first argument should work as well (as
+#'   long as they also return a \code{data.frame}).
 #'
-#' @return a data.frame with three columns: type, group, and code. Type
+#' @return a \code{data.frame} with three columns: type, group, and code. Type
 #'   indicates the decision type, group is a decision, and the code is the
 #'   actual code that will be executed. If part of a pipe, the current set of
 #'   decisions will be appended as new rows.
@@ -224,7 +224,7 @@ add_variables <- function(.df, var_group, ...){
 #'   )
 #'
 #' the_data |>
-#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2, include3 > -2.5) |>
 #'   add_variables("ivs", iv1, iv2, iv3) |>
 #'   add_variables("dvs", dv1, dv2) |>
 #'   add_variables("mods", starts_with("mod")) |>
@@ -262,22 +262,22 @@ add_preprocess <- function(.df, process_name, code){
 
 }
 
-#' Add a model and formula to a multiverese pipeline
+#' Add a model and formula to a multiverse pipeline
 #'
-#' @param .df The original data.frame (e.g., base data set). If part of set of
-#'   add_* decision functions in a pipeline, the base data will be passed along
-#'   as an attribute.
+#' @param .df The original \code{data.frame}(e.g., base data set). If part of
+#'   set of add_* decision functions in a pipeline, the base data will be passed
+#'   along as an attribute.
 #' @param model_desc a human readable name you would like to give the model.
-#' @param code literal model syntax you would like to run. You can
-#'   use \code{glue} inside formulas to dynamically generate variable names
-#'   based on a variable grid. For example, if you make variable grid with two
-#'   versions of your IVs (e.g., \code{iv1} and \code{iv2}), you can write your
-#'   formula like so: \code{lm(happiness ~ {iv} + control_var)}. The only
-#'   requirement is that the variables written in the formula actually exist in
-#'   the underlying data. You are also responsible for loading any packages that
-#'   run a particular model (e.g., \code{lme4} for mixed-models)
+#' @param code literal model syntax you would like to run. You can use
+#'   \code{glue} inside formulas to dynamically generate variable names based on
+#'   a variable grid. For example, if you make variable grid with two versions
+#'   of your IVs (e.g., \code{iv1} and \code{iv2}), you can write your formula
+#'   like so: \code{lm(happiness ~ {iv} + control_var)}. The only requirement is
+#'   that the variables written in the formula actually exist in the underlying
+#'   data. You are also responsible for loading any packages that run a
+#'   particular model (e.g., \code{lme4} for mixed-models)
 #'
-#' @return a data.frame with three columns: type, group, and code. Type
+#' @return a \code{data.frame} with three columns: type, group, and code. Type
 #'   indicates the decision type, group is a decision, and the code is the
 #'   actual code that will be executed. If part of a pipe, the current set of
 #'   decisions will be appended as new rows.
@@ -307,7 +307,7 @@ add_preprocess <- function(.df, process_name, code){
 #'   )
 #'
 #' the_data |>
-#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2, include3 > -2.5) |>
 #'   add_variables("ivs", iv1, iv2, iv3) |>
 #'   add_variables("dvs", dv1, dv2) |>
 #'   add_variables("mods", starts_with("mod")) |>
@@ -346,11 +346,93 @@ add_model <- function(.df, model_desc, code){
 
 }
 
+
+#' Add parameter keys names for later use in summarizing model effects
+#'
+#' @param .df The original \code{data.frame}(e.g., base data set). If part of
+#'   set of add_* decision functions in a pipeline, the base data will be passed
+#'   along as an attribute.
+#' @param parameter_group character, a name for the parameter of interest
+#' @param parameter_name quoted or unquoted names of variables involved in a
+#'   particular parameter of interest. Usually this is just a variable in your
+#'   model (e.g., a main effect of your iv). However, it could also be an
+#'   interaction term or some other term. You can use \code{glue} syntax to
+#'   specify an effect that might use alternative versions of the same variable.
+#'
+#' @return a \code{data.frame} with three columns: type, group, and code. Type
+#'   indicates the decision type, group is a decision, and the code is the
+#'   actual code that will be executed. If part of a pipe, the current set of
+#'   decisions will be appended as new rows.
+#' @export
+#'
+#' @examples
+#'
+#' library(tidyverse)
+#' library(multitool)
+#'
+#' # Simulate some data
+#' the_data <-
+#'   data.frame(
+#'     id   = 1:500,
+#'     iv1  = rnorm(500),
+#'     iv2  = rnorm(500),
+#'     iv3  = rnorm(500),
+#'     mod1 = rnorm(500),
+#'     mod2 = rnorm(500),
+#'     mod3 = rnorm(500),
+#'     cov1 = rnorm(500),
+#'     cov2 = rnorm(500),
+#'     dv1  = rnorm(500),
+#'     dv2  = rnorm(500),
+#'     include1 = rbinom(500, size = 1, prob = .1),
+#'     include2 = sample(1:3, size = 500, replace = TRUE),
+#'     include3 = rnorm(500)
+#'   )
+#'
+#' the_data |>
+#'   add_variables("ivs", iv1, iv2, iv3) |>
+#'   add_variables("dvs", dv1, dv2) |>
+#'   add_variables("mods", starts_with("mod")) |>
+#'   add_model("linear model", lm({dvs} ~ {ivs} * {mods})) |>
+#'   add_parameter_keys("my_interaction", "{ivs}:{mods}") |>
+#'   add_parameter_keys("my_main_effect", {ivs})
+add_parameter_keys <- function(.df, parameter_group, parameter_name){
+  code <- dplyr::enexprs(parameter_name)
+  code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
+
+  data_chr <- dplyr::enexpr(.df) |> as.character()
+  data_attr <- attr(.df, "base_df")
+
+  if(!is.null(data_attr)){
+    data_chr <- attr(.df, "base_df")
+  }
+
+  base_df <-
+    rlang::parse_expr(data_chr) |>
+    rlang::eval_tidy(env = parent.frame())
+
+  grid_prep <-
+    tibble::tibble(
+      type  = "parameter_key",
+      group = parameter_group,
+      code  = code_chr
+    )
+
+  if(!is.null(data_attr)){
+    grid_prep <- dplyr::bind_rows(.df, grid_prep)
+  } else{
+    grid_prep <- grid_prep
+  }
+
+  attr(grid_prep, "base_df") <- data_chr
+  grid_prep
+}
+
 #' Add arbitrary postprocessing code to a multiverse pipeline
 #'
-#' @param .df The original data.frame (e.g., base data set). If part of set of
-#'   add_* decision functions in a pipeline, the base data will be passed along
-#'   as an attribute.
+#' @param .df The original \code{data.frame}(e.g., base data set). If part of
+#'   set of add_* decision functions in a pipeline, the base data will be passed
+#'   along as an attribute.
 #' @param postprocess_name a character string. A descriptive name for what the
 #'   postprocessing step accomplishes.
 #' @param code the literal code you would like to execute after each analysis.
@@ -362,12 +444,12 @@ add_model <- function(.df, model_desc, code){
 #'
 #'   For example, if you fit a simple linear model like: \code{lm(y ~ x1 + x2)},
 #'   and your post-processing code executes a call to \code{anova}, you would
-#'   simply pass \code{anova()} to \code{add_postprocess()}. The underlying
-#'   code would be:
+#'   simply pass \code{anova()} to \code{add_postprocess()}. The underlying code
+#'   would be:
 #'
 #'   \code{data |> filters |> lm(y ~ x1 + x2, data = _) |> anova()}
 #'
-#' @return a data.frame with three columns: type, group, and code. Type
+#' @return a \code{data.frame} with three columns: type, group, and code. Type
 #'   indicates the decision type, group is a decision, and the code is the
 #'   actual code that will be executed. If part of a pipe, the current set of
 #'   decisions will be appended as new rows.
@@ -397,7 +479,7 @@ add_model <- function(.df, model_desc, code){
 #'   )
 #'
 #' the_data |>
-#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2, include3 > -2.5) |>
 #'   add_variables("ivs", iv1, iv2, iv3) |>
 #'   add_variables("dvs", dv1, dv2) |>
 #'   add_variables("mods", starts_with("mod")) |>
@@ -438,11 +520,11 @@ add_postprocess <- function(.df, postprocess_name, code){
 
 }
 
-#' Add a set of descriptiove statistics to compute over a set of variables
+#' Add a set of descriptive statistics to compute over a set of variables
 #'
-#' @param .df The original data.frame (e.g., base data set). If part of set of
-#'   add_* decision functions in a pipeline, the base data will be passed along
-#'   as an attribute.
+#' @param .df The original \code{data.frame}(e.g., base data set). If part of
+#'   set of add_* decision functions in a pipeline, the base data will be passed
+#'   along as an attribute.
 #' @param var_set a character string. A name for the set of summary statistics
 #' @param variables the variables for which you would like to compute summary
 #'   statistics. You can also use tidyselect to select variables.
@@ -451,7 +533,7 @@ add_postprocess <- function(.df, postprocess_name, code){
 #'   summary statistics. Summary statistic functions must work inside
 #'   \code{\link[dplyr]{summarize}}.
 #'
-#' @return a data.frame with three columns: type, group, and code. Type
+#' @return a \code{data.frame} with three columns: type, group, and code. Type
 #'   indicates the decision type, group is a decision, and the code is the
 #'   actual code that will be executed. If part of a pipe, the current set of
 #'   decisions will be appended as new rows.
@@ -481,7 +563,7 @@ add_postprocess <- function(.df, postprocess_name, code){
 #'   )
 #'
 #' the_data |>
-#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2, include3 > -2.5) |>
 #'   add_variables("ivs", iv1, iv2, iv3) |>
 #'   add_variables("dvs", dv1, dv2) |>
 #'   add_variables("mods", starts_with("mod")) |>
@@ -537,7 +619,8 @@ add_summary_stats <- function(.df, var_set, variables, stats){
 
 #' Add correlations from the {correlation} package in {easystats}
 #'
-#' @param .df the original data.frame (e.g., base data set). If part of set of
+#' @param .df the original \code{data.frame}(e.g., base data set). If part of
+#'   set of
 #'   add_* decision functions in a pipeline, the base data will be passed along
 #'   as an attribute.
 #' @param var_set character string. Should be a descriptive name of the
@@ -557,7 +640,7 @@ add_summary_stats <- function(.df, var_set, variables, stats){
 #' @param add_matrix logical, add a traditional correlation matrix to the
 #'   output. Defaults to \code{TRUE}.
 #'
-#' @return a data.frame with three columns: type, group, and code. Type
+#' @return a \code{data.frame}with three columns: type, group, and code. Type
 #'   indicates the decision type, group is a decision, and the code is the
 #'   actual code that will be executed. If part of a pipe, the current set of
 #'   decisions will be appended as new rows.
@@ -587,7 +670,7 @@ add_summary_stats <- function(.df, var_set, variables, stats){
 #'   )
 #'
 #' the_data |>
-#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2, include3 > -2.5) |>
 #'   add_variables("ivs", iv1, iv2, iv3) |>
 #'   add_variables("dvs", dv1, dv2) |>
 #'   add_variables("mods", starts_with("mod")) |>
@@ -624,7 +707,8 @@ add_correlations <-
 
     full_pairs <-
       glue::glue(
-        'select({variables}) |> correlation(method = "{method}", redundant = {redundant})'
+        'select({variables}) |> ',
+        'correlation(method = "{method}", redundant = {redundant})'
       ) |>
       as.character() |>
       stringr::str_remove_all("\n|  ")
@@ -640,11 +724,11 @@ add_correlations <-
     if(add_matrix){
       corrs_matrix <-
         glue::glue(
-          'select({variables}) |>
-           correlation(method = "{method}", redundant = {redundant}) |>
-           select(1:3) |>
-           pivot_wider(names_from = Parameter2, values_from = r) |>
-           rename(variable = Parameter1)',
+          'select({variables}) |> ',
+           'correlation(method = "{method}", redundant = {redundant}) |> ',
+           'select(1:3) |> ',
+           'pivot_wider(names_from = Parameter2, values_from = r) |> ',
+           'rename(variable = Parameter1)',
           .trim = FALSE
         ) |>
         as.character() |>
@@ -652,18 +736,26 @@ add_correlations <-
 
       grid_prep <-
         grid_prep |>
-        dplyr::add_row(type = "corrs", group = paste0(var_set, "_matrix"), code = corrs_matrix)
+        dplyr::add_row(
+          type = "corrs",
+          group = paste0(var_set, "_matrix"),
+          code = corrs_matrix
+        )
     }
 
     if(focus){
       corrs_focused <-
         glue::glue(
-          'select({variables}) |>
-           correlation(method = "{method}", redundant = {redundant}) |>
-           select(1:3) |>
-           filter(Parameter1 %in% c({focus_set_chr}), r!=1, !Parameter2 %in% c({focus_set_chr})) |>
-           pivot_wider(names_from = Parameter1, values_from = r) |>
-           rename(variable = Parameter2)',
+          'select({variables}) |> ',
+          'correlation(method = "{method}", redundant = {redundant}) |> ',
+          'select(1:3) |> ',
+          'filter(',
+          'Parameter1 %in% c({focus_set_chr}), ',
+          'r!=1, ',
+          '!Parameter2 %in% c({focus_set_chr})',
+          ') |> ',
+          'pivot_wider(names_from = Parameter1, values_from = r) |> ',
+          'rename(variable = Parameter2)',
           .trim = FALSE
         ) |>
         as.character() |>
@@ -671,7 +763,11 @@ add_correlations <-
 
       grid_prep <-
         grid_prep |>
-        dplyr::add_row(type = "corrs", group = paste0(var_set, "_focus"), code = corrs_focused)
+        dplyr::add_row(
+          type = "corrs",
+          group = paste0(var_set, "_focus"),
+          code = corrs_focused
+        )
     }
 
     if(!is.null(data_attr)){
@@ -687,9 +783,9 @@ add_correlations <-
 
 #' Add Cronbach's Alpha to a multiverse pipeline
 #'
-#' @param .df the original data.frame (e.g., base data set). If part of set of
-#'   add_* decision functions in a pipeline, the base data will be passed along
-#'   as an attribute.
+#' @param .df the original \code{data.frame}(e.g., base data set). If part of
+#'   set of add_* decision functions in a pipeline, the base data will be passed
+#'   along as an attribute.
 #' @param scale_name a character string. Indicates the name of the scale or
 #'   measure measured by the items or indicators in \code{items}.
 #' @param items the items (variables) that comprise a scale or measure. These
@@ -699,7 +795,7 @@ add_correlations <-
 #'   keyed normal directino and a -1 is reverse scored. The length of the
 #'   \code{keys} must be the same as \code{items}.
 #'
-#' @return a data.frame with three columns: type, group, and code. Type
+#' @return a \code{data.frame}with three columns: type, group, and code. Type
 #'   indicates the decision type, group is a decision, and the code is the
 #'   actual code that will be executed. If part of a pipe, the current set of
 #'   decisions will be appended as new rows.
@@ -729,7 +825,7 @@ add_correlations <-
 #'   )
 #'
 #' the_data |>
-#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2, include3 > -2.5) |>
 #'   add_variables("ivs", iv1, iv2, iv3) |>
 #'   add_variables("dvs", dv1, dv2) |>
 #'   add_variables("mods", starts_with("mod")) |>
@@ -776,7 +872,7 @@ add_cron_alpha <- function(.df, scale_name, items, keys = NULL){
 
 #' Expand a set of multiverse decisions into all possible combinations
 #'
-#' @param .grid a d\code{data.frame} produced by calling a series of add_*
+#' @param .pipeline a \code{data.frame} produced by calling a series of add_*
 #'   functions.
 #'
 #' @return a nested \code{data.frame} containing all combinations of arbitrary
@@ -812,7 +908,7 @@ add_cron_alpha <- function(.df, scale_name, items, keys = NULL){
 #'
 #' full_pipeline <-
 #'   the_data |>
-#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2, include3 > -2.5) |>
 #'   add_variables("ivs", iv1, iv2, iv3) |>
 #'   add_variables("dvs", dv1, dv2) |>
 #'   add_variables("mods", starts_with("mod")) |>
@@ -826,17 +922,18 @@ add_cron_alpha <- function(.df, scale_name, items, keys = NULL){
 #'   add_cron_alpha("vio_scale", starts_with("mod")) |>
 #'   add_model("no covariates", lm({dvs} ~ {ivs} * {mods})) |>
 #'   add_model("with covariates", lm({dvs} ~ {ivs} * {mods} + cov1)) |>
-#'   add_postprocess("aov", aov()) |>
-#'   expand_decisions()
+#'   add_postprocess("aov", aov())
 #'
-#' full_pipeline
-expand_decisions <- function(.grid){
+#' pipeline_expanded <- expand_decisions(full_pipeline)
+expand_decisions <- function(.pipeline){
 
-  data_chr <- attr(.grid, "base_df")
+  data_chr <- attr(.pipeline, "base_df")
 
   grid_components <-
-    .grid |>
-    dplyr::mutate(group = stringr::str_replace_all(group, " ", "_") |> tolower()) |>
+    .pipeline |>
+    dplyr::mutate(
+      group = stringr::str_replace_all(group, " ", "_") |> tolower()
+    ) |>
     dplyr::group_split(type) |>
     purrr::map(function(x) {
       if(x |> dplyr::pull(type) |> unique() == "models"){
@@ -853,8 +950,10 @@ expand_decisions <- function(.grid){
     purrr::flatten()
 
   full_grid <-
-    .grid |>
-    dplyr::mutate(group = stringr::str_replace_all(group, " ", "_") |> tolower()) |>
+    .pipeline |>
+    dplyr::mutate(
+      group = stringr::str_replace_all(group, " ", "_") |> tolower()
+    ) |>
     dplyr::group_split(type) |>
     purrr::map(function(x){
       if(x |> dplyr::pull(type) |> unique() == "models"){
@@ -880,7 +979,7 @@ expand_decisions <- function(.grid){
     full_grid <-
       full_grid |>
       dplyr::left_join(
-        .grid |>
+        .pipeline |>
           dplyr::filter(type == "models") |>
           dplyr::transmute(
             model_meta = group,
@@ -893,7 +992,28 @@ expand_decisions <- function(.grid){
   if(!is.null(grid_components$variables)){
     full_grid <-
       full_grid |>
-      tidyr::nest(data = dplyr::any_of(dplyr::matches(paste0("^",grid_components$variables,"$")))) |>
+      tidyr::nest(
+        data = dplyr::any_of(
+          dplyr::matches(paste0("^",grid_components$variables,"$"))
+        )
+      ) |>
+      dplyr::mutate(
+        dplyr::across(
+          c(-data),
+          ~purrr::map2_chr(data, .x, function(x, y) glue::glue_data(x, y))
+        )
+      ) |>
+      tidyr::unnest(data)
+  }
+
+  if(!is.null(grid_components$parameter_key)){
+    full_grid <-
+      full_grid |>
+      tidyr::nest(
+        data = dplyr::any_of(
+          dplyr::matches(paste0("^",grid_components$parameter_key,"$"))
+        )
+      ) |>
       dplyr::mutate(
         dplyr::across(
           c(-data),
@@ -909,6 +1029,15 @@ expand_decisions <- function(.grid){
         full_grid |>
           dplyr::select(decision, x, model_meta) |>
           tidyr::nest("{y}" := -decision)
+      }else if(y == "parameter_key"){
+        full_grid |>
+          dplyr::select(decision, x) |>
+          tidyr::pivot_longer(
+            -decision,
+            names_to = "parameter_key",
+            values_to =  "parameter"
+          ) |>
+          tidyr::nest(parameter_keys = -decision)
       }else{
         full_grid |>
           dplyr::select(decision, x) |>
@@ -918,7 +1047,19 @@ expand_decisions <- function(.grid){
     purrr::reduce(dplyr::left_join, "decision") |>
     dplyr::select(
       decision,
-      dplyr::any_of(c("variables", "filters", "preprocess","models","postprocess", "corrs", "summary_stats", "cron_alphas"))
+      dplyr::any_of(
+        c(
+          "variables",
+          "filters",
+          "preprocess",
+          "models",
+          "postprocess",
+          "corrs",
+          "summary_stats",
+          "cron_alphas",
+          "parameter_keys"
+        )
+      )
     )
 
   attr(pipeline_expanded, "base_df") <- data_chr

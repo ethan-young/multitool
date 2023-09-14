@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 
 Once you have built your full specification blueprint and feel comfortable with how the pipeline is executed, you can implement a full multiverse-style analysis. 
 
-Simply use `run_multiverse(<your pipeline object>)`:
+Simply use `run_multiverse(<your expanded grid object>)`:
 
 ```{r setup, message=FALSE}
 library(tidyverse)
@@ -56,93 +56,126 @@ multiverse_results
 
 The result will be another `tibble` with various list columns. 
 
-It will always contain a list column named `specifications` containing all the information you generated in your blueprint. Next, there will be one list column per model fitted, labelled with a suffix like so `<your model name>_fitted`. 
-
-Here, our model used `lm()` so inside our `model_fitted` list column, we have our results are contained in `lm_*` columns.
+It will always contain a list column named `specifications` containing all the information you generated in your blueprint. Next, there will a list column for your fitted model fitted, labelled `model_fitted`. 
 
 ## Unpacking a multiverse analysis
 
-There are two main ways to unpack and examine `multitool` results. The first is by using `tidyr::unnest()` (similar to unpacking the specification blueprint earlier).
+There are two main ways to unpack and examine `multitool` results. The first is by using `tidyr::unnest()`.
 
 ### Unnest
+
+Inside the `model_fitted` column, `multitool` gives us 4 columns: `model_parameters`, `model_performance`, `model_warnings`, and `model_messages`. 
 
 ```{r unnest}
 multiverse_results |> unnest(model_fitted)
 ```
 
-Inside the `model_fitted` column, `multitool` gives us 4 columns using the model function you ran as a prefix. 
-
-The first column is always the full code pipeline that produced the results. In our example, this is `lm_code`. The next are results passed to [`broom`](https://broom.tidymodels.org/) (if `tidy` and/or `glance` methods exist). For `lm`, we have `lm_tidy` and `lm_glance`. Notice the naming convention: `<model function>_params` and `<model function>_performance`.
+The `model_parameters` column gives you the result of calling `parameters::parameters()` on each model in your grid, which is a `data.frame` of model coefficients and their associated standard errors, confidence intervals, test statistic, and a p-values.
 
 ```{r tidy}
 multiverse_results |> 
   unnest(model_fitted) |> 
-  unnest(lm_params)
+  unnest(model_parameters)
 ```
 
-The `lm_params` (or `<model function>_params`) column gives us the main results of `lm()` per decision. These include terms, estimates, standard errors, and p-values. `lm_performance` (or `<model function>_performance`) column gives us model fit statistics (among other things):
+The `model_performance` column gives fit statistics, such as r^2^ or AIC and BIC values, computed by running `performance::performance()` on each model in your grid.
 
 ```{r glance}
 multiverse_results |> 
   unnest(model_fitted) |>
-  unnest(lm_performance)
+  unnest(model_performance)
 ```
+
+The `model_messages` and `model_warnings` columns contain information provided by the modeling function. If something went wrong or you need to know something about a particular model, these columns will have captured messages and warnings printed by the modeling function.
 
 ### Reveal
 
-I wrote wrappers around the `unnest()` workflow. The main function is `reveal()`. Pass a multiverse results `tibble` to `reveal()` and tell it which columns to grab by indicating the column name in the `.what` argument:
+I wrote wrappers around the `tidyr::unnest()` workflow. The main function is `reveal()`. Pass a multiverse results object to `reveal()` and tell it which columns to grab by indicating the column name in the `.what` argument:
 
 ```{r reveal}
 multiverse_results |> 
   reveal(.what = model_fitted)
 ```
 
-If you want to get straight to a tidied result you can specify a sub-list with the `.which` argument:
+If you want to get straight to a specific result you can specify a sub-list with the `.which` argument:
 
 ```{r which}
 multiverse_results |> 
-  reveal(.what = model_fitted, .which = lm_params)
+  reveal(.what = model_fitted, .which = model_parameters)
 ```
 
-You can also choose to expand your specification blueprint with `.unpack_specs = TRUE` to see which decisions produced what result:
+### `reveal_model_*`
 
-```{r unpack-specs}
+`multitool` will run and save anything you put in your pipeline but most often, you will want to look at model parameters and/or performance. To that end, there are a set of convenience functions for getting at the most common multiverse results: `reveal_model_parameters`, `reveal_model_performance`, `reveal_model_messages`, and `reveal_model_warnings`.
+
+`reveal_model_parameters` unpacks the model parameters in your multiverse:
+
+```{r reveal-model-parameters}
 multiverse_results |> 
-  reveal(.what = model_fitted, .which = lm_params, .unpack_specs = TRUE)
+  reveal_model_parameters()
+```
+
+`reveal_model_performance` unpacks the model performance:
+
+```{r reveal-model-performance}
+multiverse_results |> 
+  reveal_model_performance()
+```
+
+### Unpacking Specifications
+
+You can also choose to expand your decision grid with `.unpack_specs` to see which decisions produced what result. You have two options for unpacking your decisions - `wide` or `long`. If you set `.unpack_specs = 'wide'`, you get one column per decion variable. This is exactly the same as how your decisions appeared in your grid.
+
+```{r unpack-specs-wide}
+multiverse_results |> 
+  reveal_model_parameters(.unpack_specs = "wide")
+```
+
+If you set `.unpack_specs = 'long'`, your decisions get stacked into two columns: `decision_set` and `alternatives`. This format is nice for plotting a particular result from a multiverse analyses per different decision alternatives.
+
+```{r unpack-specs-long}
+multiverse_results |> 
+  reveal_model_performance(.unpack_specs = "long")
 ```
 
 ### Condense
 
 Unpacking specifications alongside specific results allows us to examine the effects of our pipeline decisions. 
 
-A powerful way to organize these results is to `condense` a specific results column, say our predictor regression coefficient, over the entire multiverse. `condense()` takes a result column and summarizes it with the `.how` argument, which takes a list in the form of `list(<a name you pick> = <summary function>)`.
+A powerful way to organize these results is to summarize a specific results column, say the r^2^ values of our model over the entire multiverse. `condense()` takes a result column and summarizes it with the `.how` argument, which takes a list in the form of `list(<a name you pick> = <summary function>)`.
 
-`.how` will create a column named like so `<column being condsensed>_<summary function name provided>"`. For this case, we have `coefficient_mean` and `coefficient_median`.
+`.how` will create a column named like so `<column being condsensed>_<summary function name provided>"`. For this case, we have `r2`_mean` and `r2_median`.
 
 ```{r condense}
-multiverse_results |> 
-  reveal(.what = model_fitted, .which = lm_params, .unpack_specs = TRUE) |> 
-  filter(str_detect(parameter, "iv")) |> 
+# model performance r2 summaries
+multiverse_results |>
+  reveal_model_performance() |> 
+  condense(r2, list(mean = mean, median = median))
+
+# model parameters for our predictor of interest
+multiverse_results |>
+  reveal_model_parameters() |> 
+  filter(str_detect(parameter, "iv")) |>
   condense(coefficient, list(mean = mean, median = median))
 ```
 
-Here, we have filtered our multiverse results to look at our predictors `iv*` to see what the mean and median effect was (over all combinations of decisions) on our outcomes. 
+In the last example, we have filtered our multiverse results to look at our predictors `iv*` to see what the mean and median effect was (over all combinations of decisions) on our outcomes. 
 
 However, we had three versions of our predictor and two outcomes, so combining `dplyr::group_by()` with `condense()` might be more informative:
 
 ```{r group_by-condense1}
-multiverse_results |> 
-  reveal(.what = model_fitted, .which = lm_params, .unpack_specs = TRUE) |> 
+multiverse_results |>
+  reveal_model_parameters(.unpack_specs = "wide") |> 
   filter(str_detect(parameter, "iv")) |>
-  group_by(ivs, dvs) |> 
+  group_by(ivs, dvs) |>
   condense(coefficient, list(mean = mean, median = median))
 ```
 
 If we were interested in all the terms of the model, we can leverage `group_by` further:
 
 ```{r group_by-condense2}
-multiverse_results |> 
-  reveal(.what = model_fitted, .which = lm_params, .unpack_specs = TRUE) |> 
-  group_by(parameter, ivs, dvs) |> 
+multiverse_results |>
+  reveal_model_parameters(.unpack_specs = "wide") |> 
+  group_by(parameter, dvs) |>
   condense(coefficient, list(mean = mean, median = median))
 ```

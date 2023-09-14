@@ -4,10 +4,11 @@
 \alias{detect_n_variables}
 \title{Detect total number of variable sets in your pipelines}
 \usage{
-detect_n_variables(.grid)
+detect_n_variables(.pipeline)
 }
 \arguments{
-\item{.grid}{a full decision grid created by \code{\link{expand_decisions}}}
+\item{.pipeline}{a \code{data.frame} produced by calling a series of add_*
+functions.}
 }
 \value{
 a numeric, the total number of unique variable sets
@@ -37,7 +38,7 @@ the_data <-
 # create a pipeline blueprint
 full_pipeline <-
   the_data |>
-  add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |>
+  add_filters(include1 == 0, include2 != 3, include3 > -2.5) |>
   add_variables(var_group = "ivs", iv1, iv2, iv3) |>
   add_variables(var_group = "dvs", dv1, dv2) |>
   add_model("linear model", lm({dvs} ~ {ivs} * mod))

@@ -2,7 +2,7 @@
 title: "Defining an Analysis Pipeline Blueprint"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{decision-grids}
+  %\VignetteIndexEntry{create-your-blueprint}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -181,11 +181,11 @@ Here, `{dvs}` and `{ivs}` tells `multitool` to insert the current version of the
 
 ## Finalizing the specification blueprint
 
-There are two steps in finalizing your bluerprint. The first is to visualize your pipeline with a graph. This is optional, but I think it is helpful. 
+There are two steps in finalizing your blueprint. The first is to visualize your pipeline with a graph. This is optional, but I think it is helpful. 
 
 You can automate making a chart with `create_blueprint_graph()`. Feed your pipeline to `create_blueprint_graph()` to see a chart of your multiverse pipeline plan:
 
-```{r blueprint-chart}
+```{r blueprint-diagram, fig.width=5.75, fig.height=6}
 full_pipeline <- 
   the_data |>
   add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |> 
@@ -193,7 +193,7 @@ full_pipeline <-
   add_variables(var_group = "dvs", dv1, dv2) |> 
   add_model("linear model", lm({dvs} ~ {ivs} * mod))
 
-create_blueprint_graph(full_pipeline, width = 450, height = 500)
+create_blueprint_graph(full_pipeline)
 ```
 
 The final step in making your blueprint is expanding all your specifications into all possible combinations. You can do this by calling `expand_decisions()` at the end of your blueprint pipeline:

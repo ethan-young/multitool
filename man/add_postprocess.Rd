@@ -7,9 +7,9 @@
 add_postprocess(.df, postprocess_name, code)
 }
 \arguments{
-\item{.df}{The original data.frame (e.g., base data set). If part of set of
-add_* decision functions in a pipeline, the base data will be passed along
-as an attribute.}
+\item{.df}{The original \code{data.frame}(e.g., base data set). If part of
+set of add_* decision functions in a pipeline, the base data will be passed
+along as an attribute.}
 
 \item{postprocess_name}{a character string. A descriptive name for what the
 postprocessing step accomplishes.}
@@ -23,13 +23,13 @@ post-processing code.
 
 For example, if you fit a simple linear model like: \code{lm(y ~ x1 + x2)},
 and your post-processing code executes a call to \code{anova}, you would
-simply pass \code{anova()} to \code{add_postprocess()}. The underlying
-code would be:
+simply pass \code{anova()} to \code{add_postprocess()}. The underlying code
+would be:
 
 \code{data |> filters |> lm(y ~ x1 + x2, data = _) |> anova()}}
 }
 \value{
-a data.frame with three columns: type, group, and code. Type
+a \code{data.frame} with three columns: type, group, and code. Type
 indicates the decision type, group is a decision, and the code is the
 actual code that will be executed. If part of a pipe, the current set of
 decisions will be appended as new rows.
@@ -61,7 +61,7 @@ the_data <-
   )
 
 the_data |>
-  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+  add_filters(include1 == 0,include2 != 3,include2 != 2, include3 > -2.5) |>
   add_variables("ivs", iv1, iv2, iv3) |>
   add_variables("dvs", dv1, dv2) |>
   add_variables("mods", starts_with("mod")) |>

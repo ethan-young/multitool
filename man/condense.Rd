@@ -4,7 +4,7 @@
 \alias{condense}
 \title{Summarize multiverse parameters}
 \usage{
-condense(.unpacked, .what, .how)
+condense(.unpacked, .what, .how, list_cols = TRUE, ...)
 }
 \arguments{
 \item{.unpacked}{an unpacked (with \code{\link{reveal}} or
@@ -17,6 +17,12 @@ multiverse.}
 \item{.how}{a named list. The list should contain summary functions (e.g.,
 mean or median) the user would like to compute over the individual
 estimates from the multiverse}
+
+\item{list_cols}{logical, whether to create list columns for the raw values
+of any summarized columns. Useful for creating visualizations and tables.
+Default is TRUE.}
+
+\item{...}{additional arguments passed to \code{dplyr::summarize()}}
 }
 \value{
 a summarized \code{tibble} containing a column for each summary
@@ -26,7 +32,6 @@ method from \code{.how}
 Summarize multiverse parameters
 }
 \examples{
-\dontrun{
 
 library(tidyverse)
 library(multitool)
@@ -57,29 +62,16 @@ full_pipeline <-
   add_variables("ivs", iv1, iv2, iv3) |>
   add_variables("dvs", dv1, dv2) |>
   add_variables("mods", starts_with("mod")) |>
-  add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
-  add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
-  add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
-  add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis")) |>
-  add_correlations("predictors", matches("iv|mod|cov"), focus_set = c(cov1,cov2)) |>
-  add_correlations("outcomes", matches("dv|mod"), focus_set = matches("dv")) |>
-  add_cron_alpha("unp_scale", c(iv1,iv2,iv3)) |>
-  add_cron_alpha("vio_scale", starts_with("mod")) |>
-  add_model(lm({dvs} ~ {ivs} * {mods})) |>
-  add_model(lm({dvs} ~ {ivs} * {mods} + cov1)) |>
-  add_postprocess("aov", aov()) |>
-  expand_decisions()
+  add_model("linear_model", lm({dvs} ~ {ivs} * {mods} + cov1))
+
+pipeline_grid <- expand_decisions(full_pipeline)
 
 # Run the whole multiverse
-the_multiverse <- run_multiverse(full_pipeline[1:10,])
-
-# Reveal results of the linear model
-the_multiverse |> reveal(lm_fitted, matches("tidy"), .unpack_specs = TRUE)
+the_multiverse <- run_multiverse(pipeline_grid[1:10,])
 
 # Reveal and condense
 the_multiverse |>
-  reveal(lm_fitted, matches("tidy"), .unpack_specs = TRUE) |>
-  group_by(term, dvs) |>
-  condense(estimate, list(mn = mean, med = median))
-  }
+  reveal_model_parameters() |>
+  filter(str_detect(parameter, "iv")) |>
+  condense(coefficient, list(mean = mean, median = median))
 }

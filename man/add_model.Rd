@@ -2,34 +2,34 @@
 % Please edit documentation in R/grid-pipeline.R
 \name{add_model}
 \alias{add_model}
-\title{Add a model and formula to a multiverese pipeline}
+\title{Add a model and formula to a multiverse pipeline}
 \usage{
 add_model(.df, model_desc, code)
 }
 \arguments{
-\item{.df}{The original data.frame (e.g., base data set). If part of set of
-add_* decision functions in a pipeline, the base data will be passed along
-as an attribute.}
+\item{.df}{The original \code{data.frame}(e.g., base data set). If part of
+set of add_* decision functions in a pipeline, the base data will be passed
+along as an attribute.}
 
 \item{model_desc}{a human readable name you would like to give the model.}
 
-\item{code}{literal model syntax you would like to run. You can
-use \code{glue} inside formulas to dynamically generate variable names
-based on a variable grid. For example, if you make variable grid with two
-versions of your IVs (e.g., \code{iv1} and \code{iv2}), you can write your
-formula like so: \code{lm(happiness ~ {iv} + control_var)}. The only
-requirement is that the variables written in the formula actually exist in
-the underlying data. You are also responsible for loading any packages that
-run a particular model (e.g., \code{lme4} for mixed-models)}
+\item{code}{literal model syntax you would like to run. You can use
+\code{glue} inside formulas to dynamically generate variable names based on
+a variable grid. For example, if you make variable grid with two versions
+of your IVs (e.g., \code{iv1} and \code{iv2}), you can write your formula
+like so: \code{lm(happiness ~ {iv} + control_var)}. The only requirement is
+that the variables written in the formula actually exist in the underlying
+data. You are also responsible for loading any packages that run a
+particular model (e.g., \code{lme4} for mixed-models)}
 }
 \value{
-a data.frame with three columns: type, group, and code. Type
+a \code{data.frame} with three columns: type, group, and code. Type
 indicates the decision type, group is a decision, and the code is the
 actual code that will be executed. If part of a pipe, the current set of
 decisions will be appended as new rows.
 }
 \description{
-Add a model and formula to a multiverese pipeline
+Add a model and formula to a multiverse pipeline
 }
 \examples{
 
@@ -55,7 +55,7 @@ the_data <-
   )
 
 the_data |>
-  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+  add_filters(include1 == 0,include2 != 3,include2 != 2, include3 > -2.5) |>
   add_variables("ivs", iv1, iv2, iv3) |>
   add_variables("dvs", dv1, dv2) |>
   add_variables("mods", starts_with("mod")) |>

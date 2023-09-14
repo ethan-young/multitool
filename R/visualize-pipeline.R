@@ -1,6 +1,6 @@
 #' Create a Analysis Pipeline diagram
 #'
-#' @param .grid a \code{data.frame} produced by calling a series of add_*
+#' @param .pipeline a \code{data.frame} produced by calling a series of add_*
 #'   functions.
 #' @param splines options for how to draw edges (lines) for a grViz diagram
 #' @param render whether to render the graph or just output grViz code
@@ -38,12 +38,12 @@
 #'   add_model("linear model", lm({dvs} ~ {ivs} * mod))
 #'
 #' create_blueprint_graph(full_pipeline)
-create_blueprint_graph <- function(.grid, splines = "line", render = TRUE, show_code = FALSE, ...){
+create_blueprint_graph <- function(.pipeline, splines = "line", render = TRUE, show_code = FALSE, ...){
 
   decision_types <-
-    .grid |> dplyr::pull(type) |> unique()
+    .pipeline |> dplyr::pull(type) |> unique()
 
-  grid_ndf <- create_pipeline_ndf(.grid)
+  grid_ndf <- create_pipeline_ndf(.pipeline)
 
   possible_edges <-
     tribble(
@@ -185,11 +185,9 @@ create_blueprint_graph <- function(.grid, splines = "line", render = TRUE, show_
     stringr::str_replace_all("( __ )", "</B>") |>
     stringr::str_replace_all("( _ )", "<B>")
 
-
   if(show_code){
     cat(graph_text)
   }
-
 
   if(render){
     DiagrammeR::grViz(graph_text, ...)

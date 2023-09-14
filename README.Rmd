@@ -9,7 +9,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
-  out.width = "100%"
+  out.width = "100%",
+  fig.retina = 2
 )
 ```
 
@@ -83,7 +84,8 @@ Finally, multiverse analyses were originally intended to look at how model param
 
 ## Usage
 
-```{r message=FALSE}
+```{r usage, message=FALSE}
+# load packages
 library(tidyverse)
 library(multitool)
 
@@ -112,36 +114,30 @@ full_pipeline <-
 
 full_pipeline
 
-# Visualize the pipeline
-create_blueprint_graph(full_pipeline)
-
-# expand the pipeline
+# Expand your blueprint into a grid
 expanded_pipeline <- expand_decisions(full_pipeline)
 expanded_pipeline
 
-# Use your blueprint to run the multiverse
+# Run the blueprint
 multiverse_results <- run_multiverse(expanded_pipeline)
 multiverse_results
 
-# Unpack some results
+# Unpack model coefficients
 multiverse_results |> 
-  reveal(.what = model_fitted, .which = lm_params, .unpack_specs = TRUE)
+  reveal_model_parameters()
 
-# Summarize an effect
+# Unpack model fit statistics
 multiverse_results |> 
-  reveal(.what = model_fitted, .which = lm_params, .unpack_specs = TRUE) |> 
-  filter(str_detect(parameter, "iv")) |> 
-  condense(coefficient, list(mean = mean, median = median))
+  reveal_model_performance()
 
-# Plot your effects
+# Summarize model coefficients
 multiverse_results |> 
-  reveal(.what = model_fitted, .which = lm_params, .unpack_specs = TRUE) |> 
-  filter(str_detect(parameter, "^iv\\d$")) |> 
-  group_by(ivs, dvs) |> 
-  mutate(sorted_decision = fct_reorder(as_factor(decision), coefficient) |> as.numeric()) |> 
-  ggplot(aes(x = sorted_decision, y = coefficient, color = ivs)) +
-  geom_line() +
-  geom_point() +
-  facet_wrap(~dvs, scales = "free_x") +
-  scale_x_continuous("Data Decision")
+  reveal_model_parameters() |> 
+  group_by(parameter) |> 
+  condense(coefficient, list(mean = mean, median = median, sd = sd))
+
+# Summarize fit statistics
+multiverse_results |> 
+  reveal_model_performance() |> 
+  condense(r2, list(mean = mean, sd = sd))
 ```

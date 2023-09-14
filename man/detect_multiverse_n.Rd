@@ -4,16 +4,17 @@
 \alias{detect_multiverse_n}
 \title{Detect total number of analysis pipelines}
 \usage{
-detect_multiverse_n(.grid, include_models = TRUE)
+detect_multiverse_n(.pipeline, include_models = TRUE)
 }
 \arguments{
-\item{.grid}{a full decision grid created by \code{\link{expand_decisions}}}
+\item{.pipeline}{a \code{data.frame} produced by calling a series of add_*
+functions.}
 
 \item{include_models}{Whether to count alternative models if you have more
 than one \code{add_model()} call.}
 }
 \value{
-a numeric, the total number of unique analyis pipelines
+a numeric, the total number of unique analysis pipelines
 }
 \description{
 Detect total number of analysis pipelines
@@ -40,7 +41,7 @@ the_data <-
 # create a pipeline blueprint
 full_pipeline <-
   the_data |>
-  add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |>
+  add_filters(include1 == 0, include2 != 3, include3 > -2.5) |>
   add_variables(var_group = "ivs", iv1, iv2, iv3) |>
   add_variables(var_group = "dvs", dv1, dv2) |>
   add_model("linear model", lm({dvs} ~ {ivs} * mod))

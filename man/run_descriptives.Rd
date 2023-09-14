@@ -4,7 +4,7 @@
 \alias{run_descriptives}
 \title{Run a multiverse-style descriptive analysis based on a complete decision grid}
 \usage{
-run_descriptives(.pipeline, show_progress = FALSE)
+run_descriptives(.pipeline, show_progress = TRUE)
 }
 \arguments{
 \item{.pipeline}{a \code{tibble} produced by a series of \code{add_*} calls.
@@ -23,7 +23,42 @@ analyses specified
 Run a multiverse-style descriptive analysis based on a complete decision grid
 }
 \examples{
-\dontrun{
-run_descriptives(pipeline)
-}
+
+library(tidyverse)
+library(multitool)
+
+# Simulate some data
+the_data <-
+  data.frame(
+    id   = 1:500,
+    iv1  = rnorm(500),
+    iv2  = rnorm(500),
+    iv3  = rnorm(500),
+    mod1 = rnorm(500),
+    mod2 = rnorm(500),
+    mod3 = rnorm(500),
+    cov1 = rnorm(500),
+    cov2 = rnorm(500),
+    dv1  = rnorm(500),
+    dv2  = rnorm(500),
+    include1 = rbinom(500, size = 1, prob = .1),
+    include2 = sample(1:3, size = 500, replace = TRUE),
+    include3 = rnorm(500)
+  )
+
+# Decision pipeline
+full_pipeline <-
+  the_data |>
+  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+  add_variables("ivs", iv1, iv2, iv3) |>
+  add_variables("dvs", dv1, dv2) |>
+  add_variables("mods", starts_with("mod")) |>
+  add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
+  add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis")) |>
+  add_correlations("predictors", matches("iv|mod|cov"), focus_set = c(cov1,cov2)) |>
+  add_correlations("outcomes", matches("dv|mod"), focus_set = matches("dv")) |>
+  add_cron_alpha("unp_scale", c(iv1,iv2,iv3)) |>
+  add_cron_alpha("vio_scale", starts_with("mod"))
+
+run_descriptives(full_pipeline)
 }

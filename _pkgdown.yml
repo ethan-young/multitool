@@ -2,7 +2,7 @@ url: https://ethan-young.github.io/multitool/
 
 template:
   bootstrap: 5
-  theme:  pygments
+  theme: pygments
   navbar:
     type: light
   bslib:
@@ -16,7 +16,6 @@ template:
     pre-bg: "#ecf0f1"
     pre-border: "#ecf0f1"
     fg: "#000"
-    primary: "#1e87f0"
     secondary: "#ecf0f1"
     light: "white"
 
@@ -27,6 +26,8 @@ articles:
   - create-your-blueprint
   - validate-your-blueprint
   - run-your-pipeline
+  - run-descriptive-analyses
+  - multitool-nomenclature
 
 reference:
 - title: Creating a Pipeline
@@ -41,6 +42,7 @@ reference:
   - add_summary_stats
   - add_cron_alpha
   - add_correlations
+  - add_parameter_keys
   - expand_decisions
 
 - title: View, Check, and Test
@@ -54,8 +56,6 @@ reference:
   - detect_n_models
   - summarize_filter_ns
   - show_code_filter
-  - run_universe_model
-  - run_universe_summary_stats
 
 - title: Run your Pipeline
   desc: >
@@ -70,6 +70,10 @@ reference:
     Unpack your results for viewing, plotting, and understanding
   contents:
   - reveal
+  - reveal_model_parameters
+  - reveal_model_performance
+  - reveal_model_warnings
+  - reveal_model_messages
   - reveal_alphas
   - reveal_corrs
   - reveal_summary_stats

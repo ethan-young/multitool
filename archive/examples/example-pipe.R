@@ -7,6 +7,7 @@ library(DiagrammeR)
 the_data <-
   data.frame(
     id   = 1:500,
+    group = sample(1:20,size = 500, replace = T),
     iv1  = rnorm(500),
     iv2  = rnorm(500),
     iv3  = rnorm(500),
@@ -37,14 +38,11 @@ full_pipeline <-
   add_correlations("Between Outcomes", matches("dv|mod"), focus_set = matches("dv")) |>
   add_cron_alpha("unp_scale", c(iv1,iv2,iv3)) |>
   add_cron_alpha("vio_scale", starts_with("mod")) |>
-  add_model("my model", lm({dvs} ~ {ivs} * {mods})) |>
-  add_postprocess("plotting", ggpredict(terms = c("{ivs} [-1,1]", "{mods} [-1,1]"))) |>
-  add_postprocess("simple_slopes", hypothesis_test(c("{ivs}", "{mods}"), test = NULL))
+  add_model("linear model", lm({dvs} ~ {ivs} * {mods} + cov1)) |>
+  add_parameter_keys("interaction", {ivs}:{mods})
 
 
-create_blueprint_graph(full_pipeline)$ndf
-create_blueprint_graph(full_pipeline)$edf
-create_blueprint_graph(full_pipeline, "line")$graph |> grViz()
+create_blueprint_graph(full_pipeline)
 
 pipeline_expanded <-
   full_pipeline |>
@@ -61,35 +59,22 @@ show_code_cron_alpha(pipeline_expanded, decision_num = 1)
 
 ## Run a single decision set ----
 run_universe_model(pipeline_expanded, 1)
-run_universe_corrs(full_pipeline, 120)
-run_universe_corrs(full_pipeline, 120) |>
-  unnest(corrs_computed) |>
-  unnest(predictors_rs)
+run_universe_corrs(pipeline_expanded, 120)
 
-run_universe_cron_alphas(pipeline_expanded, decision_num = 2) |> unnest(cron_alphas_computed) |> unnest(unp_scale_total)
-run_universe_summary_stats(full_pipeline, 120) |> unnest(summary_stats_computed)
+run_universe_cron_alphas(pipeline_expanded, decision_num = 2)
+run_universe_summary_stats(pipeline_expanded, 120) |> unnest(summary_stats_computed)
 
 ## Run the whole multiverse ----
-the_multiverse <- run_multiverse(pipeline_expanded)
+the_multiverse <- run_multiverse(pipeline_expanded[1:5,])
 the_multiverse
 
-the_multiverse |>
-  reveal(model_fitted, lm_tidy,.unpack_specs = T) |>
-  filter(str_detect(term, "iv.$")) |>
-  lme4::lmer(estimate ~ 1 + (1|ivs) + (1|dvs) + (1|mods), data = _) |>
-  performance::icc(by_group = T)
-
-the_multiverse |>
-  reveal(model_fitted, lm_tidy,.unpack_specs = T) |>
-  filter(str_detect(term, "iv")) |>
-  lme4::lmer(estimate ~ 1 + (1|ivs) + (1|dvs) + (1|mods), data = _) |>
-  specr::icc_specs()
-
-
+## Run descriptive multiverse
+descriptive_mulitverse <- run_descriptives(full_pipeline)
+descriptive_mulitverse
 
 ## Unpack the multiverse ----
 the_multiverse |>
-  reveal(model, matches("tidy"), T)
+  reveal(model_fitted, lm_params, .unpack_specs =  T)
 
 the_multiverse |>
   reveal(cron_alphas_computed)
@@ -109,6 +94,6 @@ the_multiverse |>
   summarize(across(c(cov1,cov2), list(mean = mean, median = median)))
 
 the_multiverse |>
-  reveal(lm_fitted, matches("tidy"), T) |>
-  group_by(term, dvs) |>
-  condense(estimate, list(mn = mean, med = median))
+  reveal(model_fitted, lm_params, T) |>
+  group_by(ivs, dvs) |>
+  condense(coefficient, list(mn = mean, med = median))

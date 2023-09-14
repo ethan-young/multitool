@@ -1,12 +1,11 @@
 Package: multitool
-Date: 2022-10-05
 Title: Tools for Running Multiverse Style Analyses
 Version: 0.0.0.9000
 Authors@R: c(
         person(
           "Ethan", "Young", 
           email = "young.ethan.scott@gmail.com", 
-          role = c("aut", "cre"),
+          role = c("aut", "cre", "cph"),
           comment = c(ORCID = "0000-0002-8232-0184")
         ),
         person(
@@ -16,13 +15,11 @@ Authors@R: c(
           comment = c(ORCID = "0000-0002-9595-5373")
         )
        )
-Description: Multiverse analyses run the same (or very similar) analyses over a
-    range of arbitrary data processing decisions. We provide an interface for creating
-    analysis decision grids and generating all possible combinations of those decisions. 
-    Grids can contain data filtering criteria, different versions of IVs and DVs, 
-    modeling strategies, pre- and post-analysis steps. You can also compute general
-    descriptive statistics, correlations, and cronbach's alpha (for reliability)
-    over arbitrary decisions.
+Description: Multiverse analyses run the same analysis over a
+    range of arbitrary data processing decisions. 'multitool' provides an 
+    interface for creating alternative analysis pipelines and turning then into a 
+    grid of all possible pipelines. Using this grid as a blueprint, you can 
+    model your data with all possible analysis pipelines and summarize the results.
 License: MIT + file LICENSE
 Imports:
   broom.mixed,
@@ -34,6 +31,7 @@ Imports:
   dplyr,
   furrr,
   future,
+  ggdist,
   glue,
   moments,
   psych,
