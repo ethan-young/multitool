@@ -27,6 +27,8 @@
     <a class="dropdown-item" href="../articles/create-your-blueprint.html">Defining an Analysis Pipeline Blueprint</a>
     <a class="dropdown-item" href="../articles/validate-your-blueprint.html">Check and Test your Blueprint</a>
     <a class="dropdown-item" href="../articles/run-your-pipeline.html">Run your Pipeline</a>
+    <a class="dropdown-item" href="../articles/run-descriptive-analyses.html">Descriptive Analyses</a>
+    <a class="dropdown-item" href="../articles/multitool-nomenclature.html">multitool Nomenclature</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -56,9 +58,9 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>.df</dt>
-<dd><p>The original data.frame (e.g., base data set). If part of set of
-add_* decision functions in a pipeline, the base data will be passed along
-as an attribute.</p></dd>
+<dd><p>The original <code>data.frame</code>(e.g., base data set). If part of
+set of add_* decision functions in a pipeline, the base data will be passed
+along as an attribute.</p></dd>
 
 
 <dt>var_group</dt>
@@ -77,7 +79,7 @@ variables.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>a data.frame with three columns: type, group, and code. Type
+<p>a <code>data.frame</code> with three columns: type, group, and code. Type
 indicates the decision type, group is a decision, and the code is the
 actual code that will be executed. If part of a pipe, the current set of
 decisions will be appended as new rows.</p>

@@ -46,6 +46,8 @@
     <a class="dropdown-item" href="../articles/create-your-blueprint.html">Defining an Analysis Pipeline Blueprint</a>
     <a class="dropdown-item" href="../articles/validate-your-blueprint.html">Check and Test your Blueprint</a>
     <a class="dropdown-item" href="../articles/run-your-pipeline.html">Run your Pipeline</a>
+    <a class="dropdown-item" href="../articles/run-descriptive-analyses.html">Descriptive Analyses</a>
+    <a class="dropdown-item" href="../articles/multitool-nomenclature.html">multitool Nomenclature</a>
   </div>
 </li>
       </ul>
@@ -78,7 +80,7 @@
 comfortable with how the pipeline is executed, you can implement a full
 multiverse-style analysis.</p>
 <p>Simply use
-<code>run_multiverse(&lt;your pipeline object&gt;)</code>:</p>
+<code>run_multiverse(&lt;your expanded grid object&gt;)</code>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ethan-young.github.io/multitool/">multitool</a></span><span class="op">)</span></span>
@@ -113,250 +115,355 @@ multiverse-style analysis.</p>
 <span><span class="va">multiverse_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_multiverse.html">run_multiverse</a></span><span class="op">(</span><span class="va">expanded_pipeline</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">multiverse_results</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 48 × 3</span></span></span>
-<span><span class="co">#&gt;    decision specifications   model_fitted    </span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 5]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 2        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 5]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 3        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 5]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 4        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 5]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 5        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 5]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 6        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 5]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 7        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 5]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 8        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 5]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 9        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 5]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 10       <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 5]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 48 × 4</span></span></span>
+<span><span class="co">#&gt;    decision specifications   model_fitted     pipeline_code   </span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 5]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 2]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 2        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 5]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 2]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 3        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 5]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 2]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 4        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 5]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 2]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 5        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 5]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 2]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 6        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 5]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 2]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 7        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 5]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 2]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 8        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 5]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 2]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 9        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 5]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 2]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 10       <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 5]&gt;</span> <span style="color: #949494;">&lt;tibble [1 × 2]&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 38 more rows</span></span></span></code></pre></div>
 <p>The result will be another <code>tibble</code> with various list
 columns.</p>
 <p>It will always contain a list column named
 <code>specifications</code> containing all the information you generated
-in your blueprint. Next, there will be one list column per model fitted,
-labelled with a suffix like so
-<code>&lt;your model name&gt;_fitted</code>.</p>
-<p>Here, our model used <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm()</a></code> so inside our
-<code>model_fitted</code> list column, we have our results are contained
-in <code>lm_*</code> columns.</p>
+in your blueprint. Next, there will a list column for your fitted model
+fitted, labelled <code>model_fitted</code>.</p>
 <div class="section level2">
 <h2 id="unpacking-a-multiverse-analysis">Unpacking a multiverse analysis<a class="anchor" aria-label="anchor" href="#unpacking-a-multiverse-analysis"></a>
 </h2>
 <p>There are two main ways to unpack and examine <code>multitool</code>
-results. The first is by using <code><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">tidyr::unnest()</a></code> (similar to
-unpacking the specification blueprint earlier).</p>
+results. The first is by using <code><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">tidyr::unnest()</a></code>.</p>
 <div class="section level3">
 <h3 id="unnest">Unnest<a class="anchor" aria-label="anchor" href="#unnest"></a>
 </h3>
+<p>Inside the <code>model_fitted</code> column, <code>multitool</code>
+gives us 4 columns: <code>model_parameters</code>,
+<code>model_performance</code>, <code>model_warnings</code>, and
+<code>model_messages</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">model_fitted</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 48 × 7</span></span></span>
-<span><span class="co">#&gt;    decision specifications   lm_code       lm_params  lm_performance lm_warnings</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;glue&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; … <span style="color: #949494;">&lt;prmtrs_m&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>     <span style="color: #949494;">&lt;tibble&gt;</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 2        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; … <span style="color: #949494;">&lt;prmtrs_m&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>     <span style="color: #949494;">&lt;tibble&gt;</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 3        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; … <span style="color: #949494;">&lt;prmtrs_m&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>     <span style="color: #949494;">&lt;tibble&gt;</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 4        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; … <span style="color: #949494;">&lt;prmtrs_m&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>     <span style="color: #949494;">&lt;tibble&gt;</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 5        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; … <span style="color: #949494;">&lt;prmtrs_m&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>     <span style="color: #949494;">&lt;tibble&gt;</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 6        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; … <span style="color: #949494;">&lt;prmtrs_m&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>     <span style="color: #949494;">&lt;tibble&gt;</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 7        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; … <span style="color: #949494;">&lt;prmtrs_m&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>     <span style="color: #949494;">&lt;tibble&gt;</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 8        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; … <span style="color: #949494;">&lt;prmtrs_m&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>     <span style="color: #949494;">&lt;tibble&gt;</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 9        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; … <span style="color: #949494;">&lt;prmtrs_m&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>     <span style="color: #949494;">&lt;tibble&gt;</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 10       <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; … <span style="color: #949494;">&lt;prmtrs_m&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>     <span style="color: #949494;">&lt;tibble&gt;</span>   </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 48 × 8</span></span></span>
+<span><span class="co">#&gt;    decision specifications   model_function model_parameters   model_performance</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 2        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 3        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 4        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 5        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 6        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 7        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 8        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 9        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 10       <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>       </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 38 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: lm_messages &lt;list&gt;</span></span></span></code></pre></div>
-<p>Inside the <code>model_fitted</code> column, <code>multitool</code>
-gives us 4 columns using the model function you ran as a prefix.</p>
-<p>The first column is always the full code pipeline that produced the
-results. In our example, this is <code>lm_code</code>. The next are
-results passed to <a href="https://broom.tidymodels.org/" class="external-link"><code>broom</code></a> (if
-<code>tidy</code> and/or <code>glance</code> methods exist). For
-<code>lm</code>, we have <code>lm_tidy</code> and
-<code>lm_glance</code>. Notice the naming convention:
-<code>&lt;model function&gt;_params</code> and
-<code>&lt;model function&gt;_performance</code>.</p>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: model_warnings &lt;list&gt;, model_messages &lt;list&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   pipeline_code &lt;list&gt;</span></span></span></code></pre></div>
+<p>The <code>model_parameters</code> column gives you the result of
+calling <code><a href="https://easystats.github.io/parameters/reference/model_parameters.html" class="external-link">parameters::parameters()</a></code> on each model in your
+grid, which is a <code>data.frame</code> of model coefficients and their
+associated standard errors, confidence intervals, test statistic, and a
+p-values.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">model_fitted</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">lm_params</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 192 × 15</span></span></span>
-<span><span class="co">#&gt;    decision specifications   lm_code  parameter coefficient     se    ci  ci_low</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;glue&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_dat… (Interce…      0.018<span style="text-decoration: underline;">7</span> 0.058<span style="text-decoration: underline;">5</span>  0.95 -<span style="color: #BB0000;">0.096</span><span style="color: #BB0000; text-decoration: underline;">5</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 1        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_dat… iv1            0.023<span style="text-decoration: underline;">4</span> 0.062<span style="text-decoration: underline;">1</span>  0.95 -<span style="color: #BB0000;">0.098</span><span style="color: #BB0000; text-decoration: underline;">8</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 1        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_dat… mod            0.017<span style="text-decoration: underline;">2</span> 0.055<span style="text-decoration: underline;">2</span>  0.95 -<span style="color: #BB0000;">0.091</span><span style="color: #BB0000; text-decoration: underline;">4</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 1        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_dat… iv1:mod       -<span style="color: #BB0000;">0.095</span><span style="color: #BB0000; text-decoration: underline;">6</span> 0.057<span style="text-decoration: underline;">4</span>  0.95 -<span style="color: #BB0000;">0.209</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 2        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_dat… (Interce…      0.042<span style="text-decoration: underline;">0</span> 0.051<span style="text-decoration: underline;">7</span>  0.95 -<span style="color: #BB0000;">0.059</span><span style="color: #BB0000; text-decoration: underline;">8</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 2        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_dat… iv1            0.134  0.054<span style="text-decoration: underline;">9</span>  0.95  0.025<span style="text-decoration: underline;">9</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 2        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_dat… mod           -<span style="color: #BB0000;">0.052</span><span style="color: #BB0000; text-decoration: underline;">0</span> 0.048<span style="text-decoration: underline;">8</span>  0.95 -<span style="color: #BB0000;">0.148</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 2        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_dat… iv1:mod        0.072<span style="text-decoration: underline;">4</span> 0.050<span style="text-decoration: underline;">8</span>  0.95 -<span style="color: #BB0000;">0.027</span><span style="color: #BB0000; text-decoration: underline;">5</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 3        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_dat… (Interce…      0.019<span style="text-decoration: underline;">0</span> 0.058<span style="text-decoration: underline;">9</span>  0.95 -<span style="color: #BB0000;">0.096</span><span style="color: #BB0000; text-decoration: underline;">9</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 3        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_dat… iv2            0.017<span style="text-decoration: underline;">5</span> 0.061<span style="text-decoration: underline;">7</span>  0.95 -<span style="color: #BB0000;">0.104</span> </span></span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">model_parameters</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 192 × 16</span></span></span>
+<span><span class="co">#&gt;    decision specifications   model_function parameter   coefficient     se    ci</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             (Intercept)      0.052<span style="text-decoration: underline;">2</span> 0.060<span style="text-decoration: underline;">2</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 1        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             iv1              0.029<span style="text-decoration: underline;">6</span> 0.061<span style="text-decoration: underline;">0</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 1        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             mod              0.014<span style="text-decoration: underline;">4</span> 0.058<span style="text-decoration: underline;">7</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 1        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             iv1:mod         -<span style="color: #BB0000;">0.094</span><span style="color: #BB0000; text-decoration: underline;">8</span> 0.062<span style="text-decoration: underline;">4</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 2        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             (Intercept)     -<span style="color: #BB0000;">0.096</span><span style="color: #BB0000; text-decoration: underline;">5</span> 0.057<span style="text-decoration: underline;">5</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 2        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             iv1             -<span style="color: #BB0000;">0.062</span><span style="color: #BB0000; text-decoration: underline;">5</span> 0.058<span style="text-decoration: underline;">2</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 2        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             mod              0.056<span style="text-decoration: underline;">2</span> 0.056<span style="text-decoration: underline;">1</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 2        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             iv1:mod         -<span style="color: #BB0000;">0.089</span><span style="color: #BB0000; text-decoration: underline;">9</span> 0.059<span style="text-decoration: underline;">6</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 3        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             (Intercept)      0.044<span style="text-decoration: underline;">0</span> 0.060<span style="text-decoration: underline;">0</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 3        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             iv2              0.061<span style="text-decoration: underline;">0</span> 0.055<span style="text-decoration: underline;">5</span>  0.95</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 182 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: ci_high &lt;dbl&gt;, t &lt;dbl&gt;, df_error &lt;int&gt;, p &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   lm_performance &lt;list&gt;, lm_warnings &lt;list&gt;, lm_messages &lt;list&gt;</span></span></span></code></pre></div>
-<p>The <code>lm_params</code> (or
-<code>&lt;model function&gt;_params</code>) column gives us the main
-results of <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm()</a></code> per decision. These include terms,
-estimates, standard errors, and p-values. <code>lm_performance</code>
-(or <code>&lt;model function&gt;_performance</code>) column gives us
-model fit statistics (among other things):</p>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 9 more variables: ci_low &lt;dbl&gt;, ci_high &lt;dbl&gt;, t &lt;dbl&gt;, df_error &lt;int&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   p &lt;dbl&gt;, model_performance &lt;list&gt;, model_warnings &lt;list&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   model_messages &lt;list&gt;, pipeline_code &lt;list&gt;</span></span></span></code></pre></div>
+<p>The <code>model_performance</code> column gives fit statistics, such
+as r<sup>2</sup> or AIC and BIC values, computed by running
+<code><a href="https://easystats.github.io/performance/reference/model_performance.html" class="external-link">performance::performance()</a></code> on each model in your grid.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">model_fitted</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">lm_performance</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 48 × 13</span></span></span>
-<span><span class="co">#&gt;    decision specifications   lm_code        lm_params    aic  aicc   bic      r2</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;glue&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; f… <span style="color: #949494;">&lt;prmtrs_m&gt;</span>  917.  917.  935. 1.03<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 2        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; f… <span style="color: #949494;">&lt;prmtrs_m&gt;</span>  839.  839.  858. 2.45<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 3        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; f… <span style="color: #949494;">&lt;prmtrs_m&gt;</span>  920.  920.  938. 8.16<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 4        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; f… <span style="color: #949494;">&lt;prmtrs_m&gt;</span>  845.  845.  863. 7.24<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 5        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; f… <span style="color: #949494;">&lt;prmtrs_m&gt;</span>  915.  915.  934. 1.48<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 6        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; f… <span style="color: #949494;">&lt;prmtrs_m&gt;</span>  843.  843.  862. 1.25<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 7        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; f… <span style="color: #949494;">&lt;prmtrs_m&gt;</span>  917.  917.  935. 1.03<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 8        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; f… <span style="color: #949494;">&lt;prmtrs_m&gt;</span>  839.  839.  858. 2.45<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 9        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; f… <span style="color: #949494;">&lt;prmtrs_m&gt;</span>  920.  920.  938. 8.16<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 10       <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; f… <span style="color: #949494;">&lt;prmtrs_m&gt;</span>  845.  845.  863. 7.24<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span></span></span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">model_performance</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 48 × 14</span></span></span>
+<span><span class="co">#&gt;    decision specifications   model_function model_parameters     aic  aicc   bic</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  898.  898.  917.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 2        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  870.  870.  889.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 3        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  899.  899.  918.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 4        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  870.  870.  889.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 5        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  900.  900.  919.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 6        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  869.  869.  888.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 7        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  901.  901.  920.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 8        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  873.  873.  891.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 9        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  903.  904.  922.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 10       <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  872.  872.  891.</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 38 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: r2_adjusted &lt;dbl&gt;, rmse &lt;dbl&gt;, sigma &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   lm_warnings &lt;list&gt;, lm_messages &lt;list&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: r2 &lt;dbl&gt;, r2_adjusted &lt;dbl&gt;, rmse &lt;dbl&gt;, sigma &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   model_warnings &lt;list&gt;, model_messages &lt;list&gt;, pipeline_code &lt;list&gt;</span></span></span></code></pre></div>
+<p>The <code>model_messages</code> and <code>model_warnings</code>
+columns contain information provided by the modeling function. If
+something went wrong or you need to know something about a particular
+model, these columns will have captured messages and warnings printed by
+the modeling function.</p>
 </div>
 <div class="section level3">
 <h3 id="reveal">Reveal<a class="anchor" aria-label="anchor" href="#reveal"></a>
 </h3>
-<p>I wrote wrappers around the <code><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest()</a></code> workflow. The main
-function is <code><a href="../reference/reveal.html">reveal()</a></code>. Pass a multiverse results
-<code>tibble</code> to <code><a href="../reference/reveal.html">reveal()</a></code> and tell it which columns
-to grab by indicating the column name in the <code>.what</code>
-argument:</p>
+<p>I wrote wrappers around the <code><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">tidyr::unnest()</a></code> workflow.
+The main function is <code><a href="../reference/reveal.html">reveal()</a></code>. Pass a multiverse results
+object to <code><a href="../reference/reveal.html">reveal()</a></code> and tell it which columns to grab by
+indicating the column name in the <code>.what</code> argument:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/reveal.html">reveal</a></span><span class="op">(</span>.what <span class="op">=</span> <span class="va">model_fitted</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 48 × 7</span></span></span>
-<span><span class="co">#&gt;    decision specifications   lm_code       lm_params  lm_performance lm_warnings</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;glue&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; … <span style="color: #949494;">&lt;prmtrs_m&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>     <span style="color: #949494;">&lt;tibble&gt;</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 2        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; … <span style="color: #949494;">&lt;prmtrs_m&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>     <span style="color: #949494;">&lt;tibble&gt;</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 3        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; … <span style="color: #949494;">&lt;prmtrs_m&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>     <span style="color: #949494;">&lt;tibble&gt;</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 4        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; … <span style="color: #949494;">&lt;prmtrs_m&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>     <span style="color: #949494;">&lt;tibble&gt;</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 5        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; … <span style="color: #949494;">&lt;prmtrs_m&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>     <span style="color: #949494;">&lt;tibble&gt;</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 6        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; … <span style="color: #949494;">&lt;prmtrs_m&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>     <span style="color: #949494;">&lt;tibble&gt;</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 7        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; … <span style="color: #949494;">&lt;prmtrs_m&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>     <span style="color: #949494;">&lt;tibble&gt;</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 8        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; … <span style="color: #949494;">&lt;prmtrs_m&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>     <span style="color: #949494;">&lt;tibble&gt;</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 9        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; … <span style="color: #949494;">&lt;prmtrs_m&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>     <span style="color: #949494;">&lt;tibble&gt;</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 10       <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> the_data |&gt; … <span style="color: #949494;">&lt;prmtrs_m&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>     <span style="color: #949494;">&lt;tibble&gt;</span>   </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 48 × 8</span></span></span>
+<span><span class="co">#&gt;    decision specifications   model_function model_parameters   model_performance</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 2        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 3        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 4        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 5        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 6        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 7        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 8        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 9        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 10       <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span> <span style="color: #949494;">&lt;prfrmnc_&gt;</span>       </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 38 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: lm_messages &lt;list&gt;</span></span></span></code></pre></div>
-<p>If you want to get straight to a tidied result you can specify a
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: model_warnings &lt;list&gt;, model_messages &lt;list&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   pipeline_code &lt;list&gt;</span></span></span></code></pre></div>
+<p>If you want to get straight to a specific result you can specify a
 sub-list with the <code>.which</code> argument:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/reveal.html">reveal</a></span><span class="op">(</span>.what <span class="op">=</span> <span class="va">model_fitted</span>, .which <span class="op">=</span> <span class="va">lm_params</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 192 × 11</span></span></span>
-<span><span class="co">#&gt;    decision specifications   parameter  coefficient     se    ci  ci_low ci_high</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> (Intercep…      0.018<span style="text-decoration: underline;">7</span> 0.058<span style="text-decoration: underline;">5</span>  0.95 -<span style="color: #BB0000;">0.096</span><span style="color: #BB0000; text-decoration: underline;">5</span>  0.134 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 1        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> iv1             0.023<span style="text-decoration: underline;">4</span> 0.062<span style="text-decoration: underline;">1</span>  0.95 -<span style="color: #BB0000;">0.098</span><span style="color: #BB0000; text-decoration: underline;">8</span>  0.146 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 1        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> mod             0.017<span style="text-decoration: underline;">2</span> 0.055<span style="text-decoration: underline;">2</span>  0.95 -<span style="color: #BB0000;">0.091</span><span style="color: #BB0000; text-decoration: underline;">4</span>  0.126 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 1        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> iv1:mod        -<span style="color: #BB0000;">0.095</span><span style="color: #BB0000; text-decoration: underline;">6</span> 0.057<span style="text-decoration: underline;">4</span>  0.95 -<span style="color: #BB0000;">0.209</span>   0.017<span style="text-decoration: underline;">4</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 2        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> (Intercep…      0.042<span style="text-decoration: underline;">0</span> 0.051<span style="text-decoration: underline;">7</span>  0.95 -<span style="color: #BB0000;">0.059</span><span style="color: #BB0000; text-decoration: underline;">8</span>  0.144 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 2        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> iv1             0.134  0.054<span style="text-decoration: underline;">9</span>  0.95  0.025<span style="text-decoration: underline;">9</span>  0.242 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 2        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> mod            -<span style="color: #BB0000;">0.052</span><span style="color: #BB0000; text-decoration: underline;">0</span> 0.048<span style="text-decoration: underline;">8</span>  0.95 -<span style="color: #BB0000;">0.148</span>   0.044<span style="text-decoration: underline;">0</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 2        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> iv1:mod         0.072<span style="text-decoration: underline;">4</span> 0.050<span style="text-decoration: underline;">8</span>  0.95 -<span style="color: #BB0000;">0.027</span><span style="color: #BB0000; text-decoration: underline;">5</span>  0.172 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 3        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> (Intercep…      0.019<span style="text-decoration: underline;">0</span> 0.058<span style="text-decoration: underline;">9</span>  0.95 -<span style="color: #BB0000;">0.096</span><span style="color: #BB0000; text-decoration: underline;">9</span>  0.135 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 3        <span style="color: #949494;">&lt;tibble [1 × 4]&gt;</span> iv2             0.017<span style="text-decoration: underline;">5</span> 0.061<span style="text-decoration: underline;">7</span>  0.95 -<span style="color: #BB0000;">0.104</span>   0.139 </span></span>
+<span>  <span class="fu"><a href="../reference/reveal.html">reveal</a></span><span class="op">(</span>.what <span class="op">=</span> <span class="va">model_fitted</span>, .which <span class="op">=</span> <span class="va">model_parameters</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 192 × 16</span></span></span>
+<span><span class="co">#&gt;    decision specifications   model_function parameter   coefficient     se    ci</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             (Intercept)      0.052<span style="text-decoration: underline;">2</span> 0.060<span style="text-decoration: underline;">2</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 1        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             iv1              0.029<span style="text-decoration: underline;">6</span> 0.061<span style="text-decoration: underline;">0</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 1        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             mod              0.014<span style="text-decoration: underline;">4</span> 0.058<span style="text-decoration: underline;">7</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 1        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             iv1:mod         -<span style="color: #BB0000;">0.094</span><span style="color: #BB0000; text-decoration: underline;">8</span> 0.062<span style="text-decoration: underline;">4</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 2        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             (Intercept)     -<span style="color: #BB0000;">0.096</span><span style="color: #BB0000; text-decoration: underline;">5</span> 0.057<span style="text-decoration: underline;">5</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 2        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             iv1             -<span style="color: #BB0000;">0.062</span><span style="color: #BB0000; text-decoration: underline;">5</span> 0.058<span style="text-decoration: underline;">2</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 2        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             mod              0.056<span style="text-decoration: underline;">2</span> 0.056<span style="text-decoration: underline;">1</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 2        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             iv1:mod         -<span style="color: #BB0000;">0.089</span><span style="color: #BB0000; text-decoration: underline;">9</span> 0.059<span style="text-decoration: underline;">6</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 3        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             (Intercept)      0.044<span style="text-decoration: underline;">0</span> 0.060<span style="text-decoration: underline;">0</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 3        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             iv2              0.061<span style="text-decoration: underline;">0</span> 0.055<span style="text-decoration: underline;">5</span>  0.95</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 182 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: t &lt;dbl&gt;, df_error &lt;int&gt;, p &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>You can also choose to expand your specification blueprint with
-<code>.unpack_specs = TRUE</code> to see which decisions produced what
-result:</p>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 9 more variables: ci_low &lt;dbl&gt;, ci_high &lt;dbl&gt;, t &lt;dbl&gt;, df_error &lt;int&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   p &lt;dbl&gt;, model_performance &lt;list&gt;, model_warnings &lt;list&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   model_messages &lt;list&gt;, pipeline_code &lt;list&gt;</span></span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="reveal_model_">
+<code>reveal_model_*</code><a class="anchor" aria-label="anchor" href="#reveal_model_"></a>
+</h3>
+<p><code>multitool</code> will run and save anything you put in your
+pipeline but most often, you will want to look at model parameters
+and/or performance. To that end, there are a set of convenience
+functions for getting at the most common multiverse results:
+<code>reveal_model_parameters</code>,
+<code>reveal_model_performance</code>,
+<code>reveal_model_messages</code>, and
+<code>reveal_model_warnings</code>.</p>
+<p><code>reveal_model_parameters</code> unpacks the model parameters in
+your multiverse:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/reveal.html">reveal</a></span><span class="op">(</span>.what <span class="op">=</span> <span class="va">model_fitted</span>, .which <span class="op">=</span> <span class="va">lm_params</span>, .unpack_specs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 192 × 18</span></span></span>
-<span><span class="co">#&gt;    decision ivs   dvs   include1  include2 include3 model model_meta filter_code</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;glue&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        iv1   dv1   include1… include… include… lm(d… linear mo… the_data |…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 1        iv1   dv1   include1… include… include… lm(d… linear mo… the_data |…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 1        iv1   dv1   include1… include… include… lm(d… linear mo… the_data |…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 1        iv1   dv1   include1… include… include… lm(d… linear mo… the_data |…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 2        iv1   dv2   include1… include… include… lm(d… linear mo… the_data |…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 2        iv1   dv2   include1… include… include… lm(d… linear mo… the_data |…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 2        iv1   dv2   include1… include… include… lm(d… linear mo… the_data |…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 2        iv1   dv2   include1… include… include… lm(d… linear mo… the_data |…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 3        iv2   dv1   include1… include… include… lm(d… linear mo… the_data |…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 3        iv2   dv1   include1… include… include… lm(d… linear mo… the_data |…</span></span>
+<span>  <span class="fu"><a href="../reference/reveal_model_parameters.html">reveal_model_parameters</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 192 × 16</span></span></span>
+<span><span class="co">#&gt;    decision specifications   model_function parameter   coefficient     se    ci</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             (Intercept)      0.052<span style="text-decoration: underline;">2</span> 0.060<span style="text-decoration: underline;">2</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 1        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             iv1              0.029<span style="text-decoration: underline;">6</span> 0.061<span style="text-decoration: underline;">0</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 1        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             mod              0.014<span style="text-decoration: underline;">4</span> 0.058<span style="text-decoration: underline;">7</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 1        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             iv1:mod         -<span style="color: #BB0000;">0.094</span><span style="color: #BB0000; text-decoration: underline;">8</span> 0.062<span style="text-decoration: underline;">4</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 2        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             (Intercept)     -<span style="color: #BB0000;">0.096</span><span style="color: #BB0000; text-decoration: underline;">5</span> 0.057<span style="text-decoration: underline;">5</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 2        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             iv1             -<span style="color: #BB0000;">0.062</span><span style="color: #BB0000; text-decoration: underline;">5</span> 0.058<span style="text-decoration: underline;">2</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 2        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             mod              0.056<span style="text-decoration: underline;">2</span> 0.056<span style="text-decoration: underline;">1</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 2        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             iv1:mod         -<span style="color: #BB0000;">0.089</span><span style="color: #BB0000; text-decoration: underline;">9</span> 0.059<span style="text-decoration: underline;">6</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 3        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             (Intercept)      0.044<span style="text-decoration: underline;">0</span> 0.060<span style="text-decoration: underline;">0</span>  0.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 3        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             iv2              0.061<span style="text-decoration: underline;">0</span> 0.055<span style="text-decoration: underline;">5</span>  0.95</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 182 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 9 more variables: parameter &lt;chr&gt;, coefficient &lt;dbl&gt;, se &lt;dbl&gt;, ci &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   ci_low &lt;dbl&gt;, ci_high &lt;dbl&gt;, t &lt;dbl&gt;, df_error &lt;int&gt;, p &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 9 more variables: ci_low &lt;dbl&gt;, ci_high &lt;dbl&gt;, t &lt;dbl&gt;, df_error &lt;int&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   p &lt;dbl&gt;, model_performance &lt;list&gt;, model_warnings &lt;list&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   model_messages &lt;list&gt;, pipeline_code &lt;list&gt;</span></span></span></code></pre></div>
+<p><code>reveal_model_performance</code> unpacks the model
+performance:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/reveal_model_performance.html">reveal_model_performance</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 48 × 14</span></span></span>
+<span><span class="co">#&gt;    decision specifications   model_function model_parameters     aic  aicc   bic</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  898.  898.  917.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 2        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  870.  870.  889.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 3        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  899.  899.  918.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 4        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  870.  870.  889.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 5        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  900.  900.  919.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 6        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  869.  869.  888.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 7        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  901.  901.  920.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 8        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  873.  873.  891.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 9        <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  903.  904.  922.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 10       <span style="color: #949494;">&lt;tibble [1 × 3]&gt;</span> lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  872.  872.  891.</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 38 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: r2 &lt;dbl&gt;, r2_adjusted &lt;dbl&gt;, rmse &lt;dbl&gt;, sigma &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   model_warnings &lt;list&gt;, model_messages &lt;list&gt;, pipeline_code &lt;list&gt;</span></span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="unpacking-specifications">Unpacking Specifications<a class="anchor" aria-label="anchor" href="#unpacking-specifications"></a>
+</h3>
+<p>You can also choose to expand your decision grid with
+<code>.unpack_specs</code> to see which decisions produced what result.
+You have two options for unpacking your decisions - <code>wide</code> or
+<code>long</code>. If you set <code>.unpack_specs = 'wide'</code>, you
+get one column per decion variable. This is exactly the same as how your
+decisions appeared in your grid.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/reveal_model_parameters.html">reveal_model_parameters</a></span><span class="op">(</span>.unpack_specs <span class="op">=</span> <span class="st">"wide"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 192 × 22</span></span></span>
+<span><span class="co">#&gt;    decision ivs   dvs   include1      include2      include3    model model_meta</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        iv1   dv1   include1 == 0 include2 != 3 include3 &gt;… lm(d… linear mo…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 1        iv1   dv1   include1 == 0 include2 != 3 include3 &gt;… lm(d… linear mo…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 1        iv1   dv1   include1 == 0 include2 != 3 include3 &gt;… lm(d… linear mo…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 1        iv1   dv1   include1 == 0 include2 != 3 include3 &gt;… lm(d… linear mo…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 2        iv1   dv2   include1 == 0 include2 != 3 include3 &gt;… lm(d… linear mo…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 2        iv1   dv2   include1 == 0 include2 != 3 include3 &gt;… lm(d… linear mo…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 2        iv1   dv2   include1 == 0 include2 != 3 include3 &gt;… lm(d… linear mo…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 2        iv1   dv2   include1 == 0 include2 != 3 include3 &gt;… lm(d… linear mo…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 3        iv2   dv1   include1 == 0 include2 != 3 include3 &gt;… lm(d… linear mo…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 3        iv2   dv1   include1 == 0 include2 != 3 include3 &gt;… lm(d… linear mo…</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 182 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 14 more variables: model_function &lt;chr&gt;, parameter &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   coefficient &lt;dbl&gt;, se &lt;dbl&gt;, ci &lt;dbl&gt;, ci_low &lt;dbl&gt;, ci_high &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   t &lt;dbl&gt;, df_error &lt;int&gt;, p &lt;dbl&gt;, model_performance &lt;list&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   model_warnings &lt;list&gt;, model_messages &lt;list&gt;, pipeline_code &lt;list&gt;</span></span></span></code></pre></div>
+<p>If you set <code>.unpack_specs = 'long'</code>, your decisions get
+stacked into two columns: <code>decision_set</code> and
+<code>alternatives</code>. This format is nice for plotting a particular
+result from a multiverse analyses per different decision
+alternatives.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/reveal_model_performance.html">reveal_model_performance</a></span><span class="op">(</span>.unpack_specs <span class="op">=</span> <span class="st">"long"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 288 × 15</span></span></span>
+<span><span class="co">#&gt;    decision decision_set alternatives    model_function model_parameters     aic</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        ivs          iv1             lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  898.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 1        dvs          dv1             lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  898.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 1        include1     include1 == 0   lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  898.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 1        include2     include2 != 3   lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  898.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 1        include3     include3 &gt; -2.5 lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  898.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 1        model        linear model    lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  898.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 2        ivs          iv1             lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  870.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 2        dvs          dv2             lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  870.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 2        include1     include1 == 0   lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  870.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 2        include2     include2 != 3   lm             <span style="color: #949494;">&lt;prmtrs_m [4 × 9]&gt;</span>  870.</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 278 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 9 more variables: aicc &lt;dbl&gt;, bic &lt;dbl&gt;, r2 &lt;dbl&gt;, r2_adjusted &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   rmse &lt;dbl&gt;, sigma &lt;dbl&gt;, model_warnings &lt;list&gt;, model_messages &lt;list&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   pipeline_code &lt;list&gt;</span></span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="condense">Condense<a class="anchor" aria-label="anchor" href="#condense"></a>
 </h3>
 <p>Unpacking specifications alongside specific results allows us to
 examine the effects of our pipeline decisions.</p>
-<p>A powerful way to organize these results is to <code>condense</code>
-a specific results column, say our predictor regression coefficient,
-over the entire multiverse. <code><a href="../reference/condense.html">condense()</a></code> takes a result
-column and summarizes it with the <code>.how</code> argument, which
-takes a list in the form of
+<p>A powerful way to organize these results is to summarize a specific
+results column, say the r<sup>2</sup> values of our model over the
+entire multiverse. <code><a href="../reference/condense.html">condense()</a></code> takes a result column and
+summarizes it with the <code>.how</code> argument, which takes a list in
+the form of
 <code>list(&lt;a name you pick&gt; = &lt;summary function&gt;)</code>.</p>
 <p><code>.how</code> will create a column named like so
 <code>&lt;column being condsensed&gt;_&lt;summary function name provided&gt;"</code>.
-For this case, we have <code>coefficient_mean</code> and
-<code>coefficient_median</code>.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/reveal.html">reveal</a></span><span class="op">(</span>.what <span class="op">=</span> <span class="va">model_fitted</span>, .which <span class="op">=</span> <span class="va">lm_params</span>, .unpack_specs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">parameter</span>, <span class="st">"iv"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+For this case, we have
+<code>r2</code>_mean<code>and</code>r2_median`.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># model performance r2 summaries</span></span>
+<span><span class="va">multiverse_results</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/reveal_model_performance.html">reveal_model_performance</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/condense.html">condense</a></span><span class="op">(</span><span class="va">r2</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="va">mean</span>, median <span class="op">=</span> <span class="va">median</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 3</span></span></span>
+<span><span class="co">#&gt;   r2_mean r2_median r2_list   </span></span>
+<span><span class="co">#&gt;     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 0.008<span style="text-decoration: underline;">72</span>    0.010<span style="text-decoration: underline;">1</span> <span style="color: #949494;">&lt;dbl [48]&gt;</span></span></span>
+<span></span>
+<span><span class="co"># model parameters for our predictor of interest</span></span>
+<span><span class="va">multiverse_results</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/reveal_model_parameters.html">reveal_model_parameters</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">parameter</span>, <span class="st">"iv"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/condense.html">condense</a></span><span class="op">(</span><span class="va">coefficient</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="va">mean</span>, median <span class="op">=</span> <span class="va">median</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 2</span></span></span>
-<span><span class="co">#&gt;   coefficient_mean coefficient_median</span></span>
-<span><span class="co">#&gt;              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         -<span style="color: #BB0000;">0.001</span><span style="color: #BB0000; text-decoration: underline;">66</span>           -<span style="color: #BB0000;">0.004</span><span style="color: #BB0000; text-decoration: underline;">69</span></span></span></code></pre></div>
-<p>Here, we have filtered our multiverse results to look at our
-predictors <code>iv*</code> to see what the mean and median effect was
-(over all combinations of decisions) on our outcomes.</p>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 3</span></span></span>
+<span><span class="co">#&gt;   coefficient_mean coefficient_median coefficient_list</span></span>
+<span><span class="co">#&gt;              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>          -<span style="color: #BB0000;">0.011</span><span style="color: #BB0000; text-decoration: underline;">0</span>            -<span style="color: #BB0000;">0.013</span><span style="color: #BB0000; text-decoration: underline;">3</span> <span style="color: #949494;">&lt;dbl [96]&gt;</span></span></span></code></pre></div>
+<p>In the last example, we have filtered our multiverse results to look
+at our predictors <code>iv*</code> to see what the mean and median
+effect was (over all combinations of decisions) on our outcomes.</p>
 <p>However, we had three versions of our predictor and two outcomes, so
 combining <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">dplyr::group_by()</a></code> with <code><a href="../reference/condense.html">condense()</a></code>
 might be more informative:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/reveal.html">reveal</a></span><span class="op">(</span>.what <span class="op">=</span> <span class="va">model_fitted</span>, .which <span class="op">=</span> <span class="va">lm_params</span>, .unpack_specs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/reveal_model_parameters.html">reveal_model_parameters</a></span><span class="op">(</span>.unpack_specs <span class="op">=</span> <span class="st">"wide"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">parameter</span>, <span class="st">"iv"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">ivs</span>, <span class="va">dvs</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">ivs</span>, <span class="va">dvs</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/condense.html">condense</a></span><span class="op">(</span><span class="va">coefficient</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="va">mean</span>, median <span class="op">=</span> <span class="va">median</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 5</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># Groups:   ivs [3]</span></span></span>
-<span><span class="co">#&gt;   ivs   dvs   coefficient_mean coefficient_median</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> iv1   dv1            -<span style="color: #BB0000;">0.030</span><span style="color: #BB0000; text-decoration: underline;">9</span>            -<span style="color: #BB0000;">0.028</span><span style="color: #BB0000; text-decoration: underline;">0</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> iv1   dv2             0.077<span style="text-decoration: underline;">4</span>             0.075<span style="text-decoration: underline;">1</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> iv2   dv1             0.028<span style="text-decoration: underline;">9</span>             0.020<span style="text-decoration: underline;">3</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> iv2   dv2            -<span style="color: #BB0000;">0.037</span><span style="color: #BB0000; text-decoration: underline;">2</span>            -<span style="color: #BB0000;">0.040</span><span style="color: #BB0000; text-decoration: underline;">2</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> iv3   dv1            -<span style="color: #BB0000;">0.066</span><span style="color: #BB0000; text-decoration: underline;">6</span>            -<span style="color: #BB0000;">0.069</span><span style="color: #BB0000; text-decoration: underline;">9</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> iv3   dv2             0.018<span style="text-decoration: underline;">6</span>             0.022<span style="text-decoration: underline;">3</span></span></span></code></pre></div>
+<span><span class="co">#&gt;   ivs   dvs   coefficient_mean coefficient_median coefficient_list</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> iv1   dv1            -<span style="color: #BB0000;">0.022</span><span style="color: #BB0000; text-decoration: underline;">4</span>            -<span style="color: #BB0000;">0.013</span><span style="color: #BB0000; text-decoration: underline;">4</span> <span style="color: #949494;">&lt;dbl [16]&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> iv1   dv2            -<span style="color: #BB0000;">0.052</span><span style="color: #BB0000; text-decoration: underline;">3</span>            -<span style="color: #BB0000;">0.067</span><span style="color: #BB0000; text-decoration: underline;">5</span> <span style="color: #949494;">&lt;dbl [16]&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> iv2   dv1             0.021<span style="text-decoration: underline;">9</span>             0.017<span style="text-decoration: underline;">9</span> <span style="color: #949494;">&lt;dbl [16]&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> iv2   dv2            -<span style="color: #BB0000;">0.066</span><span style="color: #BB0000; text-decoration: underline;">7</span>            -<span style="color: #BB0000;">0.064</span><span style="color: #BB0000; text-decoration: underline;">0</span> <span style="color: #949494;">&lt;dbl [16]&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> iv3   dv1             0.013<span style="text-decoration: underline;">8</span>             0.015<span style="text-decoration: underline;">9</span> <span style="color: #949494;">&lt;dbl [16]&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> iv3   dv2             0.039<span style="text-decoration: underline;">5</span>             0.038<span style="text-decoration: underline;">3</span> <span style="color: #949494;">&lt;dbl [16]&gt;</span></span></span></code></pre></div>
 <p>If we were interested in all the terms of the model, we can leverage
 <code>group_by</code> further:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="../reference/reveal.html">reveal</a></span><span class="op">(</span>.what <span class="op">=</span> <span class="va">model_fitted</span>, .which <span class="op">=</span> <span class="va">lm_params</span>, .unpack_specs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">parameter</span>, <span class="va">ivs</span>, <span class="va">dvs</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/reveal_model_parameters.html">reveal_model_parameters</a></span><span class="op">(</span>.unpack_specs <span class="op">=</span> <span class="st">"wide"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">parameter</span>, <span class="va">dvs</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/condense.html">condense</a></span><span class="op">(</span><span class="va">coefficient</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="va">mean</span>, median <span class="op">=</span> <span class="va">median</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 24 × 5</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   parameter, ivs [12]</span></span></span>
-<span><span class="co">#&gt;    parameter   ivs   dvs   coefficient_mean coefficient_median</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> (Intercept) iv1   dv1            0.009<span style="text-decoration: underline;">54</span>            0.010<span style="text-decoration: underline;">0</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> (Intercept) iv1   dv2            0.033<span style="text-decoration: underline;">4</span>             0.034<span style="text-decoration: underline;">3</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> (Intercept) iv2   dv1            0.009<span style="text-decoration: underline;">10</span>            0.008<span style="text-decoration: underline;">87</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> (Intercept) iv2   dv2            0.037<span style="text-decoration: underline;">9</span>             0.039<span style="text-decoration: underline;">2</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> (Intercept) iv3   dv1            0.012<span style="text-decoration: underline;">5</span>             0.013<span style="text-decoration: underline;">1</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> (Intercept) iv3   dv2            0.040<span style="text-decoration: underline;">7</span>             0.041<span style="text-decoration: underline;">4</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> iv1         iv1   dv1            0.025<span style="text-decoration: underline;">4</span>             0.024<span style="text-decoration: underline;">0</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> iv1         iv1   dv2            0.110              0.109  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> iv1:mod     iv1   dv1           -<span style="color: #BB0000;">0.087</span><span style="color: #BB0000; text-decoration: underline;">2</span>            -<span style="color: #BB0000;">0.085</span><span style="color: #BB0000; text-decoration: underline;">8</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> iv1:mod     iv1   dv2            0.045<span style="text-decoration: underline;">3</span>             0.048<span style="text-decoration: underline;">6</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 14 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 16 × 5</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   parameter [8]</span></span></span>
+<span><span class="co">#&gt;    parameter   dvs   coefficient_mean coefficient_median coefficient_list</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> (Intercept) dv1           0.029<span style="text-decoration: underline;">5</span>             0.025<span style="text-decoration: underline;">0</span>   <span style="color: #949494;">&lt;dbl [24]&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> (Intercept) dv2          -<span style="color: #BB0000;">0.074</span><span style="color: #BB0000; text-decoration: underline;">8</span>            -<span style="color: #BB0000;">0.075</span><span style="color: #BB0000; text-decoration: underline;">3</span>   <span style="color: #949494;">&lt;dbl [24]&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> iv1         dv1           0.015<span style="text-decoration: underline;">8</span>             0.015<span style="text-decoration: underline;">4</span>   <span style="color: #949494;">&lt;dbl [8]&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> iv1         dv2          -<span style="color: #BB0000;">0.024</span><span style="color: #BB0000; text-decoration: underline;">7</span>            -<span style="color: #BB0000;">0.020</span><span style="color: #BB0000; text-decoration: underline;">9</span>   <span style="color: #949494;">&lt;dbl [8]&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> iv1:mod     dv1          -<span style="color: #BB0000;">0.060</span><span style="color: #BB0000; text-decoration: underline;">6</span>            -<span style="color: #BB0000;">0.057</span><span style="color: #BB0000; text-decoration: underline;">6</span>   <span style="color: #949494;">&lt;dbl [8]&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> iv1:mod     dv2          -<span style="color: #BB0000;">0.080</span><span style="color: #BB0000; text-decoration: underline;">0</span>            -<span style="color: #BB0000;">0.079</span><span style="color: #BB0000; text-decoration: underline;">9</span>   <span style="color: #949494;">&lt;dbl [8]&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> iv2         dv1           0.026<span style="text-decoration: underline;">7</span>             0.025<span style="text-decoration: underline;">0</span>   <span style="color: #949494;">&lt;dbl [8]&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> iv2         dv2          -<span style="color: #BB0000;">0.049</span><span style="color: #BB0000; text-decoration: underline;">1</span>            -<span style="color: #BB0000;">0.048</span><span style="color: #BB0000; text-decoration: underline;">8</span>   <span style="color: #949494;">&lt;dbl [8]&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> iv2:mod     dv1           0.017<span style="text-decoration: underline;">1</span>             0.017<span style="text-decoration: underline;">9</span>   <span style="color: #949494;">&lt;dbl [8]&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> iv2:mod     dv2          -<span style="color: #BB0000;">0.084</span><span style="color: #BB0000; text-decoration: underline;">2</span>            -<span style="color: #BB0000;">0.086</span><span style="color: #BB0000; text-decoration: underline;">5</span>   <span style="color: #949494;">&lt;dbl [8]&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> iv3         dv1           0.000<span style="text-decoration: underline;">865</span>          -<span style="color: #BB0000;">0.000</span><span style="color: #BB0000; text-decoration: underline;">374</span> <span style="color: #949494;">&lt;dbl [8]&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span> iv3         dv2          -<span style="color: #BB0000;">0.030</span><span style="color: #BB0000; text-decoration: underline;">5</span>            -<span style="color: #BB0000;">0.025</span><span style="color: #BB0000; text-decoration: underline;">2</span>   <span style="color: #949494;">&lt;dbl [8]&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span> iv3:mod     dv1           0.026<span style="text-decoration: underline;">8</span>             0.025<span style="text-decoration: underline;">0</span>   <span style="color: #949494;">&lt;dbl [8]&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span> iv3:mod     dv2           0.109              0.110    <span style="color: #949494;">&lt;dbl [8]&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">15</span> mod         dv1          -<span style="color: #BB0000;">0.002</span><span style="color: #BB0000; text-decoration: underline;">22</span>           -<span style="color: #BB0000;">0.001</span><span style="color: #BB0000; text-decoration: underline;">91</span>  <span style="color: #949494;">&lt;dbl [24]&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">16</span> mod         dv2           0.061<span style="text-decoration: underline;">1</span>             0.062<span style="text-decoration: underline;">4</span>   <span style="color: #949494;">&lt;dbl [24]&gt;</span></span></span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

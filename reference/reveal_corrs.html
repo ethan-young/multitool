@@ -27,6 +27,8 @@
     <a class="dropdown-item" href="../articles/create-your-blueprint.html">Defining an Analysis Pipeline Blueprint</a>
     <a class="dropdown-item" href="../articles/validate-your-blueprint.html">Check and Test your Blueprint</a>
     <a class="dropdown-item" href="../articles/run-your-pipeline.html">Run your Pipeline</a>
+    <a class="dropdown-item" href="../articles/run-descriptive-analyses.html">Descriptive Analyses</a>
+    <a class="dropdown-item" href="../articles/multitool-nomenclature.html">multitool Nomenclature</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -50,14 +52,14 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">reveal_corrs</span><span class="op">(</span><span class="va">.multi</span>, <span class="va">.which</span>, .unpack_specs <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">reveal_corrs</span><span class="op">(</span><span class="va">.descriptives</span>, <span class="va">.which</span>, .unpack_specs <span class="op">=</span> <span class="st">"no"</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <dl><dt>.multi</dt>
-<dd><p>a multiverse list-column <code>tibble</code> produced by
-<code><a href="run_multiverse.html">run_multiverse</a></code>.</p></dd>
+    <dl><dt>.descriptives</dt>
+<dd><p>a descriptive multiverse list-column <code>tibble</code>
+produced by <code><a href="run_descriptives.html">run_descriptives</a></code>.</p></dd>
 
 
 <dt>.which</dt>
@@ -65,8 +67,12 @@
 
 
 <dt>.unpack_specs</dt>
-<dd><p>logical, whether to unnest the specifications that built
-the multiverse grid. Defaults to FALSE.</p></dd>
+<dd><p>character, options are <code>"no"</code>, <code>"wide"</code>, or
+<code>"long"</code>. <code>"no"</code> (default) keeps specifications in a list column,
+<code>wide</code> unnests specifications with each specification category as a
+column. <code>"long"</code> unnests specifications and stacks them into long
+format, which stacks specifications into a <code>decision_set</code> and
+<code>alternatives</code> columns. This is mainly useful for plotting.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -79,55 +85,54 @@ multiverse.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ethan-young.github.io/multitool/">multitool</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Simulate some data</span></span></span>
+<span class="r-in"><span><span class="co"># create some data</span></span></span>
 <span class="r-in"><span><span class="va">the_data</span> <span class="op">&lt;-</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    id   <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">500</span>,</span></span>
-<span class="r-in"><span>    iv1  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    iv2  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    iv3  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    mod1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    mod2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    mod3 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    cov1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    cov2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    dv1  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    dv2  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    id  <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">500</span>,</span></span>
+<span class="r-in"><span>    iv1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    iv2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    iv3 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    mod <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    dv1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    dv2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    include1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="fl">500</span>, size <span class="op">=</span> <span class="fl">1</span>, prob <span class="op">=</span> <span class="fl">.1</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    include2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, size <span class="op">=</span> <span class="fl">500</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    include3 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Decision pipeline</span></span></span>
+<span class="r-in"><span><span class="co"># create a pipeline blueprint</span></span></span>
 <span class="r-in"><span><span class="va">full_pipeline</span> <span class="op">&lt;-</span></span></span>
 <span class="r-in"><span>  <span class="va">the_data</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="add_filters.html">add_filters</a></span><span class="op">(</span><span class="va">include1</span> <span class="op">==</span> <span class="fl">0</span>,<span class="va">include2</span> <span class="op">!=</span> <span class="fl">3</span>,<span class="va">include2</span> <span class="op">!=</span> <span class="fl">2</span>,<span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">include3</span><span class="op">)</span> <span class="op">&gt;</span> <span class="op">-</span><span class="fl">2.5</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="add_variables.html">add_variables</a></span><span class="op">(</span><span class="st">"ivs"</span>, <span class="va">iv1</span>, <span class="va">iv2</span>, <span class="va">iv3</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="add_variables.html">add_variables</a></span><span class="op">(</span><span class="st">"dvs"</span>, <span class="va">dv1</span>, <span class="va">dv2</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="add_variables.html">add_variables</a></span><span class="op">(</span><span class="st">"mods"</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"mod"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="add_preprocess.html">add_preprocess</a></span><span class="op">(</span>process_name <span class="op">=</span> <span class="st">"scale_iv"</span>, <span class="st">'mutate({ivs} = scale({ivs}))'</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="add_preprocess.html">add_preprocess</a></span><span class="op">(</span>process_name <span class="op">=</span> <span class="st">"scale_mod"</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="op">{</span><span class="va">mods</span><span class="op">}</span> <span class="op">:=</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="op">{</span><span class="va">mods</span><span class="op">}</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="add_filters.html">add_filters</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="va">include1</span> <span class="op">==</span> <span class="fl">0</span>,</span></span>
+<span class="r-in"><span>    <span class="va">include2</span> <span class="op">!=</span> <span class="fl">3</span>,</span></span>
+<span class="r-in"><span>    <span class="va">include2</span> <span class="op">!=</span> <span class="fl">2</span>,</span></span>
+<span class="r-in"><span>    <span class="va">include3</span> <span class="op">&gt;</span> <span class="op">-</span><span class="fl">2.5</span>,</span></span>
+<span class="r-in"><span>    <span class="va">include3</span> <span class="op">&lt;</span> <span class="fl">2.5</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html" class="external-link">between</a></span><span class="op">(</span><span class="va">include3</span>, <span class="op">-</span><span class="fl">2.5</span>, <span class="fl">2.5</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="add_variables.html">add_variables</a></span><span class="op">(</span>var_group <span class="op">=</span> <span class="st">"ivs"</span>, <span class="va">iv1</span>, <span class="va">iv2</span>, <span class="va">iv3</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="add_variables.html">add_variables</a></span><span class="op">(</span>var_group <span class="op">=</span> <span class="st">"dvs"</span>, <span class="va">dv1</span>, <span class="va">dv2</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="add_correlations.html">add_correlations</a></span><span class="op">(</span><span class="st">"predictors"</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"iv"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="add_summary_stats.html">add_summary_stats</a></span><span class="op">(</span><span class="st">"iv_stats"</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"iv"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean"</span>, <span class="st">"sd"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="add_summary_stats.html">add_summary_stats</a></span><span class="op">(</span><span class="st">"dv_stats"</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"dv"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"skewness"</span>, <span class="st">"kurtosis"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="add_correlations.html">add_correlations</a></span><span class="op">(</span><span class="st">"predictors"</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">matches</a></span><span class="op">(</span><span class="st">"iv|mod|cov"</span><span class="op">)</span>, focus_set <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">cov1</span>,<span class="va">cov2</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="add_correlations.html">add_correlations</a></span><span class="op">(</span><span class="st">"outcomes"</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">matches</a></span><span class="op">(</span><span class="st">"dv|mod"</span><span class="op">)</span>, focus_set <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">matches</a></span><span class="op">(</span><span class="st">"dv"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="add_cron_alpha.html">add_cron_alpha</a></span><span class="op">(</span><span class="st">"unp_scale"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">iv1</span>,<span class="va">iv2</span>,<span class="va">iv3</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="add_cron_alpha.html">add_cron_alpha</a></span><span class="op">(</span><span class="st">"vio_scale"</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"mod"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="add_model.html">add_model</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="op">{</span><span class="va">dvs</span><span class="op">}</span> <span class="op">~</span> <span class="op">{</span><span class="va">ivs</span><span class="op">}</span> <span class="op">*</span> <span class="op">{</span><span class="va">mods</span><span class="op">}</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="add_model.html">add_model</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="op">{</span><span class="va">dvs</span><span class="op">}</span> <span class="op">~</span> <span class="op">{</span><span class="va">ivs</span><span class="op">}</span> <span class="op">*</span> <span class="op">{</span><span class="va">mods</span><span class="op">}</span> <span class="op">+</span> <span class="va">cov1</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="add_postprocess.html">add_postprocess</a></span><span class="op">(</span><span class="st">"aov"</span>, <span class="fu"><a href="https://rdrr.io/r/stats/aov.html" class="external-link">aov</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="expand_decisions.html">expand_decisions</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="add_cron_alpha.html">add_cron_alpha</a></span><span class="op">(</span><span class="st">"vio_scale"</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"iv"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="add_model.html">add_model</a></span><span class="op">(</span><span class="st">"linear model"</span>, <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="op">{</span><span class="va">dvs</span><span class="op">}</span> <span class="op">~</span> <span class="op">{</span><span class="va">ivs</span><span class="op">}</span> <span class="op">*</span> <span class="va">mod</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Run the whole multiverse</span></span></span>
-<span class="r-in"><span><span class="va">the_multiverse</span> <span class="op">&lt;-</span> <span class="fu"><a href="run_multiverse.html">run_multiverse</a></span><span class="op">(</span><span class="va">full_pipeline</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,<span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">my_descriptives</span> <span class="op">&lt;-</span> <span class="fu"><a href="run_descriptives.html">run_descriptives</a></span><span class="op">(</span><span class="va">full_pipeline</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in purrr::map(seq_len(nrow(filter_grid)), .progress = TRUE, function(x) {    multi_results &lt;- list()    if ("corrs" %in% names(filter_grid)) {        multi_results$corrs &lt;- run_universe_corrs(.grid = filter_grid,             decision_num = filter_grid$decision[x])    }    if ("summary_stats" %in% names(filter_grid)) {        multi_results$stats &lt;- run_universe_summary_stats(.grid = filter_grid,             decision_num = filter_grid$decision[x])    }    if ("cron_alphas" %in% names(filter_grid)) {        multi_results$alphas &lt;- run_universe_cron_alphas(.grid = filter_grid,             decision_num = filter_grid$decision[x])    }    purrr::reduce(multi_results, dplyr::left_join, by = "decision")}):</span> <span style="color: #00BBBB;">ℹ</span> In index: 1.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `map2()`:</span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> In index: 1.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> With name: predictors_rs.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error:</span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> object 'the_data' not found</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Reveal correlations among predictor across decision set</span></span></span>
-<span class="r-in"><span><span class="va">the_multiverse</span> <span class="op">|&gt;</span> <span class="fu">reveal_corrs</span><span class="op">(</span><span class="va">predictors_rs</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">my_descriptives</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">reveal_corrs</span><span class="op">(</span><span class="va">predictors_rs</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'my_descriptives' not found</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

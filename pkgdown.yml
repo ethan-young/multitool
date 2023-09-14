@@ -3,9 +3,11 @@ pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
   create-your-blueprint: create-your-blueprint.html
+  multitool-nomenclature: multitool-nomenclature.html
+  run-descriptive-analyses: run-descriptive-analyses.html
   run-your-pipeline: run-your-pipeline.html
   validate-your-blueprint: validate-your-blueprint.html
-last_built: 2023-08-21T22:56Z
+last_built: 2023-09-14T00:19Z
 urls:
   reference: https://ethan-young.github.io/multitool/reference
   article: https://ethan-young.github.io/multitool/articles

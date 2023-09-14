@@ -16,6 +16,12 @@
     <loc>https://ethan-young.github.io/multitool/articles/index.html</loc>
   </url>
   <url>
+    <loc>https://ethan-young.github.io/multitool/articles/multitool-nomenclature.html</loc>
+  </url>
+  <url>
+    <loc>https://ethan-young.github.io/multitool/articles/run-descriptive-analyses.html</loc>
+  </url>
+  <url>
     <loc>https://ethan-young.github.io/multitool/articles/run-your-pipeline.html</loc>
   </url>
   <url>
@@ -44,6 +50,9 @@
   </url>
   <url>
     <loc>https://ethan-young.github.io/multitool/reference/add_model.html</loc>
+  </url>
+  <url>
+    <loc>https://ethan-young.github.io/multitool/reference/add_parameter_keys.html</loc>
   </url>
   <url>
     <loc>https://ethan-young.github.io/multitool/reference/add_postprocess.html</loc>
@@ -100,6 +109,18 @@
     <loc>https://ethan-young.github.io/multitool/reference/reveal_corrs.html</loc>
   </url>
   <url>
+    <loc>https://ethan-young.github.io/multitool/reference/reveal_model_messages.html</loc>
+  </url>
+  <url>
+    <loc>https://ethan-young.github.io/multitool/reference/reveal_model_parameters.html</loc>
+  </url>
+  <url>
+    <loc>https://ethan-young.github.io/multitool/reference/reveal_model_performance.html</loc>
+  </url>
+  <url>
+    <loc>https://ethan-young.github.io/multitool/reference/reveal_model_warnings.html</loc>
+  </url>
+  <url>
     <loc>https://ethan-young.github.io/multitool/reference/reveal_summary_stats.html</loc>
   </url>
   <url>
@@ -107,12 +128,6 @@
   </url>
   <url>
     <loc>https://ethan-young.github.io/multitool/reference/run_multiverse.html</loc>
-  </url>
-  <url>
-    <loc>https://ethan-young.github.io/multitool/reference/run_universe_model.html</loc>
-  </url>
-  <url>
-    <loc>https://ethan-young.github.io/multitool/reference/run_universe_summary_stats.html</loc>
   </url>
   <url>
     <loc>https://ethan-young.github.io/multitool/reference/show_code_filter.html</loc>

@@ -5,13 +5,11 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="Multiverse analyses run the same (or very similar) analyses over a
-    range of arbitrary data processing decisions. We provide an interface for creating
-    analysis decision grids and generating all possible combinations of those decisions. 
-    Grids can contain data filtering criteria, different versions of IVs and DVs, 
-    modeling strategies, pre- and post-analysis steps. You can also compute general
-    descriptive statistics, correlations, and cronbach's alpha (for reliability)
-    over arbitrary decisions.">
+<meta name="description" content="Multiverse analyses run the same analysis over a
+    range of arbitrary data processing decisions. multitool provides an 
+    interface for creating alternative analysis pipelines and turning then into a 
+    grid of all possible pipelines. Using this grid as a blueprint, you can 
+    model your data with all possible analysis pipelines and summarize the results.">
 <title>Tools for Running Multiverse Style Analyses • multitool</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
@@ -20,13 +18,11 @@
 <!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Tools for Running Multiverse Style Analyses">
-<meta property="og:description" content="Multiverse analyses run the same (or very similar) analyses over a
-    range of arbitrary data processing decisions. We provide an interface for creating
-    analysis decision grids and generating all possible combinations of those decisions. 
-    Grids can contain data filtering criteria, different versions of IVs and DVs, 
-    modeling strategies, pre- and post-analysis steps. You can also compute general
-    descriptive statistics, correlations, and cronbach's alpha (for reliability)
-    over arbitrary decisions.">
+<meta property="og:description" content="Multiverse analyses run the same analysis over a
+    range of arbitrary data processing decisions. multitool provides an 
+    interface for creating alternative analysis pipelines and turning then into a 
+    grid of all possible pipelines. Using this grid as a blueprint, you can 
+    model your data with all possible analysis pipelines and summarize the results.">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -58,6 +54,8 @@
     <a class="dropdown-item" href="articles/create-your-blueprint.html">Defining an Analysis Pipeline Blueprint</a>
     <a class="dropdown-item" href="articles/validate-your-blueprint.html">Check and Test your Blueprint</a>
     <a class="dropdown-item" href="articles/run-your-pipeline.html">Run your Pipeline</a>
+    <a class="dropdown-item" href="articles/run-descriptive-analyses.html">Descriptive Analyses</a>
+    <a class="dropdown-item" href="articles/multitool-nomenclature.html">multitool Nomenclature</a>
   </div>
 </li>
       </ul>
@@ -129,7 +127,8 @@
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># load packages</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ethan-young.github.io/multitool/">multitool</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># create some data</span></span>
@@ -172,12 +171,7 @@
 <span><span class="co">#&gt; 11 variables dvs          dv2                           </span></span>
 <span><span class="co">#&gt; 12 models    linear model lm({dvs} ~ {ivs} * mod)</span></span>
 <span></span>
-<span><span class="co"># Visualize the pipeline</span></span>
-<span><span class="fu"><a href="reference/create_blueprint_graph.html">create_blueprint_graph</a></span><span class="op">(</span><span class="va">full_pipeline</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-2-1.png" width="100%"></p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="co"># expand the pipeline</span></span>
+<span><span class="co"># Expand your blueprint into a grid</span></span>
 <span><span class="va">expanded_pipeline</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/expand_decisions.html">expand_decisions</a></span><span class="op">(</span><span class="va">full_pipeline</span><span class="op">)</span></span>
 <span><span class="va">expanded_pipeline</span></span>
 <span><span class="co">#&gt; # A tibble: 48 × 4</span></span>
@@ -195,66 +189,90 @@
 <span><span class="co">#&gt; 10 10       &lt;tibble [1 × 2]&gt; &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 2]&gt;</span></span>
 <span><span class="co">#&gt; # ℹ 38 more rows</span></span>
 <span></span>
-<span><span class="co"># Use your blueprint to run the multiverse</span></span>
+<span><span class="co"># Run the blueprint</span></span>
 <span><span class="va">multiverse_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/run_multiverse.html">run_multiverse</a></span><span class="op">(</span><span class="va">expanded_pipeline</span><span class="op">)</span></span>
 <span><span class="va">multiverse_results</span></span>
-<span><span class="co">#&gt; # A tibble: 48 × 3</span></span>
-<span><span class="co">#&gt;    decision specifications   model_fitted    </span></span>
-<span><span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;           &lt;list&gt;          </span></span>
-<span><span class="co">#&gt;  1 1        &lt;tibble [1 × 4]&gt; &lt;tibble [1 × 5]&gt;</span></span>
-<span><span class="co">#&gt;  2 2        &lt;tibble [1 × 4]&gt; &lt;tibble [1 × 5]&gt;</span></span>
-<span><span class="co">#&gt;  3 3        &lt;tibble [1 × 4]&gt; &lt;tibble [1 × 5]&gt;</span></span>
-<span><span class="co">#&gt;  4 4        &lt;tibble [1 × 4]&gt; &lt;tibble [1 × 5]&gt;</span></span>
-<span><span class="co">#&gt;  5 5        &lt;tibble [1 × 4]&gt; &lt;tibble [1 × 5]&gt;</span></span>
-<span><span class="co">#&gt;  6 6        &lt;tibble [1 × 4]&gt; &lt;tibble [1 × 5]&gt;</span></span>
-<span><span class="co">#&gt;  7 7        &lt;tibble [1 × 4]&gt; &lt;tibble [1 × 5]&gt;</span></span>
-<span><span class="co">#&gt;  8 8        &lt;tibble [1 × 4]&gt; &lt;tibble [1 × 5]&gt;</span></span>
-<span><span class="co">#&gt;  9 9        &lt;tibble [1 × 4]&gt; &lt;tibble [1 × 5]&gt;</span></span>
-<span><span class="co">#&gt; 10 10       &lt;tibble [1 × 4]&gt; &lt;tibble [1 × 5]&gt;</span></span>
+<span><span class="co">#&gt; # A tibble: 48 × 4</span></span>
+<span><span class="co">#&gt;    decision specifications   model_fitted     pipeline_code   </span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;           &lt;list&gt;           &lt;list&gt;          </span></span>
+<span><span class="co">#&gt;  1 1        &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 5]&gt; &lt;tibble [1 × 2]&gt;</span></span>
+<span><span class="co">#&gt;  2 2        &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 5]&gt; &lt;tibble [1 × 2]&gt;</span></span>
+<span><span class="co">#&gt;  3 3        &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 5]&gt; &lt;tibble [1 × 2]&gt;</span></span>
+<span><span class="co">#&gt;  4 4        &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 5]&gt; &lt;tibble [1 × 2]&gt;</span></span>
+<span><span class="co">#&gt;  5 5        &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 5]&gt; &lt;tibble [1 × 2]&gt;</span></span>
+<span><span class="co">#&gt;  6 6        &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 5]&gt; &lt;tibble [1 × 2]&gt;</span></span>
+<span><span class="co">#&gt;  7 7        &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 5]&gt; &lt;tibble [1 × 2]&gt;</span></span>
+<span><span class="co">#&gt;  8 8        &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 5]&gt; &lt;tibble [1 × 2]&gt;</span></span>
+<span><span class="co">#&gt;  9 9        &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 5]&gt; &lt;tibble [1 × 2]&gt;</span></span>
+<span><span class="co">#&gt; 10 10       &lt;tibble [1 × 3]&gt; &lt;tibble [1 × 5]&gt; &lt;tibble [1 × 2]&gt;</span></span>
 <span><span class="co">#&gt; # ℹ 38 more rows</span></span>
 <span></span>
-<span><span class="co"># Unpack some results</span></span>
+<span><span class="co"># Unpack model coefficients</span></span>
 <span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="reference/reveal.html">reveal</a></span><span class="op">(</span>.what <span class="op">=</span> <span class="va">model_fitted</span>, .which <span class="op">=</span> <span class="va">lm_params</span>, .unpack_specs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 192 × 18</span></span>
-<span><span class="co">#&gt;    decision ivs   dvs   include1  include2 include3 model model_meta filter_code</span></span>
-<span><span class="co">#&gt;    &lt;chr&gt;    &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt; &lt;chr&gt;      &lt;glue&gt;     </span></span>
-<span><span class="co">#&gt;  1 1        iv1   dv1   include1… include… include… lm(d… linear mo… the_data |…</span></span>
-<span><span class="co">#&gt;  2 1        iv1   dv1   include1… include… include… lm(d… linear mo… the_data |…</span></span>
-<span><span class="co">#&gt;  3 1        iv1   dv1   include1… include… include… lm(d… linear mo… the_data |…</span></span>
-<span><span class="co">#&gt;  4 1        iv1   dv1   include1… include… include… lm(d… linear mo… the_data |…</span></span>
-<span><span class="co">#&gt;  5 2        iv1   dv2   include1… include… include… lm(d… linear mo… the_data |…</span></span>
-<span><span class="co">#&gt;  6 2        iv1   dv2   include1… include… include… lm(d… linear mo… the_data |…</span></span>
-<span><span class="co">#&gt;  7 2        iv1   dv2   include1… include… include… lm(d… linear mo… the_data |…</span></span>
-<span><span class="co">#&gt;  8 2        iv1   dv2   include1… include… include… lm(d… linear mo… the_data |…</span></span>
-<span><span class="co">#&gt;  9 3        iv2   dv1   include1… include… include… lm(d… linear mo… the_data |…</span></span>
-<span><span class="co">#&gt; 10 3        iv2   dv1   include1… include… include… lm(d… linear mo… the_data |…</span></span>
+<span>  <span class="fu"><a href="reference/reveal_model_parameters.html">reveal_model_parameters</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 192 × 16</span></span>
+<span><span class="co">#&gt;    decision specifications   model_function parameter   coefficient     se    ci</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;           &lt;chr&gt;          &lt;chr&gt;             &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 1        &lt;tibble [1 × 3]&gt; lm             (Intercept)    0.208    0.131   0.95</span></span>
+<span><span class="co">#&gt;  2 1        &lt;tibble [1 × 3]&gt; lm             iv1           -0.152    0.123   0.95</span></span>
+<span><span class="co">#&gt;  3 1        &lt;tibble [1 × 3]&gt; lm             mod           -0.236    0.144   0.95</span></span>
+<span><span class="co">#&gt;  4 1        &lt;tibble [1 × 3]&gt; lm             iv1:mod       -0.0713   0.160   0.95</span></span>
+<span><span class="co">#&gt;  5 2        &lt;tibble [1 × 3]&gt; lm             (Intercept)   -0.170    0.102   0.95</span></span>
+<span><span class="co">#&gt;  6 2        &lt;tibble [1 × 3]&gt; lm             iv1            0.000704 0.0957  0.95</span></span>
+<span><span class="co">#&gt;  7 2        &lt;tibble [1 × 3]&gt; lm             mod            0.146    0.112   0.95</span></span>
+<span><span class="co">#&gt;  8 2        &lt;tibble [1 × 3]&gt; lm             iv1:mod       -0.0899   0.124   0.95</span></span>
+<span><span class="co">#&gt;  9 3        &lt;tibble [1 × 3]&gt; lm             (Intercept)    0.231    0.130   0.95</span></span>
+<span><span class="co">#&gt; 10 3        &lt;tibble [1 × 3]&gt; lm             iv2            0.116    0.124   0.95</span></span>
 <span><span class="co">#&gt; # ℹ 182 more rows</span></span>
-<span><span class="co">#&gt; # ℹ 9 more variables: parameter &lt;chr&gt;, coefficient &lt;dbl&gt;, se &lt;dbl&gt;, ci &lt;dbl&gt;,</span></span>
-<span><span class="co">#&gt; #   ci_low &lt;dbl&gt;, ci_high &lt;dbl&gt;, t &lt;dbl&gt;, df_error &lt;int&gt;, p &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; # ℹ 9 more variables: ci_low &lt;dbl&gt;, ci_high &lt;dbl&gt;, t &lt;dbl&gt;, df_error &lt;int&gt;,</span></span>
+<span><span class="co">#&gt; #   p &lt;dbl&gt;, model_performance &lt;list&gt;, model_warnings &lt;list&gt;,</span></span>
+<span><span class="co">#&gt; #   model_messages &lt;list&gt;, pipeline_code &lt;list&gt;</span></span>
 <span></span>
-<span><span class="co"># Summarize an effect</span></span>
+<span><span class="co"># Unpack model fit statistics</span></span>
 <span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="reference/reveal.html">reveal</a></span><span class="op">(</span>.what <span class="op">=</span> <span class="va">model_fitted</span>, .which <span class="op">=</span> <span class="va">lm_params</span>, .unpack_specs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">parameter</span>, <span class="st">"iv"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="reference/condense.html">condense</a></span><span class="op">(</span><span class="va">coefficient</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="va">mean</span>, median <span class="op">=</span> <span class="va">median</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 1 × 2</span></span>
-<span><span class="co">#&gt;   coefficient_mean coefficient_median</span></span>
-<span><span class="co">#&gt;              &lt;dbl&gt;              &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1           0.0476             0.0270</span></span>
+<span>  <span class="fu"><a href="reference/reveal_model_performance.html">reveal_model_performance</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 48 × 14</span></span>
+<span><span class="co">#&gt;    decision specifications   model_function model_parameters     aic  aicc   bic</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;           &lt;chr&gt;          &lt;list&gt;             &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 1        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  184.  186.  195.</span></span>
+<span><span class="co">#&gt;  2 2        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  153.  154.  164.</span></span>
+<span><span class="co">#&gt;  3 3        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  183.  184.  193.</span></span>
+<span><span class="co">#&gt;  4 4        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  151.  152.  161.</span></span>
+<span><span class="co">#&gt;  5 5        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  184.  185.  195.</span></span>
+<span><span class="co">#&gt;  6 6        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  153.  154.  164.</span></span>
+<span><span class="co">#&gt;  7 7        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  184.  186.  195.</span></span>
+<span><span class="co">#&gt;  8 8        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  153.  154.  164.</span></span>
+<span><span class="co">#&gt;  9 9        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  183.  184.  193.</span></span>
+<span><span class="co">#&gt; 10 10       &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  151.  152.  161.</span></span>
+<span><span class="co">#&gt; # ℹ 38 more rows</span></span>
+<span><span class="co">#&gt; # ℹ 7 more variables: r2 &lt;dbl&gt;, r2_adjusted &lt;dbl&gt;, rmse &lt;dbl&gt;, sigma &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   model_warnings &lt;list&gt;, model_messages &lt;list&gt;, pipeline_code &lt;list&gt;</span></span>
 <span></span>
-<span><span class="co"># Plot your effects</span></span>
+<span><span class="co"># Summarize model coefficients</span></span>
 <span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="reference/reveal.html">reveal</a></span><span class="op">(</span>.what <span class="op">=</span> <span class="va">model_fitted</span>, .which <span class="op">=</span> <span class="va">lm_params</span>, .unpack_specs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_detect.html" class="external-link">str_detect</a></span><span class="op">(</span><span class="va">parameter</span>, <span class="st">"^iv\\d$"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">ivs</span>, <span class="va">dvs</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>sorted_decision <span class="op">=</span> <span class="fu"><a href="https://forcats.tidyverse.org/reference/fct_reorder.html" class="external-link">fct_reorder</a></span><span class="op">(</span><span class="fu"><a href="https://forcats.tidyverse.org/reference/as_factor.html" class="external-link">as_factor</a></span><span class="op">(</span><span class="va">decision</span><span class="op">)</span>, <span class="va">coefficient</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sorted_decision</span>, y <span class="op">=</span> <span class="va">coefficient</span>, color <span class="op">=</span> <span class="va">ivs</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">dvs</span>, scales <span class="op">=</span> <span class="st">"free_x"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span><span class="st">"Data Decision"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-2-2.png" width="100%"></p>
+<span>  <span class="fu"><a href="reference/reveal_model_parameters.html">reveal_model_parameters</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">parameter</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/condense.html">condense</a></span><span class="op">(</span><span class="va">coefficient</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="va">mean</span>, median <span class="op">=</span> <span class="va">median</span>, sd <span class="op">=</span> <span class="va">sd</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 8 × 5</span></span>
+<span><span class="co">#&gt;   parameter  coefficient_mean coefficient_median coefficient_sd coefficient_list</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;                 &lt;dbl&gt;              &lt;dbl&gt;          &lt;dbl&gt; &lt;list&gt;          </span></span>
+<span><span class="co">#&gt; 1 (Intercep…         -0.00625            0.00395         0.197  &lt;dbl [48]&gt;      </span></span>
+<span><span class="co">#&gt; 2 iv1                -0.0415            -0.0338          0.0746 &lt;dbl [16]&gt;      </span></span>
+<span><span class="co">#&gt; 3 iv1:mod            -0.0829            -0.0779          0.0206 &lt;dbl [16]&gt;      </span></span>
+<span><span class="co">#&gt; 4 iv2                 0.129              0.131           0.0246 &lt;dbl [16]&gt;      </span></span>
+<span><span class="co">#&gt; 5 iv2:mod             0.108              0.0972          0.0789 &lt;dbl [16]&gt;      </span></span>
+<span><span class="co">#&gt; 6 iv3                 0.116              0.127           0.0684 &lt;dbl [16]&gt;      </span></span>
+<span><span class="co">#&gt; 7 iv3:mod             0.0300             0.0488          0.0841 &lt;dbl [16]&gt;      </span></span>
+<span><span class="co">#&gt; 8 mod                 0.0374             0.0605          0.158  &lt;dbl [48]&gt;</span></span>
+<span></span>
+<span><span class="co"># Summarize fit statistics</span></span>
+<span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/reveal_model_performance.html">reveal_model_performance</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="reference/condense.html">condense</a></span><span class="op">(</span><span class="va">r2</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="va">mean</span>, sd <span class="op">=</span> <span class="va">sd</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 1 × 3</span></span>
+<span><span class="co">#&gt;   r2_mean  r2_sd r2_list   </span></span>
+<span><span class="co">#&gt;     &lt;dbl&gt;  &lt;dbl&gt; &lt;list&gt;    </span></span>
+<span><span class="co">#&gt; 1  0.0581 0.0209 &lt;dbl [48]&gt;</span></span></code></pre></div>
 </div>
 
   </main><aside class="col-md-3"><div class="license">
@@ -276,7 +294,7 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Ethan Young <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-8232-0184" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Ethan Young <br><small class="roles"> Author, maintainer, copyright holder </small> <a href="https://orcid.org/0000-0002-8232-0184" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 <li>Stefan Vermeent <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-9595-5373" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 </ul>
 </div>

@@ -27,6 +27,8 @@
     <a class="dropdown-item" href="../articles/create-your-blueprint.html">Defining an Analysis Pipeline Blueprint</a>
     <a class="dropdown-item" href="../articles/validate-your-blueprint.html">Check and Test your Blueprint</a>
     <a class="dropdown-item" href="../articles/run-your-pipeline.html">Run your Pipeline</a>
+    <a class="dropdown-item" href="../articles/run-descriptive-analyses.html">Descriptive Analyses</a>
+    <a class="dropdown-item" href="../articles/multitool-nomenclature.html">multitool Nomenclature</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -64,7 +66,8 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>.df</dt>
-<dd><p>the original data.frame (e.g., base data set). If part of set of
+<dd><p>the original <code>data.frame</code>(e.g., base data set). If part of
+set of
 add_* decision functions in a pipeline, the base data will be passed along
 as an attribute.</p></dd>
 
@@ -107,7 +110,7 @@ output. Defaults to <code>TRUE</code>.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>a data.frame with three columns: type, group, and code. Type
+<p>a <code>data.frame</code>with three columns: type, group, and code. Type
 indicates the decision type, group is a decision, and the code is the
 actual code that will be executed. If part of a pipe, the current set of
 decisions will be appended as new rows.</p>
@@ -118,7 +121,7 @@ decisions will be appended as new rows.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Attaching core tidyverse packages</span> ──────────────────────── tidyverse 2.0.0 ──</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dplyr    </span> 1.1.2     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">readr    </span> 2.1.4</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dplyr    </span> 1.1.3     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">readr    </span> 2.1.4</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">forcats  </span> 1.0.0     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">stringr  </span> 1.5.0</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">ggplot2  </span> 3.4.3     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tibble   </span> 3.2.1</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">lubridate</span> 1.9.2     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tidyr    </span> 1.3.0</span>
@@ -148,7 +151,7 @@ decisions will be appended as new rows.</p>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">the_data</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="add_filters.html">add_filters</a></span><span class="op">(</span><span class="va">include1</span> <span class="op">==</span> <span class="fl">0</span>,<span class="va">include2</span> <span class="op">!=</span> <span class="fl">3</span>,<span class="va">include2</span> <span class="op">!=</span> <span class="fl">2</span>,<span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">include3</span><span class="op">)</span> <span class="op">&gt;</span> <span class="op">-</span><span class="fl">2.5</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="add_filters.html">add_filters</a></span><span class="op">(</span><span class="va">include1</span> <span class="op">==</span> <span class="fl">0</span>,<span class="va">include2</span> <span class="op">!=</span> <span class="fl">3</span>,<span class="va">include2</span> <span class="op">!=</span> <span class="fl">2</span>, <span class="va">include3</span> <span class="op">&gt;</span> <span class="op">-</span><span class="fl">2.5</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="add_variables.html">add_variables</a></span><span class="op">(</span><span class="st">"ivs"</span>, <span class="va">iv1</span>, <span class="va">iv2</span>, <span class="va">iv3</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="add_variables.html">add_variables</a></span><span class="op">(</span><span class="st">"dvs"</span>, <span class="va">dv1</span>, <span class="va">dv2</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="add_variables.html">add_variables</a></span><span class="op">(</span><span class="st">"mods"</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"mod"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
@@ -161,7 +164,7 @@ decisions will be appended as new rows.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> filters   include2          <span style="color: #949494;">"</span>include2 != 3<span style="color: #949494;">"</span>                                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> filters   include2          <span style="color: #949494;">"</span>include2 != 2<span style="color: #949494;">"</span>                                  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> filters   include2          <span style="color: #949494;">"</span>include2 %in% unique(include2)<span style="color: #949494;">"</span>                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> filters   include3          <span style="color: #949494;">"</span>scale(include3) &gt; -2.5<span style="color: #949494;">"</span>                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> filters   include3          <span style="color: #949494;">"</span>include3 &gt; -2.5<span style="color: #949494;">"</span>                                </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> filters   include3          <span style="color: #949494;">"</span>include3 %in% unique(include3)<span style="color: #949494;">"</span>                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> variables ivs               <span style="color: #949494;">"</span>iv1<span style="color: #949494;">"</span>                                            </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> variables ivs               <span style="color: #949494;">"</span>iv2<span style="color: #949494;">"</span>                                            </span>

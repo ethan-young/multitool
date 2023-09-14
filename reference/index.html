@@ -27,6 +27,8 @@
     <a class="dropdown-item" href="../articles/create-your-blueprint.html">Defining an Analysis Pipeline Blueprint</a>
     <a class="dropdown-item" href="../articles/validate-your-blueprint.html">Check and Test your Blueprint</a>
     <a class="dropdown-item" href="../articles/run-your-pipeline.html">Run your Pipeline</a>
+    <a class="dropdown-item" href="../articles/run-descriptive-analyses.html">Descriptive Analyses</a>
+    <a class="dropdown-item" href="../articles/multitool-nomenclature.html">multitool Nomenclature</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -67,7 +69,7 @@
           
           <code><a href="add_model.html">add_model()</a></code> 
         </dt>
-        <dd>Add a model and formula to a multiverese pipeline</dd>
+        <dd>Add a model and formula to a multiverse pipeline</dd>
       </dl><dl><dt>
           
           <code><a href="add_preprocess.html">add_preprocess()</a></code> 
@@ -82,7 +84,7 @@
           
           <code><a href="add_summary_stats.html">add_summary_stats()</a></code> 
         </dt>
-        <dd>Add a set of descriptiove statistics to compute over a set of variables</dd>
+        <dd>Add a set of descriptive statistics to compute over a set of variables</dd>
       </dl><dl><dt>
           
           <code><a href="add_cron_alpha.html">add_cron_alpha()</a></code> 
@@ -93,6 +95,11 @@
           <code><a href="add_correlations.html">add_correlations()</a></code> 
         </dt>
         <dd>Add correlations from the correlation package in easystats</dd>
+      </dl><dl><dt>
+          
+          <code><a href="add_parameter_keys.html">add_parameter_keys()</a></code> 
+        </dt>
+        <dd>Add parameter keys names for later use in summarizing model effects</dd>
       </dl><dl><dt>
           
           <code><a href="expand_decisions.html">expand_decisions()</a></code> 
@@ -144,16 +151,6 @@
           <code><a href="show_code_filter.html">show_code_filter()</a></code> <code><a href="show_code_filter.html">show_code_preprocess()</a></code> <code><a href="show_code_filter.html">show_code_model()</a></code> <code><a href="show_code_filter.html">show_code_postprocess()</a></code> <code><a href="show_code_filter.html">show_code_summary_stats()</a></code> <code><a href="show_code_filter.html">show_code_corrs()</a></code> <code><a href="show_code_filter.html">show_code_cron_alpha()</a></code> 
         </dt>
         <dd>Show multiverse data code pipelines</dd>
-      </dl><dl><dt>
-          
-          <code><a href="run_universe_model.html">run_universe_model()</a></code> 
-        </dt>
-        <dd>Run a single set of arbitrary decisions and save the result</dd>
-      </dl><dl><dt>
-          
-          <code><a href="run_universe_summary_stats.html">run_universe_summary_stats()</a></code> 
-        </dt>
-        <dd>Compute summary statistics for a single decision set</dd>
       </dl></div><div class="section level2">
       <h2 id="run-your-pipeline">Run your Pipeline<a class="anchor" aria-label="anchor" href="#run-your-pipeline"></a></h2>
       
@@ -196,6 +193,26 @@
           <code><a href="reveal.html">reveal()</a></code> 
         </dt>
         <dd>Reveal the contents of a multiverse analysis</dd>
+      </dl><dl><dt>
+          
+          <code><a href="reveal_model_parameters.html">reveal_model_parameters()</a></code> 
+        </dt>
+        <dd>Reveal the model parameters of a multiverse analysis</dd>
+      </dl><dl><dt>
+          
+          <code><a href="reveal_model_performance.html">reveal_model_performance()</a></code> 
+        </dt>
+        <dd>Reveal the model performance/fit indices from a multiverse analysis</dd>
+      </dl><dl><dt>
+          
+          <code><a href="reveal_model_warnings.html">reveal_model_warnings()</a></code> 
+        </dt>
+        <dd>Reveal any warnings about your models during a multiverse analysis</dd>
+      </dl><dl><dt>
+          
+          <code><a href="reveal_model_messages.html">reveal_model_messages()</a></code> 
+        </dt>
+        <dd>Reveal any messages about your models during a multiverse analysis</dd>
       </dl><dl><dt>
           
           <code><a href="reveal_alphas.html">reveal_alphas()</a></code> 

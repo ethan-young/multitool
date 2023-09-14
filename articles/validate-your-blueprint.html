@@ -46,6 +46,8 @@
     <a class="dropdown-item" href="../articles/create-your-blueprint.html">Defining an Analysis Pipeline Blueprint</a>
     <a class="dropdown-item" href="../articles/validate-your-blueprint.html">Check and Test your Blueprint</a>
     <a class="dropdown-item" href="../articles/run-your-pipeline.html">Run your Pipeline</a>
+    <a class="dropdown-item" href="../articles/run-descriptive-analyses.html">Descriptive Analyses</a>
+    <a class="dropdown-item" href="../articles/multitool-nomenclature.html">multitool Nomenclature</a>
   </div>
 </li>
       </ul>
@@ -137,9 +139,9 @@ of the sample sizes after each exclusion criteria is applied.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
 <span><span class="co">#&gt;   filter_expression              variable n_retained n_excluded</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> include1 == 0                  include1        447         53</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> include1 == 0                  include1        450         50</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> include1 %in% unique(include1) include1        500          0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> include2 != 3                  include2        325        175</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> include2 != 3                  include2        351        149</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> include2 %in% unique(include2) include2        500          0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> include3 &gt; -2.5                include3        494          6</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> include3 %in% unique(include3) include3        500          0</span></span></code></pre></div>
@@ -173,13 +175,6 @@ decision 17 using <code>show_code_model(decision_num = 17)</code>:</p>
 <p>Setting the <code>copy</code> argument to <code>TRUE</code> allows
 you to send the code straight to your clipboard. You can paste it into
 the source or console for testing/editing.</p>
-<p>You can also run individual decisions to test that they work.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/run_universe_model.html">run_universe_model</a></span><span class="op">(</span><span class="va">expanded_pipeline</span>, decision_num <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 3</span></span></span>
-<span><span class="co">#&gt;   decision filter_code                                              model_fitted</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;glue&gt;</span>                                                   <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 1        the_data |&gt; filter(include1 == 0, include2 != 3, includ… <span style="color: #949494;">&lt;tibble&gt;</span></span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
