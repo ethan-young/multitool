@@ -43,9 +43,6 @@
     <loc>https://ethan-young.github.io/multitool/reference/add_correlations.html</loc>
   </url>
   <url>
-    <loc>https://ethan-young.github.io/multitool/reference/add_cron_alpha.html</loc>
-  </url>
-  <url>
     <loc>https://ethan-young.github.io/multitool/reference/add_filters.html</loc>
   </url>
   <url>
@@ -59,6 +56,9 @@
   </url>
   <url>
     <loc>https://ethan-young.github.io/multitool/reference/add_preprocess.html</loc>
+  </url>
+  <url>
+    <loc>https://ethan-young.github.io/multitool/reference/add_reliabilities.html</loc>
   </url>
   <url>
     <loc>https://ethan-young.github.io/multitool/reference/add_summary_stats.html</loc>
@@ -97,13 +97,10 @@
     <loc>https://ethan-young.github.io/multitool/reference/index.html</loc>
   </url>
   <url>
-    <loc>https://ethan-young.github.io/multitool/reference/report_universe_console.html</loc>
+    <loc>https://ethan-young.github.io/multitool/reference/multitool-package.html</loc>
   </url>
   <url>
     <loc>https://ethan-young.github.io/multitool/reference/reveal.html</loc>
-  </url>
-  <url>
-    <loc>https://ethan-young.github.io/multitool/reference/reveal_alphas.html</loc>
   </url>
   <url>
     <loc>https://ethan-young.github.io/multitool/reference/reveal_corrs.html</loc>
@@ -119,6 +116,9 @@
   </url>
   <url>
     <loc>https://ethan-young.github.io/multitool/reference/reveal_model_warnings.html</loc>
+  </url>
+  <url>
+    <loc>https://ethan-young.github.io/multitool/reference/reveal_reliabilities.html</loc>
   </url>
   <url>
     <loc>https://ethan-young.github.io/multitool/reference/reveal_summary_stats.html</loc>

@@ -211,18 +211,18 @@
 <span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="reference/reveal_model_parameters.html">reveal_model_parameters</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 192 × 16</span></span>
-<span><span class="co">#&gt;    decision specifications   model_function parameter   coefficient     se    ci</span></span>
-<span><span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;           &lt;chr&gt;          &lt;chr&gt;             &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1 1        &lt;tibble [1 × 3]&gt; lm             (Intercept)    0.208    0.131   0.95</span></span>
-<span><span class="co">#&gt;  2 1        &lt;tibble [1 × 3]&gt; lm             iv1           -0.152    0.123   0.95</span></span>
-<span><span class="co">#&gt;  3 1        &lt;tibble [1 × 3]&gt; lm             mod           -0.236    0.144   0.95</span></span>
-<span><span class="co">#&gt;  4 1        &lt;tibble [1 × 3]&gt; lm             iv1:mod       -0.0713   0.160   0.95</span></span>
-<span><span class="co">#&gt;  5 2        &lt;tibble [1 × 3]&gt; lm             (Intercept)   -0.170    0.102   0.95</span></span>
-<span><span class="co">#&gt;  6 2        &lt;tibble [1 × 3]&gt; lm             iv1            0.000704 0.0957  0.95</span></span>
-<span><span class="co">#&gt;  7 2        &lt;tibble [1 × 3]&gt; lm             mod            0.146    0.112   0.95</span></span>
-<span><span class="co">#&gt;  8 2        &lt;tibble [1 × 3]&gt; lm             iv1:mod       -0.0899   0.124   0.95</span></span>
-<span><span class="co">#&gt;  9 3        &lt;tibble [1 × 3]&gt; lm             (Intercept)    0.231    0.130   0.95</span></span>
-<span><span class="co">#&gt; 10 3        &lt;tibble [1 × 3]&gt; lm             iv2            0.116    0.124   0.95</span></span>
+<span><span class="co">#&gt;    decision specifications   model_function parameter   coefficient    se    ci</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;           &lt;chr&gt;          &lt;chr&gt;             &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 1        &lt;tibble [1 × 3]&gt; lm             (Intercept)      0.0309 0.115  0.95</span></span>
+<span><span class="co">#&gt;  2 1        &lt;tibble [1 × 3]&gt; lm             iv1              0.163  0.119  0.95</span></span>
+<span><span class="co">#&gt;  3 1        &lt;tibble [1 × 3]&gt; lm             mod             -0.0615 0.112  0.95</span></span>
+<span><span class="co">#&gt;  4 1        &lt;tibble [1 × 3]&gt; lm             iv1:mod         -0.235  0.123  0.95</span></span>
+<span><span class="co">#&gt;  5 2        &lt;tibble [1 × 3]&gt; lm             (Intercept)      0.140  0.124  0.95</span></span>
+<span><span class="co">#&gt;  6 2        &lt;tibble [1 × 3]&gt; lm             iv1             -0.203  0.128  0.95</span></span>
+<span><span class="co">#&gt;  7 2        &lt;tibble [1 × 3]&gt; lm             mod             -0.215  0.120  0.95</span></span>
+<span><span class="co">#&gt;  8 2        &lt;tibble [1 × 3]&gt; lm             iv1:mod         -0.223  0.132  0.95</span></span>
+<span><span class="co">#&gt;  9 3        &lt;tibble [1 × 3]&gt; lm             (Intercept)      0.0486 0.121  0.95</span></span>
+<span><span class="co">#&gt; 10 3        &lt;tibble [1 × 3]&gt; lm             iv2             -0.0384 0.143  0.95</span></span>
 <span><span class="co">#&gt; # ℹ 182 more rows</span></span>
 <span><span class="co">#&gt; # ℹ 9 more variables: ci_low &lt;dbl&gt;, ci_high &lt;dbl&gt;, t &lt;dbl&gt;, df_error &lt;int&gt;,</span></span>
 <span><span class="co">#&gt; #   p &lt;dbl&gt;, model_performance &lt;list&gt;, model_warnings &lt;list&gt;,</span></span>
@@ -234,16 +234,16 @@
 <span><span class="co">#&gt; # A tibble: 48 × 14</span></span>
 <span><span class="co">#&gt;    decision specifications   model_function model_parameters     aic  aicc   bic</span></span>
 <span><span class="co">#&gt;    &lt;chr&gt;    &lt;list&gt;           &lt;chr&gt;          &lt;list&gt;             &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1 1        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  184.  186.  195.</span></span>
-<span><span class="co">#&gt;  2 2        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  153.  154.  164.</span></span>
-<span><span class="co">#&gt;  3 3        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  183.  184.  193.</span></span>
-<span><span class="co">#&gt;  4 4        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  151.  152.  161.</span></span>
-<span><span class="co">#&gt;  5 5        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  184.  185.  195.</span></span>
-<span><span class="co">#&gt;  6 6        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  153.  154.  164.</span></span>
-<span><span class="co">#&gt;  7 7        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  184.  186.  195.</span></span>
-<span><span class="co">#&gt;  8 8        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  153.  154.  164.</span></span>
-<span><span class="co">#&gt;  9 9        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  183.  184.  193.</span></span>
-<span><span class="co">#&gt; 10 10       &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  151.  152.  161.</span></span>
+<span><span class="co">#&gt;  1 1        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  157.  158.  167.</span></span>
+<span><span class="co">#&gt;  2 2        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  165.  166.  176.</span></span>
+<span><span class="co">#&gt;  3 3        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  161.  162.  171.</span></span>
+<span><span class="co">#&gt;  4 4        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  173.  175.  184.</span></span>
+<span><span class="co">#&gt;  5 5        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  153.  154.  163.</span></span>
+<span><span class="co">#&gt;  6 6        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  172.  173.  183.</span></span>
+<span><span class="co">#&gt;  7 7        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  157.  158.  167.</span></span>
+<span><span class="co">#&gt;  8 8        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  165.  166.  176.</span></span>
+<span><span class="co">#&gt;  9 9        &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  161.  162.  171.</span></span>
+<span><span class="co">#&gt; 10 10       &lt;tibble [1 × 3]&gt; lm             &lt;prmtrs_m [4 × 9]&gt;  173.  175.  184.</span></span>
 <span><span class="co">#&gt; # ℹ 38 more rows</span></span>
 <span><span class="co">#&gt; # ℹ 7 more variables: r2 &lt;dbl&gt;, r2_adjusted &lt;dbl&gt;, rmse &lt;dbl&gt;, sigma &lt;dbl&gt;,</span></span>
 <span><span class="co">#&gt; #   model_warnings &lt;list&gt;, model_messages &lt;list&gt;, pipeline_code &lt;list&gt;</span></span>
@@ -256,14 +256,14 @@
 <span><span class="co">#&gt; # A tibble: 8 × 5</span></span>
 <span><span class="co">#&gt;   parameter  coefficient_mean coefficient_median coefficient_sd coefficient_list</span></span>
 <span><span class="co">#&gt;   &lt;chr&gt;                 &lt;dbl&gt;              &lt;dbl&gt;          &lt;dbl&gt; &lt;list&gt;          </span></span>
-<span><span class="co">#&gt; 1 (Intercep…         -0.00625            0.00395         0.197  &lt;dbl [48]&gt;      </span></span>
-<span><span class="co">#&gt; 2 iv1                -0.0415            -0.0338          0.0746 &lt;dbl [16]&gt;      </span></span>
-<span><span class="co">#&gt; 3 iv1:mod            -0.0829            -0.0779          0.0206 &lt;dbl [16]&gt;      </span></span>
-<span><span class="co">#&gt; 4 iv2                 0.129              0.131           0.0246 &lt;dbl [16]&gt;      </span></span>
-<span><span class="co">#&gt; 5 iv2:mod             0.108              0.0972          0.0789 &lt;dbl [16]&gt;      </span></span>
-<span><span class="co">#&gt; 6 iv3                 0.116              0.127           0.0684 &lt;dbl [16]&gt;      </span></span>
-<span><span class="co">#&gt; 7 iv3:mod             0.0300             0.0488          0.0841 &lt;dbl [16]&gt;      </span></span>
-<span><span class="co">#&gt; 8 mod                 0.0374             0.0605          0.158  &lt;dbl [48]&gt;</span></span>
+<span><span class="co">#&gt; 1 (Intercep…           0.0826             0.0726         0.0506 &lt;dbl [48]&gt;      </span></span>
+<span><span class="co">#&gt; 2 iv1                 -0.0186            -0.0134         0.179  &lt;dbl [16]&gt;      </span></span>
+<span><span class="co">#&gt; 3 iv1:mod             -0.209             -0.225          0.0324 &lt;dbl [16]&gt;      </span></span>
+<span><span class="co">#&gt; 4 iv2                  0.0356             0.0397         0.0489 &lt;dbl [16]&gt;      </span></span>
+<span><span class="co">#&gt; 5 iv2:mod             -0.0232            -0.0213         0.0292 &lt;dbl [16]&gt;      </span></span>
+<span><span class="co">#&gt; 6 iv3                  0.0479             0.0413         0.113  &lt;dbl [16]&gt;      </span></span>
+<span><span class="co">#&gt; 7 iv3:mod              0.145              0.132          0.128  &lt;dbl [16]&gt;      </span></span>
+<span><span class="co">#&gt; 8 mod                 -0.116             -0.119          0.0911 &lt;dbl [48]&gt;</span></span>
 <span></span>
 <span><span class="co"># Summarize fit statistics</span></span>
 <span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
@@ -272,7 +272,7 @@
 <span><span class="co">#&gt; # A tibble: 1 × 3</span></span>
 <span><span class="co">#&gt;   r2_mean  r2_sd r2_list   </span></span>
 <span><span class="co">#&gt;     &lt;dbl&gt;  &lt;dbl&gt; &lt;list&gt;    </span></span>
-<span><span class="co">#&gt; 1  0.0581 0.0209 &lt;dbl [48]&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; 1  0.0695 0.0447 &lt;dbl [48]&gt;</span></span></code></pre></div>
 </div>
 
   </main><aside class="col-md-3"><div class="license">
