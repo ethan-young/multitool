@@ -50,6 +50,9 @@
     <a class="dropdown-item" href="../articles/multitool-nomenclature.html">multitool Nomenclature</a>
   </div>
 </li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
+</li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
@@ -108,8 +111,8 @@ summarized</li>
 </ol>
 <p>These conventions make more sense when visualized across a typical
 <code>multitool</code> workflow:</p>
-<div class="grViz html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-d8b57363bf14c5f40aee" style="width:552px;height:576px;"></div>
-<script type="application/json" data-for="htmlwidget-d8b57363bf14c5f40aee">{"x":{"diagram":"\ndigraph boxes_and_circles {\n\n  # a \"graph\" statement\n  graph [overlap = true, fontsize = 10]\n\n  # several \"node\" statements\n  node [shape = box,\n        fill = gray,\n        fontname = Helvetica]\n  1 [label = \"base data\"]\n  2 [label = \"add_*() functions\"]\n  3 [label = \"expand_decisions()\"]\n  4 [label = \"create_blueprint_graph()\"]\n  5 [label = \"run_descriptives()\"]\n  6 [label = \"show_code_*()\"]\n  7 [label = \"run_multiverse()\"]\n  8 [label = \"reveal(), reveal_model_*()\"]\n  9 [label = \"condense()\"]\n  10 [label = \"reveal_corrs(), reveal_reliabilities(), reveal_summary_stats()\"]\n  11 [label = \"column_plot(), custom plotting/tables\"]\n  12 [label = \"detect_*(), summarize_filter_ns()\"]\n\n  # several \"edge\" statements\n  1->2 [label = \".df\"]\n  2->3 [label = \".pipeline\"]\n  2->4 [label = \".pipeline\"]\n  2->5 [label = \".pipeline\"]\n  3->6 [label = \".grid\"]\n  3->7 [label = \".grid\"]\n  7->8 [label = \".multi\"]\n  8->9 [label = \".unpacked\"]\n  5->10 [label = \".descriptives\"]\n  10->9 [label = \".unpacked\"]\n  9->11 [label = \".condensed\"]\n  2->12 [label = \".pipeline\"]\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script></main>
+<div class="grViz html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-9b2d74a3c89bbf66402e" style="width:552px;height:576px;"></div>
+<script type="application/json" data-for="htmlwidget-9b2d74a3c89bbf66402e">{"x":{"diagram":"\ndigraph boxes_and_circles {\n\n  # a \"graph\" statement\n  graph [overlap = true, fontsize = 10]\n\n  # several \"node\" statements\n  node [shape = box,\n        fill = gray,\n        fontname = Helvetica]\n  1 [label = \"base data\"]\n  2 [label = \"add_*() functions\"]\n  3 [label = \"expand_decisions()\"]\n  4 [label = \"create_blueprint_graph()\"]\n  5 [label = \"run_descriptives()\"]\n  6 [label = \"show_code_*()\"]\n  7 [label = \"run_multiverse()\"]\n  8 [label = \"reveal(), reveal_model_*()\"]\n  9 [label = \"condense()\"]\n  10 [label = \"reveal_corrs(), reveal_reliabilities(), reveal_summary_stats()\"]\n  11 [label = \"column_plot(), custom plotting/tables\"]\n  12 [label = \"detect_*(), summarize_filter_ns()\"]\n\n  # several \"edge\" statements\n  1->2 [label = \".df\"]\n  2->3 [label = \".pipeline\"]\n  2->4 [label = \".pipeline\"]\n  2->5 [label = \".pipeline\"]\n  3->6 [label = \".grid\"]\n  3->7 [label = \".grid\"]\n  7->8 [label = \".multi\"]\n  8->9 [label = \".unpacked\"]\n  5->10 [label = \".descriptives\"]\n  10->9 [label = \".unpacked\"]\n  9->11 [label = \".condensed\"]\n  2->12 [label = \".pipeline\"]\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script></main>
 </div>
 
 
