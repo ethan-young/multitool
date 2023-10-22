@@ -2,7 +2,7 @@
 % Please edit documentation in R/grid-pipeline.R
 \name{add_correlations}
 \alias{add_correlations}
-\title{Add correlations from the {correlation} package in {easystats}}
+\title{Add correlations from the \code{correlation} package in \code{easystats}}
 \usage{
 add_correlations(
   .df,
@@ -49,7 +49,7 @@ actual code that will be executed. If part of a pipe, the current set of
 decisions will be appended as new rows.
 }
 \description{
-Add correlations from the {correlation} package in {easystats}
+Add correlations from the \code{correlation} package in \code{easystats}
 }
 \examples{
 

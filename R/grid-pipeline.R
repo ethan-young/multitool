@@ -617,7 +617,7 @@ add_summary_stats <- function(.df, var_set, variables, stats){
 
 }
 
-#' Add correlations from the {correlation} package in {easystats}
+#' Add correlations from the \code{correlation} package in \code{easystats}
 #'
 #' @param .df the original \code{data.frame}(e.g., base data set). If part of
 #'   set of
