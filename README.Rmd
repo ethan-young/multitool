@@ -29,13 +29,20 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![CRAN status](https://www.r-pkg.org/badges/version/multitool)](https://CRAN.R-project.org/package=multitool)
-[![R-CMD-check](https://github.com/ethan-young/multiverse_tools/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ethan-young/multiverse_tools/actions/workflows/R-CMD-check.yaml)
+![CRAN status](https://www.r-pkg.org/badges/version/multitool)
+[![R-CMD-check](https://github.com/ethan-young/multiverse_tools/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ethan-young/multitool/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 </div>
 
 ## Installation
+
+Install from CRAN:
+
+```r
+install.packages("multitool")
+```
+
 
 You can install the development version of `multitool` from [GitHub](https://github.com/) with:
 

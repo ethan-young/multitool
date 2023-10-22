@@ -12,3 +12,4 @@ Icon
 ^pkgdown$
 ^\.github$
 ^data-raw$
+^CRAN-SUBMISSION$
