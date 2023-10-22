@@ -2,13 +2,13 @@ url: https://ethan-young.github.io/multitool/
 
 template:
   bootstrap: 5
-  theme: pygments
+  theme: github-light
   navbar:
     type: light
   bslib:
     base_font: {google: "Lato"}
     font-size-base: ".90rem"
-    line-height-base: "1.35"
+    line-height-base: "1.5"
     headings-font-weight: "bold"
     code_font: {google: "Fira Code"}
     bg: "#fff"
@@ -26,7 +26,6 @@ articles:
   - create-your-blueprint
   - validate-your-blueprint
   - run-your-pipeline
-  - run-descriptive-analyses
   - multitool-nomenclature
 
 reference:
@@ -77,12 +76,5 @@ reference:
   - reveal_corrs
   - reveal_summary_stats
   - condense
-
-- title: Examples
-  desc: >
-    Example data
-  contents:
-  - icar_data_codebook
-  - icar_data
 
 

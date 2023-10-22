@@ -15,11 +15,11 @@ Authors@R: c(
           comment = c(ORCID = "0000-0002-9595-5373")
         )
        )
-Description: Multiverse analyses run the same analysis over a
-    range of arbitrary data processing decisions. 'multitool' provides an 
-    interface for creating alternative analysis pipelines and turning then into a 
-    grid of all possible pipelines. Using this grid as a blueprint, you can 
-    model your data with all possible analysis pipelines and summarize the results.
+Description: Run the same analysis over a range of arbitrary data processing 
+    decisions. 'multitool' provides an interface for creating alternative 
+    analysis pipelines and turning then into a grid of all possible pipelines. 
+    Using this grid as a blueprint, you can model your data with all possible 
+    analysis pipelines and summarize the results.
 License: MIT + file LICENSE
 Imports:
   clipr,

@@ -318,12 +318,18 @@
       margin-right: 0; 
     }
   </style>
+  <style>
+  #title-slide .title {
+    font-size: 4.5em;
+    color: white;
+  }
+  </style>
 </head>
 <body class="quarto-light">
   <div class="reveal">
     <div class="slides">
 
-<section id="title-slide" data-background-color="black" data-background-image="title.png" class="quarto-title-block center">
+<section id="title-slide" data-background-color="black" data-background-image="title.png" data-background-size="cover" class="quarto-title-block center">
   <h1 class="title">Multiverse Analysis</h1>
 
 <div class="quarto-title-authors">
@@ -333,14 +339,22 @@
 <section id="garden-of-forking-paths" class="slide level2 smaller">
 <h2>Garden of Forking Paths</h2>
 <p>All data analysis projects must choose between different ways to analyze data. This is known as the garden of forking paths:</p>
-
-<img data-src="1-forking.png" data-with="100%" class="r-stretch quarto-figure-center"></section>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="1-forking.png" data-with="100%"></p>
+</figure>
+</div>
+</section>
 <section id="garden-of-forking-data" class="slide level2 smaller">
 <h2>Garden of Forking Data</h2>
 <p>In practice, this means we must choose between many possible versions of our dataset. Every data processing step leads to a different final dataset.</p>
 <p>Enter the <em><strong>multiverse</strong></em>:</p>
-
-<img data-src="2-forking-data.png" data-with="100%" class="r-stretch quarto-figure-center"></section>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="2-forking-data.png" data-with="100%"></p>
+</figure>
+</div>
+</section>
 <section id="why-care-about-the-multiverse" class="slide level2 smaller">
 <h2>Why Care About the Multiverse?</h2>
 <p>Ignoring the multiverse can lead to undesirable actions/outcomes:</p>
@@ -366,8 +380,12 @@
 <p>Becoming constrained by overly rigid analysis criteria</p>
 </div>
 </div>
-
-<img data-src="5-dangers.png" data-with="100%" class="r-stretch quarto-figure-center"></section>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="5-dangers.png" data-with="100%"></p>
+</figure>
+</div>
+</section>
 <section id="multiverse-analysis" class="slide level2">
 <h2>Multiverse Analysis</h2>
 <div class="columns">
@@ -416,7 +434,7 @@
 'autoAnimateEasing': "ease",
 'autoAnimateDuration': 1,
 'autoAnimateUnmatched': true,
-'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":false},
 'smaller': false,
  
         // Display controls in the bottom right corner
@@ -459,7 +477,7 @@
         keyboard: true,
 
         // Enable the slide overview mode
-        overview: true,
+        overview: false,
 
         // Disables the default reveal.js slide layout (scaling and centering)
         // so that you can use custom CSS layout
