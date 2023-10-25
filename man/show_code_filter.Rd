@@ -10,28 +10,33 @@
 \alias{show_code_reliabilities}
 \title{Show multiverse data code pipelines}
 \usage{
-show_code_filter(.grid, decision_num, copy = F)
+show_code_filter(.grid, decision_num, copy = FALSE)
 
-show_code_preprocess(.grid, decision_num, copy = F)
+show_code_preprocess(.grid, decision_num, copy = FALSE)
 
-show_code_model(.grid, decision_num, copy = F)
+show_code_model(.grid, decision_num, copy = FALSE)
 
-show_code_postprocess(.grid, decision_num, copy = F)
+show_code_postprocess(.grid, decision_num, copy = FALSE)
 
-show_code_summary_stats(.grid, decision_num, copy = F)
+show_code_summary_stats(.grid, decision_num, copy = FALSE)
 
-show_code_corrs(.grid, decision_num, copy = F)
+show_code_corrs(.grid, decision_num, copy = FALSE)
 
-show_code_reliabilities(.grid, decision_num, copy = F)
+show_code_reliabilities(.grid, decision_num, copy = FALSE)
 }
 \arguments{
-\item{.grid}{a full decision grid created by \code{\link{expand_decisions}}}
+\item{.grid}{a full decision grid created by \code{\link{expand_decisions}}.}
 
 \item{decision_num}{numeric. Indicates which 'universe' in the multiverse to
 show underlying code.}
 
 \item{copy}{logical. Whether to copy the pipeline code to the clipboard using
-\code{\link[clipr]{write_clip}}.}
+\code{\link[clipr]{write_clip}}. Defaults to \code{FALSE}.}
+}
+\value{
+the code that generated results up to the specified point in an
+analysis pipeline. The code is printed in the console and can be optionally
+copied to the clipboard.
 }
 \description{
 Each \code{show_code*} function should be self-explanatory - they indicate

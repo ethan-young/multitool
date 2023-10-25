@@ -6,13 +6,17 @@
 #'context/results and allow the user to inspect specific decisions straight from
 #'the code that produced it.
 #'
-#'@param .grid a full decision grid created by \code{\link{expand_decisions}}
+#'@param .grid a full decision grid created by \code{\link{expand_decisions}}.
 #'@param decision_num numeric. Indicates which 'universe' in the multiverse to
 #'  show underlying code.
 #'@param copy logical. Whether to copy the pipeline code to the clipboard using
-#'  \code{\link[clipr]{write_clip}}.
+#'  \code{\link[clipr]{write_clip}}. Defaults to \code{FALSE}.
+#'
+#'@returns the code that generated results up to the specified point in an
+#'  analysis pipeline. The code is printed in the console and can be optionally
+#'  copied to the clipboard.
 #'@export
-show_code_filter <- function(.grid, decision_num, copy = F){
+show_code_filter <- function(.grid, decision_num, copy = FALSE){
 
   data_chr <- attr(.grid,  "base_df")
 
@@ -46,7 +50,7 @@ show_code_filter <- function(.grid, decision_num, copy = F){
 
 #' @describeIn show_code_filter Show the code up to the preprocessing stage
 #' @export
-show_code_preprocess <- function(.grid, decision_num, copy = F){
+show_code_preprocess <- function(.grid, decision_num, copy = FALSE){
 
   data_chr <- attr(.grid,  "base_df")
 
@@ -87,7 +91,7 @@ show_code_preprocess <- function(.grid, decision_num, copy = F){
 
 #' @describeIn show_code_filter Show the code up to the modeling stage
 #' @export
-show_code_model <- function(.grid, decision_num, copy = F){
+show_code_model <- function(.grid, decision_num, copy = FALSE){
 
   data_chr <- attr(.grid,  "base_df")
 
@@ -138,7 +142,7 @@ show_code_model <- function(.grid, decision_num, copy = F){
 #' @describeIn show_code_filter Show the code up to the post-processing
 #'   stage
 #' @export
-show_code_postprocess <- function(.grid, decision_num, copy = F){
+show_code_postprocess <- function(.grid, decision_num, copy = FALSE){
 
   data_chr <- attr(.grid,  "base_df")
 
@@ -207,7 +211,7 @@ show_code_postprocess <- function(.grid, decision_num, copy = F){
 
 #' @describeIn show_code_filter Show the code for computing summary statistics
 #' @export
-show_code_summary_stats <- function(.grid, decision_num, copy = F){
+show_code_summary_stats <- function(.grid, decision_num, copy = FALSE){
 
   data_chr <- attr(.grid,  "base_df")
 
@@ -260,7 +264,7 @@ show_code_summary_stats <- function(.grid, decision_num, copy = F){
 
 #' @describeIn show_code_filter Show the code for computing correlations
 #' @export
-show_code_corrs <- function(.grid, decision_num, copy = F){
+show_code_corrs <- function(.grid, decision_num, copy = FALSE){
 
   data_chr <- attr(.grid,  "base_df")
 
@@ -313,7 +317,7 @@ show_code_corrs <- function(.grid, decision_num, copy = F){
 
 #' @describeIn show_code_filter Show the code for computing scale reliability
 #' @export
-show_code_reliabilities <- function(.grid, decision_num, copy = F){
+show_code_reliabilities <- function(.grid, decision_num, copy = FALSE){
 
   data_chr <- attr(.grid,  "base_df")
 

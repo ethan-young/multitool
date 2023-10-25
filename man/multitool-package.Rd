@@ -4,9 +4,9 @@
 \name{multitool-package}
 \alias{multitool}
 \alias{multitool-package}
-\title{multitool: Tools for Running Multiverse Style Analyses}
+\title{multitool: Run Multiverse Style Analyses}
 \description{
-Run the same analysis over a range of arbitrary data processing decisions. 'multitool' provides an interface for creating alternative analysis pipelines and turning then into a grid of all possible pipelines. Using this grid as a blueprint, you can model your data with all possible analysis pipelines and summarize the results.
+Run the same analysis over a range of arbitrary data processing decisions. 'multitool' provides an interface for creating alternative analysis pipelines and turning them into a grid of all possible pipelines. Using this grid as a blueprint, you can model your data across all possible pipelines and summarize the results.
 }
 \seealso{
 Useful links:

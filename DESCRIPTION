@@ -1,6 +1,6 @@
 Package: multitool
-Title: Tools for Running Multiverse Style Analyses
-Version: 0.1.1
+Title: Run Multiverse Style Analyses
+Version: 0.1.2
 Authors@R: c(
         person(
           "Ethan", "Young", 
@@ -17,9 +17,9 @@ Authors@R: c(
        )
 Description: Run the same analysis over a range of arbitrary data processing 
     decisions. 'multitool' provides an interface for creating alternative 
-    analysis pipelines and turning then into a grid of all possible pipelines. 
-    Using this grid as a blueprint, you can model your data with all possible 
-    analysis pipelines and summarize the results.
+    analysis pipelines and turning them into a grid of all possible pipelines. 
+    Using this grid as a blueprint, you can model your data across all possible 
+    pipelines and summarize the results.
 License: MIT + file LICENSE
 Imports:
   clipr,
