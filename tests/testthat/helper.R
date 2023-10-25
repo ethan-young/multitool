@@ -1,6 +1,5 @@
-set.seed(1)
+make_data <- function(){
 
-the_data <-
   data.frame(
     id   = 1:500,
     iv1  = rnorm(500),
@@ -18,11 +17,14 @@ the_data <-
     include3 = rnorm(500)
   )
 
-full_pipeline <-
-  the_data |>
-  add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
-  add_variables("ivs", iv1, iv2, iv3) |>
-  add_variables("dvs", dv1, dv2) |>
-  add_variables("mods", starts_with("mod"))
+}
 
-save(the_data, full_pipeline, file = "tests/testthat/fixtures/the_data.rds")
+make_pipeline <- function(the_data){
+
+  the_data |>
+    add_filters(include1 == 0, include2 != 3, include2 != 2, include3 > -2.5) |>
+    add_variables("ivs", iv1, iv2, iv3) |>
+    add_variables("dvs", dv1, dv2) |>
+    add_variables("mods", starts_with("mod"))
+
+}

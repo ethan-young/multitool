@@ -1,7 +1,8 @@
 
 test_that("df_to_expand_prep creates a list and its the correct length", {
 
-  load(test_path("fixtures", "the_data.rds"))
+  the_data <- make_data()
+  full_pipeline <- the_data |> make_pipeline()
 
   expect_true(is.list(df_to_expand_prep(full_pipeline, group, code)))
   expect_equal(length(df_to_expand_prep(full_pipeline, group, code)), nrow(dplyr::distinct(full_pipeline, type, group)))
@@ -10,7 +11,8 @@ test_that("df_to_expand_prep creates a list and its the correct length", {
 
 test_that("expanded grid is the right size",{
 
-  load(test_path("fixtures", "the_data.rds"))
+  the_data <- make_data()
+  full_pipeline <- the_data |> make_pipeline()
 
   expanded_prep <-
     full_pipeline |>

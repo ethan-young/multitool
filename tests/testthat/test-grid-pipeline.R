@@ -1,10 +1,11 @@
 
 test_that("add_filters creates a data.frame with base_df attribute",{
-  load(test_path("fixtures", "the_data.rds"))
+
+  the_data <- make_data()
 
   a_pipeline <-
     the_data |>
-    add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5)
+    add_filters(include1 == 0, include2 != 3, include2 != 2, include3 > -2.5)
 
   expect_true(is.data.frame(a_pipeline))
   expect_true(!is.null(attr(a_pipeline, "base_df")))
@@ -13,7 +14,7 @@ test_that("add_filters creates a data.frame with base_df attribute",{
 
 test_that("add_filters creates a data.frame with correct number of rows", {
 
-  load(test_path("fixtures", "the_data.rds"))
+  the_data <- make_data()
 
   a_pipeline1 <-
     the_data |>
@@ -64,7 +65,7 @@ test_that("add_filters creates a data.frame with correct number of rows", {
 
 test_that("add_variables creates a data.frame with correct rows", {
 
-  load(test_path("fixtures", "the_data.rds"))
+  the_data <- make_data()
 
   a_pipeline <-
     the_data |>
@@ -90,7 +91,7 @@ test_that("add_variables creates a data.frame with correct rows", {
 
 test_that("add_variables creates variables from the base_df", {
 
-  load(test_path("fixtures", "the_data.rds"))
+  the_data <- make_data()
 
   a_pipeline_true <-
     the_data |>
