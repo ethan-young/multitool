@@ -1,6 +1,6 @@
 Package: multitool
 Title: Run Multiverse Style Analyses
-Version: 0.1.3
+Version: 0.1.3.9000
 Authors@R: c(
         person(
           "Ethan", "Young", 
