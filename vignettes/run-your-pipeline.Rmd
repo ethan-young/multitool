@@ -70,7 +70,7 @@ Inside the `model_fitted` column, `multitool` gives us 4 columns: `model_paramet
 multiverse_results |> unnest(model_fitted)
 ```
 
-The `model_parameters` column gives you the result of calling `parameters::parameters()` on each model in your grid, which is a `data.frame` of model coefficients and their associated standard errors, confidence intervals, test statistic, and a p-values.
+The `model_parameters` column gives you the result of calling `parameters::parameters()` on each model in your grid, which is a `data.frame` of model coefficients and their associated standard errors, confidence intervals, test statistic, and p-values.
 
 ```{r tidy}
 multiverse_results |> 
@@ -144,7 +144,7 @@ Unpacking specifications alongside specific results allows us to examine the eff
 
 A powerful way to organize these results is to summarize a specific results column, say the r^2^ values of our model over the entire multiverse. `condense()` takes a result column and summarizes it with the `.how` argument, which takes a list in the form of `list(<a name you pick> = <summary function>)`.
 
-`.how` will create a column named like so `<column being condsensed>_<summary function name provided>"`. For this case, we have `r2`_mean` and `r2_median`.
+`.how` will create a column named like so `<column being condsensed>_<summary function name provided>`. For this case, we have `r2_mean` and `r2_median`.
 
 ```{r condense}
 # model performance r2 summaries

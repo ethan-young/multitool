@@ -175,9 +175,9 @@ the_data |>
   add_model("linear model", lm({dvs} ~ {ivs} * mod)) # see the {} here
 ```
 
-This allows `multitool` to insert the correct version of each variable specified in a `add_variables()` step. Make sure to use embrace the variable with the `var_group` argument from `add_variables()`, for example `add_model(lm({dvs} ~ {ivs} * mod))`. 
+This allows `multitool` to insert the correct version of each variable specified in a `add_variables()` step. Make sure to embrace the variable with the `var_group` argument from `add_variables()`, for example `add_model(lm({dvs} ~ {ivs} * mod))`. 
 
-Here, `{dvs}` and `{ivs}` tells `multitool` to insert the current version of the `ivs` and `dvs` into the model.
+Here, `dvs` and `ivs` tells `multitool` to insert the current version of the `ivs` and `dvs` into the model.
 
 ## Finalizing the specification blueprint
 
@@ -206,7 +206,7 @@ expanded_pipeline
 
 The result is an expanded `tibble` with 1 row per unique decision and columns for each major blueprint category. In our example, we have alternative variables (predictors and outcomes), filters (three exclusion alternatives), and a model to run. 
 
-Note that we have 3 exclusions (each with two combinations), 3 versions of our predictor, and 2 versions of our outcome. This means our blueprint should have `2*2*2*3*2` or `r `2*2*2*3*2` rows, which corresponds with our expanded pipeline:
+Note that we have 3 exclusions (each with two combinations), 3 versions of our predictor, and 2 versions of our outcome. This means our blueprint should have `2*2*2*3*2` or `r 2*2*2*3*2` rows, which corresponds with our expanded pipeline:
 
 ```{r}
 2*2*2*3*2 == nrow(expanded_pipeline)
