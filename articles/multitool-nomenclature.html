@@ -58,7 +58,14 @@
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
 </form>
 
-      <ul class="navbar-nav"></ul>
+      <ul class="navbar-nav">
+<li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/ethan-young/multitool/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 
     
@@ -73,7 +80,7 @@
       <img src="" class="logo" alt=""><h1>multitool Nomenclature</h1>
             
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/ethan-young/multitool/blob/HEAD/vignettes/multitool-nomenclature.Rmd" class="external-link"><code>vignettes/multitool-nomenclature.Rmd</code></a></small>
       <div class="d-none name"><code>multitool-nomenclature.Rmd</code></div>
     </div>
 
@@ -111,8 +118,8 @@ summarized</li>
 </ol>
 <p>These conventions make more sense when visualized across a typical
 <code>multitool</code> workflow:</p>
-<div class="grViz html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-b19a5eaa2b445cd48e52" style="width:552px;height:576px;"></div>
-<script type="application/json" data-for="htmlwidget-b19a5eaa2b445cd48e52">{"x":{"diagram":"\ndigraph boxes_and_circles {\n\n  # a \"graph\" statement\n  graph [overlap = true, fontsize = 10]\n\n  # several \"node\" statements\n  node [shape = box,\n        fill = gray,\n        fontname = Helvetica]\n  1 [label = \"base data\"]\n  2 [label = \"add_*() functions\"]\n  3 [label = \"expand_decisions()\"]\n  4 [label = \"create_blueprint_graph()\"]\n  5 [label = \"run_descriptives()\"]\n  6 [label = \"show_code_*()\"]\n  7 [label = \"run_multiverse()\"]\n  8 [label = \"reveal(), reveal_model_*()\"]\n  9 [label = \"condense()\"]\n  10 [label = \"reveal_corrs(), reveal_reliabilities(), reveal_summary_stats()\"]\n  11 [label = \"column_plot(), custom plotting/tables\"]\n  12 [label = \"detect_*(), summarize_filter_ns()\"]\n\n  # several \"edge\" statements\n  1->2 [label = \".df\"]\n  2->3 [label = \".pipeline\"]\n  2->4 [label = \".pipeline\"]\n  2->5 [label = \".pipeline\"]\n  3->6 [label = \".grid\"]\n  3->7 [label = \".grid\"]\n  7->8 [label = \".multi\"]\n  8->9 [label = \".unpacked\"]\n  5->10 [label = \".descriptives\"]\n  10->9 [label = \".unpacked\"]\n  9->11 [label = \".condensed\"]\n  2->12 [label = \".pipeline\"]\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script></main>
+<div class="grViz html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-340e3d3e87eed3bf7cbe" style="width:552px;height:576px;"></div>
+<script type="application/json" data-for="htmlwidget-340e3d3e87eed3bf7cbe">{"x":{"diagram":"\ndigraph boxes_and_circles {\n\n  # a \"graph\" statement\n  graph [overlap = true, fontsize = 10]\n\n  # several \"node\" statements\n  node [shape = box,\n        fill = gray,\n        fontname = Helvetica]\n  1 [label = \"base data\"]\n  2 [label = \"add_*() functions\"]\n  3 [label = \"expand_decisions()\"]\n  4 [label = \"create_blueprint_graph()\"]\n  5 [label = \"run_descriptives()\"]\n  6 [label = \"show_code_*()\"]\n  7 [label = \"run_multiverse()\"]\n  8 [label = \"reveal(), reveal_model_*()\"]\n  9 [label = \"condense()\"]\n  10 [label = \"reveal_corrs(), reveal_reliabilities(), reveal_summary_stats()\"]\n  11 [label = \"column_plot(), custom plotting/tables\"]\n  12 [label = \"detect_*(), summarize_filter_ns()\"]\n\n  # several \"edge\" statements\n  1->2 [label = \".df\"]\n  2->3 [label = \".pipeline\"]\n  2->4 [label = \".pipeline\"]\n  2->5 [label = \".pipeline\"]\n  3->6 [label = \".grid\"]\n  3->7 [label = \".grid\"]\n  7->8 [label = \".multi\"]\n  8->9 [label = \".unpacked\"]\n  5->10 [label = \".descriptives\"]\n  10->9 [label = \".unpacked\"]\n  9->11 [label = \".condensed\"]\n  2->12 [label = \".pipeline\"]\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script></main>
 </div>
 
 
