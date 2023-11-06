@@ -18,6 +18,9 @@ template:
     fg: "#000"
     secondary: "#ecf0f1"
     light: "white"
+  includes:
+    in_header: |
+      <script defer data-domain="ethan-young.github.io/multitool" src="https://plausible.io/js/script.js"></script>
 
 articles:
 - title: Get started
