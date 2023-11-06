@@ -19,7 +19,7 @@
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
+<![endif]--><script defer data-domain="ethan-young.github.io/multitool" src="https://plausible.io/js/script.js"></script>
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -118,8 +118,8 @@ summarized</li>
 </ol>
 <p>These conventions make more sense when visualized across a typical
 <code>multitool</code> workflow:</p>
-<div class="grViz html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-27bcfb90bb3cc9b108b7" style="width:552px;height:576px;"></div>
-<script type="application/json" data-for="htmlwidget-27bcfb90bb3cc9b108b7">{"x":{"diagram":"\ndigraph boxes_and_circles {\n\n  # a \"graph\" statement\n  graph [overlap = true, fontsize = 10]\n\n  # several \"node\" statements\n  node [shape = box,\n        fill = gray,\n        fontname = Helvetica]\n  1 [label = \"base data\"]\n  2 [label = \"add_*() functions\"]\n  3 [label = \"expand_decisions()\"]\n  4 [label = \"create_blueprint_graph()\"]\n  5 [label = \"run_descriptives()\"]\n  6 [label = \"show_code_*()\"]\n  7 [label = \"run_multiverse()\"]\n  8 [label = \"reveal(), reveal_model_*()\"]\n  9 [label = \"condense()\"]\n  10 [label = \"reveal_corrs(), reveal_reliabilities(), reveal_summary_stats()\"]\n  11 [label = \"column_plot(), custom plotting/tables\"]\n  12 [label = \"detect_*(), summarize_filter_ns()\"]\n\n  # several \"edge\" statements\n  1->2 [label = \".df\"]\n  2->3 [label = \".pipeline\"]\n  2->4 [label = \".pipeline\"]\n  2->5 [label = \".pipeline\"]\n  3->6 [label = \".grid\"]\n  3->7 [label = \".grid\"]\n  7->8 [label = \".multi\"]\n  8->9 [label = \".unpacked\"]\n  5->10 [label = \".descriptives\"]\n  10->9 [label = \".unpacked\"]\n  9->11 [label = \".condensed\"]\n  2->12 [label = \".pipeline\"]\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script></main>
+<div class="grViz html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-3c7b92518cb041a84ce7" style="width:552px;height:576px;"></div>
+<script type="application/json" data-for="htmlwidget-3c7b92518cb041a84ce7">{"x":{"diagram":"\ndigraph boxes_and_circles {\n\n  # a \"graph\" statement\n  graph [overlap = true, fontsize = 10]\n\n  # several \"node\" statements\n  node [shape = box,\n        fill = gray,\n        fontname = Helvetica]\n  1 [label = \"base data\"]\n  2 [label = \"add_*() functions\"]\n  3 [label = \"expand_decisions()\"]\n  4 [label = \"create_blueprint_graph()\"]\n  5 [label = \"run_descriptives()\"]\n  6 [label = \"show_code_*()\"]\n  7 [label = \"run_multiverse()\"]\n  8 [label = \"reveal(), reveal_model_*()\"]\n  9 [label = \"condense()\"]\n  10 [label = \"reveal_corrs(), reveal_reliabilities(), reveal_summary_stats()\"]\n  11 [label = \"column_plot(), custom plotting/tables\"]\n  12 [label = \"detect_*(), summarize_filter_ns()\"]\n\n  # several \"edge\" statements\n  1->2 [label = \".df\"]\n  2->3 [label = \".pipeline\"]\n  2->4 [label = \".pipeline\"]\n  2->5 [label = \".pipeline\"]\n  3->6 [label = \".grid\"]\n  3->7 [label = \".grid\"]\n  7->8 [label = \".multi\"]\n  8->9 [label = \".unpacked\"]\n  5->10 [label = \".descriptives\"]\n  10->9 [label = \".unpacked\"]\n  9->11 [label = \".condensed\"]\n  2->12 [label = \".pipeline\"]\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script></main>
 </div>
 
 
