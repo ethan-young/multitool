@@ -1,5 +1,9 @@
 url: https://ethan-young.github.io/multitool/
 
+home:
+  title: An R package for designing and running multiverse analysis
+  description: Create, validate, visualize, and run multiverse data analysis pipelines.
+
 template:
   bootstrap: 5
   theme: github-light
