@@ -227,13 +227,20 @@ run_universe_model <- function(.grid, decision_num, save_model = FALSE){
       tidyr::nest(model_fitted = -dplyr::ends_with("code"))
   }
 
-  universe_results |>
+  universe_results <- universe_results |>
     purrr::reduce(dplyr::bind_cols) |>
     dplyr::mutate(
       decision = decision_num |> as.character(),
     ) |>
-    dplyr::select(decision, dplyr::everything()) |>
+    dplyr::select(decision, dplyr::everything())
+
+  pipeline_code <- universe_results |>
+    select(dplyr::ends_with("code")) |>
     tidyr::nest(pipeline_code = dplyr::ends_with("code"))
+
+  universe_results |>
+    select(-dplyr::ends_with("code")) |>
+    bind_cols(pipeline_code)
 }
 
 run_universe_corrs <- function(.grid, decision_num){
