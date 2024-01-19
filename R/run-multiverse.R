@@ -108,15 +108,19 @@ run_multiverse <- function(.grid, ncores = 1, save_model = FALSE, show_progress 
       purrr::list_rbind()
   }
 
-  dplyr::full_join(
+  out <- dplyr::full_join(
     .grid |>
       dplyr::select(-dplyr::contains("code")) |>
       mutate(decision = as.character(decision)),
     multiverse,
     by = "decision"
   ) |>
-    dplyr::select(-dplyr::matches("^parameter_keys$")) |>
+    dplyr::select(-dplyr::matches("^parameter_keys$"))
+
+  out <- out |>
+    select(c(-dplyr::matches("fitted$|computed$|code$"))) |>
     tidyr::nest(specifications = c(-decision, -dplyr::matches("fitted$|computed$|code$"))) |>
+    bind_cols(out |> select(dplyr::matches("fitted$|computed$|code$"))) |>
     dplyr::select(decision, specifications, dplyr::everything())
 }
 
