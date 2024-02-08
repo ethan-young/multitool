@@ -12,6 +12,8 @@ Run the same analysis over a range of arbitrary data processing decisions. 'mult
 Useful links:
 \itemize{
   \item \url{https://ethan-young.github.io/multitool/}
+  \item \url{https://github.com/ethan-young/multitool}
+  \item Report bugs at \url{https://github.com/ethan-young/multitool/issues}
 }
 
 }

@@ -58,9 +58,9 @@ We want to maximize our knowledge but we also want to be systematic. One approac
 filtered_data <- 
   the_data |> 
   filter(
-    include1 == 0,           # --
-    include2 != 3,           # Exclusion criteria
-    as.numeric(scale(include3)) > -2.5   # --
+    include1 == 0,  # --
+    include2 != 3,  # Exclusion criteria
+    include3 > -2.5 # --
   )
 
 # Model the data
@@ -86,7 +86,7 @@ Our example above has three exclusion criteria. If we don't know which are impor
 
 ```{r filters}
 the_data |> 
-  add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5)
+  add_filters(include1 == 0, include2 != 3, include3 > -2.5)
 ```
 
 The output above is a simple `tibble` (i.e., `data.frame`) containing three columns. 
@@ -134,7 +134,7 @@ For example, perhaps we want to explore our exclusion criteria alternatives acro
 
 ```{r building}
 the_data |>
-  add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |> 
+  add_filters(include1 == 0, include2 != 3, include3 > -2.5) |> 
   add_variables(var_group = "ivs", iv1, iv2, iv3) |> 
   add_variables(var_group = "dvs", dv1, dv2)
 ```
@@ -149,7 +149,7 @@ You can add a model to your blueprint by using `add_model()`. I designed `add_mo
 
 ```{r model}
 the_data |>
-  add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |> 
+  add_filters(include1 == 0, include2 != 3, include3 > -2.5) |> 
   add_variables(var_group = "ivs", iv1, iv2, iv3) |> 
   add_variables(var_group = "dvs", dv1, dv2) |> 
   add_model("linear model", lm(dv1 ~ iv1 * mod))
@@ -159,7 +159,7 @@ Above, the model is completely unquoted. It also has no `data` argument. This is
 
 ```{r}
 the_data |>
-  add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |>
+  add_filters(include1 == 0, include2 != 3, include3 > -2.5) |>
   add_variables(var_group = "ivs", iv1, iv2, iv3) |> 
   add_variables(var_group = "dvs", dv1, dv2) |> 
   add_model("linear model", "lm(dv1 ~ iv1 * mod)")
@@ -169,7 +169,7 @@ To make sure your `add_variables()` works properly, `add_model()` was designed t
 
 ```{r}
 the_data |>
-  add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |> 
+  # add_filters(include1 == 0, include2 != 3, include3 > -2.5) |> 
   add_variables(var_group = "ivs", iv1, iv2, iv3) |> 
   add_variables(var_group = "dvs", dv1, dv2) |> 
   add_model("linear model", lm({dvs} ~ {ivs} * mod)) # see the {} here
@@ -188,7 +188,7 @@ You can automate making a chart with `create_blueprint_graph()`. Feed your pipel
 ```{r blueprint-diagram, fig.width=5.75, fig.height=6}
 full_pipeline <- 
   the_data |>
-  add_filters(include1 == 0, include2 != 3, scale(include3) > -2.5) |> 
+  add_filters(include1 == 0, include2 != 3, include3 > -2.5) |> 
   add_variables(var_group = "ivs", iv1, iv2, iv3) |> 
   add_variables(var_group = "dvs", dv1, dv2) |> 
   add_model("linear model", lm({dvs} ~ {ivs} * mod))

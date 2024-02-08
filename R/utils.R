@@ -434,11 +434,11 @@ create_var_nodes <- function(.grid){
       dplyr::group_by(group) |>
       dplyr::summarize(
         type =  unique(type),
-        description = glue::glue( "&#x2022; {code}") |> paste(collapse = " - ")
+        description = glue::glue( "&#x2022; {code}") |> paste(... = _, collapse = " - ")
       ) |>
       summarize(
         type = glue::glue("{unique(type)}_set"),
-        description = glue::glue( " _ {group} __  - {description}") |> paste(collapse = " -- ") |> as.character(),
+        description = glue::glue( " _ {group} __  - {description}") |> paste(... = _, collapse = " -- ") |> as.character(),
         description = glue::glue("{description} - ")
       )
 
@@ -483,11 +483,11 @@ create_filter_nodes <- function(.grid){
       dplyr::group_by(group) |>
       dplyr::summarize(
         type =  unique(type),
-        description = glue::glue( "&#x2022; {code}") |> paste(collapse = " - ")
+        description = glue::glue( "&#x2022; {code}") |> paste(... = _, collapse = " - ")
       ) |>
       dplyr::summarize(
         type = glue::glue("{unique(type)}_set"),
-        description = glue::glue( " _ {group} __  - {description}") |> paste(collapse = " -- ") |> as.character() |> paste0(... = _, " - ")
+        description = glue::glue( " _ {group} __  - {description}") |> paste(... = _, collapse = " -- ") |> as.character() |> paste0(... = _, " - ")
       )
 
     list(overview, details)
@@ -539,11 +539,11 @@ create_descriptive_node <- function(.grid){
     dplyr::mutate(
       group = stringr::str_remove(group, "_(rs|alpha)$"),
       code_pipe = glue::glue("{attr(.grid, 'base_df')} |> {stringr::str_extract(code, '^.*\\\\|\\\\>')} ncol()"),
-      code_names = ifelse(type == "summary_stats", glue::glue("{attr(.grid, 'base_df')} |> {code} |> names() |> stringr::str_remove('^.*_') |> unique() |> paste(collapse = ', ')"), "c()"),
+      code_names = ifelse(type == "summary_stats", glue::glue("{attr(.grid, 'base_df')} |> {code} |> names() |> stringr::str_remove('^.*_') |> unique() |> paste(... = _, collapse = ', ')"), "c()"),
     ) |>
     dplyr::mutate(
-      code_result = purrr::map_chr(code_pipe, function(x) rlang::eval_tidy(rlang::parse_expr(x)) |> paste(collapse = ", ")),
-      code_names = purrr::map_chr(code_names, function(x) rlang::eval_tidy(rlang::parse_expr(x)) |> paste(collapse = ", "))
+      code_result = purrr::map_chr(code_pipe, function(x) rlang::eval_tidy(rlang::parse_expr(x)) |> paste(... = _, collapse = ", ")),
+      code_names = purrr::map_chr(code_names, function(x) rlang::eval_tidy(rlang::parse_expr(x)) |> paste(... = _, collapse = ", "))
     )
 
   if(nrow(descriptives) > 0){
@@ -579,7 +579,7 @@ create_preprocess_node <- function(.grid){
       dplyr::group_by(type) |>
       dplyr::summarize(
         type = unique(type),
-        description = glue::glue(" &#x2022; {group}") |> paste(collapse = " - ") |> as.character()
+        description = glue::glue(" &#x2022; {group}") |> paste(... = _, collapse = " - ") |> as.character()
       ) |>
       dplyr::mutate(
         description = glue::glue(" _ Preprocessing Steps __  -- {description} - ")
@@ -599,7 +599,7 @@ create_postprocess_node <- function(.grid){
       dplyr::group_by("type") |>
       dplyr::summarize(
         type = unique(type),
-        description = glue::glue(" &#x2022; {group}") |> paste(collapse = " - ") |> as.character()
+        description = glue::glue(" &#x2022; {group}") |> paste(... = _, collapse = " - ") |> as.character()
       ) |>
       dplyr::mutate(
         description = glue::glue(" _ Post-Processing Steps __  -- {description} - ")
@@ -619,9 +619,9 @@ create_model_nodes <- function(.grid){
       dplyr::group_by(code) |>
       dplyr::summarize(
         type = glue::glue("model"),
-        description = glue::glue(" _ {group} __  --| {code} - ") |> paste(collapse = "\n")
+        description = glue::glue(" _ {group} __  --| {code} - ") |> paste(... = _, collapse = "\n")
       ) |>
-      dplyr::select(type,description) |>
+      dplyr::select(type, description) |>
       dplyr::mutate(
         type = glue::glue("{type}_{1:dplyr::n()}") |> as.character()
       )
@@ -645,7 +645,7 @@ create_nmodels_node <- function(.grid){
       dplyr::ungroup() |>
       dplyr::summarize(
         type        = "total_models",
-        description = glue::glue(" _ {n_models} fitted models __  -- {paste0('(', paste(n, collapse = '*'), ')')} -| ",) |> as.character()
+        description = glue::glue(" _ {n_models} fitted models __  -- {paste0('(', paste(n, collapse = '*'), ')')} -| ") |> as.character()
       )
   } else{
     message("You don't have any models in your pipeline")
