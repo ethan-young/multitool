@@ -8,9 +8,9 @@
 <meta name="description" content="multitool">
 <title>multitool Nomenclature • multitool</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><link href="../deps/Lato-0.4.7/font.css" rel="stylesheet">
-<link href="../deps/Fira_Code-0.4.7/font.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/Lato-0.4.8/font.css" rel="stylesheet">
+<link href="../deps/Fira_Code-0.4.8/font.css" rel="stylesheet">
 <!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
@@ -74,8 +74,8 @@
 
 
 
-<script src="multitool-nomenclature_files/htmlwidgets-1.6.2/htmlwidgets.js"></script><script src="multitool-nomenclature_files/viz-1.8.2/viz.js"></script><link href="multitool-nomenclature_files/DiagrammeR-styles-0.2/styles.css" rel="stylesheet">
-<script src="multitool-nomenclature_files/grViz-binding-1.0.10/grViz.js"></script><div class="row">
+<script src="multitool-nomenclature_files/htmlwidgets-1.6.4/htmlwidgets.js"></script><script src="multitool-nomenclature_files/viz-1.8.2/viz.js"></script><link href="multitool-nomenclature_files/DiagrammeR-styles-0.2/styles.css" rel="stylesheet">
+<script src="multitool-nomenclature_files/grViz-binding-1.0.11/grViz.js"></script><div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>multitool Nomenclature</h1>
             
@@ -118,8 +118,8 @@ summarized</li>
 </ol>
 <p>These conventions make more sense when visualized across a typical
 <code>multitool</code> workflow:</p>
-<div class="grViz html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-3089c81828d43620fbdc" style="width:552px;height:576px;"></div>
-<script type="application/json" data-for="htmlwidget-3089c81828d43620fbdc">{"x":{"diagram":"\ndigraph boxes_and_circles {\n\n  # a \"graph\" statement\n  graph [overlap = true, fontsize = 10]\n\n  # several \"node\" statements\n  node [shape = box,\n        fill = gray,\n        fontname = Helvetica]\n  1 [label = \"base data\"]\n  2 [label = \"add_*() functions\"]\n  3 [label = \"expand_decisions()\"]\n  4 [label = \"create_blueprint_graph()\"]\n  5 [label = \"run_descriptives()\"]\n  6 [label = \"show_code_*()\"]\n  7 [label = \"run_multiverse()\"]\n  8 [label = \"reveal(), reveal_model_*()\"]\n  9 [label = \"condense()\"]\n  10 [label = \"reveal_corrs(), reveal_reliabilities(), reveal_summary_stats()\"]\n  11 [label = \"column_plot(), custom plotting/tables\"]\n  12 [label = \"detect_*(), summarize_filter_ns()\"]\n\n  # several \"edge\" statements\n  1->2 [label = \".df\"]\n  2->3 [label = \".pipeline\"]\n  2->4 [label = \".pipeline\"]\n  2->5 [label = \".pipeline\"]\n  3->6 [label = \".grid\"]\n  3->7 [label = \".grid\"]\n  7->8 [label = \".multi\"]\n  8->9 [label = \".unpacked\"]\n  5->10 [label = \".descriptives\"]\n  10->9 [label = \".unpacked\"]\n  9->11 [label = \".condensed\"]\n  2->12 [label = \".pipeline\"]\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script></main>
+<div class="grViz html-widget html-fill-item" id="htmlwidget-fe377e8971f3ea8208e1" style="width:552px;height:576px;"></div>
+<script type="application/json" data-for="htmlwidget-fe377e8971f3ea8208e1">{"x":{"diagram":"\ndigraph boxes_and_circles {\n\n  # a \"graph\" statement\n  graph [overlap = true, fontsize = 10]\n\n  # several \"node\" statements\n  node [shape = box,\n        fill = gray,\n        fontname = Helvetica]\n  1 [label = \"base data\"]\n  2 [label = \"add_*() functions\"]\n  3 [label = \"expand_decisions()\"]\n  4 [label = \"create_blueprint_graph()\"]\n  5 [label = \"run_descriptives()\"]\n  6 [label = \"show_code_*()\"]\n  7 [label = \"run_multiverse()\"]\n  8 [label = \"reveal(), reveal_model_*()\"]\n  9 [label = \"condense()\"]\n  10 [label = \"reveal_corrs(), reveal_reliabilities(), reveal_summary_stats()\"]\n  11 [label = \"column_plot(), custom plotting/tables\"]\n  12 [label = \"detect_*(), summarize_filter_ns()\"]\n\n  # several \"edge\" statements\n  1->2 [label = \".df\"]\n  2->3 [label = \".pipeline\"]\n  2->4 [label = \".pipeline\"]\n  2->5 [label = \".pipeline\"]\n  3->6 [label = \".grid\"]\n  3->7 [label = \".grid\"]\n  7->8 [label = \".multi\"]\n  8->9 [label = \".unpacked\"]\n  5->10 [label = \".descriptives\"]\n  10->9 [label = \".unpacked\"]\n  9->11 [label = \".condensed\"]\n  2->12 [label = \".pipeline\"]\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script></main>
 </div>
 
 
