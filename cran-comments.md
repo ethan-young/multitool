@@ -2,7 +2,7 @@
 
 This is a resubmission. In this version I have:
 
-* Removed functions in my tests that write files.
+* Addressed the problem documented here: <https://cran.r-project.org/web/checks/check_results_multitool.html>.
 
 ## R CMD check results
 

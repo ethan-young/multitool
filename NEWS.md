@@ -1,4 +1,4 @@
-# multitool (development version)
+# multitool 0.1.4
 
 # multitool 0.1.4
 
