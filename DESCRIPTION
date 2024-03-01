@@ -40,7 +40,8 @@ Imports:
   tidyr,
   lme4,
   parameters,
-  performance
+  performance,
+  rstudioapi
 Suggests: 
     knitr,
     rmarkdown,

@@ -87,13 +87,13 @@ A special set of functions with the `show_code_*` prefix allow you to see the co
 
 ```{r}
 # Take a look at the first filter decision
-expanded_pipeline |> show_code_filter(decision_num = 1)
+expanded_pipeline |> show_code_filter(decision_num = 1, console = FALSE)
 ```
 
 These functions allow you to generate the relevant code along the analysis pipeline. For example, we can look at our model pipeline for decision 17 using `show_code_model(decision_num = 17)`:
 
 ```{r}
-expanded_pipeline |> show_code_model(decision_num = 17)
+expanded_pipeline |> show_code_model(decision_num = 17, console = FALSE)
 ```
 
 Setting the `copy` argument to `TRUE` allows you to send the code straight to your clipboard. You can paste it into the source or console for testing/editing.

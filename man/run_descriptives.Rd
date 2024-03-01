@@ -4,20 +4,19 @@
 \alias{run_descriptives}
 \title{Run a multiverse-style descriptive analysis based on a complete decision grid}
 \usage{
-run_descriptives(.pipeline, show_progress = TRUE)
+run_descriptives(.grid, show_progress = TRUE)
 }
 \arguments{
-\item{.pipeline}{a \code{tibble} produced by a series of \code{add_*} calls.
-Importantly, this needs to be a pre-expanded pipeline because descriptive
-analyses only change when the underlying cases change. Thus, only filtering
-decisions will be used and internally expanded before calculating various
-descriptive analyses.}
+\item{.grid}{a \code{tibble} produced by \code{\link{expand_decisions}}}
 
 \item{show_progress}{logical, whether to show a progress bar while running.}
 }
 \value{
 single \code{tibble} containing tidied results for all descriptive
-analyses specified
+analyses specified. Because descriptive analyses only change when the
+underlying cases change, only filtering and/or subgroup decisions will be
+used and will be internally re-expanded before performing various
+descriptive analyses.
 }
 \description{
 Run a multiverse-style descriptive analysis based on a complete decision grid
@@ -58,7 +57,8 @@ full_pipeline <-
   add_correlations("predictors", matches("iv|mod|cov"), focus_set = c(cov1,cov2)) |>
   add_correlations("outcomes", matches("dv|mod"), focus_set = matches("dv")) |>
   add_reliabilities("unp_scale", c(iv1,iv2,iv3)) |>
-  add_reliabilities("vio_scale", starts_with("mod"))
+  add_reliabilities("vio_scale", starts_with("mod")) |>
+  expand_decisions()
 
 run_descriptives(full_pipeline)
 }

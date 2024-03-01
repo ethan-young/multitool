@@ -581,7 +581,8 @@ reveal_model_messages <- function(.multi, .unpack_specs = "no"){
 #'   add_correlations("predictor correlations", starts_with("iv")) |>
 #'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
 #'   add_reliabilities("vio_scale", starts_with("iv")) |>
-#'   add_model("linear model", lm({dvs} ~ {ivs} * mod))
+#'   add_model("linear model", lm({dvs} ~ {ivs} * mod)) |>
+#'   expand_decisions()
 #'
 #' my_descriptives <- run_descriptives(full_pipeline)
 #'
@@ -686,7 +687,8 @@ reveal_summary_stats <- function(.descriptives, .which, .unpack_specs = "no"){
 #'   add_correlations("predictors", starts_with("iv")) |>
 #'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
 #'   add_reliabilities("vio_scale", starts_with("iv")) |>
-#'   add_model("linear model", lm({dvs} ~ {ivs} * mod))
+#'   add_model("linear model", lm({dvs} ~ {ivs} * mod)) |>
+#'   expand_decisions()
 #'
 #' my_descriptives <- run_descriptives(full_pipeline)
 #'
@@ -790,7 +792,8 @@ reveal_corrs <- function(.descriptives, .which, .unpack_specs = "no"){
 #'   add_correlations("predictor correlations", starts_with("iv")) |>
 #'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
 #'   add_reliabilities("vio_scale", starts_with("iv")) |>
-#'   add_model("linear model", lm({dvs} ~ {ivs} * mod))
+#'   add_model("linear model", lm({dvs} ~ {ivs} * mod)) |>
+#'   expand_decisions()
 #'
 #' my_descriptives <- run_descriptives(full_pipeline)
 #'

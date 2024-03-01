@@ -53,6 +53,7 @@ utils::globalVariables(
     "v1",
     "v2",
     "value",
-    "vcov"
+    "vcov",
+    "subgroups"
   )
 )

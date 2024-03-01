@@ -124,7 +124,7 @@ multiverse_results |>
 
 ### Unpacking Specifications
 
-You can also choose to expand your decision grid with `.unpack_specs` to see which decisions produced what result. You have two options for unpacking your decisions - `wide` or `long`. If you set `.unpack_specs = 'wide'`, you get one column per decion variable. This is exactly the same as how your decisions appeared in your grid.
+You can also choose to expand your decision grid with `.unpack_specs` to see which decisions produced what result. You have two options for unpacking your decisions - `wide` or `long`. If you set `.unpack_specs = 'wide'`, you get one column per decision variable. This is exactly the same as how your decisions appeared in your grid.
 
 ```{r unpack-specs-wide}
 multiverse_results |> 

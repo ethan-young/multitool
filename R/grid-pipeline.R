@@ -76,7 +76,7 @@ add_filters <- function(.df, ...){
     grid_prep1 |>
     dplyr::pull(group) |>
     unique() |>
-    purrr::map_df(function(x){
+    purrr::map(function(x){
 
       grid_prep1 |>
         dplyr::filter(group == x) |>
@@ -86,7 +86,8 @@ add_filters <- function(.df, ...){
           code  = glue::glue("{x} %in% unique({x})") |> as.character()
         )
 
-    })
+    }) |>
+    purrr::list_rbind()
 
   if(!is.null(data_attr)){
     grid_prep <- dplyr::bind_rows(.df, grid_prep2)
@@ -97,6 +98,101 @@ add_filters <- function(.df, ...){
   attr(grid_prep, "base_df") <- data_chr
   grid_prep
 
+}
+
+#' Add sub groups to the multiverse pipeline
+#'
+#' @param .df The original \code{data.frame}(e.g., base data set). If part of
+#'   set of add_* decision functions in a pipeline, the base data will be passed
+#'   along as an attribute.
+#' @param ... sub group variable(s) in your data whose values specify groupings.
+#' @param .only a character vector of sub group values to include. The default
+#'   includes all sub group values for each sub group variable.
+#'
+#' @return a \code{data.frame} with three columns: type, group, and code. Type
+#'   indicates the decision type, group is a decision, and the code is the
+#'   actual code that will be executed. If part of a pipe, the current set of
+#'   decisions will be appended as new rows.
+#' @export
+#'
+#' @examples
+#'
+#' library(tidyverse)
+#' library(multitool)
+#'
+#' # Simulate some data
+#' the_data <-
+#'   data.frame(
+#'     id   = 1:500,
+#'     iv1  = rnorm(500),
+#'     iv2  = rnorm(500),
+#'     iv3  = rnorm(500),
+#'     mod1 = rnorm(500),
+#'     mod2 = rnorm(500),
+#'     mod3 = rnorm(500),
+#'     cov1 = rnorm(500),
+#'     cov2 = rnorm(500),
+#'     dv1  = rnorm(500),
+#'     dv2  = rnorm(500),
+#'     include1 = rbinom(500, size = 1, prob = .1),
+#'     include2 = sample(1:3, size = 500, replace = TRUE),
+#'     include3 = rnorm(500),
+#'     group    = sample(1:3, size = 500, replace = TRUE)
+#'   )
+#'
+#' the_data |>
+#'   add_subgroups(group)
+#'
+#' the_data |>
+#'   add_subgroups(group, .only = c(1,3))
+add_subgroups <- function(.df, ..., .only = NULL){
+  data_chr <- dplyr::enexpr(.df) |> as.character()
+  data_attr <- attr(.df, "base_df")
+
+  if(!is.null(data_attr)){
+    data_chr <- attr(.df, "base_df")
+  }
+
+  base_df <-
+    rlang::parse_expr(data_chr) |>
+    rlang::eval_tidy(env = parent.frame())
+
+  subgroups <-
+    base_df |>
+    dplyr::select(...) |>
+    dplyr::distinct() |>
+    tidyr::pivot_longer(
+      dplyr::everything(),
+      names_to = "group",
+      values_to = "code",
+      values_transform = as.character
+    ) |>
+    dplyr::mutate(
+      type = "subgroups"
+    ) |>
+    dplyr::relocate(type, .before = group) |>
+    dplyr::distinct() |>
+    dplyr::arrange(group, code)
+
+  if(is.null(.only)){
+    grid_prep <-
+      subgroups
+  } else{
+    grid_prep <-
+      subgroups |>
+      dplyr::filter(
+        code %in% .only
+      )
+  }
+
+  if(!is.null(data_attr)){
+    grid_prep <- dplyr::bind_rows(.df, grid_prep)
+  } else{
+    grid_prep <- grid_prep
+  }
+
+  attr(grid_prep, "base_df") <- data_chr
+  grid_prep
 }
 
 #' Add a set of variable alternatives to a multiverse pipeline
@@ -939,6 +1035,7 @@ add_reliabilities <- function(.df, scale_name, items){
 #' pipeline_expanded <- expand_decisions(full_pipeline)
 expand_decisions <- function(.pipeline){
 
+  pipeline_chr <- dplyr::enexpr(.pipeline)
   data_chr <- attr(.pipeline, "base_df")
 
   grid_components <-
@@ -1061,6 +1158,7 @@ expand_decisions <- function(.pipeline){
       decision,
       dplyr::any_of(
         c(
+          "subgroups",
           "variables",
           "filters",
           "preprocess",
@@ -1075,5 +1173,6 @@ expand_decisions <- function(.pipeline){
     )
 
   attr(pipeline_expanded, "base_df") <- data_chr
+  attr(pipeline_expanded, "pipeline") <- pipeline_chr
   pipeline_expanded
 }

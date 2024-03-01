@@ -62,7 +62,8 @@ full_pipeline <-
   add_correlations("predictors", starts_with("iv")) |>
   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
   add_reliabilities("vio_scale", starts_with("iv")) |>
-  add_model("linear model", lm({dvs} ~ {ivs} * mod))
+  add_model("linear model", lm({dvs} ~ {ivs} * mod)) |>
+  expand_decisions()
 
 my_descriptives <- run_descriptives(full_pipeline)
 
