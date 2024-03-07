@@ -270,9 +270,10 @@ run_universe_model <- function(.grid, decision_num, run = TRUE, save_model = FAL
         tidyr::unnest(model_parameters) |>
         dplyr::left_join(custom_param_keys, by = "parameter") |>
         dplyr::relocate(parameter_key, .before = parameter) |>
-        tidyr::nest(model_parameters = -dplyr::matches("^model_|_code$")) |>
+        tidyr::nest(model_parameters = -dplyr::matches("^model_|_code$|_fitted")) |>
         dplyr::relocate(model_parameters, .after = model_function) |>
-        tidyr::nest(model_fitted = -dplyr::ends_with("code"))
+        tidyr::nest(model_fitted = -dplyr::matches("code$|fitted$")) |>
+        dplyr::relocate(model_fitted,.before = 1)
     }
 
     universe_results |>

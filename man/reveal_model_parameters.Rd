@@ -4,13 +4,13 @@
 \alias{reveal_model_parameters}
 \title{Reveal the model parameters of a multiverse analysis}
 \usage{
-reveal_model_parameters(.multi, parameter_key = NULL, .unpack_specs = "no")
+reveal_model_parameters(.multi, effect_key = NULL, .unpack_specs = "no")
 }
 \arguments{
 \item{.multi}{a multiverse list-column \code{tibble} produced by
 \code{\link{run_multiverse}}.}
 
-\item{parameter_key}{character, if you added parameter keys to your pipeline,
+\item{effect_key}{character, if you added parameter keys to your pipeline,
 you can specify if you would like filter the parameters using one of your
 parameter keys. This is useful when different variables are being switched
 out across the multiverse but represent the same effect of interest.}
