@@ -178,7 +178,7 @@ reveal_model_parameters <- function(.multi, effect_key = NULL, .unpack_specs = "
   if(!is.null(effect_key)){
     unpacked <-
       unpacked |>
-      dplyr::filter(parameter_key == effect_key)
+      dplyr::filter(stringr::str_detect(parameter_key, effect_key))
   }
 
   if(.unpack_specs == "wide"){
