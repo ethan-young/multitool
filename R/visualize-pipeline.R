@@ -45,21 +45,61 @@ create_blueprint_graph <- function(.pipeline, splines = "line", render = TRUE, s
 
   grid_ndf <- create_pipeline_ndf(.pipeline)
 
-  possible_edges <-
-    tibble::tribble(
-      ~my_from,        ~my_to,
-      "base_df",       "filters",
-      "base_df",       "variables",
-      "variables_set", "variables",
-      "filters",       "filters_set",
-      "variables",     "total_dfs",
-      "filters",       "total_dfs",
-      "total_dfs",     "preprocess",
-      "filters_set",   "reliabilities",
-      "filters_set",   "summary_stats",
-      "filters_set",   "corrs",
-      "total_models",  "postprocess"
-    )
+  if("subgroups" %in% decision_types){
+    if("filters" %in% decision_types){
+      possible_edges <-
+        tibble::tribble(
+          ~my_from,        ~my_to,
+          "base_df",       "subgroups",
+          "subgroups_set", "subgroups",
+          "subgroups",     "variables",
+          "subgroups",     "filters",
+          "variables_set", "variables",
+          "filters",       "filters_set",
+          "variables",     "total_dfs",
+          "filters",       "total_dfs",
+          "total_dfs",     "preprocess",
+          "filters_set",   "reliabilities",
+          "filters_set",   "summary_stats",
+          "filters_set",   "corrs",
+          "total_models",  "postprocess"
+        )
+    } else{
+      possible_edges <-
+        tibble::tribble(
+          ~my_from,        ~my_to,
+          "base_df",       "subgroups",
+          "subgroups_set", "subgroups",
+          "subgroups",     "variables",
+          "subgroups",     "filters",
+          "variables_set", "variables",
+          "filters",       "filters_set",
+          "variables",     "total_dfs",
+          "filters",       "total_dfs",
+          "total_dfs",     "preprocess",
+          "subgroups_set", "reliabilities",
+          "subgroups_set", "summary_stats",
+          "subgroups_set", "corrs",
+          "total_models",  "postprocess"
+        )
+    }
+  } else{
+    possible_edges <-
+      tibble::tribble(
+        ~my_from,        ~my_to,
+        "base_df",       "filters",
+        "base_df",       "variables",
+        "variables_set", "variables",
+        "filters",       "filters_set",
+        "variables",     "total_dfs",
+        "filters",       "total_dfs",
+        "total_dfs",     "preprocess",
+        "filters_set",   "reliabilities",
+        "filters_set",   "summary_stats",
+        "filters_set",   "corrs",
+        "total_models",  "postprocess"
+      )
+  }
 
   if(grid_ndf |> dplyr::filter(stringr::str_detect(nodes,"model_\\d")) |> nrow() > 0){
 
@@ -67,7 +107,12 @@ create_blueprint_graph <- function(.pipeline, splines = "line", render = TRUE, s
       grid_ndf |>
       dplyr::filter(stringr::str_detect(nodes,"model_\\d")) |>
       dplyr::transmute(
-        my_from = ifelse("preprocess" %in% unique(grid_ndf$nodes), "preprocess", "total_dfs"),
+        my_from =
+          ifelse(
+            "preprocess" %in% unique(grid_ndf$nodes),
+            "preprocess",
+            "total_dfs"
+          ),
         my_to = nodes
       )
 
@@ -89,12 +134,12 @@ create_blueprint_graph <- function(.pipeline, splines = "line", render = TRUE, s
 
   pipeline_edges <-
     possible_edges |>
-    dplyr::left_join(
+    dplyr::inner_join(
       grid_ndf |> dplyr::select(nodes, id),
       by = c("my_from" = "nodes")
     ) |>
     dplyr::rename(from = id) |>
-    dplyr::left_join(
+    dplyr::inner_join(
       grid_ndf |> dplyr::select(nodes, id),
       by = c("my_to" = "nodes")
     ) |>
@@ -106,16 +151,23 @@ create_blueprint_graph <- function(.pipeline, splines = "line", render = TRUE, s
     DiagrammeR::create_graph() |>
     DiagrammeR::add_node_df(grid_ndf)
 
-  if("filters" %in% decision_types & "variables" %in% decision_types){
+  if("filters" %in% decision_types | "variables" %in% decision_types | "subgroups" %in% decision_types){
     invis_nodes <-
       a_graph |>
-      DiagrammeR::select_nodes(conditions = stringr::str_detect(nodes, "filters|variables")) |>
+      DiagrammeR::select_nodes(
+        conditions = stringr::str_detect(nodes, "subgroups|filters|variables")
+      ) |>
       DiagrammeR::get_node_df_ws() |>
       dplyr::mutate(
-        new_order = dplyr::case_when(nodes == "variables_set" ~ 1,
-                                     nodes == "variables" ~ 2,
-                                     nodes == "filters" ~ 3,
-                                     nodes == "filters_set" ~ 4)
+        new_order =
+          dplyr::case_when(
+            nodes == "subgroups" ~ 1,
+            nodes == "subgroups_set" ~ 2,
+            nodes == "variables_set" ~ 3,
+            nodes == "variables" ~ 4,
+            nodes == "filters" ~ 5,
+            nodes == "filters_set" ~ 6
+          )
       ) |>
       dplyr::arrange(new_order) |>
       dplyr::pull(id)
@@ -135,9 +187,16 @@ create_blueprint_graph <- function(.pipeline, splines = "line", render = TRUE, s
       )
   }
 
+  the_graph <- a_graph
+
+  if("filters" %in% decision_types | "variables" %in% decision_types | "subgroups" %in% decision_types){
+    the_graph <-
+      the_graph |>
+      DiagrammeR::add_edge_df(invis_edges)
+  }
+
   the_graph <-
-    a_graph |>
-    DiagrammeR::add_edge_df(invis_edges) |>
+    the_graph |>
     DiagrammeR::add_edge_df(pipeline_edges) |>
     DiagrammeR::add_global_graph_attrs("splines", splines, "graph") |>
     DiagrammeR::add_global_graph_attrs("layout", "dot", "graph") |>
@@ -151,21 +210,47 @@ create_blueprint_graph <- function(.pipeline, splines = "line", render = TRUE, s
     DiagrammeR::add_global_graph_attrs("tailport", "s", "edge") |>
     DiagrammeR::add_global_graph_attrs("headport", "n", "edge") |>
     DiagrammeR::add_global_graph_attrs("concentrate", "false", "edge") |>
-    DiagrammeR::add_global_graph_attrs("constraint", "true", "edge") |>
-    DiagrammeR::select_edges(my_to == "filters_set") |>
-    DiagrammeR::set_edge_attrs_ws("arrowhead", "none") |>
-    DiagrammeR::set_edge_attrs_ws("arrowtail", "none") |>
-    DiagrammeR::set_edge_attrs_ws("style", "solid") |>
-    DiagrammeR::set_edge_attrs_ws("headport", "w") |>
-    DiagrammeR::set_edge_attrs_ws("tailport", "e") |>
-    DiagrammeR::clear_selection() |>
-    DiagrammeR::select_edges(my_from == "variables_set") |>
-    DiagrammeR::set_edge_attrs_ws("arrowhead", "none") |>
-    DiagrammeR::set_edge_attrs_ws("arrowtail", "none") |>
-    DiagrammeR::set_edge_attrs_ws("style", "solid") |>
-    DiagrammeR::set_edge_attrs_ws("headport", "w") |>
-    DiagrammeR::set_edge_attrs_ws("tailport", "e") |>
-    DiagrammeR::clear_selection()
+    DiagrammeR::add_global_graph_attrs("constraint", "true", "edge")
+
+  if("subgroups" %in% decision_types){
+    the_graph <-
+      the_graph |>
+      DiagrammeR::select_edges(my_to == "subgroups") |>
+      DiagrammeR::set_edge_attrs_ws("arrowhead", "none") |>
+      DiagrammeR::set_edge_attrs_ws("arrowtail", "none") |>
+      DiagrammeR::set_edge_attrs_ws("style", "solid") |>
+      DiagrammeR::set_edge_attrs_ws("headport", "e") |>
+      DiagrammeR::set_edge_attrs_ws("tailport", "w") |>
+      DiagrammeR::clear_selection() |>
+      DiagrammeR::select_edges(my_from == "base_df") |>
+      DiagrammeR::set_edge_attrs_ws("headport", "n") |>
+      DiagrammeR::set_edge_attrs_ws("tailport", "s") |>
+      DiagrammeR::clear_selection()
+  }
+
+  if("filters" %in% decision_types){
+    the_graph <-
+      the_graph |>
+      DiagrammeR::select_edges(my_to == "filters_set") |>
+      DiagrammeR::set_edge_attrs_ws("arrowhead", "none") |>
+      DiagrammeR::set_edge_attrs_ws("arrowtail", "none") |>
+      DiagrammeR::set_edge_attrs_ws("style", "solid") |>
+      DiagrammeR::set_edge_attrs_ws("headport", "w") |>
+      DiagrammeR::set_edge_attrs_ws("tailport", "e") |>
+      DiagrammeR::clear_selection()
+  }
+
+  if("variables" %in% decision_types){
+    the_graph <-
+      the_graph |>
+      DiagrammeR::select_edges(my_from == "variables_set") |>
+      DiagrammeR::set_edge_attrs_ws("arrowhead", "none") |>
+      DiagrammeR::set_edge_attrs_ws("arrowtail", "none") |>
+      DiagrammeR::set_edge_attrs_ws("style", "solid") |>
+      DiagrammeR::set_edge_attrs_ws("headport", "w") |>
+      DiagrammeR::set_edge_attrs_ws("tailport", "e") |>
+      DiagrammeR::clear_selection()
+  }
 
   graph_text <-
     the_graph |>

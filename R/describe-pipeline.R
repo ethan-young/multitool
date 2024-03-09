@@ -40,7 +40,7 @@ detect_multiverse_n <- function(.pipeline, include_models = TRUE){
 
   if(include_models){
     .pipeline |>
-      dplyr::filter(type %in% c("filters","variables", "models")) |>
+      dplyr::filter(type %in% c("subgroups","filters","variables", "models")) |>
       dplyr::mutate(group = ifelse(type=="models", "model", group)) |>
       dplyr::group_by(group) |>
       dplyr::count() |>
@@ -48,15 +48,77 @@ detect_multiverse_n <- function(.pipeline, include_models = TRUE){
       cumprod() |>
       max()
   } else{
-    .pipeline |>
-      dplyr::filter(type %in% c("filters","variables")) |>
+    n_data <-
+      .pipeline |>
+      dplyr::filter(type %in% c("subgroups","filters","variables")) |>
       dplyr::group_by(group) |>
-      dplyr::count() |>
+      dplyr::count()
+
+    if(nrow(n_data) > 0){
+      n_data |>
+        dplyr::pull(n) |>
+        cumprod() |>
+        max()
+    } else{
+      1
+    }
+  }
+}
+
+#'Detect total number of subgroups in your pipelines
+#'
+#'@param .pipeline a \code{data.frame} produced by calling a series of add_*
+#'  functions.
+#'
+#'@return a numeric, the total number of unique subgroups, including subgroup
+#'  combinations
+#'@export
+#'
+#' @examples
+#' library(tidyverse)
+#' library(multitool)
+#'
+#' # create some data
+#' the_data <-
+#'   data.frame(
+#'     id  = 1:500,
+#'     iv1 = rnorm(500),
+#'     iv2 = rnorm(500),
+#'     iv3 = rnorm(500),
+#'     mod = rnorm(500),
+#'     dv1 = rnorm(500),
+#'     dv2 = rnorm(500),
+#'     include1 = rbinom(500, size = 1, prob = .1),
+#'     include2 = sample(1:3, size = 500, replace = TRUE),
+#'     include3 = rnorm(500)
+#'   )
+#'
+#' # create a pipeline blueprint
+#' full_pipeline <-
+#'   the_data |>
+#'   add_subgroups(include2) |>
+#'   add_filters(include1 == 0, include2 != 3, include3 > -2.5) |>
+#'   add_variables(var_group = "ivs", iv1, iv2, iv3) |>
+#'   add_variables(var_group = "dvs", dv1, dv2) |>
+#'   add_model("linear model", lm({dvs} ~ {ivs} * mod))
+#'
+#' detect_n_variables(full_pipeline)
+detect_n_subgroups <- function(.pipeline){
+
+  n_subgroups <-
+    .pipeline |>
+    dplyr::filter(type == "subgroups") |>
+    dplyr::group_by(type, group) |>
+    dplyr::count()
+
+  if(nrow(n_subgroups) > 0){
+    n_subgroups |>
       dplyr::pull(n) |>
       cumprod() |>
       max()
+  } else{
+    0
   }
-
 }
 
 #' Detect total number of variable sets in your pipelines
@@ -97,13 +159,20 @@ detect_multiverse_n <- function(.pipeline, include_models = TRUE){
 #' detect_n_variables(full_pipeline)
 detect_n_variables <- function(.pipeline){
 
-  .pipeline |>
+  n_vars <-
+    .pipeline |>
     dplyr::filter(type == "variables") |>
     dplyr::group_by(type, group) |>
-    dplyr::count() |>
-    dplyr::pull(n) |>
-    cumprod() |>
-    max()
+    dplyr::count()
+
+  if(nrow(n_vars) > 0){
+    n_vars |>
+      dplyr::pull(n) |>
+      cumprod() |>
+      max()
+  } else{
+    0
+  }
 }
 
 #' Detect total number of filtering expressions your pipelines
@@ -143,14 +212,20 @@ detect_n_variables <- function(.pipeline){
 #'
 #' detect_n_filters(full_pipeline)
 detect_n_filters <- function(.pipeline){
-
-  .pipeline |>
+  n_filters <-
+    .pipeline |>
     dplyr::filter(type == "filters") |>
     dplyr::group_by(type, group) |>
-    dplyr::count() |>
-    dplyr::pull(n) |>
-    cumprod() |>
-    max()
+    dplyr::count()
+
+  if(nrow(n_filters) > 0){
+    n_filters |>
+      dplyr::pull(n) |>
+      cumprod() |>
+      max()
+  } else{
+    0
+  }
 }
 
 #' Detect total number of models in your pipelines

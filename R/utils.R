@@ -556,6 +556,48 @@ run_universe_reliabilities <- function(.grid, decision_num, run = TRUE){
   }
 }
 
+create_subgroup_nodes <- function(.grid){
+
+  n_subgroup_datasets <- detect_n_subgroups(.grid)
+
+  subgroup_nodes <-
+    .grid |>
+    dplyr::filter(type == "subgroups")
+
+  if(nrow(subgroup_nodes) > 0){
+    overview <-
+      subgroup_nodes |>
+      dplyr::group_by(type, group) |>
+      dplyr::count() |>
+      dplyr::ungroup() |>
+      dplyr::summarize(
+        type = unique(type),
+        description =
+          glue::glue(
+            " _ {stringr::str_to_sentence(type)} __  --| {dplyr::n()} sets -| ({paste(n, collapse = '*')} = {n_subgroup_datasets}) - "
+          ) |>
+          as.character()
+      )
+
+    details <-
+      subgroup_nodes |>
+      dplyr::group_by(group) |>
+      dplyr::summarize(
+        type =  unique(type),
+        description = glue::glue( "&#x2022; {code}") |> paste(... = _, collapse = " - ")
+      ) |>
+      summarize(
+        type = glue::glue("{unique(type)}_set"),
+        description = glue::glue( " _ {group} __  - {description}") |> paste(... = _, collapse = " -- ") |> as.character(),
+        description = glue::glue("{description} - ")
+      )
+
+    list(overview, details)
+  } else{
+    message("No subgroups in your pipeline")
+  }
+}
+
 create_var_nodes <- function(.grid){
 
   n_var_datasets <- detect_n_variables(.grid)
@@ -596,23 +638,28 @@ create_var_nodes <- function(.grid){
 
 create_filter_nodes <- function(.grid){
 
-  n_filter_datasets <- detect_n_filters(.grid)
-
   filter_nodes <-
     .grid |>
     dplyr::filter(type == "filters") |>
     dplyr::mutate(
-      code = stringr::str_replace_all(code, c(">=" = "bigger than or equal to",
-                                              "<=" = "less than or equal to",
-                                              " > "  = " bigger than ",
-                                              " < "  = " less than ",
-                                              "==" = "equals",
-                                              "!=" = "does not equal",
-                                              "%in%.*$" = 'is any value',
-                                              "scale\\((.*)\\)" = "z-scored \\1 is"))
+      code =
+        stringr::str_replace_all(
+          code,
+          c(
+            ">=" = "bigger than or equal to",
+            "<=" = "less than or equal to",
+            " > "  = " bigger than ",
+            " < "  = " less than ",
+            "==" = "equals",
+            "!=" = "does not equal",
+            "%in%.*$" = 'is any value',
+            "scale\\((.*)\\)" = "z-scored \\1 is"
+          )
+        )
     )
 
   if(nrow(filter_nodes) > 0){
+    n_filter_datasets <- detect_n_filters(.grid)
 
     overview <-
       filter_nodes |>
@@ -620,8 +667,12 @@ create_filter_nodes <- function(.grid){
       dplyr::count() |>
       dplyr::ungroup() |>
       dplyr::summarize(
-        type        = unique(type),
-        description = glue::glue(" _ {stringr::str_to_sentence(type)} __  --| {dplyr::n()} sets -| ({paste(n, collapse = '*')} = {n_filter_datasets}) - ") |> as.character()
+        type = unique(type),
+        description =
+          glue::glue(
+            " _ {stringr::str_to_sentence(type)} __  --| {dplyr::n()} sets -| ({paste(n, collapse = '*')} = {n_filter_datasets}) - "
+          ) |>
+          as.character()
       )
 
     details <-
@@ -629,11 +680,20 @@ create_filter_nodes <- function(.grid){
       dplyr::group_by(group) |>
       dplyr::summarize(
         type =  unique(type),
-        description = glue::glue( "&#x2022; {code}") |> paste(... = _, collapse = " - ")
+        description =
+          glue::glue( "&#x2022; {code}") |>
+          paste(... = _, collapse = " - ")
       ) |>
       dplyr::summarize(
         type = glue::glue("{unique(type)}_set"),
-        description = glue::glue( " _ {group} __  - {description}") |> paste(... = _, collapse = " -- ") |> as.character() |> paste0(... = _, " - ")
+        description =
+          glue::glue(" _ {group} __  - {description}") |>
+          paste(
+            ... = _,
+            collapse = " -- "
+          ) |>
+          as.character() |>
+          paste0(... = _, " - ")
       )
 
     list(overview, details)
@@ -644,34 +704,43 @@ create_filter_nodes <- function(.grid){
 
 create_datasets_node <- function(.grid){
 
-  n_datasets <- detect_multiverse_n(.grid, include_models =FALSE)
-  n_var_datasets <- detect_n_variables(.grid)
-  n_filter_datasets <- detect_n_filters(.grid)
+  n_datasets <- detect_multiverse_n(.grid, include_models = FALSE)
+  n_subgroups <- detect_n_subgroups(.grid)
+  n_vars <- detect_n_variables(.grid)
+  n_filters <- detect_n_filters(.grid)
 
   if(n_datasets > 1){
     overview <-
       .grid |>
-      dplyr::filter(type %in% c("filters","variables")) |>
+      dplyr::filter(type %in% c("subgroups","filters","variables")) |>
       dplyr::group_by(type, group) |>
       dplyr::count() |>
       dplyr::ungroup() |>
       dplyr::mutate(
-        each = dplyr::case_when(type == "filters" ~ glue::glue("{n_filter_datasets}"),
-                                type == "variables" ~ glue::glue("{n_var_datasets}"),
-                                T~""),
+        each =
+          dplyr::case_when(
+            type == "filters" ~ glue::glue("{n_filters}"),
+            type == "variables" ~ glue::glue("{n_vars}"),
+            type == "subgroups" ~ glue::glue("{n_subgroups}"),
+            T~""
+          ),
         .by = type
       ) |>
       dplyr::distinct(type, each) |>
       dplyr::summarize(
-        description = glue::glue(" _ {n_datasets} analysis datasets __  --| {paste0(type, ' (', each, ')', collapse = ' * ')} - ") |> as.character(),
-        type        = "total_dfs"
+        description =
+          glue::glue(
+            " _ {n_datasets} analysis datasets __  --| {paste0(type, ' (', each, ')', collapse = ' * ')} - "
+          ) |>
+          as.character(),
+        type = "total_dfs"
       )
 
     overview
   } else{
     tibble(
       type = "total_dfs",
-      description = " _ {n_datasets} datasets __ "
+      description = glue::glue(" _ {n_datasets} datasets __ ")
     )
   }
 }
@@ -800,32 +869,52 @@ create_nmodels_node <- function(.grid){
 
 create_pipeline_ndf <- function(.grid){
 
-  dplyr::bind_rows(
-    create_var_nodes(.grid),
-    create_filter_nodes(.grid),
-    create_datasets_node(.grid),
-    create_descriptive_node(.grid),
-    create_preprocess_node(.grid),
-    create_model_nodes(.grid),
-    create_nmodels_node(.grid),
-    create_postprocess_node(.grid)
-  ) |>
-    dplyr::add_row(type = "base_df", description = paste0(" _ Base Dataset __  -- ", attr(.grid, "base_df"), " -| "), .before = 1) |>
+  node_list <- list()
+
+  node_list$subgroups <- create_subgroup_nodes(.grid)
+  node_list$var <- create_var_nodes(.grid)
+  node_list$filter <- create_filter_nodes(.grid)
+  node_list$datasets <- create_datasets_node(.grid)
+  node_list$descr <- create_descriptive_node(.grid)
+  node_list$pre <- create_preprocess_node(.grid)
+  node_list$model <- create_model_nodes(.grid)
+  node_list$nmodels <- create_nmodels_node(.grid)
+  node_list$post <- create_postprocess_node(.grid)
+
+  dplyr::bind_rows(node_list) |>
+    dplyr::add_row(
+      type = "base_df",
+      description = paste0(" _ Base Dataset __  -- ", attr(.grid, "base_df"), " -| "),
+      .before = 1
+    ) |>
     dplyr::transmute(
       id = 1:dplyr::n(),
       nodes = type,
       label = description
     ) |>
-    dplyr::mutate(order = dplyr::case_when(nodes == "base_df" ~ 1,
-                                           nodes %in% c("filters","variables","filters_set","variables_set") ~ 2,
-                                           nodes == "total_dfs" ~ 3,
-                                           nodes == "descriptives" ~ 3,
-                                           nodes %in% c("corrs", "reliabilities", "summary_stats") ~ 3,
-                                           nodes == "preprocess" ~ 4,
-                                           stringr::str_detect(nodes, "model_") ~ 5,
-                                           nodes == "total_models" ~ 6,
-                                           nodes == "postprocess" ~ 7),
-                  rank = order
+    dplyr::mutate(
+      order =
+        dplyr::case_when(
+          nodes == "base_df" ~ 1,
+          nodes %in% c(
+            "subgroups",
+            "subgroups_set"
+          ) ~ 2,
+          nodes %in% c(
+            "filters",
+            "variables",
+            "filters_set",
+            "variables_set"
+          ) ~ 3,
+          nodes == "total_dfs" ~ 4,
+          nodes == "descriptives" ~ 4,
+          nodes %in% c("corrs", "reliabilities", "summary_stats") ~ 4,
+          nodes == "preprocess" ~ 5,
+          stringr::str_detect(nodes, "model_") ~ 6,
+          nodes == "total_models" ~ 7,
+          nodes == "postprocess" ~ 8
+        ),
+      rank = order
     ) |>
     as.data.frame()
 }
