@@ -61,6 +61,9 @@
     <loc>https://ethan-young.github.io/multitool/reference/add_reliabilities.html</loc>
   </url>
   <url>
+    <loc>https://ethan-young.github.io/multitool/reference/add_subgroups.html</loc>
+  </url>
+  <url>
     <loc>https://ethan-young.github.io/multitool/reference/add_summary_stats.html</loc>
   </url>
   <url>
@@ -80,6 +83,9 @@
   </url>
   <url>
     <loc>https://ethan-young.github.io/multitool/reference/detect_n_models.html</loc>
+  </url>
+  <url>
+    <loc>https://ethan-young.github.io/multitool/reference/detect_n_subgroups.html</loc>
   </url>
   <url>
     <loc>https://ethan-young.github.io/multitool/reference/detect_n_variables.html</loc>
@@ -124,7 +130,7 @@
     <loc>https://ethan-young.github.io/multitool/reference/run_multiverse.html</loc>
   </url>
   <url>
-    <loc>https://ethan-young.github.io/multitool/reference/show_code_filter.html</loc>
+    <loc>https://ethan-young.github.io/multitool/reference/show_code_subgroups.html</loc>
   </url>
   <url>
     <loc>https://ethan-young.github.io/multitool/reference/summarize_filter_ns.html</loc>
