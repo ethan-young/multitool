@@ -1,6 +1,10 @@
 # multitool (development version)
 
-# multitool 0.1.4
+* Added subgroup functionality with `add_subgroups()`
+* Updated `show_code_*` functions with an option to run code in the console
+* Updated `create_blueprint_graph()` to visualize subgroups if they exist
+* Updated `reveal_*` functions to show subgroup specs, if they exist
+* Fixed an issue with `add_parameters()`
 
 # multitool 0.1.4
 
