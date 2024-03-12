@@ -60,7 +60,12 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">run_multiverse</span><span class="op">(</span><span class="va">.grid</span>, ncores <span class="op">=</span> <span class="fl">1</span>, save_model <span class="op">=</span> <span class="cn">FALSE</span>, show_progress <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">run_multiverse</span><span class="op">(</span></span>
+<span>  <span class="va">.grid</span>,</span>
+<span>  add_standardized <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  save_model <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  show_progress <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -69,9 +74,9 @@
 <dd><p>a <code>tibble</code> produced by <code><a href="expand_decisions.html">expand_decisions</a></code></p></dd>
 
 
-<dt>ncores</dt>
-<dd><p>numeric. The number of cores you want to use for parallel
-processing.</p></dd>
+<dt>add_standardized</dt>
+<dd><p>logical. Whether to add standardized coefficients to
+the model output. Defaults to <code>TRUE</code>.</p></dd>
 
 
 <dt>save_model</dt>
@@ -143,7 +148,7 @@ If not, <code>summary</code> will be called instead.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Run the whole multiverse</span></span></span>
 <span class="r-in"><span><span class="va">the_multiverse</span> <span class="op">&lt;-</span> <span class="fu">run_multiverse</span><span class="op">(</span><span class="va">pipeline_grid</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,<span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in purrr::map(seq_len(nrow(.grid)), .progress = show_progress, function(x) {    multi_results &lt;- list()    if ("models" %in% names(.grid)) {        multi_results$models &lt;- run_universe_model(.grid = .grid,             decision_num = .grid$decision[x], save_model = save_model)    }    purrr::reduce(multi_results, dplyr::left_join, by = "decision")}):</span> <span style="color: #00BBBB;">ℹ</span> In index: 1.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in purrr::map(seq_len(nrow(.grid)), .progress = show_progress, function(x) {    multi_results &lt;- list()    if ("models" %in% names(.grid)) {        multi_results$models &lt;- run_universe_model(.grid = .grid,             decision_num = .grid$decision[x], add_standardized = add_standardized,             save_model = save_model)    }    purrr::reduce(multi_results, dplyr::left_join, by = "decision")}):</span> <span style="color: #00BBBB;">ℹ</span> In index: 1.</span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `map2()`:</span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> In index: 1.</span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> With name: model.</span>
