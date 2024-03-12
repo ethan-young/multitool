@@ -1,13 +1,13 @@
 #' Run a multiverse based on a complete decision grid
 #'
 #' @param .grid a \code{tibble} produced by \code{\link{expand_decisions}}
+#' @param add_standardized logical. Whether to add standardized coefficients to
+#'   the model output. Defaults to \code{TRUE}.
 #' @param save_model logical, indicates whether to save the model object in its
 #'   entirety. The default is \code{FALSE} because model objects are usually
 #'   large and under the hood, \code{\link[parameters]{parameters}} and
 #'   \code{\link[performance]{performance}} is used to summarize the most useful
 #'   model information.
-#' @param ncores numeric. The number of cores you want to use for parallel
-#'   processing.
 #' @param show_progress logical, whether to show a progress bar while running.
 #'
 #' @return a single \code{tibble} containing tidied results for the model and
@@ -60,33 +60,7 @@
 #'
 #' # Run the whole multiverse
 #' the_multiverse <- run_multiverse(pipeline_grid[1:10,])
-run_multiverse <- function(.grid, ncores = 1, save_model = FALSE, show_progress = TRUE){
-
-  if(ncores > 1){
-    future::plan(future::multisession, workers = ncores)
-    multiverse <-
-      furrr::future_map_dfr(
-        seq_len(nrow(.grid)),
-        function(x){
-          multi_results <- list()
-
-          if("models" %in% names(.grid)){
-            multi_results$models <-
-              run_universe_model(
-                .grid = .grid,
-                decision_num = x,
-                save_model = save_model
-              )
-          }
-          purrr::reduce(multi_results, dplyr::left_join, by = "decision")
-        },
-        .options = furrr::furrr_options(seed = TRUE)
-      ) |>
-      purrr::list_rbind()
-
-    future::plan(future::sequential)
-
-  } else{
+run_multiverse <- function(.grid, add_standardized = TRUE, save_model = FALSE, show_progress = TRUE){
 
     multiverse <-
       purrr::map(
@@ -100,13 +74,13 @@ run_multiverse <- function(.grid, ncores = 1, save_model = FALSE, show_progress 
               run_universe_model(
                 .grid = .grid,
                 decision_num = .grid$decision[x],
+                add_standardized = add_standardized,
                 save_model = save_model
               )
           }
           purrr::reduce(multi_results, dplyr::left_join, by = "decision")
         }) |>
       purrr::list_rbind()
-  }
 
   dplyr::full_join(
     .grid |>

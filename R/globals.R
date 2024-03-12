@@ -54,6 +54,11 @@ utils::globalVariables(
     "v2",
     "value",
     "vcov",
-    "subgroups"
-  )
+    "subgroups",
+    "coefficient",
+    "ci",
+    "ci_low",
+    "ci_high",
+    "std_coefficient"
+    )
 )

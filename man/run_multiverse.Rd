@@ -4,13 +4,18 @@
 \alias{run_multiverse}
 \title{Run a multiverse based on a complete decision grid}
 \usage{
-run_multiverse(.grid, ncores = 1, save_model = FALSE, show_progress = TRUE)
+run_multiverse(
+  .grid,
+  add_standardized = TRUE,
+  save_model = FALSE,
+  show_progress = TRUE
+)
 }
 \arguments{
 \item{.grid}{a \code{tibble} produced by \code{\link{expand_decisions}}}
 
-\item{ncores}{numeric. The number of cores you want to use for parallel
-processing.}
+\item{add_standardized}{logical. Whether to add standardized coefficients to
+the model output. Defaults to \code{TRUE}.}
 
 \item{save_model}{logical, indicates whether to save the model object in its
 entirety. The default is \code{FALSE} because model objects are usually

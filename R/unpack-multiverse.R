@@ -907,7 +907,7 @@ reveal_reliabilities <- function(.descriptives, .which, .unpack_specs = "no"){
 #' the_multiverse |>
 #'   reveal_model_parameters() |>
 #'   filter(str_detect(parameter, "iv")) |>
-#'   condense(coefficient, list(mean = mean, median = median))
+#'   condense(unstd_coef, list(mean = mean, median = median))
 condense <- function(.unpacked, .what, .how, .group = NULL, list_cols = TRUE){
 
   if(list_cols){

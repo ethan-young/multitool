@@ -27,8 +27,6 @@ Imports:
   DiagrammeR,
   dplyr,
   flextable,
-  furrr,
-  future,
   ggdist,
   glue,
   ggplot2,

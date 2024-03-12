@@ -199,40 +199,41 @@ multiverse_results
 # Unpack model coefficients
 multiverse_results |> 
   reveal_model_parameters()
-#> # A tibble: 192 × 16
-#>    decision specifications   model_function parameter   coefficient    se    ci
-#>    <chr>    <list>           <chr>          <chr>             <dbl> <dbl> <dbl>
-#>  1 1        <tibble [1 × 3]> lm             (Intercept)     -0.0621 0.119  0.95
-#>  2 1        <tibble [1 × 3]> lm             iv1              0.0811 0.135  0.95
-#>  3 1        <tibble [1 × 3]> lm             mod             -0.0708 0.119  0.95
-#>  4 1        <tibble [1 × 3]> lm             iv1:mod          0.0357 0.137  0.95
-#>  5 2        <tibble [1 × 3]> lm             (Intercept)     -0.0608 0.114  0.95
-#>  6 2        <tibble [1 × 3]> lm             iv1             -0.0262 0.129  0.95
-#>  7 2        <tibble [1 × 3]> lm             mod             -0.147  0.114  0.95
-#>  8 2        <tibble [1 × 3]> lm             iv1:mod         -0.0479 0.131  0.95
-#>  9 3        <tibble [1 × 3]> lm             (Intercept)     -0.0261 0.117  0.95
-#> 10 3        <tibble [1 × 3]> lm             iv2             -0.129  0.114  0.95
+#> # A tibble: 192 × 20
+#>    decision specifications   model_function parameter  unstd_coef    se unstd_ci
+#>    <chr>    <list>           <chr>          <chr>           <dbl> <dbl>    <dbl>
+#>  1 1        <tibble [1 × 3]> lm             (Intercep…    0.0609  0.114     0.95
+#>  2 1        <tibble [1 × 3]> lm             iv1           0.0220  0.118     0.95
+#>  3 1        <tibble [1 × 3]> lm             mod          -0.00847 0.138     0.95
+#>  4 1        <tibble [1 × 3]> lm             iv1:mod       0.187   0.148     0.95
+#>  5 2        <tibble [1 × 3]> lm             (Intercep…   -0.289   0.133     0.95
+#>  6 2        <tibble [1 × 3]> lm             iv1           0.106   0.137     0.95
+#>  7 2        <tibble [1 × 3]> lm             mod          -0.0277  0.160     0.95
+#>  8 2        <tibble [1 × 3]> lm             iv1:mod       0.0471  0.172     0.95
+#>  9 3        <tibble [1 × 3]> lm             (Intercep…    0.0839  0.113     0.95
+#> 10 3        <tibble [1 × 3]> lm             iv2          -0.0919  0.119     0.95
 #> # ℹ 182 more rows
-#> # ℹ 9 more variables: ci_low <dbl>, ci_high <dbl>, t <dbl>, df_error <int>,
-#> #   p <dbl>, model_performance <list>, model_warnings <list>,
+#> # ℹ 13 more variables: unstd_ci_low <dbl>, unstd_ci_high <dbl>, t <dbl>,
+#> #   df_error <int>, p <dbl>, std_coef <dbl>, std_ci <dbl>, std_ci_low <dbl>,
+#> #   std_ci_high <dbl>, model_performance <list>, model_warnings <list>,
 #> #   model_messages <list>, pipeline_code <list>
 
 # Unpack model fit statistics
 multiverse_results |> 
   reveal_model_performance()
 #> # A tibble: 48 × 14
-#>    decision specifications   model_function model_parameters     aic  aicc   bic
-#>    <chr>    <list>           <chr>          <list>             <dbl> <dbl> <dbl>
-#>  1 1        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  182.  183.  193.
-#>  2 2        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  177.  178.  188.
-#>  3 3        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  180.  181.  191.
-#>  4 4        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  176.  177.  187.
-#>  5 5        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  182.  183.  193.
-#>  6 6        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  176.  177.  187.
-#>  7 7        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  184.  185.  195.
-#>  8 8        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  178.  179.  189.
-#>  9 9        <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  181.  182.  192.
-#> 10 10       <tibble [1 × 3]> lm             <prmtrs_m [4 × 9]>  177.  178.  188.
+#>    decision specifications   model_function model_parameters   aic  aicc   bic
+#>    <chr>    <list>           <chr>          <list>           <dbl> <dbl> <dbl>
+#>  1 1        <tibble [1 × 3]> lm             <prmtrs_m>        182.  183.  193.
+#>  2 2        <tibble [1 × 3]> lm             <prmtrs_m>        202.  203.  213.
+#>  3 3        <tibble [1 × 3]> lm             <prmtrs_m>        182.  183.  193.
+#>  4 4        <tibble [1 × 3]> lm             <prmtrs_m>        202.  203.  213.
+#>  5 5        <tibble [1 × 3]> lm             <prmtrs_m>        182.  183.  193.
+#>  6 6        <tibble [1 × 3]> lm             <prmtrs_m>        200.  201.  211.
+#>  7 7        <tibble [1 × 3]> lm             <prmtrs_m>        182.  183.  193.
+#>  8 8        <tibble [1 × 3]> lm             <prmtrs_m>        202.  203.  213.
+#>  9 9        <tibble [1 × 3]> lm             <prmtrs_m>        182.  183.  193.
+#> 10 10       <tibble [1 × 3]> lm             <prmtrs_m>        202.  203.  213.
 #> # ℹ 38 more rows
 #> # ℹ 7 more variables: r2 <dbl>, r2_adjusted <dbl>, rmse <dbl>, sigma <dbl>,
 #> #   model_warnings <list>, model_messages <list>, pipeline_code <list>
@@ -241,18 +242,18 @@ multiverse_results |>
 multiverse_results |> 
   reveal_model_parameters() |> 
   group_by(parameter) |> 
-  condense(coefficient, list(mean = mean, median = median, sd = sd))
+  condense(unstd_coef, list(mean = mean, median = median, sd = sd))
 #> # A tibble: 8 × 5
-#>   parameter  coefficient_mean coefficient_median coefficient_sd coefficient_list
-#>   <chr>                 <dbl>              <dbl>          <dbl> <list>          
-#> 1 (Intercep…         -0.0571            -0.0585          0.0420 <dbl [48]>      
-#> 2 iv1                 0.0390             0.0493          0.0602 <dbl [16]>      
-#> 3 iv1:mod            -0.00187           -0.00108         0.0331 <dbl [16]>      
-#> 4 iv2                -0.0351            -0.0235          0.0640 <dbl [16]>      
-#> 5 iv2:mod             0.0224            -0.00418         0.180  <dbl [16]>      
-#> 6 iv3                -0.00675            0.00728         0.0983 <dbl [16]>      
-#> 7 iv3:mod            -0.0135            -0.0109          0.0493 <dbl [16]>      
-#> 8 mod                -0.0940            -0.0872          0.0408 <dbl [48]>
+#>   parameter   unstd_coef_mean unstd_coef_median unstd_coef_sd unstd_coef_list
+#>   <chr>                 <dbl>             <dbl>         <dbl> <list>         
+#> 1 (Intercept)        -0.0834           -0.0628         0.162  <dbl [48]>     
+#> 2 iv1                 0.0617            0.0642         0.0498 <dbl [16]>     
+#> 3 iv1:mod             0.0659            0.0590         0.0841 <dbl [16]>     
+#> 4 iv2                -0.0238           -0.0243         0.0549 <dbl [16]>     
+#> 5 iv2:mod             0.125             0.112          0.0323 <dbl [16]>     
+#> 6 iv3                -0.138            -0.166          0.0631 <dbl [16]>     
+#> 7 iv3:mod            -0.0116           -0.0127         0.0563 <dbl [16]>     
+#> 8 mod                -0.00679          -0.00978        0.0281 <dbl [48]>
 
 # Summarize fit statistics
 multiverse_results |> 
@@ -261,5 +262,5 @@ multiverse_results |>
 #> # A tibble: 1 × 3
 #>   r2_mean  r2_sd r2_list   
 #>     <dbl>  <dbl> <list>    
-#> 1  0.0310 0.0182 <dbl [48]>
+#> 1  0.0206 0.0140 <dbl [48]>
 ```

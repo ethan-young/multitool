@@ -61,7 +61,7 @@ run_universe_code_quietly <-
     }
   )
 
-collect_quiet_results_easy <- function(code, save_model = FALSE){
+collect_quiet_results_easy <- function(code, standardize = TRUE, save_model = FALSE, post_process = FALSE){
 
   quiet_results <- list()
 
@@ -96,6 +96,7 @@ collect_quiet_results_easy <- function(code, save_model = FALSE){
   messages <-
     purrr::map_df(quiet_results, "messages") |>
     dplyr::rename_with(~paste0("message_", .x))
+
   results <-
     tibble::tibble(
       "model_code" := code
@@ -109,27 +110,83 @@ collect_quiet_results_easy <- function(code, save_model = FALSE){
       )
   }
 
-  if(is_easystats){
-    results <-
-      dplyr::bind_cols(
-        results,
-        tibble::tibble(
-          model_function = model_func,
-          model_parameters = list(quiet_results$params$result |> dplyr::rename_with(tolower)),
-          model_performance = list(quiet_results$performance$result |> dplyr::rename_with(tolower))
+  if(is_easystats & !save_model){
+    if(post_process){
+      final_results <-
+        dplyr::bind_cols(
+          results,
+          tibble::tibble(
+            "{model_func}_parameters" := list(quiet_results$params$result),
+            "{model_func}_warnings" := list(warnings),
+            "{model_func}_messages" := list(messages)
+          )
         )
+    } else{
+
+      model_results <-
+        quiet_results$params$result |>
+        dplyr::rename_with(tolower) |>
+        dplyr::rename(
+          unstd_coef = coefficient,
+          unstd_ci = ci,
+          unstd_ci_low = ci_low,
+          unstd_ci_high = ci_high
+        )
+
+      if(standardize){
+
+        quiet_results$std_params <-
+          code |>
+          paste("|> parameters::standardize_parameters()", collapse = " ") |>
+          run_universe_code_quietly()
+
+        model_results <-
+          dplyr::left_join(
+            model_results,
+            quiet_results$std_params$result |>
+              dplyr::rename_with(tolower) |>
+              dplyr::rename(
+                std_coef = std_coefficient,
+                std_ci = ci,
+                std_ci_low = ci_low,
+                std_ci_high = ci_high
+              ),
+            dplyr::join_by(parameter)
+          )
+      }
+
+      final_results <-
+        dplyr::bind_cols(
+          results,
+          tibble::tibble(
+            model_function = model_func,
+            model_parameters = list(model_results),
+            model_performance =
+              list(
+                quiet_results$performance$result |>
+                  dplyr::rename_with(tolower)
+              )
+          ) |>
+            mutate(
+              "model_warnings" := list(warnings),
+              "model_messages" := list(messages)
+            )
+        )
+    }
+  } else{
+    final_results <-
+      results |>
+      mutate(
+        "model_warnings" := list(warnings),
+        "model_messages" := list(messages)
       )
   }
 
-  results |>
-    mutate(
-      "model_warnings" := list(warnings),
-      "model_messages" := list(messages)
-    )
+  final_results
 
 }
 
-run_universe_model <- function(.grid, decision_num, run = TRUE, save_model = FALSE){
+run_universe_model <- function(.grid, decision_num, run = TRUE, add_standardized = TRUE, save_model = FALSE){
 
   data_chr <- attr(.grid, "base_df")
 
@@ -244,11 +301,22 @@ run_universe_model <- function(.grid, decision_num, run = TRUE, save_model = FAL
       purrr::map2_dfc(
         universe_analyses, names(universe_analyses),
         function(x, y){
-          results <- collect_quiet_results_easy(x, save_model = save_model)
 
-          if(y != "model"){
+          if(y == "model"){
             results <-
-              results |>
+              collect_quiet_results_easy(
+                x,
+                standardize = add_standardized,
+                save_model = save_model
+              )
+          } else{
+            results <-
+              collect_quiet_results_easy(
+                x,
+                standardize = add_standardized,
+                save_model = save_model,
+                post_process = TRUE
+              ) |>
               dplyr::rename_with(~str_replace(.x, "model", y))
           }
 

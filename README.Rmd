@@ -141,7 +141,7 @@ multiverse_results |>
 multiverse_results |> 
   reveal_model_parameters() |> 
   group_by(parameter) |> 
-  condense(coefficient, list(mean = mean, median = median, sd = sd))
+  condense(unstd_coef, list(mean = mean, median = median, sd = sd))
 
 # Summarize fit statistics
 multiverse_results |> 

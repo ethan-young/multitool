@@ -74,5 +74,5 @@ the_multiverse <- run_multiverse(pipeline_grid[1:10,])
 the_multiverse |>
   reveal_model_parameters() |>
   filter(str_detect(parameter, "iv")) |>
-  condense(coefficient, list(mean = mean, median = median))
+  condense(unstd_coef, list(mean = mean, median = median))
 }
