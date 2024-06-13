@@ -53,13 +53,19 @@ list_to_pipeline <- function(pipeline, for_print = FALSE, execute = FALSE){
   }
 }
 
-run_universe_code_quietly <-
-  purrr::quietly(
-    function(code){
-      rlang::parse_expr(code) |>
-        rlang::eval_tidy()
-    }
-  )
+run_universe_code <- function(code) {
+
+  rlang::parse_expr(code) |>
+    rlang::eval_tidy()
+}
+
+
+run_universe_code_quietly <- function(code) {
+  purrr::quietly(run_universe_code)(code)
+}
+
+
+
 
 collect_quiet_results_easy <- function(code, save_model = FALSE){
 
@@ -72,7 +78,7 @@ collect_quiet_results_easy <- function(code, save_model = FALSE){
     stringr::str_remove("\\(.*\\)")
 
   is_easystats <- ifelse(model_func == "lmer", "merMod", model_func) %in% parameters::supported_models()
-
+print(code)
   quiet_results$model <- run_universe_code_quietly(code)
 
   if(is_easystats){
@@ -196,6 +202,7 @@ run_universe_model <- function(.grid, decision_num, save_model = FALSE){
     purrr::map2_dfc(
       universe_analyses, names(universe_analyses),
       function(x, y){
+
         results <- collect_quiet_results_easy(x, save_model = save_model)
 
         if(y != "model"){
