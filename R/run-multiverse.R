@@ -65,7 +65,7 @@ run_multiverse <- function(.grid, ncores = 1, save_model = FALSE, show_progress 
   if(ncores > 1){
     future::plan(future::multisession, workers = ncores)
     multiverse <-
-      furrr::future_map_dfr(
+      furrr::future_map(
         seq_len(nrow(.grid)),
         function(x){
           multi_results <- list()
@@ -74,7 +74,7 @@ run_multiverse <- function(.grid, ncores = 1, save_model = FALSE, show_progress 
             multi_results$models <-
               run_universe_model(
                 .grid = .grid,
-                decision_num = x,
+                decision_num = .grid$decision[x],
                 save_model = save_model
               )
           }
