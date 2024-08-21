@@ -61,7 +61,7 @@ run_universe_code_quietly <-
     }
   )
 
-collect_quiet_results_easy <- function(code, standardize = TRUE, save_model = FALSE, post_process = FALSE){
+collect_quiet_results_easy <- function(code, standardize = TRUE, save_model = FALSE, post_process = FALSE, additional_args = ""){
 
   quiet_results <- list()
 
@@ -79,7 +79,7 @@ collect_quiet_results_easy <- function(code, standardize = TRUE, save_model = FA
     ## Model coefficients
     quiet_results$params <-
       code |>
-      paste("|> parameters::parameters()", collapse = " ") |>
+      paste("|> parameters::parameters(", additional_args, ")", collapse = " ") |>
       run_universe_code_quietly()
 
     ## Model fit
@@ -271,6 +271,12 @@ run_universe_model <- function(.grid, decision_num, run = TRUE, add_standardized
       list_to_pipeline(universe_pipeline, for_print = TRUE)
 
     universe_analyses$model <- list_to_pipeline(universe_pipeline)
+
+    additional_args <-
+      universe |>
+      tidyr::unnest(models) |>
+      dplyr::pull(model_args) |>
+      stringr::str_remove_all("^list\\(|\\)$")
   }
 
   if(stringr::str_detect(grid_elements, "postprocess")){
@@ -307,7 +313,8 @@ run_universe_model <- function(.grid, decision_num, run = TRUE, add_standardized
               collect_quiet_results_easy(
                 x,
                 standardize = add_standardized,
-                save_model = save_model
+                save_model = save_model,
+                additional_args = additional_args
               )
           } else{
             results <-
@@ -315,7 +322,8 @@ run_universe_model <- function(.grid, decision_num, run = TRUE, add_standardized
                 x,
                 standardize = add_standardized,
                 save_model = save_model,
-                post_process = TRUE
+                post_process = TRUE,
+                additional_args = additional_args
               ) |>
               dplyr::rename_with(~str_replace(.x, "model", y))
           }

@@ -59,6 +59,8 @@ utils::globalVariables(
     "ci",
     "ci_low",
     "ci_high",
-    "std_coefficient"
+    "std_coefficient",
+    "additional_args",
+    "model_args"
     )
 )

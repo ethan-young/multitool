@@ -4,7 +4,7 @@
 \alias{add_model}
 \title{Add a model and formula to a multiverse pipeline}
 \usage{
-add_model(.df, model_desc, code)
+add_model(.df, model_desc, code, additional_args = NULL)
 }
 \arguments{
 \item{.df}{The original \code{data.frame}(e.g., base data set). If part of
@@ -21,6 +21,9 @@ like so: \code{lm(happiness ~ {iv} + control_var)}. The only requirement is
 that the variables written in the formula actually exist in the underlying
 data. You are also responsible for loading any packages that run a
 particular model (e.g., \code{lme4} for mixed-models)}
+
+\item{additional_args}{a list of any additional arguments supplied to
+\code{parameters::parameters()}.}
 }
 \value{
 a \code{data.frame} with three columns: type, group, and code. Type

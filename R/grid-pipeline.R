@@ -372,6 +372,8 @@ add_preprocess <- function(.df, process_name, code){
 #'   that the variables written in the formula actually exist in the underlying
 #'   data. You are also responsible for loading any packages that run a
 #'   particular model (e.g., \code{lme4} for mixed-models)
+#' @param additional_args a list of any additional arguments supplied to
+#'   \code{parameters::parameters()}.
 #'
 #' @return a \code{data.frame} with three columns: type, group, and code. Type
 #'   indicates the decision type, group is a decision, and the code is the
@@ -409,9 +411,14 @@ add_preprocess <- function(.df, process_name, code){
 #'   add_variables("mods", starts_with("mod")) |>
 #'   add_preprocess("scale_iv", 'mutate({ivs} = scale({ivs}))') |>
 #'   add_model("linear model", lm({dvs} ~ {ivs} * {mods}))
-add_model <- function(.df, model_desc, code){
+add_model <- function(.df, model_desc, code, additional_args = NULL){
   code <- dplyr::enexprs(code)
   code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
+
+  additional_args <- dplyr::enexprs(additional_args)
+  additional_args_chr <-
+    as.character(additional_args) |>
+    stringr::str_remove_all("\n|    ")
 
   data_chr <- dplyr::enexpr(.df) |> as.character()
   data_attr <- attr(.df, "base_df")
@@ -428,7 +435,8 @@ add_model <- function(.df, model_desc, code){
     tibble::tibble(
       type  = "models",
       group = model_desc,
-      code  = code_chr
+      code  = code_chr,
+      additional_args = ifelse(additional_args == "NULL", NA, additional_args_chr)
     )
 
   if(!is.null(data_attr)){
@@ -1092,7 +1100,8 @@ expand_decisions <- function(.pipeline){
           dplyr::filter(type == "models") |>
           dplyr::transmute(
             model_meta = group,
-            model = code
+            model = code,
+            model_args = additional_args
           ),
         by = "model"
       )
@@ -1136,7 +1145,8 @@ expand_decisions <- function(.pipeline){
     purrr::map2(grid_components, names(grid_components), function(x, y) {
       if(y == "models"){
         full_grid |>
-          dplyr::select(decision, x, model_meta) |>
+          dplyr::select(decision, x, dplyr::starts_with("model")) |>
+          dplyr::mutate(model_args = stringr::str_replace(model_args, "NA", "")) |>
           tidyr::nest("{y}" := -decision)
       }else if(y == "parameter_key"){
         full_grid |>
