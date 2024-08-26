@@ -326,7 +326,7 @@ run_universe_model <- function(.grid, decision_num, run = TRUE, add_standardized
                 post_process = TRUE,
                 additional_args = additional_args
               ) |>
-              dplyr::rename_with(~str_replace(.x, "model", y))
+              dplyr::rename_with(~stringr::str_replace(.x, "model", y))
           }
 
           tibble(
