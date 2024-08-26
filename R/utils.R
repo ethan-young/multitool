@@ -72,6 +72,7 @@ collect_quiet_results_easy <- function(code, standardize = TRUE, save_model = FA
     stringr::str_remove("\\(.*\\)")
 
   is_easystats <- ifelse(model_func == "lmer", "merMod", model_func) %in% parameters::supported_models()
+  is_easystats <- ifelse(model_func == "glmer", "merMod", model_func) %in% parameters::supported_models()
 
   quiet_results$model <- run_universe_code_quietly(code)
 
@@ -325,7 +326,7 @@ run_universe_model <- function(.grid, decision_num, run = TRUE, add_standardized
                 post_process = TRUE,
                 additional_args = additional_args
               ) |>
-              dplyr::rename_with(~stringr::str_replace(.x, "model", y))
+              dplyr::rename_with(~str_replace(.x, "model", y))
           }
 
           tibble(
