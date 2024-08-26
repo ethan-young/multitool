@@ -71,8 +71,12 @@ collect_quiet_results_easy <- function(code, standardize = TRUE, save_model = FA
     stringr::str_remove(".*\\|\\> ") |>
     stringr::str_remove("\\(.*\\)")
 
-  is_easystats <- ifelse(model_func == "lmer", "merMod", model_func) %in% parameters::supported_models()
-  is_easystats <- ifelse(model_func == "glmer", "merMod", model_func) %in% parameters::supported_models()
+  is_easystats <-
+    ifelse(
+      model_func %in% c("lmer", "glmer"),
+      "merMod",
+      model_func
+    ) %in% parameters::supported_models()
 
   quiet_results$model <- run_universe_code_quietly(code)
 
