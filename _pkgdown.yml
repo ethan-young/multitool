@@ -70,6 +70,7 @@ reference:
     Execute the whole pipeline and all alternatives
   contents:
   - run_multiverse
+  - run_multiverse_furrr
   - run_descriptives
 
 - title: Unpack Results
