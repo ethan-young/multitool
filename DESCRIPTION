@@ -22,14 +22,11 @@ Description: Run the same analysis over a range of arbitrary data processing
     pipelines and summarize the results.
 License: MIT + file LICENSE
 Imports:
-  clipr,
   correlation,
   DiagrammeR,
   dplyr,
-  flextable,
-  ggdist,
+  furrr,
   glue,
-  ggplot2,
   moments,
   purrr,
   rlang,
@@ -41,6 +38,11 @@ Imports:
   performance,
   rstudioapi
 Suggests: 
+    clipr,
+    flextable,
+    future,
+    ggdist,
+    ggplot2,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
