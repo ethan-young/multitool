@@ -90,7 +90,12 @@ collect_quiet_results_easy <- function(code, standardize = TRUE, save_model = FA
     ## Model coefficients
     quiet_results$params <-
       code |>
-      paste("|> parameters::parameters(", additional_args, ")", collapse = " ") |>
+      paste(
+        "|> parameters::parameters(",
+        additional_args,
+        ") |> suppressMessages()",
+        collapse = " "
+      ) |>
       run_universe_code_quietly()
 
     ## Model fit
@@ -148,7 +153,7 @@ collect_quiet_results_easy <- function(code, standardize = TRUE, save_model = FA
 
         quiet_results$std_params <-
           code |>
-          paste("|> parameters::standardize_parameters()", collapse = " ") |>
+          paste("|> parameters::standardize_parameters() |> suppressMessages()", collapse = " ") |>
           run_universe_code_quietly()
 
         model_results <-
