@@ -1,12 +1,12 @@
 pandoc: 3.1.11
-pkgdown: 2.1.1
+pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
   create-your-blueprint: create-your-blueprint.html
   multitool-nomenclature: multitool-nomenclature.html
   run-your-pipeline: run-your-pipeline.html
   validate-your-blueprint: validate-your-blueprint.html
-last_built: 2024-11-20T13:05Z
+last_built: 2025-07-01T15:05Z
 urls:
   reference: https://ethan-young.github.io/multitool/reference
   article: https://ethan-young.github.io/multitool/articles
