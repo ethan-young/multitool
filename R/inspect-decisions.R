@@ -25,7 +25,7 @@ inspect_model_iccs <- function(.multiverse, .part, .type, .estimate, term_filter
     names() |>
     paste0("(1|", ... = _, ")", collapse = " + ")
 
-  icc_formula <- glue::glue("lme4::lmer({outcome} ~ {multi_icc_formula}, data = multi_icc_data)")
+  icc_formula <- glue::glue("lme4::lmer({outcome} ~ 1 + {multi_icc_formula}, data = multi_icc_data)")
 
   rlang::parse_expr(icc_formula) |>
     rlang::eval_tidy() |>

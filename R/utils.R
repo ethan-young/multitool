@@ -53,6 +53,12 @@ list_to_pipeline <- function(pipeline, for_print = FALSE, execute = FALSE){
   }
 }
 
+run_universe_code <-
+  function(code){
+    rlang::parse_expr(code) |>
+      rlang::eval_tidy()
+  }
+
 run_universe_code_quietly <-
   purrr::quietly(
     function(code){
@@ -90,7 +96,7 @@ collect_quiet_results_easy <- function(code, standardize = TRUE, save_model = FA
     ## Model fit
     quiet_results$performance <-
       code |>
-      paste("|> performance::model_performance()", collapse = " ") |>
+      paste("|> performance::model_performance() |> suppressMessages()", collapse = " ") |>
       run_universe_code_quietly()
   }
 

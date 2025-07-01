@@ -202,7 +202,7 @@ reveal_model_parameters <- function(.multi, effect_key = NULL, .unpack_specs = "
           c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::any_of(c("subgroups","variables","filters","models"))) |>
-      dplyr::select(-model) |>
+      dplyr::select(-model, -model_args) |>
       dplyr::rename(model = model_meta) |>
       tidyr::pivot_longer(
         -decision,
@@ -305,7 +305,7 @@ reveal_model_performance <- function(.multi, .unpack_specs = "no"){
           c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::any_of(c("subgroups","variables","filters","models"))) |>
-      dplyr::select(-model) |>
+      dplyr::select(-model, -model_args) |>
       dplyr::rename(model = model_meta) |>
       tidyr::pivot_longer(
         -decision,
@@ -406,7 +406,7 @@ reveal_model_warnings <- function(.multi, .unpack_specs = "no"){
           c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::any_of(c("subgroups","variables","filters","models"))) |>
-      dplyr::select(-model) |>
+      dplyr::select(-model, -model_args) |>
       dplyr::rename(model = model_meta) |>
       tidyr::pivot_longer(
         -decision,
@@ -508,7 +508,7 @@ reveal_model_messages <- function(.multi, .unpack_specs = "no"){
           c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::any_of(c("subgroups","variables","filters","models"))) |>
-      dplyr::select(-model) |>
+      dplyr::select(-model, -model_args) |>
       dplyr::rename(model = model_meta) |>
       tidyr::pivot_longer(
         -decision,
