@@ -8,7 +8,7 @@ condense(.unpacked, .what, .how, .group = NULL, list_cols = TRUE)
 }
 \arguments{
 \item{.unpacked}{an unpacked (with \code{\link{reveal}} or
-\code{\link{unnest}}) multiverse dataset.}
+\code{tidyr::unnest}) multiverse dataset.}
 
 \item{.what}{a specific column to summarize. This could be a model estimate,
 a summary statistic, correlation, or any other estimate computed over the

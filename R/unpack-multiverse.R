@@ -292,7 +292,7 @@ reveal_model_performance <- function(.multi, .unpack_specs = "no"){
         -dplyr::any_of(
           c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
-      tidyr::unnest(dplyr::everything())
+      tidyr::unnest(dplyr::any_of(c("subgroups","variables","filters","models")))
   }
 
   if(.unpack_specs == "long"){
@@ -848,7 +848,7 @@ reveal_reliabilities <- function(.descriptives, .which, .unpack_specs = "no"){
 #' Summarize multiverse parameters
 #'
 #' @param .unpacked an unpacked (with \code{\link{reveal}} or
-#'   \code{\link{unnest}}) multiverse dataset.
+#'   \code{tidyr::unnest}) multiverse dataset.
 #' @param .what a specific column to summarize. This could be a model estimate,
 #'   a summary statistic, correlation, or any other estimate computed over the
 #'   multiverse.

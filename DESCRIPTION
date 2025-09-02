@@ -55,5 +55,5 @@ VignetteBuilder: knitr
 URL: https://ethan-young.github.io/multitool/, https://github.com/ethan-young/multitool
 BugReports: https://github.com/ethan-young/multitool/issues
 Depends: 
-    R (>= 4.1.0)
+    R (>= 4.2.0)
 LazyData: true
