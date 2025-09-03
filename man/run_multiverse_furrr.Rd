@@ -79,6 +79,6 @@ pipeline_grid <- expand_decisions(full_pipeline)
 
 # Run the whole multiverse
 plan(multisession, workers = 4)
-the_multiverse <- run_multiverse_furrr(pipeline_grid)
+the_multiverse <- run_multiverse_furrr(pipeline_grid[4,])
 plan(sequential)
 }

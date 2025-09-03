@@ -157,7 +157,7 @@ run_multiverse <- function(.grid, add_standardized = TRUE, save_model = FALSE, s
 #'
 #' # Run the whole multiverse
 #' plan(multisession, workers = 4)
-#' the_multiverse <- run_multiverse_furrr(pipeline_grid)
+#' the_multiverse <- run_multiverse_furrr(pipeline_grid[4,])
 #' plan(sequential)
 run_multiverse_furrr <- function(.grid, add_standardized = TRUE, save_model = FALSE, show_progress = TRUE){
 
