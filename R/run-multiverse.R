@@ -105,6 +105,9 @@ run_multiverse <- function(.grid, add_standardized = TRUE, save_model = FALSE, s
 #'   \code{\link[performance]{performance}} is used to summarize the most useful
 #'   model information.
 #' @param show_progress logical, whether to show a progress bar while running.
+#' @param furrr_globals any global objects to pass to \code{furrr_options}
+#' @param furrr_packages character vector, any packages to load inside parallel
+#'   environments
 #'
 #' @return a single \code{tibble} containing tidied results for the model and
 #'   any post-processing tests/tasks. For each unique test (e.g., an \code{lm}
@@ -159,45 +162,57 @@ run_multiverse <- function(.grid, add_standardized = TRUE, save_model = FALSE, s
 #' plan(multisession, workers = 4)
 #' the_multiverse <- run_multiverse_furrr(pipeline_grid[4,])
 #' plan(sequential)
-run_multiverse_furrr <- function(.grid, add_standardized = TRUE, save_model = FALSE, show_progress = TRUE){
+run_multiverse_furrr <-
+  function(
+    .grid,
+    add_standardized = TRUE,
+    save_model = FALSE,
+    show_progress = TRUE,
+    furrr_globals = NULL,
+    furrr_packages = c("multitool", "dplyr", "tidyr")
+  ){
 
-  data_chr <- attr(.grid, "base_df")
-  grid_chr <- dplyr::enexpr(.grid) |> as.character()
+    data_chr <- attr(.grid, "base_df")
+    grid_chr <- dplyr::enexpr(.grid) |> as.character()
 
-  opts <- furrr::furrr_options(globals = c(data_chr))
+    opts <-
+      furrr::furrr_options(
+        globals = c(data_chr, furrr_globals),
+        packages = furrr_packages
+      )
 
-  multiverse <-
-    furrr::future_map(
-      .options = opts,
-      seq_len(nrow(.grid)),
-      .progress = show_progress,
-      function(x){
-        multi_results <- list()
+    multiverse <-
+      furrr::future_map(
+        .options = opts,
+        seq_len(nrow(.grid)),
+        .progress = show_progress,
+        function(x){
+          multi_results <- list()
 
-        if("models" %in% names(.grid)){
-          multi_results$models <-
-            run_universe_model(
-              .grid = .grid,
-              decision_num = .grid$decision[x],
-              add_standardized = add_standardized,
-              save_model = save_model
-            )
-        }
-        purrr::reduce(multi_results, dplyr::left_join, by = "decision")
-      }) |>
-    purrr::list_rbind()
+          if("models" %in% names(.grid)){
+            multi_results$models <-
+              run_universe_model(
+                .grid = .grid,
+                decision_num = .grid$decision[x],
+                add_standardized = add_standardized,
+                save_model = save_model
+              )
+          }
+          purrr::reduce(multi_results, dplyr::left_join, by = "decision")
+        }) |>
+      purrr::list_rbind()
 
-  dplyr::full_join(
-    .grid |>
-      dplyr::select(-dplyr::contains("code")) |>
-      mutate(decision = as.character(decision)),
-    multiverse,
-    by = "decision"
-  ) |>
-    dplyr::select(-dplyr::matches("^parameter_keys$")) |>
-    tidyr::nest(specifications = c(-decision, -dplyr::matches("fitted$|computed$|code$"))) |>
-    dplyr::select(decision, specifications, dplyr::everything())
-}
+    dplyr::full_join(
+      .grid |>
+        dplyr::select(-dplyr::contains("code")) |>
+        mutate(decision = as.character(decision)),
+      multiverse,
+      by = "decision"
+    ) |>
+      dplyr::select(-dplyr::matches("^parameter_keys$")) |>
+      tidyr::nest(specifications = c(-decision, -dplyr::matches("fitted$|computed$|code$"))) |>
+      dplyr::select(decision, specifications, dplyr::everything())
+  }
 
 #' Run a multiverse-style descriptive analysis based on a complete decision grid
 #'

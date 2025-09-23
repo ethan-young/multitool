@@ -8,7 +8,9 @@ run_multiverse_furrr(
   .grid,
   add_standardized = TRUE,
   save_model = FALSE,
-  show_progress = TRUE
+  show_progress = TRUE,
+  furrr_globals = NULL,
+  furrr_packages = c("multitool", "dplyr", "tidyr")
 )
 }
 \arguments{
@@ -24,6 +26,11 @@ large and under the hood, \code{\link[parameters]{parameters}} and
 model information.}
 
 \item{show_progress}{logical, whether to show a progress bar while running.}
+
+\item{furrr_globals}{any global objects to pass to \code{furrr_options}}
+
+\item{furrr_packages}{character vector, any packages to load inside parallel
+environments}
 }
 \value{
 a single \code{tibble} containing tidied results for the model and
