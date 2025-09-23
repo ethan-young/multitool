@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">multitool</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,7 +36,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Run a multi-core, multiverse based on a complete decision grid</h1>
-      <small class="dont-index">Source: <a href="https://github.com/ethan-young/multitool/blob/v0.1.5/R/run-multiverse.R" class="external-link"><code>R/run-multiverse.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ethan-young/multitool/blob/main/R/run-multiverse.R" class="external-link"><code>R/run-multiverse.R</code></a></small>
       <div class="d-none name"><code>run_multiverse_furrr.Rd</code></div>
     </div>
 
@@ -50,7 +50,9 @@
 <span>  <span class="va">.grid</span>,</span>
 <span>  add_standardized <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  save_model <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  show_progress <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  show_progress <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  furrr_globals <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  furrr_packages <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multitool"</span>, <span class="st">"dplyr"</span>, <span class="st">"tidyr"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -77,6 +79,15 @@ model information.</p></dd>
 
 <dt id="arg-show-progress">show_progress<a class="anchor" aria-label="anchor" href="#arg-show-progress"></a></dt>
 <dd><p>logical, whether to show a progress bar while running.</p></dd>
+
+
+<dt id="arg-furrr-globals">furrr_globals<a class="anchor" aria-label="anchor" href="#arg-furrr-globals"></a></dt>
+<dd><p>any global objects to pass to <code>furrr_options</code></p></dd>
+
+
+<dt id="arg-furrr-packages">furrr_packages<a class="anchor" aria-label="anchor" href="#arg-furrr-packages"></a></dt>
+<dd><p>character vector, any packages to load inside parallel
+environments</p></dd>
 
 </dl></div>
     <div class="section level2">
