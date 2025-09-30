@@ -46,7 +46,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">expand_decisions</span><span class="op">(</span><span class="va">.pipeline</span>, .collect_after <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">expand_decisions</span><span class="op">(</span><span class="va">.pipeline</span>, .pointer_path <span class="op">=</span> <span class="cn">NULL</span>, .collect_after <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -56,6 +56,12 @@
 <dl><dt id="arg--pipeline">.pipeline<a class="anchor" aria-label="anchor" href="#arg--pipeline"></a></dt>
 <dd><p>a <code>data.frame</code> produced by calling a series of add_*
 functions.</p></dd>
+
+
+<dt id="arg--pointer-path">.pointer_path<a class="anchor" aria-label="anchor" href="#arg--pointer-path"></a></dt>
+<dd><p>a string specifying a path to create a external pointer
+object. This is only necessary if you are using data from an external
+source. Defaults to NULL.</p></dd>
 
 
 <dt id="arg--collect-after">.collect_after<a class="anchor" aria-label="anchor" href="#arg--collect-after"></a></dt>
