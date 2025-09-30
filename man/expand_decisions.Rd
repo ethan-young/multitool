@@ -4,11 +4,18 @@
 \alias{expand_decisions}
 \title{Expand a set of multiverse decisions into all possible combinations}
 \usage{
-expand_decisions(.pipeline)
+expand_decisions(.pipeline, .collect_after = NULL)
 }
 \arguments{
 \item{.pipeline}{a \code{data.frame} produced by calling a series of add_*
 functions.}
+
+\item{.collect_after}{default is NULL. Most of the time you will not use this
+argument. However, if your data come from a database, you can use this
+argument to call \code{dplyr::collect()} from \code{dbplyr} after a simple
+filter statements to speed up computations. Valid options are
+\code{"subgroups"}, \code{"filters"}, or \code{"preprocess"}. Note that
+\code{dbplyr} does not support all expressions.}
 }
 \value{
 a nested \code{data.frame} containing all combinations of arbitrary

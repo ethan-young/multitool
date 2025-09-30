@@ -47,7 +47,7 @@ add_filters <- function(.df, ...){
   }
 
   base_df <-
-    rlang::parse_expr(data_chr) |>
+    rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
     rlang::eval_tidy(env = parent.frame())
 
   filter_exprs <- dplyr::enexprs(...)
@@ -154,7 +154,7 @@ add_subgroups <- function(.df, ..., .only = NULL){
   }
 
   base_df <-
-    rlang::parse_expr(data_chr) |>
+    rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
     rlang::eval_tidy(env = parent.frame())
 
   subgroups <-
@@ -250,7 +250,7 @@ add_variables <- function(.df, var_group, ...){
   }
 
   base_df <-
-    rlang::parse_expr(data_chr) |>
+    rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
     rlang::eval_tidy(env = parent.frame())
 
   grid_prep <-
@@ -337,7 +337,7 @@ add_preprocess <- function(.df, process_name, code){
   }
 
   base_df <-
-    rlang::parse_expr(data_chr) |>
+    rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
     rlang::eval_tidy(env = parent.frame())
 
   grid_prep <-
@@ -428,7 +428,7 @@ add_model <- function(.df, model_desc, code, additional_args = NULL){
   }
 
   base_df <-
-    rlang::parse_expr(data_chr) |>
+    rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
     rlang::eval_tidy(env = parent.frame())
 
   grid_prep <-
@@ -992,6 +992,13 @@ add_reliabilities <- function(.df, scale_name, items){
 #' @param .pipeline a \code{data.frame} produced by calling a series of add_*
 #'   functions.
 #'
+#' @param .collect_after default is NULL. Most of the time you will not use this
+#'   argument. However, if your data come from a database, you can use this
+#'   argument to call \code{dplyr::collect()} from \code{dbplyr} after a simple
+#'   filter statements to speed up computations. Valid options are
+#'   \code{"subgroups"}, \code{"filters"}, or \code{"preprocess"}. Note that
+#'   \code{dbplyr} does not support all expressions.
+#'
 #' @return a nested \code{data.frame} containing all combinations of arbitrary
 #'   decisions for a multiverse analysis. Decision types will become list
 #'   columns matching the type of decisions called along the pipeline (e.g.,
@@ -1041,7 +1048,7 @@ add_reliabilities <- function(.df, scale_name, items){
 #'   add_postprocess("aov", aov())
 #'
 #' pipeline_expanded <- expand_decisions(full_pipeline)
-expand_decisions <- function(.pipeline){
+expand_decisions <- function(.pipeline, .collect_after = NULL){
 
   pipeline_chr <- dplyr::enexpr(.pipeline)
   data_chr <- attr(.pipeline, "base_df")
@@ -1184,5 +1191,14 @@ expand_decisions <- function(.pipeline){
 
   attr(pipeline_expanded, "base_df") <- data_chr
   attr(pipeline_expanded, "pipeline") <- pipeline_chr
+
+  attr(pipeline_expanded, "is_db_pointer") <- !is.null(.collect_after)
+  if(!is.null(.collect_after)){
+    attr(pipeline_expanded, "where_to_collect") <- .collect_after
+  }
+
+  grid_elements <- paste(names(pipeline_expanded), collapse = " ")
+
+
   pipeline_expanded
 }

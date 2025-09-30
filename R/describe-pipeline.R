@@ -319,7 +319,7 @@ summarize_filter_ns <- function(.pipeline){
   data_chr <- attr(.pipeline, "base_df")
 
   base_df <-
-    rlang::parse_expr(data_chr) |>
+    rlang::parse_expr(paste(data_chr, "|> collect()")) |>
     rlang::eval_tidy(env = parent.frame())
 
   filter_exprs <-
