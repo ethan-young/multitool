@@ -219,6 +219,11 @@ run_universe_model <-
   ){
     data_chr <- attr(.grid, "base_df")
 
+    if(!is.null(attr(.grid, "pointer_path"))){
+      pointer <- attr(.grid, "pointer_path")
+      data_chr <- glue::glue("open_dataset('{pointer}')")
+    }
+
     collect_info <- attr(.grid, "where_to_collect")
 
     if(is.null(collect_info)){

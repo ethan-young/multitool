@@ -992,6 +992,10 @@ add_reliabilities <- function(.df, scale_name, items){
 #' @param .pipeline a \code{data.frame} produced by calling a series of add_*
 #'   functions.
 #'
+#' @param .pointer_path a string specifying a path to create a external pointer
+#'   object. This is only necessary if you are using data from an external
+#'   source. Defaults to NULL.
+#'
 #' @param .collect_after default is NULL. Most of the time you will not use this
 #'   argument. However, if your data come from a database, you can use this
 #'   argument to call \code{dplyr::collect()} from \code{dbplyr} after a simple
@@ -1048,7 +1052,7 @@ add_reliabilities <- function(.df, scale_name, items){
 #'   add_postprocess("aov", aov())
 #'
 #' pipeline_expanded <- expand_decisions(full_pipeline)
-expand_decisions <- function(.pipeline, .collect_after = NULL){
+expand_decisions <- function(.pipeline, .pointer_path = NULL, .collect_after = NULL){
 
   pipeline_chr <- dplyr::enexpr(.pipeline)
   data_chr <- attr(.pipeline, "base_df")
@@ -1196,6 +1200,8 @@ expand_decisions <- function(.pipeline, .collect_after = NULL){
   if(!is.null(.collect_after)){
     attr(pipeline_expanded, "where_to_collect") <- .collect_after
   }
+
+  attr(pipeline_expanded, "pointer_path") <- .pointer_path
 
   grid_elements <- paste(names(pipeline_expanded), collapse = " ")
 
