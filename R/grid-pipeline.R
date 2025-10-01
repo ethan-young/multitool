@@ -161,6 +161,12 @@ add_subgroups <- function(.df, ..., .only = NULL){
     base_df |>
     dplyr::select(...) |>
     dplyr::distinct() |>
+    dplyr::mutate(
+      dplyr::across(
+        dplyr::where(is.character),
+        ~paste0('"', .x, '"')
+      )
+    ) |>
     tidyr::pivot_longer(
       dplyr::everything(),
       names_to = "group",
@@ -171,8 +177,8 @@ add_subgroups <- function(.df, ..., .only = NULL){
       type = "subgroups"
     ) |>
     dplyr::relocate(type, .before = group) |>
-    dplyr::distinct() |>
-    dplyr::arrange(group, code)
+    dplyr::distinct()
+    #dplyr::arrange(group, code)
 
   if(is.null(.only)){
     grid_prep <-
@@ -992,16 +998,22 @@ add_reliabilities <- function(.df, scale_name, items){
 #' @param .pipeline a \code{data.frame} produced by calling a series of add_*
 #'   functions.
 #'
-#' @param .pointer_path a string specifying a path to create a external pointer
-#'   object. This is only necessary if you are using data from an external
-#'   source. Defaults to NULL.
-#'
 #' @param .collect_after default is NULL. Most of the time you will not use this
 #'   argument. However, if your data come from a database, you can use this
 #'   argument to call \code{dplyr::collect()} from \code{dbplyr} after a simple
 #'   filter statements to speed up computations. Valid options are
 #'   \code{"subgroups"}, \code{"filters"}, or \code{"preprocess"}. Note that
 #'   \code{dbplyr} does not support all expressions.
+#'
+#' @param .pointer_path a string specifying a path to create a external pointer
+#'   object. This is only necessary if you are using data from an external
+#'   source. Defaults to NULL.
+#'
+#' @param .subgroup_in_path logical, whether to place the subgroup filters in a
+#'   file path. This is only relevant if you are using an external pointer
+#'   (e.g., an Arrow filesystem database). Placing the subgroup filter in the
+#'   path itself might provide a performance boost over reading the entire
+#'   filesystem and then performing subgoup filtering.
 #'
 #' @return a nested \code{data.frame} containing all combinations of arbitrary
 #'   decisions for a multiverse analysis. Decision types will become list
@@ -1052,159 +1064,160 @@ add_reliabilities <- function(.df, scale_name, items){
 #'   add_postprocess("aov", aov())
 #'
 #' pipeline_expanded <- expand_decisions(full_pipeline)
-expand_decisions <- function(.pipeline, .pointer_path = NULL, .collect_after = NULL){
+expand_decisions <-
+  function(
+    .pipeline,
+    .collect_after = NULL,
+    .pointer_path = NULL,
+    .subgroup_in_path = FALSE
+  ){
 
-  pipeline_chr <- dplyr::enexpr(.pipeline)
-  data_chr <- attr(.pipeline, "base_df")
+    pipeline_chr <- dplyr::enexpr(.pipeline)
+    data_chr <- attr(.pipeline, "base_df")
 
-  grid_components <-
-    .pipeline |>
-    dplyr::mutate(
-      group = stringr::str_replace_all(group, " ", "_") |> tolower()
-    ) |>
-    dplyr::group_split(type) |>
-    purrr::map(function(x) {
-      if(x |> dplyr::pull(type) |> unique() == "models"){
-        list(
-          models = c("model")
-        )
-      } else{
-        curr_name <- x |> dplyr::pull(type) |> unique()
-        curr_set <- x |> dplyr::pull(group) |> unique()
-        the_set <- list(curr_set) |> purrr::set_names(curr_name)
-        the_set
-      }
-    }) |>
-    purrr::flatten()
-
-  full_grid <-
-    .pipeline |>
-    dplyr::mutate(
-      group = stringr::str_replace_all(group, " ", "_") |> tolower()
-    ) |>
-    dplyr::group_split(type) |>
-    purrr::map(function(x){
-      if(x |> dplyr::pull(type) |> unique() == "models"){
-        model_tibble <-
-          dplyr::bind_rows(
-            tibble::tibble(
-              type = "models",
-              group = "model",
-              code = x |> dplyr::pull(code)
-            )
+    grid_components <-
+      .pipeline |>
+      dplyr::mutate(
+        group = stringr::str_replace_all(group, " ", "_") |> tolower()
+      ) |>
+      dplyr::group_split(type) |>
+      purrr::map(function(x) {
+        if(x |> dplyr::pull(type) |> unique() == "models"){
+          list(
+            models = c("model")
           )
-        df_to_expand_prep(model_tibble, group, code)
-      } else{
-        df_to_expand_prep(x, group, code)
-      }
-    }) |>
-    purrr::flatten() |>
-    df_to_expand() |>
-    dplyr::mutate(decision = 1:dplyr::n()) |>
-    dplyr::select(decision, dplyr::everything())
+        } else{
+          curr_name <- x |> dplyr::pull(type) |> unique()
+          curr_set <- x |> dplyr::pull(group) |> unique()
+          the_set <- list(curr_set) |> purrr::set_names(curr_name)
+          the_set
+        }
+      }) |>
+      purrr::flatten()
 
-  if(!is.null(grid_components$model)){
     full_grid <-
-      full_grid |>
-      dplyr::left_join(
-        .pipeline |>
-          dplyr::filter(type == "models") |>
-          dplyr::transmute(
-            model_meta = group,
-            model = code,
-            model_args = additional_args
-          ),
-        by = "model"
-      )
-  }
-
-  if(!is.null(grid_components$variables)){
-    full_grid <-
-      full_grid |>
-      tidyr::nest(
-        data = dplyr::any_of(
-          dplyr::matches(paste0("^",grid_components$variables,"$"))
-        )
-      ) |>
+      .pipeline |>
       dplyr::mutate(
-        dplyr::across(
-          c(-data),
-          ~purrr::map2_chr(data, .x, function(x, y) glue::glue_data(x, y))
-        )
+        group = stringr::str_replace_all(group, " ", "_") |> tolower()
       ) |>
-      tidyr::unnest(data)
-  }
+      dplyr::group_split(type) |>
+      purrr::map(function(x){
+        if(x |> dplyr::pull(type) |> unique() == "models"){
+          model_tibble <-
+            dplyr::bind_rows(
+              tibble::tibble(
+                type = "models",
+                group = "model",
+                code = x |> dplyr::pull(code)
+              )
+            )
+          df_to_expand_prep(model_tibble, group, code)
+        } else{
+          df_to_expand_prep(x, group, code)
+        }
+      }) |>
+      purrr::flatten() |>
+      df_to_expand() |>
+      dplyr::mutate(decision = 1:dplyr::n()) |>
+      dplyr::select(decision, dplyr::everything())
 
-  if(!is.null(grid_components$parameter_key)){
-    full_grid <-
-      full_grid |>
-      tidyr::nest(
-        data = dplyr::any_of(
-          dplyr::matches(paste0("^",grid_components$parameter_key,"$"))
+    if(!is.null(grid_components$model)){
+      full_grid <-
+        full_grid |>
+        dplyr::left_join(
+          .pipeline |>
+            dplyr::filter(type == "models") |>
+            dplyr::transmute(
+              model_meta = group,
+              model = code,
+              model_args = additional_args
+            ),
+          by = "model"
         )
-      ) |>
-      dplyr::mutate(
-        dplyr::across(
-          c(-data),
-          ~purrr::map2_chr(data, .x, function(x, y) glue::glue_data(x, y))
-        )
-      ) |>
-      tidyr::unnest(data)
-  }
+    }
 
-  pipeline_expanded <-
-    purrr::map2(grid_components, names(grid_components), function(x, y) {
-      if(y == "models"){
+    if(!is.null(grid_components$variables)){
+      full_grid <-
         full_grid |>
-          dplyr::select(decision, x, dplyr::starts_with("model")) |>
-          dplyr::mutate(model_args = stringr::str_replace(model_args, "NA", "")) |>
-          tidyr::nest("{y}" := -decision)
-      }else if(y == "parameter_key"){
+        tidyr::nest(
+          data = dplyr::any_of(
+            dplyr::matches(paste0("^",grid_components$variables,"$"))
+          )
+        ) |>
+        dplyr::mutate(
+          dplyr::across(
+            c(-data),
+            ~purrr::map2_chr(data, .x, function(x, y) glue::glue_data(x, y))
+          )
+        ) |>
+        tidyr::unnest(data)
+    }
+
+    if(!is.null(grid_components$parameter_key)){
+      full_grid <-
         full_grid |>
-          dplyr::select(decision, x) |>
-          tidyr::pivot_longer(
-            -decision,
-            names_to = "parameter_key",
-            values_to =  "parameter"
-          ) |>
-          tidyr::nest(parameter_keys = -decision)
-      }else{
-        full_grid |>
-          dplyr::select(decision, x) |>
-          tidyr::nest("{y}" := -decision)
-      }
-    }) |>
-    purrr::reduce(dplyr::left_join, "decision") |>
-    dplyr::select(
-      decision,
-      dplyr::any_of(
-        c(
-          "subgroups",
-          "variables",
-          "filters",
-          "preprocess",
-          "models",
-          "postprocess",
-          "corrs",
-          "summary_stats",
-          "reliabilities",
-          "parameter_keys"
+        tidyr::nest(
+          data = dplyr::any_of(
+            dplyr::matches(paste0("^",grid_components$parameter_key,"$"))
+          )
+        ) |>
+        dplyr::mutate(
+          dplyr::across(
+            c(-data),
+            ~purrr::map2_chr(data, .x, function(x, y) glue::glue_data(x, y))
+          )
+        ) |>
+        tidyr::unnest(data)
+    }
+
+    pipeline_expanded <-
+      purrr::map2(grid_components, names(grid_components), function(x, y) {
+        if(y == "models"){
+          full_grid |>
+            dplyr::select(decision, x, dplyr::starts_with("model")) |>
+            dplyr::mutate(model_args = stringr::str_replace(model_args, "NA", "")) |>
+            tidyr::nest("{y}" := -decision)
+        }else if(y == "parameter_key"){
+          full_grid |>
+            dplyr::select(decision, x) |>
+            tidyr::pivot_longer(
+              -decision,
+              names_to = "parameter_key",
+              values_to =  "parameter"
+            ) |>
+            tidyr::nest(parameter_keys = -decision)
+        }else{
+          full_grid |>
+            dplyr::select(decision, x) |>
+            tidyr::nest("{y}" := -decision)
+        }
+      }) |>
+      purrr::reduce(dplyr::left_join, "decision") |>
+      dplyr::select(
+        decision,
+        dplyr::any_of(
+          c(
+            "subgroups",
+            "variables",
+            "filters",
+            "preprocess",
+            "models",
+            "postprocess",
+            "corrs",
+            "summary_stats",
+            "reliabilities",
+            "parameter_keys"
+          )
         )
       )
-    )
 
-  attr(pipeline_expanded, "base_df") <- data_chr
-  attr(pipeline_expanded, "pipeline") <- pipeline_chr
-
-  attr(pipeline_expanded, "is_db_pointer") <- !is.null(.collect_after)
-  if(!is.null(.collect_after)){
+    attr(pipeline_expanded, "base_df") <- data_chr
+    attr(pipeline_expanded, "pipeline") <- pipeline_chr
     attr(pipeline_expanded, "where_to_collect") <- .collect_after
+    attr(pipeline_expanded, "pointer_path") <- .pointer_path
+    attr(pipeline_expanded, "subgroup_in_path") <- .subgroup_in_path
+
+    grid_elements <- paste(names(pipeline_expanded), collapse = " ")
+
+    pipeline_expanded
   }
-
-  attr(pipeline_expanded, "pointer_path") <- .pointer_path
-
-  grid_elements <- paste(names(pipeline_expanded), collapse = " ")
-
-
-  pipeline_expanded
-}

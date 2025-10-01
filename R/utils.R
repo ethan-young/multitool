@@ -218,9 +218,10 @@ run_universe_model <-
     save_model = FALSE
   ){
     data_chr <- attr(.grid, "base_df")
+    subgroup_in_path <- attr(.grid, "subgroup_in_path")
+    pointer <- attr(.grid, "pointer_path")
 
-    if(!is.null(attr(.grid, "pointer_path"))){
-      pointer <- attr(.grid, "pointer_path")
+    if(!is.null(pointer)){
       data_chr <- glue::glue("open_dataset('{pointer}')")
     }
 
@@ -257,15 +258,31 @@ run_universe_model <-
         dplyr::pull(subgroups) |>
         unlist()
 
-      universe_pipeline$subgroups <-
-        paste0(
-          "filter(",
+      if(!subgroup_in_path){
+        subgroup_string <-
           purrr::map2_chr(
             .x = names(subgroup_vars), .y = subgroup_vars,
-            \(x, y) glue::glue("as.character({x}) == '{y}'")) |>
-            paste0(collapse = ", "),
-          ")"
-        )
+            \(x, y) glue::glue("{x} == {y}")
+          ) |>
+          paste0(collapse = ", ")
+
+        universe_pipeline$subgroups <-
+          glue::glue("filter({subgroup_string})")
+      }
+
+      if(subgroup_in_path & !is.null(pointer)){
+        subgroup_string <-
+          purrr::map2_chr(
+            .x = names(subgroup_vars), .y = subgroup_vars,
+            \(x, y) glue::glue("{x}={stringr::str_remove_all(y, '\\\"')}")
+          ) |>
+          paste0(collapse = "/")
+
+        universe_pipeline$original_data <-
+          glue::glue(
+            "open_dataset('{pointer}/{subgroup_string}'/)"
+          )
+      }
 
       if(collect_after == "subgroups"){
         universe_pipeline$collect <- "collect()"

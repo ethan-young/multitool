@@ -4,15 +4,16 @@
 \alias{expand_decisions}
 \title{Expand a set of multiverse decisions into all possible combinations}
 \usage{
-expand_decisions(.pipeline, .pointer_path = NULL, .collect_after = NULL)
+expand_decisions(
+  .pipeline,
+  .collect_after = NULL,
+  .pointer_path = NULL,
+  .subgroup_in_path = FALSE
+)
 }
 \arguments{
 \item{.pipeline}{a \code{data.frame} produced by calling a series of add_*
 functions.}
-
-\item{.pointer_path}{a string specifying a path to create a external pointer
-object. This is only necessary if you are using data from an external
-source. Defaults to NULL.}
 
 \item{.collect_after}{default is NULL. Most of the time you will not use this
 argument. However, if your data come from a database, you can use this
@@ -20,6 +21,16 @@ argument to call \code{dplyr::collect()} from \code{dbplyr} after a simple
 filter statements to speed up computations. Valid options are
 \code{"subgroups"}, \code{"filters"}, or \code{"preprocess"}. Note that
 \code{dbplyr} does not support all expressions.}
+
+\item{.pointer_path}{a string specifying a path to create a external pointer
+object. This is only necessary if you are using data from an external
+source. Defaults to NULL.}
+
+\item{.subgroup_in_path}{logical, whether to place the subgroup filters in a
+file path. This is only relevant if you are using an external pointer
+(e.g., an Arrow filesystem database). Placing the subgroup filter in the
+path itself might provide a performance boost over reading the entire
+filesystem and then performing subgoup filtering.}
 }
 \value{
 a nested \code{data.frame} containing all combinations of arbitrary
