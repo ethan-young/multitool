@@ -46,7 +46,12 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">expand_decisions</span><span class="op">(</span><span class="va">.pipeline</span>, .pointer_path <span class="op">=</span> <span class="cn">NULL</span>, .collect_after <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">expand_decisions</span><span class="op">(</span></span>
+<span>  <span class="va">.pipeline</span>,</span>
+<span>  .collect_after <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .pointer_path <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .subgroup_in_path <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -58,12 +63,6 @@
 functions.</p></dd>
 
 
-<dt id="arg--pointer-path">.pointer_path<a class="anchor" aria-label="anchor" href="#arg--pointer-path"></a></dt>
-<dd><p>a string specifying a path to create a external pointer
-object. This is only necessary if you are using data from an external
-source. Defaults to NULL.</p></dd>
-
-
 <dt id="arg--collect-after">.collect_after<a class="anchor" aria-label="anchor" href="#arg--collect-after"></a></dt>
 <dd><p>default is NULL. Most of the time you will not use this
 argument. However, if your data come from a database, you can use this
@@ -71,6 +70,20 @@ argument to call <code><a href="https://dplyr.tidyverse.org/reference/compute.ht
 filter statements to speed up computations. Valid options are
 <code>"subgroups"</code>, <code>"filters"</code>, or <code>"preprocess"</code>. Note that
 <code>dbplyr</code> does not support all expressions.</p></dd>
+
+
+<dt id="arg--pointer-path">.pointer_path<a class="anchor" aria-label="anchor" href="#arg--pointer-path"></a></dt>
+<dd><p>a string specifying a path to create a external pointer
+object. This is only necessary if you are using data from an external
+source. Defaults to NULL.</p></dd>
+
+
+<dt id="arg--subgroup-in-path">.subgroup_in_path<a class="anchor" aria-label="anchor" href="#arg--subgroup-in-path"></a></dt>
+<dd><p>logical, whether to place the subgroup filters in a
+file path. This is only relevant if you are using an external pointer
+(e.g., an Arrow filesystem database). Placing the subgroup filter in the
+path itself might provide a performance boost over reading the entire
+filesystem and then performing subgoup filtering.</p></dd>
 
 </dl></div>
     <div class="section level2">
