@@ -280,7 +280,7 @@ run_universe_model <-
 
         universe_pipeline$original_data <-
           glue::glue(
-            "open_dataset('{pointer}/{subgroup_string}'/)"
+            "open_dataset('{pointer}/{subgroup_string}/')"
           )
       }
 
