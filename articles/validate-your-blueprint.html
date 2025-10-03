@@ -157,7 +157,7 @@ For example, we can look at our filtering code for the first decision of
 our blueprint:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Take a look at the first filter decision</span></span>
-<span><span class="va">expanded_pipeline</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/show_code_subgroups.html">show_code_filter</a></span><span class="op">(</span>decision_num <span class="op">=</span> <span class="fl">1</span>, console <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">expanded_pipeline</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/show_code.html">show_code_filters</a></span><span class="op">(</span>decision_num <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; the_data |&gt; </span></span>
 <span><span class="co">#&gt;   collect() |&gt; </span></span>
 <span><span class="co">#&gt;   filter(include1 == 0, include2 != 3, include3 &gt; -2.5)</span></span></code></pre></div>
@@ -165,14 +165,11 @@ our blueprint:</p>
 analysis pipeline. For example, we can look at our model pipeline for
 decision 17 using <code>show_code_model(decision_num = 17)</code>:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">expanded_pipeline</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/show_code_subgroups.html">show_code_model</a></span><span class="op">(</span>decision_num <span class="op">=</span> <span class="fl">17</span>, console <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">expanded_pipeline</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/show_code.html">show_code_model</a></span><span class="op">(</span>decision_num <span class="op">=</span> <span class="fl">17</span><span class="op">)</span></span>
 <span><span class="co">#&gt; the_data |&gt; </span></span>
 <span><span class="co">#&gt;   collect() |&gt; </span></span>
 <span><span class="co">#&gt;   filter(include1 == 0, include2 %in% unique(include2), include3 &gt; -2.5) |&gt; </span></span>
 <span><span class="co">#&gt;   lm(dv1 ~ iv3 * mod, data = _)</span></span></code></pre></div>
-<p>Setting the <code>copy</code> argument to <code>TRUE</code> allows
-you to send the code straight to your clipboard. You can paste it into
-the source or console for testing/editing.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
