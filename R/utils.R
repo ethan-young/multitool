@@ -53,10 +53,10 @@ list_to_pipeline <- function(pipeline, for_print = FALSE, execute = FALSE){
   }
 }
 
-get_code <- function(pipeline_list, which_element){
+get_code <- function(pipeline_list, which_element, for_print = FALSE){
   pipeline_elements <- names(pipeline_list)
   code <- pipeline_list[1:which(pipeline_elements == which_element)]
-  list_to_pipeline(code)
+  list_to_pipeline(code, for_print = for_print)
 }
 
 run_universe_code <-

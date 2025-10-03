@@ -1,5 +1,116 @@
 #' Show multiverse data code pipelines
 #'
+#' \code{show_code} is the generic function. All \code{show_code*} functions are
+#' simple wrappers of \code{show_code}.
+#'
+#' Each \code{show_code*} function should be self-explanatory - they indicate
+#' where along the multiverse pipeline to extract code. The goal of these
+#' functions is to create a window into each data/model combination and allow
+#' the user to inspect specific decisions straight from the code that produced
+#' it.
+#'
+#' @param .grid a full decision grid created by \code{\link{expand_decisions}}
+#'   or a fully analyzed grid produced by \code{\link{analyze_grid}}.
+#' @param decision_num numeric. Indicates which decision set in the grid to show
+#'   underlying code.
+#' @param .step a point along the pipeline for which you would like to show the
+#'   underlying code. Defaults to the model.
+#' @param .post_step Only relevant if you are exposing a postprocessing step. If
+#'   you have more than one postprocess, you can specify which you would like to
+#'   expose by index or by name.
+#'
+#' @returns the code that generated results up to the specified point in an
+#'   analysis pipeline.
+#' @export
+show_code <-
+  function(
+    .grid,
+    decision_num,
+    .step = "model",
+    .post_step = NULL
+  ){
+    if("specifications" %in% names(.grid)){
+      grid_type <- "multi"
+      grid_slice <-
+        .grid |>
+        dplyr::filter(decision == 1) |>
+        dplyr::select(decision, pipeline_code) |>
+        reveal(pipeline_code)
+
+      grid_elements <- names(grid_slice)
+    } else{
+      grid_type <- "grid"
+      grid_slice <- build_pipeline_code(.grid, decision_num)
+      grid_elements <-
+        .grid |>
+        rename_with(
+          ~stringr::str_replace(.x, "models", "model")
+        ) |>
+        names()
+    }
+
+    if(.step == "postprocess" & grid_type == "grid"){
+      if(!is.null(.post_step)){
+        grid_slice$pipeline$postprocess <-
+          grid_slice$pipeline$postprocess[[.post_step]]
+      } else{
+        grid_slice$pipeline$postprocess <-
+          grid_slice$pipeline$postprocess[[1]]
+      }
+    } else if(.step == "postprocess" & grid_type == "multi"){
+      grid_slice <-
+        grid_slice |>
+        dplyr::select(
+          -dplyr::any_of(
+            c(
+              "decision",
+              "original_data",
+              "collect",
+              "subgroups",
+              "filters",
+              "preprocess",
+              "model"
+            )
+          )
+        )
+      if(!is.null(.post_step)){
+        grid_slice <-
+          grid_slice |>
+          dplyr::select(.post_step)
+
+        .step <- names(grid_slice)
+
+      } else{
+        grid_slice <-
+          grid_slice |>
+          dplyr::select(1)
+
+        .step <- names(grid_slice)
+      }
+    }
+
+    if(!.step %in% grid_elements){
+      rlang::abort(
+        glue::glue(
+          "You don't have a {.step} step specified in your pipeline..."
+        )
+      )
+    }
+
+    if(grid_type == "grid"){
+      code <- get_code(grid_slice$pipeline, .step, for_print = TRUE)
+    } else if(grid_type == "multi"){
+      code <-
+        grid_slice |>
+        dplyr::pull(dplyr::any_of(c(.step))) |>
+        stringr::str_replace_all("\\|\\>", " |> \n  ") |>
+        glue::glue(.trim = FALSE)
+    }
+    code
+  }
+
+#' Show multiverse data code pipelines
+#'
 #' Each \code{show_code*} function should be self-explanatory - they indicate
 #' where along the multiverse pipeline to extract code. The goal of these
 #' functions is to create a window into each multiverse decision set
@@ -20,142 +131,37 @@
 #' @returns the code that generated results up to the specified point in an
 #'   analysis pipeline. The code is printed in the console and can be optionally
 #'   copied to the clipboard.
+#' @describeIn show_code Show the code up to the subgroups stage
 #' @export
-show_code_subgroups <- function(.grid, decision_num, copy = FALSE, console = TRUE, execute = FALSE, ...){
-
-  decision_pipeline <-
-    run_universe_model(.grid, decision_num, run = FALSE)
-
-  code <-
-    decision_pipeline$subgroups
-
-  if(is.null(code)){
-    rlang::warn("You don't have any subgroups specified in your pipeline...")
-  } else{
-    if(copy){
-      suppressWarnings({clipr::write_clip(code)})
-      message("Subgroup pipeline copied!")
-    }
-    if(console){
-      message("Hit enter to run the code:")
-      rstudioapi::sendToConsole(code, execute = FALSE, ...)
-    } else{
-      cat(code)
-    }
-  }
+show_code_subgroups <- function(.grid, decision_num){
+  show_code(.grid, decision_num, .step = "subgroups")
 }
 
-#' @describeIn show_code_subgroups Show the code up to the filtering stage
+#' @describeIn show_code Show the code up to the filtering stage
 #' @export
-show_code_filter <- function(.grid, decision_num, copy = FALSE, console = TRUE, execute = FALSE, ...){
-
-  decision_pipeline <-
-    run_universe_model(.grid, decision_num, run = FALSE)
-
-  code <-
-    decision_pipeline$filters
-
-  if(is.null(code)){
-    rlang::warn("You don't have any filters specified in your pipeline...")
-  } else{
-    if(copy){
-      suppressWarnings({clipr::write_clip(code)})
-      message("Filter pipeline copied!")
-    }
-    if(console){
-      message("Hit enter to run the code:")
-      rstudioapi::sendToConsole(code, execute = FALSE, ...)
-    } else{
-      cat(code)
-    }
-  }
+show_code_filters <- function(.grid, decision_num){
+  show_code(.grid, decision_num, .step = "filters")
 }
 
-#' @describeIn show_code_subgroups Show the code up to the preprocessing stage
+#' @describeIn show_code Show the code up to the preprocessing stage
 #' @export
-show_code_preprocess <- function(.grid, decision_num, copy = FALSE, console = TRUE, execute = FALSE, ...){
-
-  decision_pipeline <-
-    run_universe_model(.grid, decision_num, run = FALSE)
-
-  code <-
-    decision_pipeline$preprocess
-
-  if(is.null(code)){
-    rlang::warn("You don't have any pre-processing specified in your pipeline...")
-  } else{
-    if(copy){
-      suppressWarnings({clipr::write_clip(code)})
-      message("Pre-processing pipeline copied!")
-    }
-    if(console){
-      message("Hit enter to run the code:")
-      rstudioapi::sendToConsole(code, execute = FALSE, ...)
-    } else{
-      cat(code)
-    }
-  }
+show_code_preprocess <- function(.grid, decision_num){
+  show_code(.grid, decision_num, .step = "preprocess")
 }
 
-#' @describeIn show_code_subgroups Show the code up to the modeling stage
+#' @describeIn show_code Show the code up to the modeling stage
 #' @export
-show_code_model <- function(.grid, decision_num, copy = FALSE, console = TRUE, execute = FALSE, ...){
-
-  decision_pipeline <-
-    run_universe_model(.grid, decision_num, run = FALSE)
-
-  code <-
-    decision_pipeline$model
-
-  if(is.null(code)){
-    rlang::warn("You don't have any models specified in your pipeline...")
-  } else{
-    if(copy){
-      suppressWarnings({clipr::write_clip(code)})
-      message("Model pipeline copied!")
-    }
-    if(console){
-      message("Hit enter to run the code:")
-      rstudioapi::sendToConsole(code, execute = FALSE, ...)
-    } else{
-      cat(code)
-    }
-  }
+show_code_model <- function(.grid, decision_num){
+  show_code(.grid, decision_num, .step = "model")
 }
 
-#' @describeIn show_code_subgroups Show the code up to the post-processing stage
-#' @param post_step numeric. For \code{show_code_postprocess}, Which post-processing
-#'   step to print. Default is set to the \code{1}.
+#' @describeIn show_code Show the code up to the post-processing stage
 #' @export
-show_code_postprocess <- function(.grid, decision_num, post_step = 1, copy = FALSE, console = TRUE, execute = FALSE, ...){
-
-  decision_pipeline <-
-    run_universe_model(.grid, decision_num, run = FALSE)
-
-  code <-
-    decision_pipeline$postprocess
-
-  if(is.null(code)){
-    rlang::warn("You don't have any post-processing specified in your pipeline...")
-  } else{
-    if(copy){
-      suppressWarnings({clipr::write_clip(code[[post_step]])})
-      message("Post-processing pipeline copied!")
-    }
-    if(console){
-      message("Showing post process ", post_step, " of ", length(code),  " labeled '", names(code)[[post_step]], "'")
-      message("Use the `post_step` argument to see a different post processing pipeline")
-      message("Hit enter to run the code:")
-      rstudioapi::sendToConsole(code[[post_step]], execute, ...)
-    } else{
-      message("Showing post process ", post_step, " of ", length(code),  " labeled '", names(code)[[post_step]], "'")
-      message("Use the `post_step` argument to see a different post processing pipeline")
-      cat(code[[post_step]])
-    }
-  }
+show_code_subgroups <- function(.grid, decision_num){
+  show_code(.grid, decision_num, .step = "postprocess")
 }
 
-#' @describeIn show_code_subgroups Show the code for computing summary statistics
+#' @describeIn show_code Show the code for computing summary statistics
 #' @param summary_set numeric. For \code{show_code_summary_stats}, Which set of
 #'   summary statistics to print. Default is set to the \code{1}.
 #' @export
@@ -184,7 +190,7 @@ show_code_summary_stats <- function(.grid, decision_num, summary_set = 1, copy =
   }
 }
 
-#' @describeIn show_code_subgroups Show the code for computing correlations
+#' @describeIn show_code Show the code for computing correlations
 #' @param corr_set numeric. For \code{show_code_corrs}, Which set of
 #'   correlations to print. Default is set to the \code{1}.
 #' @export
@@ -213,7 +219,7 @@ show_code_corrs <- function(.grid, decision_num, corr_set = 1, copy = FALSE, con
   }
 }
 
-#' @describeIn show_code_subgroups Show the code for computing scale reliability
+#' @describeIn show_code Show the code for computing scale reliability
 #' @param rel_set numeric. For \code{show_code_reliabilities}, Which set of
 #'   reliabilities to print. Default is set to the \code{1}.
 #' @export

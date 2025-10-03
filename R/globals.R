@@ -62,6 +62,7 @@ utils::globalVariables(
     "std_coefficient",
     "additional_args",
     "model_args",
-    "pipeline_step"
+    "pipeline_step",
+    "pipeline_code"
     )
 )

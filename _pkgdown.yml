@@ -63,7 +63,7 @@ reference:
   - detect_n_variables
   - detect_n_models
   - summarize_filter_ns
-  - show_code_filter
+  - show_code
 
 - title: Run your Pipeline
   desc: >
