@@ -72,12 +72,24 @@ analyze_grid <-
       purrr::map(
         1:nrow(.grid),
         function(index){
-          run_universe_model_v2(
-            .grid = .grid,
-            decision_index = index,
-            add_standardized = add_standardized,
-            save_model = save_model
-          )
+          start <- Sys.time()
+          analyzed_result <-
+            run_universe_model_v2(
+              .grid,
+              decision_index = index,
+              add_standardized = add_standardized,
+              save_model = save_model
+            )
+          end <- Sys.time()
+
+          analyzed_result |>
+            dplyr::mutate(
+              run_started = start,
+              run_ended = end,
+              run_duration_seconds = end-start,
+              run_duration_minutes = (end-start)/60
+            ) |>
+            tidyr::nest(timing_logs = dplyr::starts_with("run_"))
         },
         .progress = show_progress
       )
@@ -180,12 +192,24 @@ analyze_grid_parallel <-
         .options = opts,
         decision_vec,
         function(index){
-          run_universe_model_v2(
-            .grid,
-            decision_index = index,
-            add_standardized = add_standardized,
-            save_model = save_model
-          )
+          start <- Sys.time()
+          analyzed_result <-
+            run_universe_model_v2(
+              .grid,
+              decision_index = index,
+              add_standardized = add_standardized,
+              save_model = save_model
+            )
+          end <- Sys.time()
+
+          analyzed_result |>
+            dplyr::mutate(
+              run_started = start,
+              run_ended = end,
+              run_duration_seconds = end-start,
+              run_duration_minutes = (end-start)/60
+            ) |>
+            tidyr::nest(timing_logs = dplyr::starts_with("run_"))
         },
         .progress = show_progress
       )
