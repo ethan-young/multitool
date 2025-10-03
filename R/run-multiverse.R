@@ -1,3 +1,199 @@
+#' Perform all analyses over a complete decision grid
+#'
+#' @param .grid a \code{tibble} produced by \code{\link{expand_decisions}}
+#' @param add_standardized logical. Whether to add standardized coefficients to
+#'   the model output. Defaults to \code{TRUE}.
+#' @param save_model logical, indicates whether to save the model object in its
+#'   entirety. The default is \code{FALSE} because model objects are usually
+#'   large and under the hood, \code{\link[parameters]{parameters}} and
+#'   \code{\link[performance]{performance}} is used to summarize the most useful
+#'   model information.
+#' @param show_progress logical, whether to show a progress bar while running.
+#'
+#' @return a single \code{tibble} containing tidied results for the model and
+#'   any post-processing tests/tasks. For each unique test (e.g., an \code{lm}
+#'   or \code{aov} called on an \code{lm}), a list column with the function name
+#'   is created with \code{\link[parameters]{parameters}} and
+#'   \code{\link[performance]{performance}} and any warnings or messages printed
+#'   while fitting the models. Internally, modeling and post-processing
+#'   functions are checked to see if there are tidy or glance methods available.
+#'   If not, \code{summary} will be called instead.
+#' @export
+#'
+#' @examples
+#' library(tidyverse)
+#' library(multitool)
+#'
+#' # Simulate some data
+#' the_data <-
+#'   data.frame(
+#'     id   = 1:500,
+#'     iv1  = rnorm(500),
+#'     iv2  = rnorm(500),
+#'     iv3  = rnorm(500),
+#'     mod1 = rnorm(500),
+#'     mod2 = rnorm(500),
+#'     mod3 = rnorm(500),
+#'     cov1 = rnorm(500),
+#'     cov2 = rnorm(500),
+#'     dv1  = rnorm(500),
+#'     dv2  = rnorm(500),
+#'     include1 = rbinom(500, size = 1, prob = .1),
+#'     include2 = sample(1:3, size = 500, replace = TRUE),
+#'     include3 = rnorm(500)
+#'   )
+#'
+#' # Decision pipeline
+#' full_pipeline <-
+#'   the_data |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+#'   add_variables("ivs", iv1, iv2, iv3) |>
+#'   add_variables("dvs", dv1, dv2) |>
+#'   add_variables("mods", starts_with("mod")) |>
+#'   add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
+#'   add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
+#'   add_model("no covariates",lm({dvs} ~ {ivs} * {mods})) |>
+#'   add_model("covariate", lm({dvs} ~ {ivs} * {mods} + cov1)) |>
+#'   add_postprocess("aov", aov())
+#'
+#' pipeline_grid <- expand_decisions(full_pipeline)
+#'
+#' # analyze the grid
+#' analyzed_grid <- analyze_grid(pipeline_grid[1:10,])
+analyze_grid <-
+  function(
+    .grid,
+    add_standardized = TRUE,
+    save_model = FALSE,
+    show_progress = TRUE
+  ){
+
+    analyzed_grid <-
+      purrr::map(
+        1:nrow(.grid),
+        function(index){
+          run_universe_model_v2(
+            .grid = .grid,
+            decision_index = index,
+            add_standardized = add_standardized,
+            save_model = save_model
+          )
+        },
+        .progress = show_progress
+      )
+
+    purrr::list_rbind(analyzed_grid)
+
+  }
+
+#' Analyze a complete decision grid in parallel
+#'
+#' @param .grid a \code{tibble} produced by \code{\link{expand_decisions}}
+#' @param add_standardized logical. Whether to add standardized coefficients to
+#'   the model output. Defaults to \code{TRUE}.
+#' @param save_model logical, indicates whether to save the model object in its
+#'   entirety. The default is \code{FALSE} because model objects are usually
+#'   large and under the hood, \code{\link[parameters]{parameters}} and
+#'   \code{\link[performance]{performance}} is used to summarize the most useful
+#'   model information.
+#' @param show_progress logical, whether to show a progress bar while running.
+#' @param furrr_globals any global objects to pass to \code{furrr_options}
+#' @param furrr_packages character vector, any packages to load inside parallel
+#'   environments
+#'
+#' @return a single \code{tibble} containing tidied results for the model and
+#'   any post-processing tests/tasks. For each unique test (e.g., an \code{lm}
+#'   or \code{aov} called on an \code{lm}), a list column with the function name
+#'   is created with \code{\link[parameters]{parameters}} and
+#'   \code{\link[performance]{performance}} and any warnings or messages printed
+#'   while fitting the models. Internally, modeling and post-processing
+#'   functions are checked to see if there are tidy or glance methods available.
+#'   If not, \code{summary} will be called instead.
+#' @export
+#'
+#' @examples
+#' library(tidyverse)
+#' library(multitool)
+#' library(furrr)
+#'
+#' # Simulate some data
+#' the_data <-
+#'   data.frame(
+#'     id   = 1:500,
+#'     iv1  = rnorm(500),
+#'     iv2  = rnorm(500),
+#'     iv3  = rnorm(500),
+#'     mod1 = rnorm(500),
+#'     mod2 = rnorm(500),
+#'     mod3 = rnorm(500),
+#'     cov1 = rnorm(500),
+#'     cov2 = rnorm(500),
+#'     dv1  = rnorm(500),
+#'     dv2  = rnorm(500),
+#'     include1 = rbinom(500, size = 1, prob = .1),
+#'     include2 = sample(1:3, size = 500, replace = TRUE),
+#'     include3 = rnorm(500)
+#'   )
+#'
+#' # Decision pipeline
+#' full_pipeline <-
+#'   the_data |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+#'   add_variables("ivs", iv1, iv2, iv3) |>
+#'   add_variables("dvs", dv1, dv2) |>
+#'   add_variables("mods", starts_with("mod")) |>
+#'   add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
+#'   add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
+#'   add_model("no covariates",lm({dvs} ~ {ivs} * {mods})) |>
+#'   add_model("covariate", lm({dvs} ~ {ivs} * {mods} + cov1)) |>
+#'   add_postprocess("aov", aov())
+#'
+#' pipeline_grid <- expand_decisions(full_pipeline)
+#'
+#' # Run the whole multiverse
+#' plan(multisession, workers = 4)
+#' the_multiverse <- analyze_grid_parallel(pipeline_grid[4,])
+#' plan(sequential)
+analyze_grid_parallel <-
+  function(
+    .grid,
+    add_standardized = TRUE,
+    save_model = FALSE,
+    show_progress = TRUE,
+    furrr_globals = NULL,
+    furrr_packages = c("multitool", "dplyr", "tidyr")
+  ){
+
+    data_chr <- attr(.grid, "base_df")
+    grid_chr <- dplyr::enexpr(.grid) |> as.character()
+
+    opts <-
+      furrr::furrr_options(
+        globals = c(data_chr, furrr_globals),
+        packages = furrr_packages
+      )
+
+    decision_vec <- .grid |> dplyr::pull(decision)
+
+    analyzed_grid <-
+      furrr::future_map(
+        .options = opts,
+        decision_vec,
+        function(index){
+          run_universe_model_v2(
+            .grid,
+            decision_index = index,
+            add_standardized = add_standardized,
+            save_model = save_model
+          )
+        },
+        .progress = show_progress
+      )
+
+    purrr::list_rbind(analyzed_grid)
+
+  }
+
 #' Run a multiverse based on a complete decision grid
 #'
 #' @param .grid a \code{tibble} produced by \code{\link{expand_decisions}}

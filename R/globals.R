@@ -61,6 +61,7 @@ utils::globalVariables(
     "ci_high",
     "std_coefficient",
     "additional_args",
-    "model_args"
+    "model_args",
+    "pipeline_step"
     )
 )

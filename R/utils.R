@@ -53,19 +53,343 @@ list_to_pipeline <- function(pipeline, for_print = FALSE, execute = FALSE){
   }
 }
 
+get_code <- function(pipeline_list, which_element){
+  pipeline_elements <- names(pipeline_list)
+  code <- pipeline_list[1:which(pipeline_elements == which_element)]
+  list_to_pipeline(code)
+}
+
 run_universe_code <-
-  function(code){
+  function(code, ...){
     rlang::parse_expr(code) |>
-      rlang::eval_tidy()
+      rlang::eval_tidy(...)
   }
 
 run_universe_code_quietly <-
   purrr::quietly(
-    function(code){
+    function(code, ...){
       rlang::parse_expr(code) |>
-        rlang::eval_tidy()
+        rlang::eval_tidy(...)
     }
   )
+
+build_pipeline_code <- function(.grid, decision_num){
+
+  data_chr <- attr(.grid, "base_df")
+  subgroup_in_path <- attr(.grid, "subgroup_in_path")
+  pointer <- attr(.grid, "pointer_path")
+
+  if(!is.null(pointer)){
+    data_chr <- glue::glue("open_dataset('{pointer}')")
+  }
+
+  collect_info <- attr(.grid, "where_to_collect")
+
+  if(is.null(collect_info)){
+    collect_info <- "base_df"
+  }
+
+  collect_after <-
+    dplyr::case_when(
+      collect_info %in% c("filters", "subgroups", "preprocess") ~ collect_info,
+      T ~ "base_df"
+    )
+
+  grid_elements <- paste(names(.grid), collapse = " ")
+
+  grid_slice <-
+    .grid |>
+    dplyr::filter(decision == decision_num)
+
+  universe_pipeline <- list(original_data = data_chr)
+
+  if(collect_after == "base_df"){
+    universe_pipeline$collect <- "collect()"
+  }
+
+  if(stringr::str_detect(grid_elements, "subgroups")){
+    subgroup_vars <-
+      grid_slice |>
+      dplyr::pull(subgroups) |>
+      unlist()
+
+    if(!subgroup_in_path){
+      subgroup_string <-
+        purrr::map2_chr(
+          .x = names(subgroup_vars), .y = subgroup_vars,
+          \(x, y) glue::glue("{x} == {y}")
+        ) |>
+        paste0(collapse = ", ")
+
+      universe_pipeline$subgroups <-
+        glue::glue("filter({subgroup_string})")
+    }
+
+    if(subgroup_in_path & !is.null(pointer)){
+      subgroup_string <-
+        purrr::map2_chr(
+          .x = names(subgroup_vars), .y = subgroup_vars,
+          \(x, y) glue::glue("{x}={stringr::str_remove_all(y, '\\\"')}")
+        ) |>
+        paste0(collapse = "/")
+
+      universe_pipeline$original_data <-
+        glue::glue(
+          "open_dataset('{pointer}/{subgroup_string}/')"
+        )
+    }
+
+    if(collect_after == "subgroups"){
+      universe_pipeline$collect <- "collect()"
+    }
+  }
+
+  if(stringr::str_detect(grid_elements, "filters")){
+    universe_pipeline$filters <-
+      grid_slice |>
+      dplyr::pull(filters) |>
+      unlist() |>
+      paste0(collapse = ", ") |>
+      paste0("filter(", ... =  _, ")")
+
+    if(collect_after == "filters"){
+      universe_pipeline$collect <- "collect()"
+    }
+  }
+
+  if(stringr::str_detect(grid_elements, "preprocess")){
+    universe_pipeline$preprocess <-
+      grid_slice |>
+      dplyr::pull(preprocess) |>
+      unlist() |>
+      paste0(collapse = " |> ")
+
+    if(collect_after == "preprocess"){
+      universe_pipeline$collect <- "collect()"
+    }
+  }
+
+  if(stringr::str_detect(grid_elements, "models")){
+    universe_pipeline$model <-
+      grid_slice |>
+      tidyr::unnest(models) |>
+      dplyr::pull(model) |>
+      stringr::str_replace(string = _ ,"\\)$", ", data = _)")
+
+    additional_args <-
+      grid_slice |>
+      tidyr::unnest(models) |>
+      dplyr::pull(model_args) |>
+      stringr::str_remove_all("^list\\(|\\)$")
+  }
+
+  if(stringr::str_detect(grid_elements, "postprocess")){
+    universe_pipeline$postprocess <-
+      grid_slice |>
+      dplyr::select(postprocess) |>
+      tidyr::unnest(postprocess) |>
+      as.list()
+  }
+
+  list(
+    pipeline = universe_pipeline,
+    model_args = additional_args
+  )
+}
+
+process_model <-
+  function(
+    code,
+    standardize = TRUE,
+    save_model = FALSE,
+    additional_args = "",
+    param_keys = NULL
+  ){
+
+    model_results <- list()
+
+    model_func <-
+      code |>
+      stringr::str_extract("\\|\\>[^\\|\\>].*$") |>
+      stringr::str_remove(".*\\|\\> ") |>
+      stringr::str_remove("\\(.*\\)")
+
+    is_easystats <-
+      ifelse(
+        model_func %in% c("lmer", "glmer"),
+        "merMod",
+        model_func
+      ) %in% parameters::supported_models()
+
+    model_obj <- run_universe_code_quietly(code)
+
+    if(is_easystats){
+      ## Model coefficients
+      model_params <-
+        "model_obj$result" |>
+        paste(
+          " |> parameters::model_parameters(",
+          additional_args,
+          ") |> suppressMessages()",
+          collapse = " "
+        ) |>
+        run_universe_code(env = rlang::current_env()) |>
+        dplyr::rename_with(tolower) |>
+        dplyr::rename(
+          unstd_coef = coefficient,
+          unstd_ci = ci,
+          unstd_ci_low = ci_low,
+          unstd_ci_high = ci_high
+        ) |>
+        tibble::as_tibble()
+
+      if(standardize){
+        model_std <-
+          "model_obj$result" |>
+          paste(" |> parameters::standardize_parameters() |> suppressMessages()", collapse = "") |>
+          run_universe_code(env = rlang::current_env())
+
+        model_params <-
+          model_params |>
+          dplyr::left_join(
+            model_std |>
+              dplyr::rename_with(tolower) |>
+              dplyr::rename(
+                std_coef = std_coefficient,
+                std_ci = ci,
+                std_ci_low = ci_low,
+                std_ci_high = ci_high
+              ),
+            dplyr::join_by(parameter)
+          )
+      }
+
+      if(!is.null(param_keys)){
+        model_params <-
+          model_params |>
+          dplyr::left_join(
+            param_keys,
+            dplyr::join_by(parameter)
+          ) |>
+          dplyr::relocate(parameter_key, .before = parameter)
+      }
+
+      ## Model fit
+      model_perform <-
+        "model_obj$result" |>
+        paste(
+          "|> performance::model_performance() |> suppressMessages()",
+          collapse = ""
+        ) |>
+        run_universe_code(env = rlang::current_env()) |>
+        tibble::as_tibble()
+    }
+
+    # Messages & Warnings
+    model_messages <-
+      tibble::tibble(
+        model_messages =
+          ifelse(
+            purrr::is_empty(model_obj$messages),
+            NA,
+            model_obj$messages
+          )
+      )
+
+    model_warnings <-
+      tibble::tibble(
+        model_warnings =
+          ifelse(
+            purrr::is_empty(model_obj$warnings),
+            NA,
+            model_obj$warnings
+          )
+      )
+
+    if(!is_easystats){
+      # Not easystats compatible
+      output_full <-
+        tibble::tibble(
+          "model_function" := model_func,
+          "model_full" := list(model_obj$result),
+          "model_warnings" := list(model_warnings),
+          "model_messages" := list(model_messages)
+        )
+    } else if(save_model){
+      # easystats compatible with full model
+      output_full <-
+        tibble::tibble(
+          "model_function" := model_func,
+          "model_object" := list(model_obj$result),
+          "model_parameters" := list(model_params),
+          "model_performance" := list(model_perform),
+          "model_warnings" := list(model_warnings),
+          "model_messages" := list(model_messages)
+        )
+    } else{
+      # Default, easystats compatible & lightweight
+      output_full <-
+        tibble::tibble(
+          "model_function" := model_func,
+          "model_parameters" := list(model_params),
+          "model_performance" := list(model_perform),
+          "model_warnings" := list(model_warnings),
+          "model_messages" := list(model_messages)
+        )
+    }
+
+    list(
+      results = output_full,
+      model = model_obj$result
+    )
+  }
+
+postprocess_model <-
+  function(
+    model,
+    code,
+    additional_args = ""
+  ){
+
+    postmodel_func <-
+      code |>
+      stringr::str_remove("\\(.*\\)")
+
+    postmodel_obj <-
+      glue::glue("model |> {code}") |>
+      run_universe_code_quietly(env = rlang::current_env())
+
+    # Messages & Warnings
+    postmodel_messages <-
+      tibble::tibble(
+        model_messages =
+          ifelse(
+            purrr::is_empty(postmodel_obj$messages),
+            NA,
+            postmodel_obj$messages
+          )
+      )
+
+    postmodel_warnings <-
+      tibble::tibble(
+        model_warnings =
+          ifelse(
+            purrr::is_empty(postmodel_obj$warnings),
+            NA,
+            postmodel_obj$warnings
+          )
+      )
+
+    postmodel_output_full <-
+      tibble::tibble(
+        "{postmodel_func}_function" := postmodel_func,
+        "{postmodel_func}_output" := list(postmodel_obj$result),
+        "{postmodel_func}_warnings" := list(postmodel_warnings),
+        "{postmodel_func}_messages" := list(postmodel_messages)
+      )
+
+    postmodel_output_full
+  }
 
 collect_quiet_results_easy <-
   function(
@@ -96,20 +420,22 @@ collect_quiet_results_easy <-
     if(is_easystats){
       ## Model coefficients
       quiet_results$params <-
-        code |>
+        #code
+        "quiet_results$model$result" |>
         paste(
           "|> parameters::parameters(",
           additional_args,
           ") |> suppressMessages()",
           collapse = " "
         ) |>
-        run_universe_code_quietly()
+        run_universe_code_quietly(env = rlang::current_env())
 
       ## Model fit
       quiet_results$performance <-
-        code |>
+        #code |>
+        "quiet_results$model$result" |>
         paste("|> performance::model_performance() |> suppressMessages()", collapse = " ") |>
-        run_universe_code_quietly()
+        run_universe_code_quietly(env = rlang::current_env())
     }
 
     ## Warnings and Messages
@@ -159,9 +485,10 @@ collect_quiet_results_easy <-
         if(standardize){
 
           quiet_results$std_params <-
-            code |>
+            #code |>
+            "quiet_results$model$result" |>
             paste("|> parameters::standardize_parameters() |> suppressMessages()", collapse = " ") |>
-            run_universe_code_quietly()
+            run_universe_code_quietly(env = rlang::current_env())
 
           model_results <-
             dplyr::left_join(
@@ -207,6 +534,91 @@ collect_quiet_results_easy <-
 
     final_results
 
+  }
+
+run_universe_model_v2 <-
+  function(
+    .grid,
+    decision_index,
+    add_standardized = TRUE,
+    save_model = FALSE
+  ){
+
+    stopifnot("models" %in% names(.grid))
+
+    grid_slice <-
+      .grid |>
+      dplyr::filter(decision == decision_index)
+
+    pipeline_code <- build_pipeline_code(.grid, decision_num = decision_index)
+
+    model_code <- get_code(pipeline_code$pipeline, "model")
+
+    if("parameter_keys" %in% names(.grid)){
+      parameter_keys <-
+        grid_slice |>
+        dplyr::select(parameter_keys) |>
+        tidyr::unnest(dplyr::everything())
+    } else{
+      parameter_keys <- NULL
+    }
+
+    focal_model <-
+      process_model(
+        model_code,
+        save_model = save_model,
+        standardize = add_standardized,
+        additional_args = pipeline_code$model_args,
+        param_keys = parameter_keys
+      )
+
+    results <- list()
+
+    results$specifications <-
+      grid_slice |>
+      dplyr::select(-dplyr::any_of("parameter_keys")) |>
+      tidyr::nest(specifications = c(-decision))
+
+    results$focal_model <-
+      tibble::tibble(
+        model_fitted = list(focal_model$result)
+      )
+
+    if("postprocess" %in% names(.grid)){
+      postprocessing_code <- pipeline_code$pipeline$postprocess
+
+      results$postprocess <-
+        purrr::map2(
+          postprocessing_code,
+          names(postprocessing_code),
+          function(code, func){
+            tibble::tibble(
+              "{func}_fitted" :=
+                list(
+                  postprocess_model(focal_model$model, code)
+                )
+            )
+          }
+        )
+    }
+
+    pipeline_ref <- purrr::list_flatten(pipeline_code$pipeline)
+
+    results$pipeline_code <-
+      purrr::map(seq_along(pipeline_ref), function(step){
+        tibble::tibble(
+          pipeline_step = names(pipeline_ref[step]),
+          code = list_to_pipeline(pipeline_ref[1:step])
+        )
+      }) |>
+      purrr::list_rbind() |>
+      dplyr::mutate(
+        pipeline_step = stringr::str_remove(pipeline_step, "postprocess_")
+      ) |>
+      tidyr::pivot_wider(names_from = pipeline_step, values_from = code) |>
+      tidyr::nest(pipeline_code = dplyr::everything())
+
+    purrr::reduce(results, dplyr::bind_cols)
   }
 
 run_universe_model <-

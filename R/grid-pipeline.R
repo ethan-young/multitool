@@ -1209,6 +1209,9 @@ expand_decisions <-
             "parameter_keys"
           )
         )
+      ) |>
+      mutate(
+        decision = as.numeric(decision)
       )
 
     attr(pipeline_expanded, "base_df") <- data_chr
