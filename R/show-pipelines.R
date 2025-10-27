@@ -157,7 +157,7 @@ show_code_model <- function(.grid, decision_num){
 
 #' @describeIn show_code Show the code up to the post-processing stage
 #' @export
-show_code_subgroups <- function(.grid, decision_num){
+show_code_postprocess <- function(.grid, decision_num){
   show_code(.grid, decision_num, .step = "postprocess")
 }
 
