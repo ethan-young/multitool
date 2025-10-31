@@ -215,10 +215,10 @@ process_model <-
       stringr::str_remove("\\(.*\\)")
 
     is_easystats <-
-      ifelse(
-        model_func %in% c("lmer", "glmer"),
-        "merMod",
-        model_func
+      dplyr::case_when(
+        model_func %in% c("lmer", "glmer") ~ "merMod",
+        model_func == "feols" ~ "fixest",
+        TRUE ~ model_func
       ) %in% parameters::supported_models()
 
     model_obj <- run_universe_code_quietly(code)
@@ -540,7 +540,6 @@ run_universe_model_v2 <-
   function(
     .grid,
     decision_index,
-    add_standardized = TRUE,
     save_model = FALSE
   ){
 
@@ -562,6 +561,13 @@ run_universe_model_v2 <-
     } else{
       parameter_keys <- NULL
     }
+
+    add_standardized <-
+      grid_slice |>
+      dplyr::select(models) |>
+      tidyr::unnest(dplyr::everything()) |>
+      dplyr::pull(model_standardize) |>
+      as.logical()
 
     focal_model <-
       process_model(

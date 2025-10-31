@@ -6,22 +6,29 @@
 \alias{show_code_filters}
 \alias{show_code_preprocess}
 \alias{show_code_model}
+\alias{show_code_postprocess}
 \alias{show_code_summary_stats}
 \alias{show_code_corrs}
 \alias{show_code_reliabilities}
 \title{Show multiverse data code pipelines}
 \usage{
-show_code(.grid, decision_num, .step = "model", .post_step = NULL)
+show_code(
+  .grid,
+  decision_num,
+  .step = "model",
+  .post_step = NULL,
+  .execute = FALSE
+)
 
-show_code_subgroups(.grid, decision_num)
+show_code_subgroups(.grid, decision_num, ...)
 
-show_code_filters(.grid, decision_num)
+show_code_filters(.grid, decision_num, ...)
 
-show_code_preprocess(.grid, decision_num)
+show_code_preprocess(.grid, decision_num, ...)
 
-show_code_model(.grid, decision_num)
+show_code_model(.grid, decision_num, ...)
 
-show_code_subgroups(.grid, decision_num)
+show_code_postprocess(.grid, decision_num, ...)
 
 show_code_summary_stats(
   .grid,
@@ -54,10 +61,11 @@ show_code_reliabilities(
 )
 }
 \arguments{
-\item{.grid}{a full decision grid created by \code{\link{expand_decisions}}.}
+\item{.grid}{a full decision grid created by \code{\link{expand_decisions}}
+or a fully analyzed grid produced by \code{\link{analyze_grid}}.}
 
-\item{decision_num}{numeric. Indicates which 'universe' in the multiverse to
-show underlying code.}
+\item{decision_num}{numeric. Indicates which decision set in the grid to show
+underlying code.}
 
 \item{.step}{a point along the pipeline for which you would like to show the
 underlying code. Defaults to the model.}
@@ -66,19 +74,18 @@ underlying code. Defaults to the model.}
 you have more than one postprocess, you can specify which you would like to
 expose by index or by name.}
 
+\item{.execute}{logical, whether or not to run the code as well as print it.}
+
+\item{...}{additional arguments passed to \code{show_code()}}
+
 \item{summary_set}{numeric. For \code{show_code_summary_stats}, Which set of
 summary statistics to print. Default is set to the \code{1}.}
 
-\item{copy}{logical. Whether to copy the pipeline code to the clipboard using
-\code{\link[clipr]{write_clip}}. Defaults to \code{FALSE}.}
+\item{copy}{logical, whether to copy code to clipboard}
 
-\item{console}{logical. Whether to send the code to the console in RStudio.
-Defaults to \code{TRUE} but requires that the code be running in RStudio.}
+\item{console}{logical, whether to paste code into the console}
 
-\item{execute}{logical. If sending to the console, whether to immediately run
-the code in the console. Defaults to \code{FALSE}.}
-
-\item{...}{additional arguments passed to \code{rstudioapi::sendToConsole()}}
+\item{execute}{logical, whether to run the code}
 
 \item{corr_set}{numeric. For \code{show_code_corrs}, Which set of
 correlations to print. Default is set to the \code{1}.}
@@ -89,20 +96,10 @@ reliabilities to print. Default is set to the \code{1}.}
 \value{
 the code that generated results up to the specified point in an
 analysis pipeline.
-
-the code that generated results up to the specified point in an
-analysis pipeline. The code is printed in the console and can be optionally
-copied to the clipboard.
 }
 \description{
 \code{show_code} is the generic function. All \code{show_code*} functions are
 simple wrappers of \code{show_code}.
-
-Each \code{show_code*} function should be self-explanatory - they indicate
-where along the multiverse pipeline to extract code. The goal of these
-functions is to create a window into each multiverse decision set
-context/results and allow the user to inspect specific decisions straight
-from the code that produced it.
 }
 \details{
 Each \code{show_code*} function should be self-explanatory - they indicate
@@ -121,7 +118,7 @@ it.
 
 \item \code{show_code_model()}: Show the code up to the modeling stage
 
-\item \code{show_code_subgroups()}: Show the code up to the post-processing stage
+\item \code{show_code_postprocess()}: Show the code up to the post-processing stage
 
 \item \code{show_code_summary_stats()}: Show the code for computing summary statistics
 

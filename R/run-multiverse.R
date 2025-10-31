@@ -1,8 +1,6 @@
 #' Perform all analyses over a complete decision grid
 #'
 #' @param .grid a \code{tibble} produced by \code{\link{expand_decisions}}
-#' @param add_standardized logical. Whether to add standardized coefficients to
-#'   the model output. Defaults to \code{TRUE}.
 #' @param save_model logical, indicates whether to save the model object in its
 #'   entirety. The default is \code{FALSE} because model objects are usually
 #'   large and under the hood, \code{\link[parameters]{parameters}} and
@@ -63,7 +61,6 @@
 analyze_grid <-
   function(
     .grid,
-    add_standardized = TRUE,
     save_model = FALSE,
     show_progress = TRUE
   ){
@@ -77,7 +74,6 @@ analyze_grid <-
             run_universe_model_v2(
               .grid,
               decision_index = index,
-              add_standardized = add_standardized,
               save_model = save_model
             )
           end <- Sys.time()
@@ -101,8 +97,6 @@ analyze_grid <-
 #' Analyze a complete decision grid in parallel
 #'
 #' @param .grid a \code{tibble} produced by \code{\link{expand_decisions}}
-#' @param add_standardized logical. Whether to add standardized coefficients to
-#'   the model output. Defaults to \code{TRUE}.
 #' @param save_model logical, indicates whether to save the model object in its
 #'   entirety. The default is \code{FALSE} because model objects are usually
 #'   large and under the hood, \code{\link[parameters]{parameters}} and
@@ -169,7 +163,6 @@ analyze_grid <-
 analyze_grid_parallel <-
   function(
     .grid,
-    add_standardized = TRUE,
     save_model = FALSE,
     show_progress = TRUE,
     furrr_globals = NULL,
@@ -197,7 +190,6 @@ analyze_grid_parallel <-
             run_universe_model_v2(
               .grid,
               decision_index = index,
-              add_standardized = add_standardized,
               save_model = save_model
             )
           end <- Sys.time()

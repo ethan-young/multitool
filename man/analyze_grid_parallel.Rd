@@ -6,7 +6,6 @@
 \usage{
 analyze_grid_parallel(
   .grid,
-  add_standardized = TRUE,
   save_model = FALSE,
   show_progress = TRUE,
   furrr_globals = NULL,
@@ -15,9 +14,6 @@ analyze_grid_parallel(
 }
 \arguments{
 \item{.grid}{a \code{tibble} produced by \code{\link{expand_decisions}}}
-
-\item{add_standardized}{logical. Whether to add standardized coefficients to
-the model output. Defaults to \code{TRUE}.}
 
 \item{save_model}{logical, indicates whether to save the model object in its
 entirety. The default is \code{FALSE} because model objects are usually

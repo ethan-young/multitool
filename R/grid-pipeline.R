@@ -380,6 +380,11 @@ add_preprocess <- function(.df, process_name, code){
 #'   particular model (e.g., \code{lme4} for mixed-models)
 #' @param additional_args a list of any additional arguments supplied to
 #'   \code{parameters::parameters()}.
+#' @param add_standardized logical. Indicates whether or not to produce
+#'   standardized model coefficients via
+#'   \code{parameters::standardize_parameters()}. This is most of the time
+#'   desirable, however, in some cases for some model types you might want to
+#'   skip this step. To do so, set to \code{FALSE}.
 #'
 #' @return a \code{data.frame} with three columns: type, group, and code. Type
 #'   indicates the decision type, group is a decision, and the code is the
@@ -417,7 +422,7 @@ add_preprocess <- function(.df, process_name, code){
 #'   add_variables("mods", starts_with("mod")) |>
 #'   add_preprocess("scale_iv", 'mutate({ivs} = scale({ivs}))') |>
 #'   add_model("linear model", lm({dvs} ~ {ivs} * {mods}))
-add_model <- function(.df, model_desc, code, additional_args = NULL){
+add_model <- function(.df, model_desc, code, additional_args = NULL, add_standardized = TRUE){
   code <- dplyr::enexprs(code)
   code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
 
@@ -442,7 +447,8 @@ add_model <- function(.df, model_desc, code, additional_args = NULL){
       type  = "models",
       group = model_desc,
       code  = code_chr,
-      additional_args = ifelse(additional_args == "NULL", NA, additional_args_chr)
+      additional_args = ifelse(additional_args == "NULL", NA, additional_args_chr),
+      add_standardized = add_standardized
     )
 
   if(!is.null(data_attr)){
@@ -1130,7 +1136,8 @@ expand_decisions <-
             dplyr::transmute(
               model_meta = group,
               model = code,
-              model_args = additional_args
+              model_args = additional_args,
+              model_standardize = add_standardized
             ),
           by = "model"
         )

@@ -79,6 +79,9 @@ reference:
   desc: >
     Unpack your results for viewing, plotting, and understanding
   contents:
+  - unpack_specs
+  - unpack_results
+  - condense
   - reveal
   - reveal_model_parameters
   - reveal_model_performance
@@ -87,6 +90,5 @@ reference:
   - reveal_reliabilities
   - reveal_corrs
   - reveal_summary_stats
-  - condense
 
 

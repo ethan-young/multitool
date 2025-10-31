@@ -18,6 +18,7 @@
 #' @param .post_step Only relevant if you are exposing a postprocessing step. If
 #'   you have more than one postprocess, you can specify which you would like to
 #'   expose by index or by name.
+#' @param .execute logical, whether or not to run the code as well as print it.
 #'
 #' @returns the code that generated results up to the specified point in an
 #'   analysis pipeline.
@@ -27,7 +28,8 @@ show_code <-
     .grid,
     decision_num,
     .step = "model",
-    .post_step = NULL
+    .post_step = NULL,
+    .execute = FALSE
   ){
     if("specifications" %in% names(.grid)){
       grid_type <- "multi"
@@ -106,64 +108,57 @@ show_code <-
         stringr::str_replace_all("\\|\\>", " |> \n  ") |>
         glue::glue(.trim = FALSE)
     }
-    code
+
+    print(code)
+
+    if(.execute){
+      rlang::parse_expr(code) |>
+        rlang::eval_tidy() |>
+        print()
+    }
   }
 
-#' Show multiverse data code pipelines
-#'
-#' Each \code{show_code*} function should be self-explanatory - they indicate
-#' where along the multiverse pipeline to extract code. The goal of these
-#' functions is to create a window into each multiverse decision set
-#' context/results and allow the user to inspect specific decisions straight
-#' from the code that produced it.
-#'
-#' @param .grid a full decision grid created by \code{\link{expand_decisions}}.
-#' @param decision_num numeric. Indicates which 'universe' in the multiverse to
-#'   show underlying code.
-#' @param copy logical. Whether to copy the pipeline code to the clipboard using
-#'   \code{\link[clipr]{write_clip}}. Defaults to \code{FALSE}.
-#' @param console logical. Whether to send the code to the console in RStudio.
-#'   Defaults to \code{TRUE} but requires that the code be running in RStudio.
-#' @param execute logical. If sending to the console, whether to immediately run
-#'   the code in the console. Defaults to \code{FALSE}.
-#' @param ... additional arguments passed to \code{rstudioapi::sendToConsole()}
-#'
-#' @returns the code that generated results up to the specified point in an
-#'   analysis pipeline. The code is printed in the console and can be optionally
-#'   copied to the clipboard.
 #' @describeIn show_code Show the code up to the subgroups stage
+#' @param ... additional arguments passed to \code{show_code()}
 #' @export
-show_code_subgroups <- function(.grid, decision_num){
-  show_code(.grid, decision_num, .step = "subgroups")
+show_code_subgroups <- function(.grid, decision_num, ...){
+  show_code(.grid, decision_num, .step = "subgroups", ...)
 }
 
 #' @describeIn show_code Show the code up to the filtering stage
+#' @param ... additional arguments passed to \code{show_code()}
 #' @export
-show_code_filters <- function(.grid, decision_num){
-  show_code(.grid, decision_num, .step = "filters")
+show_code_filters <- function(.grid, decision_num, ...){
+  show_code(.grid, decision_num, .step = "filters", ...)
 }
 
 #' @describeIn show_code Show the code up to the preprocessing stage
+#' @param ... additional arguments passed to \code{show_code()}
 #' @export
-show_code_preprocess <- function(.grid, decision_num){
-  show_code(.grid, decision_num, .step = "preprocess")
+show_code_preprocess <- function(.grid, decision_num, ...){
+  show_code(.grid, decision_num, .step = "preprocess", ...)
 }
 
 #' @describeIn show_code Show the code up to the modeling stage
+#' @param ... additional arguments passed to \code{show_code()}
 #' @export
-show_code_model <- function(.grid, decision_num){
-  show_code(.grid, decision_num, .step = "model")
+show_code_model <- function(.grid, decision_num, ...){
+  show_code(.grid, decision_num, .step = "model", ...)
 }
 
 #' @describeIn show_code Show the code up to the post-processing stage
+#' @param ... additional arguments passed to \code{show_code()}
 #' @export
-show_code_postprocess <- function(.grid, decision_num){
-  show_code(.grid, decision_num, .step = "postprocess")
+show_code_postprocess <- function(.grid, decision_num, ...){
+  show_code(.grid, decision_num, .step = "postprocess", ...)
 }
 
 #' @describeIn show_code Show the code for computing summary statistics
 #' @param summary_set numeric. For \code{show_code_summary_stats}, Which set of
 #'   summary statistics to print. Default is set to the \code{1}.
+#' @param copy logical, whether to copy code to clipboard
+#' @param console logical, whether to paste code into the console
+#' @param execute logical, whether to run the code
 #' @export
 show_code_summary_stats <- function(.grid, decision_num, summary_set = 1, copy = FALSE, console = TRUE, execute = FALSE, ...){
 
@@ -193,6 +188,9 @@ show_code_summary_stats <- function(.grid, decision_num, summary_set = 1, copy =
 #' @describeIn show_code Show the code for computing correlations
 #' @param corr_set numeric. For \code{show_code_corrs}, Which set of
 #'   correlations to print. Default is set to the \code{1}.
+#' @param copy logical, whether to copy code to clipboard
+#' @param console logical, whether to paste code into the console
+#' @param execute logical, whether to run the code
 #' @export
 show_code_corrs <- function(.grid, decision_num, corr_set = 1, copy = FALSE, console = TRUE, execute = FALSE, ...){
 
@@ -222,6 +220,9 @@ show_code_corrs <- function(.grid, decision_num, corr_set = 1, copy = FALSE, con
 #' @describeIn show_code Show the code for computing scale reliability
 #' @param rel_set numeric. For \code{show_code_reliabilities}, Which set of
 #'   reliabilities to print. Default is set to the \code{1}.
+#' @param copy logical, whether to copy code to clipboard
+#' @param console logical, whether to paste code into the console
+#' @param execute logical, whether to run the code
 #' @export
 show_code_reliabilities <- function(.grid, decision_num, rel_set = 1, copy = FALSE, console = TRUE, execute = FALSE, ...){
 

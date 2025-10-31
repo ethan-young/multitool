@@ -63,6 +63,10 @@ utils::globalVariables(
     "additional_args",
     "model_args",
     "pipeline_step",
-    "pipeline_code"
+    "pipeline_code",
+    "model_standardize",
+    "add_standardized",
+    "decision_choice",
+    "decision_set"
     )
 )

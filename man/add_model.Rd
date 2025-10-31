@@ -4,7 +4,13 @@
 \alias{add_model}
 \title{Add a model and formula to a multiverse pipeline}
 \usage{
-add_model(.df, model_desc, code, additional_args = NULL)
+add_model(
+  .df,
+  model_desc,
+  code,
+  additional_args = NULL,
+  add_standardized = TRUE
+)
 }
 \arguments{
 \item{.df}{The original \code{data.frame}(e.g., base data set). If part of
@@ -24,6 +30,12 @@ particular model (e.g., \code{lme4} for mixed-models)}
 
 \item{additional_args}{a list of any additional arguments supplied to
 \code{parameters::parameters()}.}
+
+\item{add_standardized}{logical. Indicates whether or not to produce
+standardized model coefficients via
+\code{parameters::standardize_parameters()}. This is most of the time
+desirable, however, in some cases for some model types you might want to
+skip this step. To do so, set to \code{FALSE}.}
 }
 \value{
 a \code{data.frame} with three columns: type, group, and code. Type
