@@ -336,7 +336,7 @@ your decisions appeared in your grid.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/reveal_model_parameters.html">reveal_model_parameters</a></span><span class="op">(</span>.unpack_specs <span class="op">=</span> <span class="st">"wide"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 192 × 27</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 192 × 28</span></span></span>
 <span><span class="co">#&gt;    decision ivs   dvs   include1   include2 include3 model model_meta model_args</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        iv1   dv1   include1 … include… include… lm(d… linear mo… <span style="color: #949494;">""</span>        </span></span>
@@ -350,11 +350,12 @@ your decisions appeared in your grid.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 3        iv2   dv1   include1 … include… include… lm(d… linear mo… <span style="color: #949494;">""</span>        </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 3        iv2   dv1   include1 … include… include… lm(d… linear mo… <span style="color: #949494;">""</span>        </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 182 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 18 more variables: model_function &lt;chr&gt;, parameter &lt;chr&gt;, unstd_coef &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   se &lt;dbl&gt;, unstd_ci &lt;dbl&gt;, unstd_ci_low &lt;dbl&gt;, unstd_ci_high &lt;dbl&gt;, t &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   df_error &lt;int&gt;, p &lt;dbl&gt;, std_coef &lt;dbl&gt;, std_ci &lt;dbl&gt;, std_ci_low &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   std_ci_high &lt;dbl&gt;, model_performance &lt;list&gt;, model_warnings &lt;list&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   model_messages &lt;list&gt;, pipeline_code &lt;list&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 19 more variables: model_standardize &lt;chr&gt;, model_function &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   parameter &lt;chr&gt;, unstd_coef &lt;dbl&gt;, se &lt;dbl&gt;, unstd_ci &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   unstd_ci_low &lt;dbl&gt;, unstd_ci_high &lt;dbl&gt;, t &lt;dbl&gt;, df_error &lt;int&gt;, p &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   std_coef &lt;dbl&gt;, std_ci &lt;dbl&gt;, std_ci_low &lt;dbl&gt;, std_ci_high &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   model_performance &lt;list&gt;, model_warnings &lt;list&gt;, model_messages &lt;list&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   pipeline_code &lt;list&gt;</span></span></span></code></pre></div>
 <p>If you set <code>.unpack_specs = 'long'</code>, your decisions get
 stacked into two columns: <code>decision_set</code> and
 <code>alternatives</code>. This format is nice for plotting a particular
@@ -363,20 +364,20 @@ alternatives.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multiverse_results</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/reveal_model_performance.html">reveal_model_performance</a></span><span class="op">(</span>.unpack_specs <span class="op">=</span> <span class="st">"long"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 288 × 15</span></span></span>
-<span><span class="co">#&gt;    decision decision_set alternatives    model_function model_parameters   aic</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        ivs          iv1             lm             <span style="color: #949494;">&lt;prmtrs_m&gt;</span>        866.</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 1        dvs          dv1             lm             <span style="color: #949494;">&lt;prmtrs_m&gt;</span>        866.</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 1        include1     include1 == 0   lm             <span style="color: #949494;">&lt;prmtrs_m&gt;</span>        866.</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 1        include2     include2 != 3   lm             <span style="color: #949494;">&lt;prmtrs_m&gt;</span>        866.</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 1        include3     include3 &gt; -2.5 lm             <span style="color: #949494;">&lt;prmtrs_m&gt;</span>        866.</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 1        model        linear model    lm             <span style="color: #949494;">&lt;prmtrs_m&gt;</span>        866.</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 2        ivs          iv1             lm             <span style="color: #949494;">&lt;prmtrs_m&gt;</span>        883.</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 2        dvs          dv2             lm             <span style="color: #949494;">&lt;prmtrs_m&gt;</span>        883.</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 2        include1     include1 == 0   lm             <span style="color: #949494;">&lt;prmtrs_m&gt;</span>        883.</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 2        include2     include2 != 3   lm             <span style="color: #949494;">&lt;prmtrs_m&gt;</span>        883.</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 278 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 336 × 15</span></span></span>
+<span><span class="co">#&gt;    decision decision_set      alternatives model_function model_parameters   aic</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1        ivs               iv1          lm             <span style="color: #949494;">&lt;prmtrs_m&gt;</span>        866.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 1        dvs               dv1          lm             <span style="color: #949494;">&lt;prmtrs_m&gt;</span>        866.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 1        include1          include1 ==… lm             <span style="color: #949494;">&lt;prmtrs_m&gt;</span>        866.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 1        include2          include2 !=… lm             <span style="color: #949494;">&lt;prmtrs_m&gt;</span>        866.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 1        include3          include3 &gt; … lm             <span style="color: #949494;">&lt;prmtrs_m&gt;</span>        866.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 1        model             linear model lm             <span style="color: #949494;">&lt;prmtrs_m&gt;</span>        866.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 1        model_standardize TRUE         lm             <span style="color: #949494;">&lt;prmtrs_m&gt;</span>        866.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 2        ivs               iv1          lm             <span style="color: #949494;">&lt;prmtrs_m&gt;</span>        883.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 2        dvs               dv2          lm             <span style="color: #949494;">&lt;prmtrs_m&gt;</span>        883.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 2        include1          include1 ==… lm             <span style="color: #949494;">&lt;prmtrs_m&gt;</span>        883.</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 326 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 9 more variables: aicc &lt;dbl&gt;, bic &lt;dbl&gt;, r2 &lt;dbl&gt;, r2_adjusted &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   rmse &lt;dbl&gt;, sigma &lt;dbl&gt;, model_warnings &lt;list&gt;, model_messages &lt;list&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   pipeline_code &lt;list&gt;</span></span></span></code></pre></div>

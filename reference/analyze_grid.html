@@ -46,12 +46,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">analyze_grid</span><span class="op">(</span></span>
-<span>  <span class="va">.grid</span>,</span>
-<span>  add_standardized <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  save_model <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  show_progress <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">analyze_grid</span><span class="op">(</span><span class="va">.grid</span>, save_model <span class="op">=</span> <span class="cn">FALSE</span>, show_progress <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -60,11 +55,6 @@
 
 <dl><dt id="arg--grid">.grid<a class="anchor" aria-label="anchor" href="#arg--grid"></a></dt>
 <dd><p>a <code>tibble</code> produced by <code><a href="expand_decisions.html">expand_decisions</a></code></p></dd>
-
-
-<dt id="arg-add-standardized">add_standardized<a class="anchor" aria-label="anchor" href="#arg-add-standardized"></a></dt>
-<dd><p>logical. Whether to add standardized coefficients to
-the model output. Defaults to <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-save-model">save_model<a class="anchor" aria-label="anchor" href="#arg-save-model"></a></dt>
@@ -132,7 +122,7 @@ If not, <code>summary</code> will be called instead.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># analyze the grid</span></span></span>
 <span class="r-in"><span><span class="va">analyzed_grid</span> <span class="op">&lt;-</span> <span class="fu">analyze_grid</span><span class="op">(</span><span class="va">pipeline_grid</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,<span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in purrr::map(1:nrow(.grid), function(index) {    start &lt;- Sys.time()    analyzed_result &lt;- run_universe_model_v2(.grid, decision_index = index,         add_standardized = add_standardized, save_model = save_model)    end &lt;- Sys.time()    tidyr::nest(dplyr::mutate(analyzed_result, run_started = start,         run_ended = end, run_duration_seconds = end - start,         run_duration_minutes = (end - start)/60), timing_logs = dplyr::starts_with("run_"))}, .progress = show_progress):</span> <span style="color: #00BBBB;">ℹ</span> In index: 1.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in purrr::map(1:nrow(.grid), function(index) {    start &lt;- Sys.time()    analyzed_result &lt;- run_universe_model_v2(.grid, decision_index = index,         save_model = save_model)    end &lt;- Sys.time()    tidyr::nest(dplyr::mutate(analyzed_result, run_started = start,         run_ended = end, run_duration_seconds = end - start,         run_duration_minutes = (end - start)/60), timing_logs = dplyr::starts_with("run_"))}, .progress = show_progress):</span> <span style="color: #00BBBB;">ℹ</span> In index: 1.</span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error:</span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> object 'the_data' not found</span>
 </code></pre></div>
