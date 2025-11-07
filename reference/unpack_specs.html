@@ -111,9 +111,8 @@ useful for plotting.</p></dd>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Run the whole multiverse</span></span></span>
 <span class="r-in"><span><span class="va">the_multiverse</span> <span class="op">&lt;-</span> <span class="fu"><a href="analyze_grid.html">analyze_grid</a></span><span class="op">(</span><span class="va">pipeline_grid</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,<span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in purrr::map(1:nrow(.grid), function(index) {    start &lt;- Sys.time()    analyzed_result &lt;- run_universe_model_v2(.grid, decision_index = index,         save_model = save_model)    end &lt;- Sys.time()    tidyr::nest(dplyr::mutate(analyzed_result, run_started = start,         run_ended = end, run_duration_seconds = end - start,         run_duration_minutes = (end - start)/60), timing_logs = dplyr::starts_with("run_"))}, .progress = show_progress):</span> <span style="color: #00BBBB;">ℹ</span> In index: 1.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> object 'the_data' not found</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in parallel_pkgs_installed():</span> The packages "carrier" (&gt;= 0.3.0) and "mirai" (&gt;= 2.5.1) are required</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> for parallel map.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Reveal results of the linear model</span></span></span>
 <span class="r-in"><span><span class="va">the_multiverse</span> <span class="op">|&gt;</span> <span class="fu">unpack_specs</span><span class="op">(</span><span class="st">"wide"</span><span class="op">)</span></span></span>
@@ -129,7 +128,7 @@ useful for plotting.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

@@ -1,0 +1,117 @@
+# Check and Test your Blueprint
+
+Making an analysis pipeline blueprint is straightforward but it’s not
+always immediately obvious how complex or large your decision pipeline
+has become.
+
+To help the user think through tweaking the blueprint, there are a
+handful of functions to help you quickly print out some metadata about
+your pipeline, such as how many total pipelines are there and how many
+have to with filtering alternatives or variable versions.
+
+First, we create our pipeline:
+
+``` r
+# load libraries
+library(tidyverse)
+library(multitool)
+
+# create some data
+the_data <-
+  data.frame(
+    id  = 1:500,
+    iv1 = rnorm(500),
+    iv2 = rnorm(500),
+    iv3 = rnorm(500),
+    mod = rnorm(500),
+    dv1 = rnorm(500),
+    dv2 = rnorm(500),
+    include1 = rbinom(500, size = 1, prob = .1),
+    include2 = sample(1:3, size = 500, replace = TRUE),
+    include3 = rnorm(500)
+  )
+
+# create a pipeline blueprint
+full_pipeline <- 
+  the_data |>
+  add_filters(include1 == 0, include2 != 3, include3 > -2.5) |> 
+  add_variables(var_group = "ivs", iv1, iv2, iv3) |> 
+  add_variables(var_group = "dvs", dv1, dv2) |> 
+  add_model("linear model", lm({dvs} ~ {ivs} * mod))
+```
+
+## Blueprint metadata
+
+There are a few `detect_*` functions for printing some metadata about
+your pipeline.
+
+``` r
+# Number of unique analysis pipelines
+detect_multiverse_n(full_pipeline)
+#> [1] 48
+
+# Number of different versions of analysis variables
+detect_n_filters(full_pipeline)
+#> [1] 8
+
+# Number of unique filtering criteria
+detect_n_filters(full_pipeline)
+#> [1] 8
+
+# Number of unique models
+detect_n_models(full_pipeline)
+#> [1] 1
+```
+
+If you have several filtering decisions, you can also print a summary of
+the sample sizes after each exclusion criteria is applied.
+
+``` r
+summarize_filter_ns(full_pipeline)
+#> # A tibble: 6 × 4
+#>   filter_expression              variable n_retained n_excluded
+#>   <chr>                          <chr>         <int>      <int>
+#> 1 include1 == 0                  include1        451         49
+#> 2 include1 %in% unique(include1) include1        500          0
+#> 3 include2 != 3                  include2        345        155
+#> 4 include2 %in% unique(include2) include2        500          0
+#> 5 include3 > -2.5                include3        496          4
+#> 6 include3 %in% unique(include3) include3        500          0
+```
+
+Once you are satisfied with your pipeline metadata, you can expand it
+and test it further. To do so, expand into a full decision grid.
+
+``` r
+expanded_pipeline <- expand_decisions(full_pipeline)
+```
+
+## Test your blueprint
+
+A `multitool` specification blueprint has a special feature: it captures
+your code and generates analysis pipelines.
+
+A special set of functions with the `show_code_*` prefix allow you to
+see the code that will be executed for a single pipeline. For example,
+we can look at our filtering code for the first decision of our
+blueprint:
+
+``` r
+# Take a look at the first filter decision
+expanded_pipeline |> show_code(decision_num = 1, .step = "filters")
+#> the_data |> 
+#>   collect() |> 
+#>   filter(include1 == 0, include2 != 3, include3 > -2.5)
+```
+
+These functions allow you to generate the relevant code along the
+analysis pipeline. For example, we can look at our model pipeline for
+decision 17 using `show_code_model(decision_num = 17)`:
+
+``` r
+expanded_pipeline |> show_code_model(decision_num = 1)
+#> the_data |> 
+#>   collect() |> 
+#>   filter(include1 == 0, include2 != 3, include3 > -2.5) |> 
+#>   lm(dv1 ~ iv1 * mod, data = _)
+```
