@@ -4,7 +4,13 @@
 \alias{analyze_grid}
 \title{Perform all analyses over a complete decision grid}
 \usage{
-analyze_grid(.grid, save_model = FALSE, show_progress = TRUE)
+analyze_grid(
+  .grid,
+  save_model = FALSE,
+  show_progress = TRUE,
+  libraries = NULL,
+  ...
+)
 }
 \arguments{
 \item{.grid}{a \code{tibble} produced by \code{\link{expand_decisions}}}
@@ -16,6 +22,18 @@ large and under the hood, \code{\link[parameters]{parameters}} and
 model information.}
 
 \item{show_progress}{logical, whether to show a progress bar while running.}
+
+\item{libraries}{a vector of character strings naming the packages you want
+to load when executing parallel processing. Internally, this will call
+\code{library} dynamically to ensure that any functions specific to a
+package you are using are available during execution on the individual
+workers. Only relevant if you have called \code{mirai::daemons()}.}
+
+\item{...}{this also reserved for parallel processing. Any custom functions
+you might use your pipeline (e.g., a custom post processin step), can be
+passed here in the form of \code{custom_func = custom_func}. This will be
+passed along to \code{purrr::in_parallel} to make them available on the
+independent workers.}
 }
 \value{
 a single \code{tibble} containing tidied results for the model and

@@ -7,6 +7,16 @@
 #'   \code{\link[performance]{performance}} is used to summarize the most useful
 #'   model information.
 #' @param show_progress logical, whether to show a progress bar while running.
+#' @param libraries a vector of character strings naming the packages you want
+#'   to load when executing parallel processing. Internally, this will call
+#'   \code{library} dynamically to ensure that any functions specific to a
+#'   package you are using are available during execution on the individual
+#'   workers. Only relevant if you have called \code{mirai::daemons()}.
+#' @param ... this also reserved for parallel processing. Any custom functions
+#'   you might use your pipeline (e.g., a custom post processin step), can be
+#'   passed here in the form of \code{custom_func = custom_func}. This will be
+#'   passed along to \code{purrr::in_parallel} to make them available on the
+#'   independent workers.
 #'
 #' @return a single \code{tibble} containing tidied results for the model and
 #'   any post-processing tests/tasks. For each unique test (e.g., an \code{lm}
@@ -62,31 +72,58 @@ analyze_grid <-
   function(
     .grid,
     save_model = FALSE,
-    show_progress = TRUE
+    show_progress = TRUE,
+    libraries = NULL,
+    ...
   ){
+
+    custom_fns <- list(...)
 
     analyzed_grid <-
       purrr::map(
         1:nrow(.grid),
-        function(index){
-          start <- Sys.time()
-          analyzed_result <-
-            run_universe_model_v2(
-              .grid,
-              decision_index = index,
-              save_model = save_model
-            )
-          end <- Sys.time()
+        purrr::in_parallel(
+          function(index, ...){
 
-          analyzed_result |>
-            dplyr::mutate(
-              run_started = start,
-              run_ended = end,
-              run_duration_seconds = end-start,
-              run_duration_minutes = (end-start)/60
-            ) |>
-            tidyr::nest(timing_logs = dplyr::starts_with("run_"))
-        },
+            if(!is.null(libraries)){
+              glue::glue("library({c('multitool', 'dplyr', libraries)})") |>
+                paste(collapse = "; ") |>
+                rlang::parse_exprs() |>
+                purrr::walk(rlang::eval_tidy)
+            }
+
+            if(!purrr::is_empty(custom_fns)){
+              glue::glue(
+                "assign('{names(custom_fns)}', {custom_fns}, pos = .GlobalEnv)"
+              ) |>
+                rlang::parse_exprs() |>
+                purrr::walk(rlang::eval_tidy)
+            }
+
+            start <- Sys.time()
+            analyzed_result <-
+              run_universe_model_v2(
+                .grid,
+                decision_index = index,
+                save_model = save_model
+              )
+            end <- Sys.time()
+
+            analyzed_result |>
+              dplyr::mutate(
+                run_started = start,
+                run_ended = end,
+                run_duration_seconds = end-start,
+                run_duration_minutes = (end-start)/60
+              ) |>
+              tidyr::nest(timing_logs = dplyr::starts_with("run_"))
+          },
+          .grid = .grid,
+          run_universe_model_v2 = run_universe_model_v2,
+          save_model = save_model,
+          libraries = libraries,
+          custom_fns = custom_fns
+        ),
         .progress = show_progress
       )
 

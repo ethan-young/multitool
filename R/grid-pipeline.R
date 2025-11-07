@@ -5,6 +5,10 @@
 #'   along as an attribute.
 #' @param ... logical expressions to be used with \code{\link[dplyr]{filter}}
 #'   separated by commas. Expressions should not be quoted.
+#' @param remove_do_nothing logical, \code{FALSE} by default. Indicates whether to
+#'   include an specification where no filters are applied to the data.
+#'   Typically this is desirable, but on a occasion you may wan to turn this
+#'   functionally off.
 #'
 #' @return a \code{data.frame} with three columns: type, group, and code. Type
 #'   indicates the decision type, group is a decision, and the code is the
@@ -38,7 +42,7 @@
 #'
 #' the_data |>
 #'   add_filters(include1 == 0,include2 != 3,include2 != 2, include3 > -2.5)
-add_filters <- function(.df, ...){
+add_filters <- function(.df, ..., remove_do_nothing = FALSE){
   data_chr <- dplyr::enexpr(.df) |> as.character()
   data_attr <- attr(.df, "base_df")
 
@@ -93,6 +97,12 @@ add_filters <- function(.df, ...){
     grid_prep <- dplyr::bind_rows(.df, grid_prep2)
   } else{
     grid_prep <- grid_prep2
+  }
+
+  if(remove_do_nothing){
+    grid_prep <-
+      grid_prep |>
+      dplyr::filter(!stringr::str_detect(code, "\\%in\\% unique"))
   }
 
   attr(grid_prep, "base_df") <- data_chr
@@ -163,7 +173,7 @@ add_subgroups <- function(.df, ..., .only = NULL){
     dplyr::distinct() |>
     dplyr::mutate(
       dplyr::across(
-        dplyr::where(is.character),
+        dplyr::where(\(x) is.character(x) | is.factor(x)),
         ~paste0('"', .x, '"')
       )
     ) |>

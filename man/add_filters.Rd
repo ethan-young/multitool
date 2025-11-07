@@ -4,7 +4,7 @@
 \alias{add_filters}
 \title{Add filtering/exclusion criteria to a multiverse pipeline}
 \usage{
-add_filters(.df, ...)
+add_filters(.df, ..., remove_do_nothing = FALSE)
 }
 \arguments{
 \item{.df}{The original \code{data.frame}(e.g., base data set). If part of
@@ -13,6 +13,11 @@ along as an attribute.}
 
 \item{...}{logical expressions to be used with \code{\link[dplyr]{filter}}
 separated by commas. Expressions should not be quoted.}
+
+\item{remove_do_nothing}{logical, \code{FALSE} by default. Indicates whether to
+include an specification where no filters are applied to the data.
+Typically this is desirable, but on a occasion you may wan to turn this
+functionally off.}
 }
 \value{
 a \code{data.frame} with three columns: type, group, and code. Type

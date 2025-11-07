@@ -540,8 +540,17 @@ run_universe_model_v2 <-
   function(
     .grid,
     decision_index,
-    save_model = FALSE
+    save_model = FALSE,
+    ...
   ){
+
+    helpers <- dplyr::enexprs(...)
+    helpers <- as.character(helpers)
+
+    glue::glue("assign('{helpers}', {helpers})") |>
+      paste(collapse = "; ") |>
+      rlang::parse_exprs() |>
+      purrr::walk(rlang::eval_tidy)
 
     stopifnot("models" %in% names(.grid))
 
