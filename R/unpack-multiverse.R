@@ -351,6 +351,53 @@ condense <- function(.unpacked, .what, .how, .group = NULL, list_cols = TRUE){
   }
 }
 
+organize <- function(.unpacked, .what, .group = NULL, focused = TRUE){
+
+  grouping <-
+    dplyr::enexpr(.group)
+
+  group_chr <-
+    grouping |>
+    as.character() |>
+    paste(collapse = '.')
+
+  print(group_chr)
+
+  if(grouping == "NULL"){
+    group_name <- "all"
+  } else{
+    group_name <- group_chr
+  }
+
+
+
+  organized <-
+    .unpacked |>
+    dplyr::mutate(
+      "rank.{{.what}}.{group_chr}" := dplyr::dense_rank({{.what}}),
+      "{{.what}}" := {{.what}},
+      .by = {{.group}}
+    ) |>
+    dplyr::rename_with(
+      ~stringr::str_replace_all(.x, ".c\\(|,", ".") |> str_remove_all("\\)$| ")
+    )
+
+  if(focused){
+    organized <-
+      organized |>
+      dplyr::select(
+        {{.group}},
+        dplyr::starts_with("rank"),
+        {{.what}}
+      ) |>
+      dplyr::rename_with(~c("rank_order"), dplyr::starts_with("rank")) |>
+      dplyr::arrange({{.group}}, rank_order)
+  }
+
+  organized
+
+}
+
 #' Reveal the contents of a multiverse analysis
 #'
 #' @param .multi a multiverse list-column \code{tibble} produced by

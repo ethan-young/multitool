@@ -188,7 +188,7 @@ add_subgroups <- function(.df, ..., .only = NULL){
     ) |>
     dplyr::relocate(type, .before = group) |>
     dplyr::distinct()
-    #dplyr::arrange(group, code)
+  #dplyr::arrange(group, code)
 
   if(is.null(.only)){
     grid_prep <-
@@ -395,6 +395,10 @@ add_preprocess <- function(.df, process_name, code){
 #'   \code{parameters::standardize_parameters()}. This is most of the time
 #'   desirable, however, in some cases for some model types you might want to
 #'   skip this step. To do so, set to \code{FALSE}.
+#' @param add_performance whether or not to run
+#'   \code{performance::performance()} on the model. Defaults to \code{TRUE}.
+#'   Set to \code{FALSE} in computationally expensive situations or if model fit
+#'   statistics are not needed.
 #'
 #' @return a \code{data.frame} with three columns: type, group, and code. Type
 #'   indicates the decision type, group is a decision, and the code is the
@@ -432,45 +436,54 @@ add_preprocess <- function(.df, process_name, code){
 #'   add_variables("mods", starts_with("mod")) |>
 #'   add_preprocess("scale_iv", 'mutate({ivs} = scale({ivs}))') |>
 #'   add_model("linear model", lm({dvs} ~ {ivs} * {mods}))
-add_model <- function(.df, model_desc, code, additional_args = NULL, add_standardized = TRUE){
-  code <- dplyr::enexprs(code)
-  code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
+add_model <-
+  function(
+    .df,
+    model_desc,
+    code,
+    additional_args = NULL,
+    add_standardized = TRUE,
+    add_performance = TRUE
+  ){
+    code <- dplyr::enexprs(code)
+    code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
 
-  additional_args <- dplyr::enexprs(additional_args)
-  additional_args_chr <-
-    as.character(additional_args) |>
-    stringr::str_remove_all("\n|    ")
+    additional_args <- dplyr::enexprs(additional_args)
+    additional_args_chr <-
+      as.character(additional_args) |>
+      stringr::str_remove_all("\n|    ")
 
-  data_chr <- dplyr::enexpr(.df) |> as.character()
-  data_attr <- attr(.df, "base_df")
+    data_chr <- dplyr::enexpr(.df) |> as.character()
+    data_attr <- attr(.df, "base_df")
 
-  if(!is.null(data_attr)){
-    data_chr <- attr(.df, "base_df")
+    if(!is.null(data_attr)){
+      data_chr <- attr(.df, "base_df")
+    }
+
+    base_df <-
+      rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
+      rlang::eval_tidy(env = parent.frame())
+
+    grid_prep <-
+      tibble::tibble(
+        type  = "models",
+        group = model_desc,
+        code  = code_chr,
+        additional_args = ifelse(additional_args == "NULL", NA, additional_args_chr),
+        add_standardized = add_standardized,
+        add_performance = add_performance
+      )
+
+    if(!is.null(data_attr)){
+      grid_prep <- dplyr::bind_rows(.df, grid_prep)
+    } else{
+      grid_prep <- grid_prep
+    }
+
+    attr(grid_prep, "base_df") <- data_chr
+    grid_prep
+
   }
-
-  base_df <-
-    rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
-    rlang::eval_tidy(env = parent.frame())
-
-  grid_prep <-
-    tibble::tibble(
-      type  = "models",
-      group = model_desc,
-      code  = code_chr,
-      additional_args = ifelse(additional_args == "NULL", NA, additional_args_chr),
-      add_standardized = add_standardized
-    )
-
-  if(!is.null(data_attr)){
-    grid_prep <- dplyr::bind_rows(.df, grid_prep)
-  } else{
-    grid_prep <- grid_prep
-  }
-
-  attr(grid_prep, "base_df") <- data_chr
-  grid_prep
-
-}
 
 
 #' Add parameter keys names for later use in summarizing model effects
@@ -1147,7 +1160,8 @@ expand_decisions <-
               model_meta = group,
               model = code,
               model_args = additional_args,
-              model_standardize = add_standardized
+              model_standardize = add_standardized,
+              model_perform = add_performance
             ),
           by = "model"
         )

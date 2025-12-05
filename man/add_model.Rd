@@ -9,7 +9,8 @@ add_model(
   model_desc,
   code,
   additional_args = NULL,
-  add_standardized = TRUE
+  add_standardized = TRUE,
+  add_performance = TRUE
 )
 }
 \arguments{
@@ -36,6 +37,11 @@ standardized model coefficients via
 \code{parameters::standardize_parameters()}. This is most of the time
 desirable, however, in some cases for some model types you might want to
 skip this step. To do so, set to \code{FALSE}.}
+
+\item{add_performance}{whether or not to run
+\code{performance::performance()} on the model. Defaults to \code{TRUE}.
+Set to \code{FALSE} in computationally expensive situations or if model fit
+statistics are not needed.}
 }
 \value{
 a \code{data.frame} with three columns: type, group, and code. Type

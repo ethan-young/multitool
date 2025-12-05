@@ -201,6 +201,7 @@ process_model <-
   function(
     code,
     standardize = TRUE,
+    run_performance = TRUE,
     save_model = FALSE,
     additional_args = "",
     param_keys = NULL
@@ -275,14 +276,18 @@ process_model <-
       }
 
       ## Model fit
-      model_perform <-
-        "model_obj$result" |>
-        paste(
-          "|> performance::model_performance() |> suppressMessages()",
-          collapse = ""
-        ) |>
-        run_universe_code(env = rlang::current_env()) |>
-        tibble::as_tibble()
+      if(run_performance){
+        model_perform <-
+          "model_obj$result" |>
+          paste(
+            "|> performance::model_performance() |> suppressMessages()",
+            collapse = ""
+          ) |>
+          run_universe_code(env = rlang::current_env()) |>
+          tibble::as_tibble()
+      } else{
+        model_perform <- NA
+      }
     }
 
     # Messages & Warnings
@@ -540,18 +545,8 @@ run_universe_model_v2 <-
   function(
     .grid,
     decision_index,
-    save_model = FALSE,
-    ...
+    save_model = FALSE
   ){
-
-    helpers <- dplyr::enexprs(...)
-    helpers <- as.character(helpers)
-
-    glue::glue("assign('{helpers}', {helpers})") |>
-      paste(collapse = "; ") |>
-      rlang::parse_exprs() |>
-      purrr::walk(rlang::eval_tidy)
-
     stopifnot("models" %in% names(.grid))
 
     grid_slice <-
@@ -578,11 +573,19 @@ run_universe_model_v2 <-
       dplyr::pull(model_standardize) |>
       as.logical()
 
+    add_performance <-
+      grid_slice |>
+      dplyr::select(models) |>
+      tidyr::unnest(dplyr::everything()) |>
+      dplyr::pull(model_perform) |>
+      as.logical()
+
     focal_model <-
       process_model(
-        model_code,
+        code = model_code,
         save_model = save_model,
         standardize = add_standardized,
+        run_performance = add_performance,
         additional_args = pipeline_code$model_args,
         param_keys = parameter_keys
       )

@@ -13,7 +13,7 @@
 #'   package you are using are available during execution on the individual
 #'   workers. Only relevant if you have called \code{mirai::daemons()}.
 #' @param ... this also reserved for parallel processing. Any custom functions
-#'   you might use your pipeline (e.g., a custom post processin step), can be
+#'   you might use your pipeline (e.g., a custom post processing step), can be
 #'   passed here in the form of \code{custom_func = custom_func}. This will be
 #'   passed along to \code{purrr::in_parallel} to make them available on the
 #'   independent workers.

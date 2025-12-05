@@ -67,6 +67,9 @@ utils::globalVariables(
     "model_standardize",
     "add_standardized",
     "decision_choice",
-    "decision_set"
+    "decision_set",
+    "add_performance",
+    "model_perform",
+    "rank_order"
     )
 )
