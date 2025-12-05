@@ -68,18 +68,18 @@ the_data |>
   add_model("linear model", lm({dvs} ~ {ivs} * {mods})) |>
   add_parameter_keys("my_interaction", "{ivs}:{mods}") |>
   add_parameter_keys("my_main_effect", {ivs})
-#> # A tibble: 11 × 5
-#>    type          group          code            additional_args add_standardized
-#>    <chr>         <chr>          <chr>           <lgl>           <lgl>           
-#>  1 variables     ivs            iv1             NA              NA              
-#>  2 variables     ivs            iv2             NA              NA              
-#>  3 variables     ivs            iv3             NA              NA              
-#>  4 variables     dvs            dv1             NA              NA              
-#>  5 variables     dvs            dv2             NA              NA              
-#>  6 variables     mods           mod1            NA              NA              
-#>  7 variables     mods           mod2            NA              NA              
-#>  8 variables     mods           mod3            NA              NA              
-#>  9 models        linear model   lm({dvs} ~ {iv… NA              TRUE            
-#> 10 parameter_key my_interaction {ivs}:{mods}    NA              NA              
-#> 11 parameter_key my_main_effect {ivs}           NA              NA              
+#> # A tibble: 11 × 6
+#>    type          group    code  additional_args add_standardized add_performance
+#>    <chr>         <chr>    <chr> <lgl>           <lgl>            <lgl>          
+#>  1 variables     ivs      iv1   NA              NA               NA             
+#>  2 variables     ivs      iv2   NA              NA               NA             
+#>  3 variables     ivs      iv3   NA              NA               NA             
+#>  4 variables     dvs      dv1   NA              NA               NA             
+#>  5 variables     dvs      dv2   NA              NA               NA             
+#>  6 variables     mods     mod1  NA              NA               NA             
+#>  7 variables     mods     mod2  NA              NA               NA             
+#>  8 variables     mods     mod3  NA              NA               NA             
+#>  9 models        linear … lm({… NA              TRUE             TRUE           
+#> 10 parameter_key my_inte… {ivs… NA              NA               NA             
+#> 11 parameter_key my_main… {ivs} NA              NA               NA             
 ```

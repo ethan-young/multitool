@@ -283,7 +283,7 @@ is exactly the same as how your decisions appeared in your grid.
 ``` r
 multiverse_results |> 
   reveal_model_parameters(.unpack_specs = "wide")
-#> # A tibble: 192 × 28
+#> # A tibble: 192 × 29
 #>    decision ivs   dvs   include1   include2 include3 model model_meta model_args
 #>    <chr>    <chr> <chr> <chr>      <chr>    <chr>    <chr> <chr>      <chr>     
 #>  1 1        iv1   dv1   include1 … include… include… lm(d… linear mo… ""        
@@ -297,12 +297,12 @@ multiverse_results |>
 #>  9 3        iv2   dv1   include1 … include… include… lm(d… linear mo… ""        
 #> 10 3        iv2   dv1   include1 … include… include… lm(d… linear mo… ""        
 #> # ℹ 182 more rows
-#> # ℹ 19 more variables: model_standardize <chr>, model_function <chr>,
-#> #   parameter <chr>, unstd_coef <dbl>, se <dbl>, unstd_ci <dbl>,
-#> #   unstd_ci_low <dbl>, unstd_ci_high <dbl>, t <dbl>, df_error <int>, p <dbl>,
-#> #   std_coef <dbl>, std_ci <dbl>, std_ci_low <dbl>, std_ci_high <dbl>,
-#> #   model_performance <list>, model_warnings <list>, model_messages <list>,
-#> #   pipeline_code <list>
+#> # ℹ 20 more variables: model_standardize <chr>, model_perform <chr>,
+#> #   model_function <chr>, parameter <chr>, unstd_coef <dbl>, se <dbl>,
+#> #   unstd_ci <dbl>, unstd_ci_low <dbl>, unstd_ci_high <dbl>, t <dbl>,
+#> #   df_error <int>, p <dbl>, std_coef <dbl>, std_ci <dbl>, std_ci_low <dbl>,
+#> #   std_ci_high <dbl>, model_performance <list>, model_warnings <list>,
+#> #   model_messages <list>, pipeline_code <list>
 ```
 
 If you set `.unpack_specs = 'long'`, your decisions get stacked into two
@@ -313,7 +313,7 @@ decision alternatives.
 ``` r
 multiverse_results |> 
   reveal_model_performance(.unpack_specs = "long")
-#> # A tibble: 336 × 15
+#> # A tibble: 384 × 15
 #>    decision decision_set      alternatives model_function model_parameters   aic
 #>    <chr>    <chr>             <chr>        <chr>          <list>           <dbl>
 #>  1 1        ivs               iv1          lm             <prmtrs_m>        866.
@@ -323,10 +323,10 @@ multiverse_results |>
 #>  5 1        include3          include3 > … lm             <prmtrs_m>        866.
 #>  6 1        model             linear model lm             <prmtrs_m>        866.
 #>  7 1        model_standardize TRUE         lm             <prmtrs_m>        866.
-#>  8 2        ivs               iv1          lm             <prmtrs_m>        883.
-#>  9 2        dvs               dv2          lm             <prmtrs_m>        883.
-#> 10 2        include1          include1 ==… lm             <prmtrs_m>        883.
-#> # ℹ 326 more rows
+#>  8 1        model_perform     TRUE         lm             <prmtrs_m>        866.
+#>  9 2        ivs               iv1          lm             <prmtrs_m>        883.
+#> 10 2        dvs               dv2          lm             <prmtrs_m>        883.
+#> # ℹ 374 more rows
 #> # ℹ 9 more variables: aicc <dbl>, bic <dbl>, r2 <dbl>, r2_adjusted <dbl>,
 #> #   rmse <dbl>, sigma <dbl>, model_warnings <list>, model_messages <list>,
 #> #   pipeline_code <list>

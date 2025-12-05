@@ -10,7 +10,8 @@ add_model(
   model_desc,
   code,
   additional_args = NULL,
-  add_standardized = TRUE
+  add_standardized = TRUE,
+  add_performance = TRUE
 )
 ```
 
@@ -51,6 +52,13 @@ add_model(
   model types you might want to skip this step. To do so, set to
   `FALSE`.
 
+- add_performance:
+
+  whether or not to run
+  [`performance::performance()`](https://easystats.github.io/performance/reference/model_performance.html)
+  on the model. Defaults to `TRUE`. Set to `FALSE` in computationally
+  expensive situations or if model fit statistics are not needed.
+
 ## Value
 
 a `data.frame` with three columns: type, group, and code. Type indicates
@@ -89,24 +97,24 @@ the_data |>
   add_variables("mods", starts_with("mod")) |>
   add_preprocess("scale_iv", 'mutate({ivs} = scale({ivs}))') |>
   add_model("linear model", lm({dvs} ~ {ivs} * {mods}))
-#> # A tibble: 17 × 5
-#>    type       group        code                 additional_args add_standardized
-#>    <chr>      <chr>        <chr>                <lgl>           <lgl>           
-#>  1 filters    include1     include1 == 0        NA              NA              
-#>  2 filters    include1     include1 %in% uniqu… NA              NA              
-#>  3 filters    include2     include2 != 3        NA              NA              
-#>  4 filters    include2     include2 != 2        NA              NA              
-#>  5 filters    include2     include2 %in% uniqu… NA              NA              
-#>  6 filters    include3     include3 > -2.5      NA              NA              
-#>  7 filters    include3     include3 %in% uniqu… NA              NA              
-#>  8 variables  ivs          iv1                  NA              NA              
-#>  9 variables  ivs          iv2                  NA              NA              
-#> 10 variables  ivs          iv3                  NA              NA              
-#> 11 variables  dvs          dv1                  NA              NA              
-#> 12 variables  dvs          dv2                  NA              NA              
-#> 13 variables  mods         mod1                 NA              NA              
-#> 14 variables  mods         mod2                 NA              NA              
-#> 15 variables  mods         mod3                 NA              NA              
-#> 16 preprocess scale_iv     mutate({ivs} = scal… NA              NA              
-#> 17 models     linear model lm({dvs} ~ {ivs} * … NA              TRUE            
+#> # A tibble: 17 × 6
+#>    type       group       code  additional_args add_standardized add_performance
+#>    <chr>      <chr>       <chr> <lgl>           <lgl>            <lgl>          
+#>  1 filters    include1    incl… NA              NA               NA             
+#>  2 filters    include1    incl… NA              NA               NA             
+#>  3 filters    include2    incl… NA              NA               NA             
+#>  4 filters    include2    incl… NA              NA               NA             
+#>  5 filters    include2    incl… NA              NA               NA             
+#>  6 filters    include3    incl… NA              NA               NA             
+#>  7 filters    include3    incl… NA              NA               NA             
+#>  8 variables  ivs         iv1   NA              NA               NA             
+#>  9 variables  ivs         iv2   NA              NA               NA             
+#> 10 variables  ivs         iv3   NA              NA               NA             
+#> 11 variables  dvs         dv1   NA              NA               NA             
+#> 12 variables  dvs         dv2   NA              NA               NA             
+#> 13 variables  mods        mod1  NA              NA               NA             
+#> 14 variables  mods        mod2  NA              NA               NA             
+#> 15 variables  mods        mod3  NA              NA               NA             
+#> 16 preprocess scale_iv    muta… NA              NA               NA             
+#> 17 models     linear mod… lm({… NA              TRUE             TRUE           
 ```

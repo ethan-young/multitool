@@ -46,7 +46,7 @@ analyze_grid(
 - ...:
 
   this also reserved for parallel processing. Any custom functions you
-  might use your pipeline (e.g., a custom post processin step), can be
+  might use your pipeline (e.g., a custom post processing step), can be
   passed here in the form of `custom_func = custom_func`. This will be
   passed along to
   [`purrr::in_parallel`](https://purrr.tidyverse.org/reference/in_parallel.html)

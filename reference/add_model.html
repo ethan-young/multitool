@@ -51,7 +51,8 @@
 <span>  <span class="va">model_desc</span>,</span>
 <span>  <span class="va">code</span>,</span>
 <span>  additional_args <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  add_standardized <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  add_standardized <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  add_performance <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -91,6 +92,13 @@ standardized model coefficients via
 <code><a href="https://easystats.github.io/parameters/reference/standardize_parameters.html" class="external-link">parameters::standardize_parameters()</a></code>. This is most of the time
 desirable, however, in some cases for some model types you might want to
 skip this step. To do so, set to <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-add-performance">add_performance<a class="anchor" aria-label="anchor" href="#arg-add-performance"></a></dt>
+<dd><p>whether or not to run
+<code><a href="https://easystats.github.io/performance/reference/model_performance.html" class="external-link">performance::performance()</a></code> on the model. Defaults to <code>TRUE</code>.
+Set to <code>FALSE</code> in computationally expensive situations or if model fit
+statistics are not needed.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -132,26 +140,26 @@ decisions will be appended as new rows.</p>
 <span class="r-in"><span>  <span class="fu"><a href="add_variables.html">add_variables</a></span><span class="op">(</span><span class="st">"mods"</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"mod"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="add_preprocess.html">add_preprocess</a></span><span class="op">(</span><span class="st">"scale_iv"</span>, <span class="st">'mutate({ivs} = scale({ivs}))'</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">add_model</span><span class="op">(</span><span class="st">"linear model"</span>, <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="op">{</span><span class="va">dvs</span><span class="op">}</span> <span class="op">~</span> <span class="op">{</span><span class="va">ivs</span><span class="op">}</span> <span class="op">*</span> <span class="op">{</span><span class="va">mods</span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 17 × 5</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    type       group        code                 additional_args add_standardized</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> filters    include1     include1 == 0        <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> filters    include1     include1 %in% uniqu… <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> filters    include2     include2 != 3        <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> filters    include2     include2 != 2        <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> filters    include2     include2 %in% uniqu… <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> filters    include3     include3 &gt; -2.5      <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> filters    include3     include3 %in% uniqu… <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> variables  ivs          iv1                  <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> variables  ivs          iv2                  <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> variables  ivs          iv3                  <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> variables  dvs          dv1                  <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> variables  dvs          dv2                  <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">13</span> variables  mods         mod1                 <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">14</span> variables  mods         mod2                 <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">15</span> variables  mods         mod3                 <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">16</span> preprocess scale_iv     mutate({ivs} = scal… <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">17</span> models     linear model lm({dvs} ~ {ivs} * … <span style="color: #BB0000;">NA</span>              TRUE            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 17 × 6</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    type       group       code  additional_args add_standardized add_performance</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> filters    include1    incl… <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>               <span style="color: #BB0000;">NA</span>             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> filters    include1    incl… <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>               <span style="color: #BB0000;">NA</span>             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> filters    include2    incl… <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>               <span style="color: #BB0000;">NA</span>             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> filters    include2    incl… <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>               <span style="color: #BB0000;">NA</span>             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> filters    include2    incl… <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>               <span style="color: #BB0000;">NA</span>             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> filters    include3    incl… <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>               <span style="color: #BB0000;">NA</span>             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> filters    include3    incl… <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>               <span style="color: #BB0000;">NA</span>             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> variables  ivs         iv1   <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>               <span style="color: #BB0000;">NA</span>             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> variables  ivs         iv2   <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>               <span style="color: #BB0000;">NA</span>             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> variables  ivs         iv3   <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>               <span style="color: #BB0000;">NA</span>             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> variables  dvs         dv1   <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>               <span style="color: #BB0000;">NA</span>             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> variables  dvs         dv2   <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>               <span style="color: #BB0000;">NA</span>             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">13</span> variables  mods        mod1  <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>               <span style="color: #BB0000;">NA</span>             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">14</span> variables  mods        mod2  <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>               <span style="color: #BB0000;">NA</span>             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">15</span> variables  mods        mod3  <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>               <span style="color: #BB0000;">NA</span>             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">16</span> preprocess scale_iv    muta… <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>               <span style="color: #BB0000;">NA</span>             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">17</span> models     linear mod… lm({… <span style="color: #BB0000;">NA</span>              TRUE             TRUE           </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
