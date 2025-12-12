@@ -49,7 +49,7 @@ full_pipeline <-
 expanded_pipeline <- expand_decisions(full_pipeline)
 
 # Run the multiverse
-multiverse_results <- run_multiverse(expanded_pipeline)
+multiverse_results <- analyze_grid(expanded_pipeline)
 
 multiverse_results
 ```
@@ -150,7 +150,7 @@ A powerful way to organize these results is to summarize a specific results colu
 # model performance r2 summaries
 multiverse_results |>
   reveal_model_performance() |> 
-  condense(r2, list(mean = mean, median = median))
+  condense(R2, list(mean = mean, median = median))
 
 # model parameters for our predictor of interest
 multiverse_results |>

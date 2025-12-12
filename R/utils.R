@@ -29,17 +29,26 @@ df_to_expand <- function(prep){
 
 list_to_pipeline <- function(pipeline, for_print = FALSE, execute = FALSE){
 
-  if(for_print){
-    separator <- " |> \n  "
-  } else{
-    separator <- " |> "
-  }
+  # if(for_print){
+  #   separator <- " |> \n  "
+  # } else{
+  #   separator <- " |> "
+  # }
 
-  pipeline_code <-
-    pipeline |>
-    purrr::compact() |>
-    paste(collapse = separator) |>
-    glue::glue(.trim = FALSE)
+  if(for_print){
+    pipeline_code <-
+      pipeline |>
+      purrr::compact() |>
+      paste(collapse = " |> ") |>
+      stringr::str_replace_all("( *)\\|\\>( *)", " |> \n  ") |>
+      glue::glue(.trim = FALSE)
+  } else{
+    pipeline_code <-
+      pipeline |>
+      purrr::compact() |>
+      paste(collapse = " |> ") |>
+      glue::glue(.trim = FALSE)
+  }
 
   if(execute){
     result <-

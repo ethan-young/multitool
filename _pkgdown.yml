@@ -81,7 +81,13 @@ reference:
   contents:
   - unpack_specs
   - unpack_results
+  - unpack_postprocess
+  - unpack_model_parameters
+  - unpack_model_performance
+  - unpack_model_warnings
+  - unpack_model_messages
   - condense
+  - organize
   - reveal
   - reveal_model_parameters
   - reveal_model_performance

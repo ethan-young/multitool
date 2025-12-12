@@ -567,6 +567,94 @@ add_parameter_keys <- function(.df, parameter_group, parameter_name){
   grid_prep
 }
 
+
+#' Add arbitrary summary statistics to a multiverse pipeline
+#'
+#' @param .df The original \code{data.frame}(e.g., base data set). If part of
+#'   set of add_* decision functions in a pipeline, the base data will be passed
+#'   along as an attribute.
+#' @param desc_name a character string. A descriptive name for what the summary
+#'   statistics you want to compute over the data passed to your model.
+#' @param code the literal code you would like to execute. For summary
+#'   statistics, \code{model.frame()} will be called on the model object fit in
+#'   the prior step. Your code should thus work with the variables that are used
+#'   in your model.
+#'
+#' @return a \code{data.frame} with three columns: type, group, and code. Type
+#'   indicates the decision type, group is a decision, and the code is the
+#'   actual code that will be executed. If part of a pipe, the current set of
+#'   decisions will be appended as new rows.
+#' @export
+#'
+#' @examples
+#'
+#' library(tidyverse)
+#' library(multitool)
+#'
+#' the_data <-
+#'   data.frame(
+#'     id   = 1:500,
+#'     iv1  = rnorm(500),
+#'     iv2  = rnorm(500),
+#'     iv3  = rnorm(500),
+#'     mod1 = rnorm(500),
+#'     mod2 = rnorm(500),
+#'     mod3 = rnorm(500),
+#'     cov1 = rnorm(500),
+#'     cov2 = rnorm(500),
+#'     dv1  = rnorm(500),
+#'     dv2  = rnorm(500),
+#'     include1 = rbinom(500, size = 1, prob = .1),
+#'     include2 = sample(1:3, size = 500, replace = TRUE),
+#'     include3 = rnorm(500)
+#'   )
+#'
+#' the_data |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2, include3 > -2.5) |>
+#'   add_variables("ivs", iv1, iv2, iv3) |>
+#'   add_variables("dvs", dv1, dv2) |>
+#'   add_variables("mods", starts_with("mod")) |>
+#'   add_preprocess("scale_iv", 'mutate({ivs} = scale({ivs}))') |>
+#'   add_model("linear model", lm({dvs} ~ {ivs} * {mods})) |>
+#'   add_model_descriptives(
+#'     "descriptives",
+#'     summarize(body_mass_mean = mean({dvs}), .by = c(include2))
+#'   )
+add_model_descriptives <- function(.df, desc_name, code){
+
+  code <- dplyr::enexprs(code)
+  code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
+
+  data_chr <- dplyr::enexpr(.df) |> as.character()
+  data_attr <- attr(.df, "base_df")
+
+  if(!is.null(data_attr)){
+    data_chr <- attr(.df, "base_df")
+  }
+
+  base_df <-
+    rlang::parse_expr(data_chr) |>
+    rlang::eval_tidy(env = parent.frame())
+
+  grid_prep <-
+    tibble::tibble(
+      type  = "postprocess",
+      group = desc_name,
+      code  = glue::glue("model.frame() |> {code_chr}")
+    )
+
+  if(!is.null(data_attr)){
+    grid_prep <- dplyr::bind_rows(.df, grid_prep)
+  } else{
+    grid_prep <- grid_prep
+  }
+
+  attr(grid_prep, "base_df") <- data_chr
+  grid_prep
+
+}
+
+
 #' Add arbitrary postprocessing code to a multiverse pipeline
 #'
 #' @param .df The original \code{data.frame}(e.g., base data set). If part of

@@ -2,28 +2,34 @@
 % Please edit documentation in R/unpack-multiverse.R
 \name{condense}
 \alias{condense}
+\alias{organize}
 \title{Summarize multiverse parameters}
 \usage{
 condense(.unpacked, .what, .how, .group = NULL, list_cols = TRUE)
+
+organize(.unpacked, .what, .group = NULL, focused = TRUE)
 }
 \arguments{
-\item{.unpacked}{an unpacked (with \code{\link{reveal}} or
-\code{tidyr::unnest}) multiverse dataset.}
+\item{.unpacked}{a set of results from \code{analyze_grid} using
+\code{unpack_results*}}
 
-\item{.what}{a specific column to summarize. This could be a model estimate,
-a summary statistic, correlation, or any other estimate computed over the
-multiverse.}
+\item{.what}{the column from the unpacked results you'd like to organize}
 
 \item{.how}{a named list. The list should contain summary functions (e.g.,
 mean or median) the user would like to compute over the individual
 estimates from the multiverse}
 
-\item{.group}{an optional variable to group the results. This argument is
-passed directly to the \code{.by} argument used in \code{dplyr::across}}
+\item{.group}{a grouping column, usually from the specifications, that you
+like to sort within. This will give you sorted output by the levels of the
+grouping variable.}
 
 \item{list_cols}{logical, whether to create list columns for the raw values
 of any summarized columns. Useful for creating visualizations and tables.
 Default is TRUE.}
+
+\item{focused}{logical, defaults to \code{TRUE}. Return only the variable,
+potential group, and a variable indicating rank. Set to \code{FALSE} to
+retain all other columns.}
 }
 \value{
 a summarized \code{tibble} containing a column for each summary
@@ -32,6 +38,11 @@ method from \code{.how}
 \description{
 Summarize multiverse parameters
 }
+\section{Functions}{
+\itemize{
+\item \code{organize()}: Sort and organize results by size and sign.
+
+}}
 \examples{
 
 library(tidyverse)

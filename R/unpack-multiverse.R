@@ -64,7 +64,7 @@ unpack_specs <- function(.multi, .how = "wide"){
           c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::any_of(c("subgroups","variables","filters","models"))) |>
-      dplyr::select(-dplyr::matches("(model|args|standardize)$")) |>
+      dplyr::select(-dplyr::matches("(model|args|standardize|perform)$")) |>
       dplyr::mutate(
         dplyr::across(
           dplyr::where(is.character),
@@ -83,7 +83,7 @@ unpack_specs <- function(.multi, .how = "wide"){
         dplyr::any_of(c("subgroups","variables","filters","models")),
         names_sep = "."
       ) |>
-      dplyr::select(-dplyr::matches("(model|args|standardize)$")) |>
+      dplyr::select(-dplyr::matches("(model|args|standardize|perform)$")) |>
       dplyr::mutate(
         dplyr::across(
           dplyr::where(is.character),
@@ -258,6 +258,23 @@ unpack_model_messges <- function(.multi, .unpack_specs = "wide"){
 
 }
 
+#' @describeIn unpack_results Unpack a post-processing result
+#' @export
+unpack_postprocess <- function(.multi, .which, .unpack_specs = "wide"){
+
+  revealed <-
+    .multi |>
+    unpack_results(
+      {{.which}},
+      dplyr::ends_with("output"),
+      .unpack_specs = .unpack_specs
+    )
+
+  revealed |>
+    dplyr::select(dplyr::where(~!is.list(.x)))
+
+}
+
 #' Summarize multiverse parameters
 #'
 #' @param .unpacked an unpacked (with \code{\link{reveal}} or
@@ -351,6 +368,17 @@ condense <- function(.unpacked, .what, .how, .group = NULL, list_cols = TRUE){
   }
 }
 
+#' @describeIn condense Sort and organize results by size and sign.
+#' @param .unpacked a set of results from \code{analyze_grid} using
+#'   \code{unpack_results*}
+#' @param .what the column from the unpacked results you'd like to organize
+#' @param .group a grouping column, usually from the specifications, that you
+#'   like to sort within. This will give you sorted output by the levels of the
+#'   grouping variable.
+#' @param focused logical, defaults to \code{TRUE}. Return only the variable,
+#'   potential group, and a variable indicating rank. Set to \code{FALSE} to
+#'   retain all other columns.
+#' @export
 organize <- function(.unpacked, .what, .group = NULL, focused = TRUE){
 
   grouping <-
@@ -368,8 +396,6 @@ organize <- function(.unpacked, .what, .group = NULL, focused = TRUE){
   } else{
     group_name <- group_chr
   }
-
-
 
   organized <-
     .unpacked |>

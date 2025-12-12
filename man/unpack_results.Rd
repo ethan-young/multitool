@@ -6,6 +6,7 @@
 \alias{unpack_model_performance}
 \alias{unpack_model_warnings}
 \alias{unpack_model_messges}
+\alias{unpack_postprocess}
 \title{Unpack a component of your analyzed grid}
 \usage{
 unpack_results(.multi, .what, .which = NULL, .unpack_specs = "wide")
@@ -17,6 +18,8 @@ unpack_model_performance(.multi, .unpack_specs = "wide")
 unpack_model_warnings(.multi, .unpack_specs = "wide")
 
 unpack_model_messges(.multi, .unpack_specs = "wide")
+
+unpack_postprocess(.multi, .which, .unpack_specs = "wide")
 }
 \arguments{
 \item{.multi}{a multiverse list-column \code{tibble} produced by
@@ -56,6 +59,8 @@ Unpack a component of your analyzed grid
 \item \code{unpack_model_warnings()}: Unpack the model warnings
 
 \item \code{unpack_model_messges()}: Unpack the model messages
+
+\item \code{unpack_postprocess()}: Unpack a post-processing result
 
 }}
 \examples{
