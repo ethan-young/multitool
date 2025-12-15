@@ -44,6 +44,7 @@ reference:
   - add_filters
   - add_variables
   - add_model
+  - add_model_descriptives
   - add_preprocess
   - add_postprocess
   - add_summary_stats
@@ -85,7 +86,7 @@ reference:
   - unpack_model_parameters
   - unpack_model_performance
   - unpack_model_warnings
-  - unpack_model_messages
+  - unpack_model_messges
   - condense
   - organize
   - reveal
