@@ -6,23 +6,19 @@ Summarize multiverse parameters
 
 ``` r
 condense(.unpacked, .what, .how, .group = NULL, list_cols = TRUE)
+
+organize(.unpacked, .what, .group = NULL, focused = TRUE)
 ```
 
 ## Arguments
 
 - .unpacked:
 
-  an unpacked (with
-  [`reveal`](https://ethan-young.github.io/multitool/reference/reveal.md)
-  or
-  [`tidyr::unnest`](https://tidyr.tidyverse.org/reference/unnest.html))
-  multiverse dataset.
+  a set of results from `analyze_grid` using `unpack_results*`
 
 - .what:
 
-  a specific column to summarize. This could be a model estimate, a
-  summary statistic, correlation, or any other estimate computed over
-  the multiverse.
+  the column from the unpacked results you'd like to organize
 
 - .how:
 
@@ -32,9 +28,9 @@ condense(.unpacked, .what, .how, .group = NULL, list_cols = TRUE)
 
 - .group:
 
-  an optional variable to group the results. This argument is passed
-  directly to the `.by` argument used in
-  [`dplyr::across`](https://dplyr.tidyverse.org/reference/across.html)
+  a grouping column, usually from the specifications, that you like to
+  sort within. This will give you sorted output by the levels of the
+  grouping variable.
 
 - list_cols:
 
@@ -42,10 +38,20 @@ condense(.unpacked, .what, .how, .group = NULL, list_cols = TRUE)
   summarized columns. Useful for creating visualizations and tables.
   Default is TRUE.
 
+- focused:
+
+  logical, defaults to `TRUE`. Return only the variable, potential
+  group, and a variable indicating rank. Set to `FALSE` to retain all
+  other columns.
+
 ## Value
 
 a summarized `tibble` containing a column for each summary method from
 `.how`
+
+## Functions
+
+- `organize()`: Sort and organize results by size and sign.
 
 ## Examples
 

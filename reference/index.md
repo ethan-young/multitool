@@ -16,6 +16,9 @@ Add your analysis pipeline steps
 - [`add_model()`](https://ethan-young.github.io/multitool/reference/add_model.md)
   : Add a model and formula to a multiverse pipeline
 
+- [`add_model_descriptives()`](https://ethan-young.github.io/multitool/reference/add_model_descriptives.md)
+  : Add arbitrary summary statistics to a multiverse pipeline
+
 - [`add_preprocess()`](https://ethan-young.github.io/multitool/reference/add_preprocess.md)
   : Add arbitrary preprocessing code to a multiverse analysis pipeline
 
@@ -97,8 +100,10 @@ Unpack your results for viewing, plotting, and understanding
   [`unpack_model_performance()`](https://ethan-young.github.io/multitool/reference/unpack_results.md)
   [`unpack_model_warnings()`](https://ethan-young.github.io/multitool/reference/unpack_results.md)
   [`unpack_model_messges()`](https://ethan-young.github.io/multitool/reference/unpack_results.md)
+  [`unpack_postprocess()`](https://ethan-young.github.io/multitool/reference/unpack_results.md)
   : Unpack a component of your analyzed grid
 - [`condense()`](https://ethan-young.github.io/multitool/reference/condense.md)
+  [`organize()`](https://ethan-young.github.io/multitool/reference/condense.md)
   : Summarize multiverse parameters
 - [`reveal()`](https://ethan-young.github.io/multitool/reference/reveal.md)
   : Reveal the contents of a multiverse analysis

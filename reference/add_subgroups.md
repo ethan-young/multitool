@@ -63,9 +63,9 @@ the_data |>
 #> # A tibble: 3 × 3
 #>   type      group code 
 #>   <chr>     <chr> <chr>
-#> 1 subgroups group 1    
-#> 2 subgroups group 3    
-#> 3 subgroups group 2    
+#> 1 subgroups group 2    
+#> 2 subgroups group 1    
+#> 3 subgroups group 3    
 
 the_data |>
   add_subgroups(group, .only = c(1,3))

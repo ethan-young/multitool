@@ -46,7 +46,9 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">condense</span><span class="op">(</span><span class="va">.unpacked</span>, <span class="va">.what</span>, <span class="va">.how</span>, .group <span class="op">=</span> <span class="cn">NULL</span>, list_cols <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">condense</span><span class="op">(</span><span class="va">.unpacked</span>, <span class="va">.what</span>, <span class="va">.how</span>, .group <span class="op">=</span> <span class="cn">NULL</span>, list_cols <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">organize</span><span class="op">(</span><span class="va">.unpacked</span>, <span class="va">.what</span>, .group <span class="op">=</span> <span class="cn">NULL</span>, focused <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -54,14 +56,12 @@
 
 
 <dl><dt id="arg--unpacked">.unpacked<a class="anchor" aria-label="anchor" href="#arg--unpacked"></a></dt>
-<dd><p>an unpacked (with <code><a href="reveal.html">reveal</a></code> or
-<code><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">tidyr::unnest</a></code>) multiverse dataset.</p></dd>
+<dd><p>a set of results from <code>analyze_grid</code> using
+<code>unpack_results*</code></p></dd>
 
 
 <dt id="arg--what">.what<a class="anchor" aria-label="anchor" href="#arg--what"></a></dt>
-<dd><p>a specific column to summarize. This could be a model estimate,
-a summary statistic, correlation, or any other estimate computed over the
-multiverse.</p></dd>
+<dd><p>the column from the unpacked results you'd like to organize</p></dd>
 
 
 <dt id="arg--how">.how<a class="anchor" aria-label="anchor" href="#arg--how"></a></dt>
@@ -71,8 +71,9 @@ estimates from the multiverse</p></dd>
 
 
 <dt id="arg--group">.group<a class="anchor" aria-label="anchor" href="#arg--group"></a></dt>
-<dd><p>an optional variable to group the results. This argument is
-passed directly to the <code>.by</code> argument used in <code><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">dplyr::across</a></code></p></dd>
+<dd><p>a grouping column, usually from the specifications, that you
+like to sort within. This will give you sorted output by the levels of the
+grouping variable.</p></dd>
 
 
 <dt id="arg-list-cols">list_cols<a class="anchor" aria-label="anchor" href="#arg-list-cols"></a></dt>
@@ -80,12 +81,23 @@ passed directly to the <code>.by</code> argument used in <code><a href="https://
 of any summarized columns. Useful for creating visualizations and tables.
 Default is TRUE.</p></dd>
 
+
+<dt id="arg-focused">focused<a class="anchor" aria-label="anchor" href="#arg-focused"></a></dt>
+<dd><p>logical, defaults to <code>TRUE</code>. Return only the variable,
+potential group, and a variable indicating rank. Set to <code>FALSE</code> to
+retain all other columns.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>a summarized <code>tibble</code> containing a column for each summary
 method from <code>.how</code></p>
     </div>
+    <div class="section level2">
+    <h2 id="functions">Functions<a class="anchor" aria-label="anchor" href="#functions"></a></h2>
+
+<ul><li><p><code>organize()</code>: Sort and organize results by size and sign.</p></li>
+</ul></div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

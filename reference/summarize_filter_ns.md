@@ -53,10 +53,10 @@ summarize_filter_ns(full_pipeline)
 #> # A tibble: 6 × 4
 #>   filter_expression              variable n_retained n_excluded
 #>   <chr>                          <chr>         <int>      <int>
-#> 1 include1 == 0                  include1        448         52
+#> 1 include1 == 0                  include1        444         56
 #> 2 include1 %in% unique(include1) include1        500          0
-#> 3 include2 != 3                  include2        346        154
+#> 3 include2 != 3                  include2        327        173
 #> 4 include2 %in% unique(include2) include2        500          0
-#> 5 include3 > -2.5                include3        493          7
+#> 5 include3 > -2.5                include3        496          4
 #> 6 include3 %in% unique(include3) include3        500          0
 ```

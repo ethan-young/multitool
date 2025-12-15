@@ -41,7 +41,8 @@ analyze_grid(
   when executing parallel processing. Internally, this will call
   `library` dynamically to ensure that any functions specific to a
   package you are using are available during execution on the individual
-  workers. Only relevant if you have called `mirai::daemons()`.
+  workers. Only relevant if you have called
+  [`mirai::daemons()`](https://mirai.r-lib.org/reference/daemons.html).
 
 - ...:
 
@@ -108,6 +109,7 @@ pipeline_grid <- expand_decisions(full_pipeline)
 
 # analyze the grid
 analyzed_grid <- analyze_grid(pipeline_grid[1:10,])
-#> Error in parallel_pkgs_installed(): The packages "carrier" (>= 0.3.0) and "mirai" (>= 2.5.1) are required
-#> for parallel map.
+#> Error in purrr::map(1:nrow(.grid), purrr::in_parallel(function(index,     ...) {    if (!is.null(libraries)) {        purrr::walk(rlang::parse_exprs(paste(glue::glue("library({c('multitool', 'dplyr', libraries)})"),             collapse = "; ")), rlang::eval_tidy)    }    if (!purrr::is_empty(custom_fns)) {        purrr::walk(rlang::parse_exprs(glue::glue("assign('{names(custom_fns)}', {custom_fns}, pos = .GlobalEnv)")),             rlang::eval_tidy)    }    start <- Sys.time()    analyzed_result <- run_universe_model_v2(.grid, decision_index = index,         save_model = save_model)    end <- Sys.time()    tidyr::nest(dplyr::mutate(analyzed_result, run_started = start,         run_ended = end, run_duration_seconds = end - start,         run_duration_minutes = (end - start)/60), timing_logs = dplyr::starts_with("run_"))}, .grid = .grid, run_universe_model_v2 = run_universe_model_v2,     save_model = save_model, libraries = libraries, custom_fns = custom_fns),     .progress = show_progress): ℹ In index: 1.
+#> Caused by error:
+#> ! object 'the_data' not found
 ```
