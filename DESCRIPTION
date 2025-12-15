@@ -39,6 +39,8 @@ Imports:
   rstudioapi
 Suggests: 
     clipr,
+    mirai,
+    carrier,
     flextable,
     future,
     ggdist,
