@@ -99,27 +99,6 @@
 
         <dt>
 
-          <code><a href="add_summary_stats.html">add_summary_stats()</a></code>
-
-        </dt>
-        <dd>Add a set of descriptive statistics to compute over a set of variables</dd>
-
-        <dt>
-
-          <code><a href="add_reliabilities.html">add_reliabilities()</a></code>
-
-        </dt>
-        <dd>Add item reliabilities to a multiverse pipeline</dd>
-
-        <dt>
-
-          <code><a href="add_correlations.html">add_correlations()</a></code>
-
-        </dt>
-        <dd>Add correlations from the <code>correlation</code> package in <code>easystats</code></dd>
-
-        <dt>
-
           <code><a href="add_parameter_keys.html">add_parameter_keys()</a></code>
 
         </dt>
@@ -143,8 +122,15 @@
 
       <dl><dt>
 
-          <code><a href="create_blueprint_graph.html">create_blueprint_graph()</a></code>
+          <code><a href="visualize_pipeline.html">visualize_pipeline()</a></code>
 
+        </dt>
+        <dd>Visualize an analysis pipeline workflow</dd>
+
+        <dt>
+
+          <code><a href="create_blueprint_graph.html">create_blueprint_graph()</a></code>
+          <span class="badge lifecycle lifecycle-superseded">superseded</span>
         </dt>
         <dd>Create a Analysis Pipeline diagram</dd>
 
@@ -192,7 +178,7 @@
 
         <dt>
 
-          <code><a href="show_code.html">show_code()</a></code> <code><a href="show_code.html">show_code_subgroups()</a></code> <code><a href="show_code.html">show_code_filters()</a></code> <code><a href="show_code.html">show_code_preprocess()</a></code> <code><a href="show_code.html">show_code_model()</a></code> <code><a href="show_code.html">show_code_postprocess()</a></code> <code><a href="show_code.html">show_code_summary_stats()</a></code> <code><a href="show_code.html">show_code_corrs()</a></code> <code><a href="show_code.html">show_code_reliabilities()</a></code>
+          <code><a href="show_code.html">show_code()</a></code> <code><a href="show_code.html">show_code_subgroups()</a></code> <code><a href="show_code.html">show_code_filters()</a></code> <code><a href="show_code.html">show_code_preprocess()</a></code> <code><a href="show_code.html">show_code_model()</a></code> <code><a href="show_code.html">show_code_postprocess()</a></code>
 
         </dt>
         <dd>Show multiverse data code pipelines</dd>
@@ -219,27 +205,6 @@
 
         </dt>
         <dd>Analyze a complete decision grid in parallel</dd>
-
-        <dt>
-
-          <code><a href="run_multiverse.html">run_multiverse()</a></code>
-
-        </dt>
-        <dd>Run a multiverse based on a complete decision grid</dd>
-
-        <dt>
-
-          <code><a href="run_multiverse_furrr.html">run_multiverse_furrr()</a></code>
-
-        </dt>
-        <dd>Run a multi-core, multiverse based on a complete decision grid</dd>
-
-        <dt>
-
-          <code><a href="run_descriptives.html">run_descriptives()</a></code>
-
-        </dt>
-        <dd>Run a multiverse-style descriptive analysis based on a complete decision grid</dd>
       </dl></div><div class="section level2">
       <h2 id="unpack-results">Unpack Results<a class="anchor" aria-label="anchor" href="#unpack-results"></a></h2>
 
@@ -259,7 +224,7 @@
 
         <dt>
 
-          <code><a href="unpack_results.html">unpack_results()</a></code> <code><a href="unpack_results.html">unpack_model_parameters()</a></code> <code><a href="unpack_results.html">unpack_model_performance()</a></code> <code><a href="unpack_results.html">unpack_model_warnings()</a></code> <code><a href="unpack_results.html">unpack_model_messges()</a></code> <code><a href="unpack_results.html">unpack_postprocess()</a></code>
+          <code><a href="unpack_results.html">unpack_results()</a></code> <code><a href="unpack_results.html">unpack_model_parameters()</a></code> <code><a href="unpack_results.html">unpack_model_performance()</a></code> <code><a href="unpack_results.html">unpack_model_warnings()</a></code> <code><a href="unpack_results.html">unpack_model_messages()</a></code> <code><a href="unpack_results.html">unpack_postprocess()</a></code>
 
         </dt>
         <dd>Unpack a component of your analyzed grid</dd>
@@ -270,62 +235,117 @@
 
         </dt>
         <dd>Summarize multiverse parameters</dd>
+      </dl></div><div class="section level2">
+      <h2 id="assess-decision-sensitivity-robustness">Assess Decision Sensitivity/Robustness<a class="anchor" aria-label="anchor" href="#assess-decision-sensitivity-robustness"></a></h2>
+
+      <div class="section-desc"><p>Evaluate the robustness of a model output over the whole decision space, by decision alternatives, or assess the impact of making specific decisions.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="assess_robustness.html">assess_robustness()</a></code>
+
+        </dt>
+        <dd>Assess the robustness of multiverse analysis results</dd>
+      </dl></div><div class="section level2">
+      <h2 id="superseded">Superseded<a class="anchor" aria-label="anchor" href="#superseded"></a></h2>
+
+      <div class="section-desc"><p>Functions that have been replaced by new approaches that are better. These functions still work and will stick around.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="create_blueprint_graph.html">create_blueprint_graph()</a></code>
+          <span class="badge lifecycle lifecycle-superseded">superseded</span>
+        </dt>
+        <dd>Create a Analysis Pipeline diagram</dd>
+
+        <dt>
+
+          <code><a href="run_multiverse.html">run_multiverse()</a></code>
+          <span class="badge lifecycle lifecycle-superseded">superseded</span>
+        </dt>
+        <dd>Run a multiverse based on a complete decision grid</dd>
+
+        <dt>
+
+          <code><a href="run_multiverse_furrr.html">run_multiverse_furrr()</a></code>
+          <span class="badge lifecycle lifecycle-superseded">superseded</span>
+        </dt>
+        <dd>Run a multi-core, multiverse based on a complete decision grid</dd>
+      </dl></div><div class="section level2">
+      <h2 id="deprecated">Deprecated<a class="anchor" aria-label="anchor" href="#deprecated"></a></h2>
+
+      <div class="section-desc"><p>Functions that are no longer supported and will be removed in a future version.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="add_correlations.html">add_correlations()</a></code>
+          <span class="badge lifecycle lifecycle-deprecated">deprecated</span>
+        </dt>
+        <dd>Add correlations from the <code>correlation</code> package in <code>easystats</code></dd>
+
+        <dt>
+
+          <code><a href="add_reliabilities.html">add_reliabilities()</a></code>
+          <span class="badge lifecycle lifecycle-deprecated">deprecated</span>
+        </dt>
+        <dd>Add item reliabilities to a multiverse pipeline</dd>
+
+        <dt>
+
+          <code><a href="add_summary_stats.html">add_summary_stats()</a></code>
+          <span class="badge lifecycle lifecycle-deprecated">deprecated</span>
+        </dt>
+        <dd>Add a set of descriptive statistics to compute over a set of variables</dd>
 
         <dt>
 
           <code><a href="reveal.html">reveal()</a></code>
-
+          <span class="badge lifecycle lifecycle-deprecated">deprecated</span>
         </dt>
         <dd>Reveal the contents of a multiverse analysis</dd>
 
         <dt>
 
-          <code><a href="reveal_model_parameters.html">reveal_model_parameters()</a></code>
+          <code><a href="reveal_model_messages.html">reveal_model_messages()</a></code>
+          <span class="badge lifecycle lifecycle-deprecated">deprecated</span>
+        </dt>
+        <dd>Reveal any messages about your models during a multiverse analysis</dd>
 
+        <dt>
+
+          <code><a href="reveal_model_parameters.html">reveal_model_parameters()</a></code>
+          <span class="badge lifecycle lifecycle-deprecated">deprecated</span>
         </dt>
         <dd>Reveal the model parameters of a multiverse analysis</dd>
 
         <dt>
 
           <code><a href="reveal_model_performance.html">reveal_model_performance()</a></code>
-
+          <span class="badge lifecycle lifecycle-deprecated">deprecated</span>
         </dt>
         <dd>Reveal the model performance/fit indices from a multiverse analysis</dd>
 
         <dt>
 
           <code><a href="reveal_model_warnings.html">reveal_model_warnings()</a></code>
-
+          <span class="badge lifecycle lifecycle-deprecated">deprecated</span>
         </dt>
         <dd>Reveal any warnings about your models during a multiverse analysis</dd>
-
-        <dt>
-
-          <code><a href="reveal_model_messages.html">reveal_model_messages()</a></code>
-
-        </dt>
-        <dd>Reveal any messages about your models during a multiverse analysis</dd>
-
-        <dt>
-
-          <code><a href="reveal_reliabilities.html">reveal_reliabilities()</a></code>
-
-        </dt>
-        <dd>Reveal a set of multiverse cronbach's alpha statistics</dd>
-
-        <dt>
-
-          <code><a href="reveal_corrs.html">reveal_corrs()</a></code>
-
-        </dt>
-        <dd>Reveal a set of multiverse correlations</dd>
-
-        <dt>
-
-          <code><a href="reveal_summary_stats.html">reveal_summary_stats()</a></code>
-
-        </dt>
-        <dd>Reveal a set of summary statistics from a multiverse analysis</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

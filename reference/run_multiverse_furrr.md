@@ -1,6 +1,11 @@
 # Run a multi-core, multiverse based on a complete decision grid
 
-Run a multi-core, multiverse based on a complete decision grid
+**\[superseded\]** `run_multiverse_furr()` will still work but I
+recommend using
+[`analyze_grid()`](https://ethan-young.github.io/multitool/reference/analyze_grid.md)
+or
+[`analyze_grid_parallel()`](https://ethan-young.github.io/multitool/reference/analyze_grid_parallel.md)
+instead, which are much faster especially with larger decision grids.
 
 ## Usage
 

@@ -1,6 +1,8 @@
 # Reveal the model performance/fit indices from a multiverse analysis
 
-Reveal the model performance/fit indices from a multiverse analysis
+**\[deprecated\]** This function has been deprecated; please use
+[`unpack_model_performance()`](https://ethan-young.github.io/multitool/reference/unpack_results.md)
+instead.
 
 ## Usage
 

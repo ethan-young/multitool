@@ -1,6 +1,8 @@
 # Add a set of descriptive statistics to compute over a set of variables
 
-Add a set of descriptive statistics to compute over a set of variables
+**\[deprecated\]** This function has been deprecated; please use
+[`add_model_descriptives()`](https://ethan-young.github.io/multitool/reference/add_model_descriptives.md)
+instead.
 
 ## Usage
 

@@ -1,6 +1,8 @@
 # Add item reliabilities to a multiverse pipeline
 
-Add item reliabilities to a multiverse pipeline
+**\[deprecated\]** This function has been deprecated; please use
+[`add_model_descriptives()`](https://ethan-young.github.io/multitool/reference/add_model_descriptives.md)
+instead.
 
 ## Usage
 

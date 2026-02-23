@@ -36,7 +36,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Analyze a complete decision grid in parallel</h1>
-      <small class="dont-index">Source: <a href="https://github.com/ethan-young/multitool/blob/main/R/run-multiverse.R" class="external-link"><code>R/run-multiverse.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ethan-young/multitool/blob/main/R/02-analyze.R" class="external-link"><code>R/02-analyze.R</code></a></small>
       <div class="d-none name"><code>analyze_grid_parallel.Rd</code></div>
     </div>
 
@@ -91,9 +91,7 @@ any post-processing tests/tasks. For each unique test (e.g., an <code>lm</code>
 or <code>aov</code> called on an <code>lm</code>), a list column with the function name
 is created with <code><a href="https://easystats.github.io/parameters/reference/model_parameters.html" class="external-link">parameters</a></code> and
 <code><a href="https://easystats.github.io/performance/reference/model_performance.html" class="external-link">performance</a></code> and any warnings or messages printed
-while fitting the models. Internally, modeling and post-processing
-functions are checked to see if there are tidy or glance methods available.
-If not, <code>summary</code> will be called instead.</p>
+while fitting the models.</p>
     </div>
 
     <div class="section level2">

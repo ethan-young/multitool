@@ -1,6 +1,8 @@
 # Reveal any warnings about your models during a multiverse analysis
 
-Reveal any warnings about your models during a multiverse analysis
+**\[deprecated\]** This function has been deprecated; please use
+[`unpack_model_warnings()`](https://ethan-young.github.io/multitool/reference/unpack_results.md)
+instead.
 
 ## Usage
 

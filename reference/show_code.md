@@ -23,36 +23,6 @@ show_code_preprocess(.grid, decision_num, ...)
 show_code_model(.grid, decision_num, ...)
 
 show_code_postprocess(.grid, decision_num, ...)
-
-show_code_summary_stats(
-  .grid,
-  decision_num,
-  summary_set = 1,
-  copy = FALSE,
-  console = TRUE,
-  execute = FALSE,
-  ...
-)
-
-show_code_corrs(
-  .grid,
-  decision_num,
-  corr_set = 1,
-  copy = FALSE,
-  console = TRUE,
-  execute = FALSE,
-  ...
-)
-
-show_code_reliabilities(
-  .grid,
-  decision_num,
-  rel_set = 1,
-  copy = FALSE,
-  console = TRUE,
-  execute = FALSE,
-  ...
-)
 ```
 
 ## Arguments
@@ -88,33 +58,6 @@ show_code_reliabilities(
 
   additional arguments passed to `show_code()`
 
-- summary_set:
-
-  numeric. For `show_code_summary_stats`, Which set of summary
-  statistics to print. Default is set to the `1`.
-
-- copy:
-
-  logical, whether to copy code to clipboard
-
-- console:
-
-  logical, whether to paste code into the console
-
-- execute:
-
-  logical, whether to run the code
-
-- corr_set:
-
-  numeric. For `show_code_corrs`, Which set of correlations to print.
-  Default is set to the `1`.
-
-- rel_set:
-
-  numeric. For `show_code_reliabilities`, Which set of reliabilities to
-  print. Default is set to the `1`.
-
 ## Value
 
 the code that generated results up to the specified point in an analysis
@@ -140,11 +83,3 @@ produced it.
 
 - `show_code_postprocess()`: Show the code up to the post-processing
   stage
-
-- `show_code_summary_stats()`: Show the code for computing summary
-  statistics
-
-- `show_code_corrs()`: Show the code for computing correlations
-
-- `show_code_reliabilities()`: Show the code for computing scale
-  reliability

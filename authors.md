@@ -12,14 +12,14 @@
 Source:
 [`DESCRIPTION`](https://github.com/ethan-young/multitool/blob/main/DESCRIPTION)
 
-Young E, Vermeent S (2025). *multitool: Run Multiverse Style Analyses*.
+Young E, Vermeent S (2026). *multitool: Run Multiverse Style Analyses*.
 R package version 0.1.5.9000,
 <https://ethan-young.github.io/multitool/>.
 
     @Manual{,
       title = {multitool: Run Multiverse Style Analyses},
       author = {Ethan Young and Stefan Vermeent},
-      year = {2025},
+      year = {2026},
       note = {R package version 0.1.5.9000},
       url = {https://ethan-young.github.io/multitool/},
     }

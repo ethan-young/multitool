@@ -38,7 +38,7 @@ simple wrappers of show_code."><script defer data-domain="ethan-young.github.io/
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Show multiverse data code pipelines</h1>
-      <small class="dont-index">Source: <a href="https://github.com/ethan-young/multitool/blob/main/R/show-pipelines.R" class="external-link"><code>R/show-pipelines.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ethan-young/multitool/blob/main/R/00-audit.R" class="external-link"><code>R/00-audit.R</code></a></small>
       <div class="d-none name"><code>show_code.Rd</code></div>
     </div>
 
@@ -65,37 +65,7 @@ simple wrappers of <code>show_code</code>.</p>
 <span></span>
 <span><span class="fu">show_code_model</span><span class="op">(</span><span class="va">.grid</span>, <span class="va">decision_num</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">show_code_postprocess</span><span class="op">(</span><span class="va">.grid</span>, <span class="va">decision_num</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">show_code_summary_stats</span><span class="op">(</span></span>
-<span>  <span class="va">.grid</span>,</span>
-<span>  <span class="va">decision_num</span>,</span>
-<span>  summary_set <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  copy <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  console <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  execute <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  <span class="va">...</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">show_code_corrs</span><span class="op">(</span></span>
-<span>  <span class="va">.grid</span>,</span>
-<span>  <span class="va">decision_num</span>,</span>
-<span>  corr_set <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  copy <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  console <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  execute <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  <span class="va">...</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">show_code_reliabilities</span><span class="op">(</span></span>
-<span>  <span class="va">.grid</span>,</span>
-<span>  <span class="va">decision_num</span>,</span>
-<span>  rel_set <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  copy <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  console <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  execute <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  <span class="va">...</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">show_code_postprocess</span><span class="op">(</span><span class="va">.grid</span>, <span class="va">decision_num</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -130,33 +100,6 @@ expose by index or by name.</p></dd>
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>additional arguments passed to <code>show_code()</code></p></dd>
 
-
-<dt id="arg-summary-set">summary_set<a class="anchor" aria-label="anchor" href="#arg-summary-set"></a></dt>
-<dd><p>numeric. For <code>show_code_summary_stats</code>, Which set of
-summary statistics to print. Default is set to the <code>1</code>.</p></dd>
-
-
-<dt id="arg-copy">copy<a class="anchor" aria-label="anchor" href="#arg-copy"></a></dt>
-<dd><p>logical, whether to copy code to clipboard</p></dd>
-
-
-<dt id="arg-console">console<a class="anchor" aria-label="anchor" href="#arg-console"></a></dt>
-<dd><p>logical, whether to paste code into the console</p></dd>
-
-
-<dt id="arg-execute">execute<a class="anchor" aria-label="anchor" href="#arg-execute"></a></dt>
-<dd><p>logical, whether to run the code</p></dd>
-
-
-<dt id="arg-corr-set">corr_set<a class="anchor" aria-label="anchor" href="#arg-corr-set"></a></dt>
-<dd><p>numeric. For <code>show_code_corrs</code>, Which set of
-correlations to print. Default is set to the <code>1</code>.</p></dd>
-
-
-<dt id="arg-rel-set">rel_set<a class="anchor" aria-label="anchor" href="#arg-rel-set"></a></dt>
-<dd><p>numeric. For <code>show_code_reliabilities</code>, Which set of
-reliabilities to print. Default is set to the <code>1</code>.</p></dd>
-
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -179,9 +122,6 @@ it.</p>
 <li><p><code>show_code_preprocess()</code>: Show the code up to the preprocessing stage</p></li>
 <li><p><code>show_code_model()</code>: Show the code up to the modeling stage</p></li>
 <li><p><code>show_code_postprocess()</code>: Show the code up to the post-processing stage</p></li>
-<li><p><code>show_code_summary_stats()</code>: Show the code for computing summary statistics</p></li>
-<li><p><code>show_code_corrs()</code>: Show the code for computing correlations</p></li>
-<li><p><code>show_code_reliabilities()</code>: Show the code for computing scale reliability</p></li>
 </ul></div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

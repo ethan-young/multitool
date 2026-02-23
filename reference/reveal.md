@@ -1,6 +1,8 @@
 # Reveal the contents of a multiverse analysis
 
-Reveal the contents of a multiverse analysis
+**\[deprecated\]** This function has been deprecated; please use
+[`unpack_results()`](https://ethan-young.github.io/multitool/reference/unpack_results.md)
+instead.
 
 ## Usage
 

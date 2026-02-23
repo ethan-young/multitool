@@ -53,9 +53,6 @@ created with
 and
 [`performance`](https://easystats.github.io/performance/reference/model_performance.html)
 and any warnings or messages printed while fitting the models.
-Internally, modeling and post-processing functions are checked to see if
-there are tidy or glance methods available. If not, `summary` will be
-called instead.
 
 ## Examples
 

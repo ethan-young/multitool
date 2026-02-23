@@ -1,6 +1,10 @@
 # Create a Analysis Pipeline diagram
 
-Create a Analysis Pipeline diagram
+**\[superseded\]** `create_blueprint_graph()` will still work but I
+recommend using
+[`visualize_pipeline()`](https://ethan-young.github.io/multitool/reference/visualize_pipeline.md)
+instead, which has more options and outputs ggplot2 objects instead of
+grViz graphs
 
 ## Usage
 

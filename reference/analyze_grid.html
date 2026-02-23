@@ -36,7 +36,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Perform all analyses over a complete decision grid</h1>
-      <small class="dont-index">Source: <a href="https://github.com/ethan-young/multitool/blob/main/R/run-multiverse.R" class="external-link"><code>R/run-multiverse.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ethan-young/multitool/blob/main/R/02-analyze.R" class="external-link"><code>R/02-analyze.R</code></a></small>
       <div class="d-none name"><code>analyze_grid.Rd</code></div>
     </div>
 
@@ -98,9 +98,7 @@ any post-processing tests/tasks. For each unique test (e.g., an <code>lm</code>
 or <code>aov</code> called on an <code>lm</code>), a list column with the function name
 is created with <code><a href="https://easystats.github.io/parameters/reference/model_parameters.html" class="external-link">parameters</a></code> and
 <code><a href="https://easystats.github.io/performance/reference/model_performance.html" class="external-link">performance</a></code> and any warnings or messages printed
-while fitting the models. Internally, modeling and post-processing
-functions are checked to see if there are tidy or glance methods available.
-If not, <code>summary</code> will be called instead.</p>
+while fitting the models.</p>
     </div>
 
     <div class="section level2">
@@ -144,7 +142,7 @@ If not, <code>summary</code> will be called instead.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># analyze the grid</span></span></span>
 <span class="r-in"><span><span class="va">analyzed_grid</span> <span class="op">&lt;-</span> <span class="fu">analyze_grid</span><span class="op">(</span><span class="va">pipeline_grid</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,<span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in purrr::map(1:nrow(.grid), purrr::in_parallel(function(index,     ...) {    if (!is.null(libraries)) {        purrr::walk(rlang::parse_exprs(paste(glue::glue("library({c('multitool', 'dplyr', libraries)})"),             collapse = "; ")), rlang::eval_tidy)    }    if (!purrr::is_empty(custom_fns)) {        purrr::walk(rlang::parse_exprs(glue::glue("assign('{names(custom_fns)}', {custom_fns}, pos = .GlobalEnv)")),             rlang::eval_tidy)    }    start &lt;- Sys.time()    analyzed_result &lt;- run_universe_model_v2(.grid, decision_index = index,         save_model = save_model)    end &lt;- Sys.time()    tidyr::nest(dplyr::mutate(analyzed_result, run_started = start,         run_ended = end, run_duration_seconds = end - start,         run_duration_minutes = (end - start)/60), timing_logs = dplyr::starts_with("run_"))}, .grid = .grid, run_universe_model_v2 = run_universe_model_v2,     save_model = save_model, libraries = libraries, custom_fns = custom_fns),     .progress = show_progress):</span> <span style="color: #00BBBB;">ℹ</span> In index: 1.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in purrr::map(1:nrow(.grid), purrr::in_parallel(function(index,     ...) {    if (!is.null(libraries)) {        purrr::walk(rlang::parse_exprs(paste(glue::glue("library({c('multitool', 'dplyr', libraries)})"),             collapse = "; ")), rlang::eval_tidy)    }    if (!purrr::is_empty(custom_fns)) {        purrr::walk(rlang::parse_exprs(glue::glue("assign('{names(custom_fns)}', {custom_fns}, pos = .GlobalEnv)")),             rlang::eval_tidy)    }    start &lt;- Sys.time()    analyzed_result &lt;- execute_universe_model(.grid, decision_index = index,         save_model = save_model)    end &lt;- Sys.time()    tidyr::nest(dplyr::mutate(analyzed_result, run_started = start,         run_ended = end, run_duration_seconds = end - start,         run_duration_minutes = (end - start)/60), timing_logs = dplyr::starts_with("run_"))}, .grid = .grid, execute_universe_model = execute_universe_model,     save_model = save_model, libraries = libraries, custom_fns = custom_fns),     .progress = show_progress):</span> <span style="color: #00BBBB;">ℹ</span> In index: 1.</span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error:</span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> object 'the_data' not found</span>
 </code></pre></div>

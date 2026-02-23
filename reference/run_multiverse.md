@@ -1,6 +1,9 @@
 # Run a multiverse based on a complete decision grid
 
-Run a multiverse based on a complete decision grid
+**\[superseded\]** `run_multiverse()` will still work but I recommend
+using
+[`analyze_grid()`](https://ethan-young.github.io/multitool/reference/analyze_grid.md)
+instead, which is much faster especially with larger decision grids.
 
 ## Usage
 

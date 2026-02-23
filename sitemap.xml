@@ -25,6 +25,7 @@
 <url><loc>https://ethan-young.github.io/multitool/reference/add_variables.html</loc></url>
 <url><loc>https://ethan-young.github.io/multitool/reference/analyze_grid.html</loc></url>
 <url><loc>https://ethan-young.github.io/multitool/reference/analyze_grid_parallel.html</loc></url>
+<url><loc>https://ethan-young.github.io/multitool/reference/assess_robustness.html</loc></url>
 <url><loc>https://ethan-young.github.io/multitool/reference/condense.html</loc></url>
 <url><loc>https://ethan-young.github.io/multitool/reference/create_blueprint_graph.html</loc></url>
 <url><loc>https://ethan-young.github.io/multitool/reference/detect_multiverse_n.html</loc></url>
@@ -35,20 +36,18 @@
 <url><loc>https://ethan-young.github.io/multitool/reference/expand_decisions.html</loc></url>
 <url><loc>https://ethan-young.github.io/multitool/reference/index.html</loc></url>
 <url><loc>https://ethan-young.github.io/multitool/reference/multitool-package.html</loc></url>
+<url><loc>https://ethan-young.github.io/multitool/reference/postprocess_model.html</loc></url>
 <url><loc>https://ethan-young.github.io/multitool/reference/reveal.html</loc></url>
-<url><loc>https://ethan-young.github.io/multitool/reference/reveal_corrs.html</loc></url>
 <url><loc>https://ethan-young.github.io/multitool/reference/reveal_model_messages.html</loc></url>
 <url><loc>https://ethan-young.github.io/multitool/reference/reveal_model_parameters.html</loc></url>
 <url><loc>https://ethan-young.github.io/multitool/reference/reveal_model_performance.html</loc></url>
 <url><loc>https://ethan-young.github.io/multitool/reference/reveal_model_warnings.html</loc></url>
-<url><loc>https://ethan-young.github.io/multitool/reference/reveal_reliabilities.html</loc></url>
-<url><loc>https://ethan-young.github.io/multitool/reference/reveal_summary_stats.html</loc></url>
-<url><loc>https://ethan-young.github.io/multitool/reference/run_descriptives.html</loc></url>
 <url><loc>https://ethan-young.github.io/multitool/reference/run_multiverse.html</loc></url>
 <url><loc>https://ethan-young.github.io/multitool/reference/run_multiverse_furrr.html</loc></url>
 <url><loc>https://ethan-young.github.io/multitool/reference/show_code.html</loc></url>
 <url><loc>https://ethan-young.github.io/multitool/reference/summarize_filter_ns.html</loc></url>
 <url><loc>https://ethan-young.github.io/multitool/reference/unpack_results.html</loc></url>
 <url><loc>https://ethan-young.github.io/multitool/reference/unpack_specs.html</loc></url>
+<url><loc>https://ethan-young.github.io/multitool/reference/visualize_pipeline.html</loc></url>
 </urlset>
 
