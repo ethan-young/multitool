@@ -29,8 +29,6 @@ View metadata, check the code, and test the pipeline
 
 - [`visualize_pipeline()`](https://ethan-young.github.io/multitool/reference/visualize_pipeline.md)
   : Visualize an analysis pipeline workflow
-- [`create_blueprint_graph()`](https://ethan-young.github.io/multitool/reference/create_blueprint_graph.md)
-  **\[superseded\]** : Create a Analysis Pipeline diagram
 - [`detect_multiverse_n()`](https://ethan-young.github.io/multitool/reference/detect_multiverse_n.md)
   : Detect total number of analysis pipelines
 - [`detect_n_subgroups()`](https://ethan-young.github.io/multitool/reference/detect_n_subgroups.md)
@@ -86,11 +84,14 @@ decisions.
 
 - [`assess_robustness()`](https://ethan-young.github.io/multitool/reference/assess_robustness.md)
   : Assess the robustness of multiverse analysis results
+- [`assess_decisions()`](https://ethan-young.github.io/multitool/reference/assess_decisions.md)
+  : Decompose decision variance using Sobol sensitivity indices and
+  variance dispersal
 
 ## Superseded
 
 Functions that have been replaced by new approaches that are better.
-These functions still work and will stick around.
+These functions still work and will stick around for awhile.
 
 - [`create_blueprint_graph()`](https://ethan-young.github.io/multitool/reference/create_blueprint_graph.md)
   **\[superseded\]** : Create a Analysis Pipeline diagram
