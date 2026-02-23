@@ -90,11 +90,12 @@ reference:
     decision alternatives, or assess the impact of making specific decisions.
   contents:
   - assess_robustness
+  - assess_decisions
 
 - title: Superseded
   desc: >
     Functions that have been replaced by new approaches that are better. These
-    functions still work and will stick around.
+    functions still work and will stick around for awhile.
   contents:
   - has_lifecycle("superseded")
 

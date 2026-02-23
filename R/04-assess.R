@@ -248,14 +248,14 @@ assess_robustness <-
 #'
 #' # Decompose variance in standardized coefficients
 #' unpacked <- unpack_model_parameters(results)
-#' decomp_decision_variance(unpacked)
+#' assess_decisions(unpacked)
 #'
 #' # Which decisions matter most for p-values?
-#' decomp_decision_variance(unpacked, .estimand = p)
+#' assess_decisions(unpacked, .estimand = p)
 #'
 #' # Decompose separately for each parameter
-#' decomp_decision_variance(unpacked, .by = dvs)
-decomp_decision_variance <-
+#' assess_decisions(unpacked, .by = dvs)
+assess_decisions <-
   function(.unpacked, .estimand = std_coef, .by = NULL){
 
     sobol_df <-
@@ -355,7 +355,7 @@ decomp_decision_variance <-
 
   }
 
-compare_choices <-
+assess_choices <-
   function(.unpacked){
 
     .unpacked |>
@@ -364,5 +364,3 @@ compare_choices <-
       )
 
   }
-
-
