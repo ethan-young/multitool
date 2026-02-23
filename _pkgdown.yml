@@ -55,7 +55,6 @@ reference:
     View metadata, check the code, and test the pipeline
   contents:
   - visualize_pipeline
-  - create_blueprint_graph
   - detect_multiverse_n
   - detect_n_subgroups
   - detect_n_filters
