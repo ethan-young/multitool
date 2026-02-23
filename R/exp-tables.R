@@ -98,3 +98,60 @@ multi_tab_create <- function(.condensed, ...){
         )
     )
 }
+
+
+multi_tab_interval <- function(x, range){
+  tibble::tibble(stat = x) |>
+    ggplot2::ggplot(ggplot2::aes(x = stat)) +
+    ggdist::stat_pointinterval() +
+    ggplot2::scale_x_continuous(limits = range) +
+    ggplot2::theme_void()
+}
+
+multi_tab_dots <- function(x, range){
+  tibble::tibble(stat = x) |>
+    ggplot2::ggplot(ggplot2::aes(x = stat)) +
+    ggdist::geom_dots() +
+    ggplot2::scale_x_continuous(limits = range) +
+    ggplot2::theme_void()
+}
+
+multi_tab_dotinterval <- function(x, range){
+  tibble::tibble(stat = x) |>
+    ggplot2::ggplot(ggplot2::aes(x = stat)) +
+    ggdist::stat_dotsinterval() +
+    ggplot2::scale_x_continuous(limits = range) +
+    ggplot2::theme_void()
+}
+
+multi_tab_slab <- function(x, range){
+  tibble::tibble(stat = x) |>
+    ggplot2::ggplot(ggplot2::aes(x = stat)) +
+    ggdist::stat_slab() +
+    ggplot2::scale_x_continuous(limits = range) +
+    ggplot2::theme_void()
+}
+
+multi_tab_slabinterval <- function(x, range){
+  tibble::tibble(stat = x) |>
+    ggplot2::ggplot(ggplot2::aes(x = stat)) +
+    ggdist::stat_slabinterval() +
+    ggplot2::scale_x_continuous(limits = range) +
+    ggplot2::theme_void()
+}
+
+multi_tab_curve <- function(x, range){
+  tibble(stat = sort(x), x = 1:length(x)) |>
+    ggplot2::ggplot(ggplot2::aes(x = x, y = stat)) +
+    ggplot2::geom_line() +
+    ggplot2::scale_y_continuous(limits = range) +
+    ggplot2::theme_void()
+}
+
+multi_tab_boxplot <- function(x, range){
+  tibble::tibble(stat = x) |>
+    ggplot2::ggplot(ggplot2::aes(x = stat)) +
+    ggplot2::geom_boxplot() +
+    ggplot2::scale_x_continuous(limits = range) +
+    ggplot2::theme_void()
+}

@@ -6,21 +6,21 @@ home:
 
 template:
   bootstrap: 5
-  theme: github-light
+  theme: arrow-light
   navbar:
     type: light
   bslib:
     base_font: {google: "Lato"}
-    font-size-base: ".90rem"
+    code_font: {google: "Fira Code"}
+    font_scale: 1.1
     line-height-base: "1.5"
     headings-font-weight: "bold"
-    code_font: {google: "Fira Code"}
     bg: "#fff"
-    code-bg: "#ecf0f1"
-    pre-bg: "#ecf0f1"
-    pre-border: "#ecf0f1"
+    code-bg: "#f8f8f8"
+    pre-bg: "#f8f8f8"
+    pre-border: "#f8f8f8"
     fg: "#000"
-    secondary: "#ecf0f1"
+    secondary: "#f8f8f8"
     light: "white"
   includes:
     in_header: |
@@ -47,9 +47,6 @@ reference:
   - add_model_descriptives
   - add_preprocess
   - add_postprocess
-  - add_summary_stats
-  - add_reliabilities
-  - add_correlations
   - add_parameter_keys
   - expand_decisions
 
@@ -57,6 +54,7 @@ reference:
   desc: >
     View metadata, check the code, and test the pipeline
   contents:
+  - visualize_pipeline
   - create_blueprint_graph
   - detect_multiverse_n
   - detect_n_subgroups
@@ -72,9 +70,6 @@ reference:
   contents:
   - analyze_grid
   - analyze_grid_parallel
-  - run_multiverse
-  - run_multiverse_furrr
-  - run_descriptives
 
 - title: Unpack Results
   desc: >
@@ -86,16 +81,26 @@ reference:
   - unpack_model_parameters
   - unpack_model_performance
   - unpack_model_warnings
-  - unpack_model_messges
+  - unpack_model_messages
   - condense
   - organize
-  - reveal
-  - reveal_model_parameters
-  - reveal_model_performance
-  - reveal_model_warnings
-  - reveal_model_messages
-  - reveal_reliabilities
-  - reveal_corrs
-  - reveal_summary_stats
 
+- title: Assess Decision Sensitivity/Robustness
+  desc: >
+    Evaluate the robustness of a model output over the whole decision space, by
+    decision alternatives, or assess the impact of making specific decisions.
+  contents:
+  - assess_robustness
 
+- title: Superseded
+  desc: >
+    Functions that have been replaced by new approaches that are better. These
+    functions still work and will stick around.
+  contents:
+  - has_lifecycle("superseded")
+
+- title: Deprecated
+  desc: >
+    Functions that are no longer supported and will be removed in a future version.
+  contents:
+  - has_lifecycle("deprecated")

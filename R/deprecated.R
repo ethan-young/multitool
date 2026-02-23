@@ -1,16 +1,23 @@
-#' Unpack the decision grid of specifications for your modeling pipeline
+#' Add a set of descriptive statistics to compute over a set of variables
 #'
-#' @param .multi a multiverse list-column \code{tibble} produced by
-#'   \code{\link{analyze_grid}}.
-#' @param .how character, options are \code{"no"}, \code{"wide"}, or
-#'   \code{"long"}. \code{"no"} (default) keeps specifications in a list column,
-#'   \code{wide} unnests specifications with each specification category as a
-#'   column. \code{"long"} unnests specifications and stacks them into long
-#'   format, which stacks specifications into a \code{decision_type},
-#'   \code{decision_set} and \code{decision_choice} columns. This is mainly
-#'   useful for plotting.
+#' @description `r lifecycle::badge("deprecated")` This function has been
+#' deprecated; please use [add_model_descriptives()] instead.
 #'
-#' @returns the unnested specifications of the analysis grid.
+#' @param .df The original \code{data.frame}(e.g., base data set). If part of
+#'   set of add_* decision functions in a pipeline, the base data will be passed
+#'   along as an attribute.
+#' @param var_set a character string. A name for the set of summary statistics
+#' @param variables the variables for which you would like to compute summary
+#'   statistics. You can also use tidyselect to select variables.
+#' @param stats a character vector of stat names (e.g., \code{c("mean","sd")}).
+#'   You are responsible for loading any packages that compute your preferred
+#'   summary statistics. Summary statistic functions must work inside
+#'   \code{\link[dplyr]{summarize}}.
+#'
+#' @return a \code{data.frame} with three columns: type, group, and code. Type
+#'   indicates the decision type, group is a decision, and the code is the
+#'   actual code that will be executed. If part of a pipe, the current set of
+#'   decisions will be appended as new rows.
 #' @export
 #'
 #' @examples
@@ -18,7 +25,6 @@
 #' library(tidyverse)
 #' library(multitool)
 #'
-#' # Simulate some data
 #' the_data <-
 #'   data.frame(
 #'     id   = 1:500,
@@ -37,394 +43,472 @@
 #'     include3 = rnorm(500)
 #'   )
 #'
-#' # Decision pipeline
-#' full_pipeline <-
-#'   the_data |>
-#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
+#' the_data |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2, include3 > -2.5) |>
 #'   add_variables("ivs", iv1, iv2, iv3) |>
 #'   add_variables("dvs", dv1, dv2) |>
 #'   add_variables("mods", starts_with("mod")) |>
-#'   add_model("linear_model", lm({dvs} ~ {ivs} * {mods} + cov1))
-#'
-#' pipeline_grid <- expand_decisions(full_pipeline)
-#'
-#' # Run the whole multiverse
-#' the_multiverse <- analyze_grid(pipeline_grid[1:10,])
-#'
-#' # Reveal results of the linear model
-#' the_multiverse |> unpack_specs("wide")
-unpack_specs <- function(.multi, .how = "wide"){
+#'   add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
+#'   add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
+#'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
+#'   add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis"))
+add_summary_stats <- function(.df, var_set, variables, stats){
 
-  if(.how == "wide"){
-    unpacked <-
-      .multi |>
-      tidyr::unnest(specifications) |>
-      dplyr::select(
-        -dplyr::any_of(
-          c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
-      ) |>
-      tidyr::unnest(dplyr::any_of(c("subgroups","variables","filters","models"))) |>
-      dplyr::select(-dplyr::matches("(model|args|standardize|perform)$")) |>
-      dplyr::mutate(
-        dplyr::across(
-          dplyr::where(is.character),
-          ~stringr::str_remove_all(.x, '^\\\"|\\\"$')
-        )
-      )
-  }else if(.how == "long"){
-    unpacked <-
-      .multi |>
-      tidyr::unnest(specifications) |>
-      dplyr::select(
-        -dplyr::any_of(
-          c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
-      ) |>
-      tidyr::unnest(
-        dplyr::any_of(c("subgroups","variables","filters","models")),
-        names_sep = "."
-      ) |>
-      dplyr::select(-dplyr::matches("(model|args|standardize|perform)$")) |>
-      dplyr::mutate(
-        dplyr::across(
-          dplyr::where(is.character),
-          ~stringr::str_remove_all(.x, '^\\\"|\\\"$')
-        )
-      ) |>
-      tidyr::pivot_longer(
-        c(dplyr::where(is.character), -decision),
-        names_to = "decision_set", values_to = "decision_choice"
-      ) |>
-      dplyr::relocate(decision_set, decision_choice, .after = decision) |>
-      tidyr::separate(
-        decision_set,
-        into = c("decision_type", "decision_set"),
-        sep = "\\."
-      )
-  } else{
-    unpacked <- .multi
+  data_chr <- dplyr::enexpr(.df) |> as.character()
+  data_attr <- attr(.df, "base_df")
+
+  if(!is.null(data_attr)){
+    data_chr <- attr(.df, "base_df")
   }
 
-  unpacked
+  base_df <-
+    rlang::parse_expr(data_chr) |>
+    rlang::eval_tidy(env = parent.frame())
 
-}
+  variables <- dplyr::enexprs(variables) |> as.character()
 
-#' Unpack a component of your analyzed grid
-#'
-#' @param .multi a multiverse list-column \code{tibble} produced by
-#'   \code{\link{analyze_grid}}.
-#' @param .what the name of a list-column you would like to unpack
-#' @param .which any sub-list columns you would like to unpack
-#' @param .unpack_specs character, options are \code{"no"}, \code{"wide"}, or
-#'   \code{"long"}. \code{"no"} (default) keeps specifications in a list column,
-#'   \code{wide} unnests specifications with each specification category as a
-#'   column. \code{"long"} unnests specifications and stacks them into long
-#'   format, which stacks specifications into a \code{decision_type},
-#'   \code{decision_set} and \code{decision_choice} columns. This is mainly
-#'   useful for plotting.
-#'
-#' @return the unnested part of the multiverse requested. This usually contains
-#'   the particular estimates or statistics you would like to analyze over the
-#'   decision grid specified.
-#' @export
-#'
-#' @examples
-#'
-#' library(tidyverse)
-#' library(multitool)
-#'
-#' # Simulate some data
-#' the_data <-
-#'   data.frame(
-#'     id   = 1:500,
-#'     iv1  = rnorm(500),
-#'     iv2  = rnorm(500),
-#'     iv3  = rnorm(500),
-#'     mod1 = rnorm(500),
-#'     mod2 = rnorm(500),
-#'     mod3 = rnorm(500),
-#'     cov1 = rnorm(500),
-#'     cov2 = rnorm(500),
-#'     dv1  = rnorm(500),
-#'     dv2  = rnorm(500),
-#'     include1 = rbinom(500, size = 1, prob = .1),
-#'     include2 = sample(1:3, size = 500, replace = TRUE),
-#'     include3 = rnorm(500)
-#'   )
-#'
-#' # Decision pipeline
-#' full_pipeline <-
-#'   the_data |>
-#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
-#'   add_variables("ivs", iv1, iv2, iv3) |>
-#'   add_variables("dvs", dv1, dv2) |>
-#'   add_variables("mods", starts_with("mod")) |>
-#'   add_model("linear_model", lm({dvs} ~ {ivs} * {mods} + cov1))
-#'
-#' pipeline_grid <- expand_decisions(full_pipeline)
-#'
-#' # Run the whole multiverse
-#' the_multiverse <- analyze_grid(pipeline_grid[1:10,])
-#'
-#' # Reveal results of the linear model
-#' the_multiverse |> unpack_results(model_fitted, model_parameters)
-unpack_results <- function(.multi, .what, .which = NULL, .unpack_specs = "wide"){
+  stats_list <-
+    purrr::map_chr(stats, function(x) glue::glue("{x} = ~ {x}(.x, na.rm = TRUE)")) |>
+    paste(collapse = ", ") |> paste0("list(", ... = _, ")")
 
-  unpacked <-
-    .multi |>
-    unpack_specs(.unpack_specs) |>
-    tidyr::unnest({{.what}})
-
-  if(!is.null(which)){
-    unpacked <-
-      unpacked |>
-      tidyr::unnest({{.which}})
-  }
-
-  unpacked
-
-}
-
-#' @describeIn unpack_results Unpack the model parameters
-#' @param effect_key character, if you added parameter keys to your pipeline,
-#'   you can specify if you would like filter the parameters using one of your
-#'   parameter keys. This is useful when different variables are being switched
-#'   out across the multiverse but represent the same effect of interest.
-#' @export
-unpack_model_parameters <- function(.multi, effect_key = NULL, .unpack_specs = "wide"){
-
-  revealed <-
-    .multi |>
-    unpack_results(model_fitted, model_parameters, .unpack_specs = .unpack_specs)
-
-  if(!is.null(effect_key)){
-    revealed <-
-      revealed |>
-      dplyr::filter(stringr::str_detect(parameter_key, effect_key))
-  }
-
-  revealed |>
-    dplyr::select(dplyr::where(~!is.list(.x)))
-
-}
-
-#' @describeIn unpack_results Unpack the model performance
-#' @export
-unpack_model_performance <- function(.multi, .unpack_specs = "wide"){
-
-  revealed <-
-    .multi |>
-    unpack_results(
-      model_fitted,
-      model_performance,
-      .unpack_specs = .unpack_specs
-    )
-
-  revealed |>
-    dplyr::select(dplyr::where(~!is.list(.x)))
-
-}
-
-#' @describeIn unpack_results Unpack the model warnings
-#' @export
-unpack_model_warnings <- function(.multi, .unpack_specs = "wide"){
-
-  revealed <-
-    .multi |>
-    unpack_results(
-      model_fitted,
-      model_warnings,
-      .unpack_specs = .unpack_specs
-    )
-
-  revealed |>
-    dplyr::select(dplyr::where(~!is.list(.x)))
-
-}
-
-#' @describeIn unpack_results Unpack the model messages
-#' @export
-unpack_model_messges <- function(.multi, .unpack_specs = "wide"){
-
-  revealed <-
-    .multi |>
-    unpack_results(
-      model_fitted,
-      model_messages,
-      .unpack_specs = .unpack_specs
-    )
-
-  revealed |>
-    dplyr::select(dplyr::where(~!is.list(.x)))
-
-}
-
-#' @describeIn unpack_results Unpack a post-processing result
-#' @export
-unpack_postprocess <- function(.multi, .which, .unpack_specs = "wide"){
-
-  revealed <-
-    .multi |>
-    unpack_results(
-      {{.which}},
-      dplyr::ends_with("output"),
-      .unpack_specs = .unpack_specs
-    )
-
-  revealed |>
-    dplyr::select(dplyr::where(~!is.list(.x)))
-
-}
-
-#' Summarize multiverse parameters
-#'
-#' @param .unpacked an unpacked (with \code{\link{reveal}} or
-#'   \code{tidyr::unnest}) multiverse dataset.
-#' @param .what a specific column to summarize. This could be a model estimate,
-#'   a summary statistic, correlation, or any other estimate computed over the
-#'   multiverse.
-#' @param .how a named list. The list should contain summary functions (e.g.,
-#'   mean or median) the user would like to compute over the individual
-#'   estimates from the multiverse
-#' @param .group an optional variable to group the results. This argument is
-#'   passed directly to the \code{.by} argument used in \code{dplyr::across}
-#' @param list_cols logical, whether to create list columns for the raw values
-#'   of any summarized columns. Useful for creating visualizations and tables.
-#'   Default is TRUE.
-#'
-#' @return a summarized \code{tibble} containing a column for each summary
-#'   method from \code{.how}
-#' @export
-#'
-#' @examples
-#'
-#' library(tidyverse)
-#' library(multitool)
-#'
-#' # Simulate some data
-#' the_data <-
-#'   data.frame(
-#'     id   = 1:500,
-#'     iv1  = rnorm(500),
-#'     iv2  = rnorm(500),
-#'     iv3  = rnorm(500),
-#'     mod1 = rnorm(500),
-#'     mod2 = rnorm(500),
-#'     mod3 = rnorm(500),
-#'     cov1 = rnorm(500),
-#'     cov2 = rnorm(500),
-#'     dv1  = rnorm(500),
-#'     dv2  = rnorm(500),
-#'     include1 = rbinom(500, size = 1, prob = .1),
-#'     include2 = sample(1:3, size = 500, replace = TRUE),
-#'     include3 = rnorm(500)
-#'   )
-#'
-#' # Decision pipeline
-#' full_pipeline <-
-#'   the_data |>
-#'   add_filters(include1 == 0,include2 != 3,include2 != 2,scale(include3) > -2.5) |>
-#'   add_variables("ivs", iv1, iv2, iv3) |>
-#'   add_variables("dvs", dv1, dv2) |>
-#'   add_variables("mods", starts_with("mod")) |>
-#'   add_model("linear_model", lm({dvs} ~ {ivs} * {mods} + cov1))
-#'
-#' pipeline_grid <- expand_decisions(full_pipeline)
-#'
-#' # Run the whole multiverse
-#' the_multiverse <- run_multiverse(pipeline_grid[1:10,])
-#'
-#' # Reveal and condense
-#' the_multiverse |>
-#'   reveal_model_parameters() |>
-#'   filter(str_detect(parameter, "iv")) |>
-#'   condense(unstd_coef, list(mean = mean, median = median))
-condense <- function(.unpacked, .what, .how, .group = NULL, list_cols = TRUE){
-
-  if(list_cols){
-    .unpacked |>
-      dplyr::summarize(
-        dplyr::across(
-          .cols = {{.what}},
-          .fns = {{.how}},
-          .names = "{.col}_{.fn}"
-        ),
-        dplyr::across(
-          .cols = {{.what}},
-          .fns = list,
-          .names = "{.col}_list"
-        ),
-        .by = {{.group}}
-      )
-  } else{
-    .unpacked |>
-      dplyr::summarize(
-        dplyr::across(
-          .cols = {{.what}},
-          .fns = {{.how}},
-          .names = "{.col}_{.fn}"
-        ),
-        .by = {{.group}}
-      )
-  }
-}
-
-#' @describeIn condense Sort and organize results by size and sign.
-#' @param .unpacked a set of results from \code{analyze_grid} using
-#'   \code{unpack_results*}
-#' @param .what the column from the unpacked results you'd like to organize
-#' @param .group a grouping column, usually from the specifications, that you
-#'   like to sort within. This will give you sorted output by the levels of the
-#'   grouping variable.
-#' @param focused logical, defaults to \code{TRUE}. Return only the variable,
-#'   potential group, and a variable indicating rank. Set to \code{FALSE} to
-#'   retain all other columns.
-#' @export
-organize <- function(.unpacked, .what, .group = NULL, focused = TRUE){
-
-  grouping <-
-    dplyr::enexpr(.group)
-
-  group_chr <-
-    grouping |>
-    as.character() |>
-    paste(collapse = '.')
-
-  print(group_chr)
-
-  if(grouping == "NULL"){
-    group_name <- "all"
-  } else{
-    group_name <- group_chr
-  }
-
-  organized <-
-    .unpacked |>
-    dplyr::mutate(
-      "rank.{{.what}}.{group_chr}" := dplyr::dense_rank({{.what}}),
-      "{{.what}}" := {{.what}},
-      .by = {{.group}}
+  descriptives <-
+    glue::glue(
+      'select(c([variables])) |> summarize(across(everything(), [stats_list]))',
+      .open = "[",
+      .close = "]"
     ) |>
-    dplyr::rename_with(
-      ~stringr::str_replace_all(.x, ".c\\(|,", ".") |> str_remove_all("\\)$| ")
+    as.character() |>
+    stringr::str_remove_all("\n|  ")
+
+  grid_prep <-
+    tibble::tibble(
+      type  = "summary_stats",
+      group = var_set,
+      code  = descriptives
     )
 
-  if(focused){
-    organized <-
-      organized |>
-      dplyr::select(
-        {{.group}},
-        dplyr::starts_with("rank"),
-        {{.what}}
-      ) |>
-      dplyr::rename_with(~c("rank_order"), dplyr::starts_with("rank")) |>
-      dplyr::arrange({{.group}}, rank_order)
+  if(!is.null(data_attr)){
+    grid_prep <- dplyr::bind_rows(.df, grid_prep)
+  } else{
+    grid_prep <- grid_prep
   }
 
-  organized
+  attr(grid_prep, "base_df") <- data_chr
+  grid_prep
 
 }
+
+#' Add correlations from the \code{correlation} package in \code{easystats}
+#'
+#' @description `r lifecycle::badge("deprecated")` This function has been
+#' deprecated; please use [add_model_descriptives()] instead.
+#'
+#' @param .df the original \code{data.frame}(e.g., base data set). If part of
+#'   set of
+#'   add_* decision functions in a pipeline, the base data will be passed along
+#'   as an attribute.
+#' @param var_set character string. Should be a descriptive name of the
+#'   correlation matrix.
+#' @param variables the variables for which you would like to correlations.
+#'   These variables will be passed to \code{link[correlation]{correlation}}.
+#'   You can also use tidyselect to select variables.
+#' @param focus_set variables to focus one in a table. This produces a table
+#'   where rows are each focused variables and columns are all other variables
+#' @param method a valid method of correlation supplied to
+#'   \code{link[correlation]{correlation}} (e.g., 'pearson' or 'kendall').
+#'   Defaults to \code{'auto'}. See \code{link[correlation]{correlation}} for
+#'   more details.
+#' @param redundant logical, should the result include repeated correlations?
+#'   Defaults to \code{TRUE} See \code{link[correlation]{correlation}} for
+#'   details.
+#' @param add_matrix logical, add a traditional correlation matrix to the
+#'   output. Defaults to \code{TRUE}.
+#'
+#' @return a \code{data.frame}with three columns: type, group, and code. Type
+#'   indicates the decision type, group is a decision, and the code is the
+#'   actual code that will be executed. If part of a pipe, the current set of
+#'   decisions will be appended as new rows.
+#' @export
+#'
+#' @examples
+#'
+#' library(tidyverse)
+#' library(multitool)
+#'
+#' the_data <-
+#'   data.frame(
+#'     id   = 1:500,
+#'     iv1  = rnorm(500),
+#'     iv2  = rnorm(500),
+#'     iv3  = rnorm(500),
+#'     mod1 = rnorm(500),
+#'     mod2 = rnorm(500),
+#'     mod3 = rnorm(500),
+#'     cov1 = rnorm(500),
+#'     cov2 = rnorm(500),
+#'     dv1  = rnorm(500),
+#'     dv2  = rnorm(500),
+#'     include1 = rbinom(500, size = 1, prob = .1),
+#'     include2 = sample(1:3, size = 500, replace = TRUE),
+#'     include3 = rnorm(500)
+#'   )
+#'
+#' the_data |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2, include3 > -2.5) |>
+#'   add_variables("ivs", iv1, iv2, iv3) |>
+#'   add_variables("dvs", dv1, dv2) |>
+#'   add_variables("mods", starts_with("mod")) |>
+#'   add_correlations("predictors", matches("iv|mod|cov"), focus_set = c(cov1,cov2))
+add_correlations <-
+  function(
+    .df,
+    var_set,
+    variables,
+    focus_set = NULL,
+    method = 'auto',
+    redundant = TRUE,
+    add_matrix = TRUE
+  ){
+
+    data_chr <- dplyr::enexpr(.df) |> as.character()
+    data_attr <- attr(.df, "base_df")
+
+    if(!is.null(data_attr)){
+      data_chr <- attr(.df, "base_df")
+    }
+
+    base_df <-
+      rlang::parse_expr(data_chr) |>
+      rlang::eval_tidy(env = parent.frame())
+
+    variables <- dplyr::enexprs(variables) |> as.character()
+    focus_set <- base_df |> dplyr::select({{focus_set}}) |> names()
+    focus_set_chr <-
+      focus_set |>
+      paste0("\"", ... = _, "\"") |>
+      paste0(collapse = ", ")
+    focus <- length(focus_set) > 1
+
+    full_pairs <-
+      glue::glue(
+        'select({variables}) |> ',
+        'correlation(method = "{method}", redundant = {redundant})'
+      ) |>
+      as.character() |>
+      stringr::str_remove_all("\n|  ")
+
+
+    grid_prep <-
+      tibble::tibble(
+        type  = "corrs",
+        group = paste0(var_set,"_rs"),
+        code  = full_pairs
+      )
+
+    if(add_matrix){
+      corrs_matrix <-
+        glue::glue(
+          'select({variables}) |> ',
+          'correlation(method = "{method}", redundant = {redundant}) |> ',
+          'select(1:3) |> ',
+          'pivot_wider(names_from = Parameter2, values_from = r) |> ',
+          'rename(variable = Parameter1)',
+          .trim = FALSE
+        ) |>
+        as.character() |>
+        stringr::str_remove_all("\n|  ")
+
+      grid_prep <-
+        grid_prep |>
+        dplyr::add_row(
+          type = "corrs",
+          group = paste0(var_set, "_matrix"),
+          code = corrs_matrix
+        )
+    }
+
+    if(focus){
+      corrs_focused <-
+        glue::glue(
+          'select({variables}) |> ',
+          'correlation(method = "{method}", redundant = {redundant}) |> ',
+          'select(1:3) |> ',
+          'filter(',
+          'Parameter1 %in% c({focus_set_chr}), ',
+          'r!=1, ',
+          '!Parameter2 %in% c({focus_set_chr})',
+          ') |> ',
+          'pivot_wider(names_from = Parameter1, values_from = r) |> ',
+          'rename(variable = Parameter2)',
+          .trim = FALSE
+        ) |>
+        as.character() |>
+        stringr::str_remove_all("\n|  ")
+
+      grid_prep <-
+        grid_prep |>
+        dplyr::add_row(
+          type = "corrs",
+          group = paste0(var_set, "_focus"),
+          code = corrs_focused
+        )
+    }
+
+    if(!is.null(data_attr)){
+      grid_prep <- dplyr::bind_rows(.df, grid_prep)
+    } else{
+      grid_prep <- grid_prep
+    }
+
+    attr(grid_prep, "base_df") <- data_chr
+    grid_prep
+  }
+
+
+#' Add item reliabilities to a multiverse pipeline
+#'
+#' @description `r lifecycle::badge("deprecated")` This function has been
+#' deprecated; please use [add_model_descriptives()] instead.
+#'
+#' @param .df the original \code{data.frame}(e.g., base data set). If part of
+#'   set of add_* decision functions in a pipeline, the base data will be passed
+#'   along as an attribute.
+#' @param scale_name a character string. Indicates the name of the scale or
+#'   measure measured by the items or indicators in \code{items}.
+#' @param items the items (variables) that comprise a scale or measure. These
+#'   variables will be passed to \code{link[performance]{cronbachs_alpha}},
+#'   \code{link[performance]{item_intercor}}, and
+#'   \code{link[performance]{item_reliability}}. You can also use tidyselect to
+#'   select variables.
+#'
+#' @return a \code{data.frame}with three columns: type, group, and code. Type
+#'   indicates the decision type, group is a decision, and the code is the
+#'   actual code that will be executed. If part of a pipe, the current set of
+#'   decisions will be appended as new rows.
+#' @export
+#'
+#' @examples
+#'
+#' library(tidyverse)
+#' library(multitool)
+#'
+#' the_data <-
+#'   data.frame(
+#'     id   = 1:500,
+#'     iv1  = rnorm(500),
+#'     iv2  = rnorm(500),
+#'     iv3  = rnorm(500),
+#'     mod1 = rnorm(500),
+#'     mod2 = rnorm(500),
+#'     mod3 = rnorm(500),
+#'     cov1 = rnorm(500),
+#'     cov2 = rnorm(500),
+#'     dv1  = rnorm(500),
+#'     dv2  = rnorm(500),
+#'     include1 = rbinom(500, size = 1, prob = .1),
+#'     include2 = sample(1:3, size = 500, replace = TRUE),
+#'     include3 = rnorm(500)
+#'   )
+#'
+#' the_data |>
+#'   add_filters(include1 == 0,include2 != 3,include2 != 2, include3 > -2.5) |>
+#'   add_variables("ivs", iv1, iv2, iv3) |>
+#'   add_variables("dvs", dv1, dv2) |>
+#'   add_variables("mods", starts_with("mod")) |>
+#'   add_reliabilities("unp_scale", c(iv1,iv2,iv3))
+add_reliabilities <- function(.df, scale_name, items){
+
+  data_chr <- dplyr::enexpr(.df) |> as.character()
+  data_attr <- attr(.df, "base_df")
+
+  if(!is.null(data_attr)){
+    data_chr <- attr(.df, "base_df")
+  }
+
+  base_df <-
+    rlang::parse_expr(data_chr) |>
+    rlang::eval_tidy(env = parent.frame())
+
+  items <- dplyr::enexprs(items) |> as.character()
+
+  items_alpha <-
+    glue::glue(
+      'select({items}) |> cronbachs_alpha()'
+    ) |>
+    as.character() |>
+    stringr::str_remove_all("\n|  ")
+
+  items_avg_intercorr <-
+    glue::glue(
+      'select({items}) |> item_intercor()'
+    ) |>
+    as.character() |>
+    stringr::str_remove_all("\n|  ")
+
+  items_alpha_if_dropped <-
+    glue::glue(
+      'select({items}) |> item_reliability()'
+    ) |>
+    as.character() |>
+    stringr::str_remove_all("\n|  ")
+
+  grid_prep <-
+    tibble::tibble(
+      type  = "reliabilities",
+      group = paste0(scale_name,c("_alpha", "_inter_corr","_if_dropped")),
+      code  = c(items_alpha, items_avg_intercorr, items_alpha_if_dropped)
+    )
+
+  if(!is.null(data_attr)){
+    grid_prep <- dplyr::bind_rows(.df, grid_prep)
+  } else{
+    grid_prep <- grid_prep
+  }
+
+  attr(grid_prep, "base_df") <- data_chr
+  grid_prep
+
+}
+
+show_code_summary_stats <- function(.grid, decision_num, summary_set = 1, copy = FALSE, console = TRUE, execute = FALSE, ...){
+
+  code <-
+    run_universe_summary_stats(.grid, decision_num, run = FALSE)
+
+  if(is.null(code)){
+    rlang::warn("You don't have any summary statistics specified in your pipeline...")
+  } else{
+    if(copy){
+      suppressWarnings({clipr::write_clip(code[[summary_set]])})
+      message("Summary stats pipeline copied!")
+    }
+    if(console){
+      message("Showing summary stats set ", summary_set, " of ",  " labeled '", names(code)[[summary_set]], "'")
+      message("Use the `summary_set` argument to see a different set of summary statistics")
+      message("Hit enter to run the code:")
+      rstudioapi::sendToConsole(code[[summary_set]], execute, ...)
+    } else{
+      message("Showing summary stats set ", summary_set, " of ",  " labeled '", names(code)[[summary_set]], "'")
+      message("Use the `summary_set` argument to see a different set of summary statistics")
+      cat(code[[summary_set]])
+    }
+  }
+}
+
+show_code_corrs <- function(.grid, decision_num, corr_set = 1, copy = FALSE, console = TRUE, execute = FALSE, ...){
+
+  code <-
+    run_universe_corrs(.grid, decision_num, run = FALSE)
+
+  if(is.null(code)){
+    rlang::warn("You don't have any correlations specified in your pipeline...")
+  } else{
+    if(copy){
+      suppressWarnings({clipr::write_clip(code[[corr_set]])})
+      message("Correlation pipeline copied!")
+    }
+    if(console){
+      message("Showing correlation set ", corr_set, " of ", length(code),  " labeled '", names(code)[[corr_set]], "'")
+      message("Use the `corr_set` argument to see a different set of correlations")
+      message("Hit enter to run the code:")
+      rstudioapi::sendToConsole(code[[corr_set]], execute, ...)
+    } else{
+      message("Showing correlation set ", corr_set, " of ", length(code),  " labeled '", names(code)[[corr_set]], "'")
+      message("Use the `corr_set` argument to see a different set of correlations")
+      cat(code[[corr_set]])
+    }
+  }
+}
+
+show_code_reliabilities <- function(.grid, decision_num, rel_set = 1, copy = FALSE, console = TRUE, execute = FALSE, ...){
+
+  code <-
+    run_universe_reliabilities(.grid, decision_num, run = FALSE)
+
+  if(is.null(code)){
+    rlang::warn("You don't have any reliabilities specified in your pipeline...")
+  } else{
+    if(copy){
+      suppressWarnings({clipr::write_clip(code[[rel_set]])})
+      message("Reliability pipeline copied!")
+    }
+    if(console){
+      message("Showing reliability set ", rel_set, " of ", length(code),  " labeled '", names(code)[[rel_set]], "'")
+      message("Use the `rel_set` argument to see a different set of reliabilities")
+      message("Hit enter to run the code:")
+      rstudioapi::sendToConsole(code[[rel_set]], execute, ...)
+    } else{
+      message("Showing reliability set ", rel_set, " of ", length(code),  " labeled '", names(code)[[rel_set]], "'")
+      message("Use the `rel_set` argument to see a different set of reliabilities")
+      cat(code[[rel_set]])
+    }
+  }
+}
+
+run_descriptives <- function(.grid, show_progress = TRUE){
+
+  pipeline <-
+    attr(.grid, "pipeline") |>
+    rlang::eval_tidy(env = parent.frame())
+
+  filter_grid <-
+    pipeline |>
+    dplyr::filter(stringr::str_detect(type, "subgroups|filters|corrs|summary_stats|reliabilities")) |>
+    expand_decisions()
+
+  multi_descriptives <-
+    purrr::map(
+      seq_len(nrow(filter_grid)),
+      .progress = TRUE,
+      function(x){
+        multi_results <- list()
+
+        if("corrs" %in% names(filter_grid)){
+          multi_results$corrs <-
+            run_universe_corrs(
+              .grid = filter_grid,
+              decision_num =  filter_grid$decision[x]
+            )
+        }
+
+        if("summary_stats" %in% names(filter_grid)){
+          multi_results$stats <-
+            run_universe_summary_stats(
+              .grid = filter_grid,
+              decision_num = filter_grid$decision[x]
+            )
+        }
+
+        if("reliabilities" %in% names(filter_grid)){
+          multi_results$reliabilities <-
+            run_universe_reliabilities(
+              .grid = filter_grid,
+              decision_num = filter_grid$decision[x]
+            )
+        }
+
+        purrr::reduce(multi_results, dplyr::left_join, by = "decision")
+
+      }) |>
+    purrr::list_rbind()
+
+  dplyr::full_join(
+    filter_grid |>
+      dplyr::select(-dplyr::contains("code")) |>
+      mutate(decision = as.character(decision)),
+    multi_descriptives,
+    by = "decision"
+  ) |>
+    tidyr::nest(specifications = c(-decision, -dplyr::matches("fitted$|computed$"))) |>
+    dplyr::select(decision, specifications, dplyr::everything())
+
+}
+
 
 #' Reveal the contents of a multiverse analysis
+#'
+#' @description `r lifecycle::badge("deprecated")` This function has been
+#' deprecated; please use [unpack_results()] instead.
 #'
 #' @param .multi a multiverse list-column \code{tibble} produced by
 #'   \code{\link{run_multiverse}}.
@@ -538,6 +622,9 @@ reveal <- function(.multi, .what, .which = NULL, .unpack_specs = "no"){
 
 #' Reveal the model parameters of a multiverse analysis
 #'
+#' @description `r lifecycle::badge("deprecated")` This function has been
+#' deprecated; please use [unpack_model_parameters()] instead.
+#'
 #' @param .multi a multiverse list-column \code{tibble} produced by
 #'   \code{\link{run_multiverse}}.
 #' @param effect_key character, if you added parameter keys to your pipeline,
@@ -650,6 +737,9 @@ reveal_model_parameters <- function(.multi, effect_key = NULL, .unpack_specs = "
 
 #' Reveal the model performance/fit indices from a multiverse analysis
 #'
+#' @description `r lifecycle::badge("deprecated")` This function has been
+#' deprecated; please use [unpack_model_performance()] instead.
+#'
 #' @param .multi a multiverse list-column \code{tibble} produced by
 #'   \code{\link{run_multiverse}}.
 #' @param .unpack_specs character, options are \code{"no"}, \code{"wide"}, or
@@ -751,6 +841,9 @@ reveal_model_performance <- function(.multi, .unpack_specs = "no"){
 }
 
 #' Reveal any warnings about your models during a multiverse analysis
+#'
+#' @description `r lifecycle::badge("deprecated")` This function has been
+#' deprecated; please use [unpack_model_warnings()] instead.
 #'
 #' @param .multi a multiverse list-column \code{tibble} produced by
 #'   \code{\link{run_multiverse}}.
@@ -854,6 +947,9 @@ reveal_model_warnings <- function(.multi, .unpack_specs = "no"){
 
 #' Reveal any messages about your models during a multiverse analysis
 #'
+#' @description `r lifecycle::badge("deprecated")` This function has been
+#' deprecated; please use [unpack_model_messages()] instead.
+#'
 #' @param .multi a multiverse list-column \code{tibble} produced by
 #'   \code{\link{run_multiverse}}.
 #' @param .unpack_specs character, options are \code{"no"}, \code{"wide"}, or
@@ -954,66 +1050,6 @@ reveal_model_messages <- function(.multi, .unpack_specs = "no"){
   unpacked
 }
 
-#' Reveal a set of summary statistics from a multiverse analysis
-#'
-#' @param .descriptives a descriptive multiverse list-column \code{tibble}
-#'   produced by \code{\link{run_descriptives}}.
-#' @param .which the specific name of the summary statistics
-#' @param .unpack_specs character, options are \code{"no"}, \code{"wide"}, or
-#'   \code{"long"}. \code{"no"} (default) keeps specifications in a list column,
-#'   \code{wide} unnests specifications with each specification category as a
-#'   column. \code{"long"} unnests specifications and stacks them into long
-#'   format, which stacks specifications into a \code{decision_set} and
-#'   \code{alternatives} columns. This is mainly useful for plotting.
-#'
-#' @return an unnested set of summary statistics per decision from the
-#'   multiverse.
-#'
-#' @export
-#'
-#' @examples
-#'
-#' library(tidyverse)
-#' library(multitool)
-#'
-#' # create some data
-#' the_data <-
-#'   data.frame(
-#'     id  = 1:500,
-#'     iv1 = rnorm(500),
-#'     iv2 = rnorm(500),
-#'     iv3 = rnorm(500),
-#'     mod = rnorm(500),
-#'     dv1 = rnorm(500),
-#'     dv2 = rnorm(500),
-#'     include1 = rbinom(500, size = 1, prob = .1),
-#'     include2 = sample(1:3, size = 500, replace = TRUE),
-#'     include3 = rnorm(500)
-#'   )
-#'
-#' # create a pipeline blueprint
-#' full_pipeline <-
-#'   the_data |>
-#'   add_filters(
-#'     include1 == 0,
-#'     include2 != 3,
-#'     include2 != 2,
-#'     include3 > -2.5,
-#'     include3 < 2.5,
-#'     between(include3, -2.5, 2.5)
-#'   ) |>
-#'   add_variables(var_group = "ivs", iv1, iv2, iv3) |>
-#'   add_variables(var_group = "dvs", dv1, dv2) |>
-#'   add_correlations("predictor correlations", starts_with("iv")) |>
-#'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
-#'   add_reliabilities("vio_scale", starts_with("iv")) |>
-#'   add_model("linear model", lm({dvs} ~ {ivs} * mod)) |>
-#'   expand_decisions()
-#'
-#' my_descriptives <- run_descriptives(full_pipeline)
-#'
-#' my_descriptives |>
-#'   reveal_summary_stats(iv_stats)
 reveal_summary_stats <- function(.descriptives, .which, .unpack_specs = "no"){
   which_sublist <- dplyr::enexprs(.which) |> as.character()
   which_sublist <- which_sublist != "NULL"
@@ -1060,66 +1096,6 @@ reveal_summary_stats <- function(.descriptives, .which, .unpack_specs = "no"){
   unpacked
 }
 
-#' Reveal a set of multiverse correlations
-#'
-#' @param .descriptives a descriptive multiverse list-column \code{tibble}
-#'   produced by \code{\link{run_descriptives}}.
-#' @param .which the specific name of the correlations requested
-#' @param .unpack_specs character, options are \code{"no"}, \code{"wide"}, or
-#'   \code{"long"}. \code{"no"} (default) keeps specifications in a list column,
-#'   \code{wide} unnests specifications with each specification category as a
-#'   column. \code{"long"} unnests specifications and stacks them into long
-#'   format, which stacks specifications into a \code{decision_set} and
-#'   \code{alternatives} columns. This is mainly useful for plotting.
-#'
-#' @return an unnested set of correlations per decision from the
-#'   multiverse.
-#'
-#' @export
-#'
-#' @examples
-#'
-#' library(tidyverse)
-#' library(multitool)
-#'
-#' # create some data
-#' the_data <-
-#'   data.frame(
-#'     id  = 1:500,
-#'     iv1 = rnorm(500),
-#'     iv2 = rnorm(500),
-#'     iv3 = rnorm(500),
-#'     mod = rnorm(500),
-#'     dv1 = rnorm(500),
-#'     dv2 = rnorm(500),
-#'     include1 = rbinom(500, size = 1, prob = .1),
-#'     include2 = sample(1:3, size = 500, replace = TRUE),
-#'     include3 = rnorm(500)
-#'   )
-#'
-#' # create a pipeline blueprint
-#' full_pipeline <-
-#'   the_data |>
-#'   add_filters(
-#'     include1 == 0,
-#'     include2 != 3,
-#'     include2 != 2,
-#'     include3 > -2.5,
-#'     include3 < 2.5,
-#'     between(include3, -2.5, 2.5)
-#'   ) |>
-#'   add_variables(var_group = "ivs", iv1, iv2, iv3) |>
-#'   add_variables(var_group = "dvs", dv1, dv2) |>
-#'   add_correlations("predictors", starts_with("iv")) |>
-#'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
-#'   add_reliabilities("vio_scale", starts_with("iv")) |>
-#'   add_model("linear model", lm({dvs} ~ {ivs} * mod)) |>
-#'   expand_decisions()
-#'
-#' my_descriptives <- run_descriptives(full_pipeline)
-#'
-#' my_descriptives |>
-#'   reveal_corrs(predictors_rs)
 reveal_corrs <- function(.descriptives, .which, .unpack_specs = "no"){
   which_sublist <- dplyr::enexprs(.which) |> as.character()
   which_sublist <- which_sublist != "NULL"
@@ -1166,65 +1142,6 @@ reveal_corrs <- function(.descriptives, .which, .unpack_specs = "no"){
   unpacked
 }
 
-#' Reveal a set of multiverse cronbach's alpha statistics
-#'
-#' @param .descriptives a descriptive multiverse list-column \code{tibble}
-#'   produced by \code{\link{run_descriptives}}.
-#' @param .which the specific name of the alphas
-#' @param .unpack_specs character, options are \code{"no"}, \code{"wide"}, or
-#'   \code{"long"}. \code{"no"} (default) keeps specifications in a list column,
-#'   \code{wide} unnests specifications with each specification category as a
-#'   column. \code{"long"} unnests specifications and stacks them into long
-#'   format, which stacks specifications into a \code{decision_set} and
-#'   \code{alternatives} columns. This is mainly useful for plotting.
-#'
-#' @return an unnested set of correlations per decision from the multiverse.
-#'
-#' @export
-#'
-#' @examples
-#'
-#' library(tidyverse)
-#' library(multitool)
-#'
-#' # create some data
-#' the_data <-
-#'   data.frame(
-#'     id  = 1:500,
-#'     iv1 = rnorm(500),
-#'     iv2 = rnorm(500),
-#'     iv3 = rnorm(500),
-#'     mod = rnorm(500),
-#'     dv1 = rnorm(500),
-#'     dv2 = rnorm(500),
-#'     include1 = rbinom(500, size = 1, prob = .1),
-#'     include2 = sample(1:3, size = 500, replace = TRUE),
-#'     include3 = rnorm(500)
-#'   )
-#'
-#' # create a pipeline blueprint
-#' full_pipeline <-
-#'   the_data |>
-#'   add_filters(
-#'     include1 == 0,
-#'     include2 != 3,
-#'     include2 != 2,
-#'     include3 > -2.5,
-#'     include3 < 2.5,
-#'     between(include3, -2.5, 2.5)
-#'   ) |>
-#'   add_variables(var_group = "ivs", iv1, iv2, iv3) |>
-#'   add_variables(var_group = "dvs", dv1, dv2) |>
-#'   add_correlations("predictor correlations", starts_with("iv")) |>
-#'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
-#'   add_reliabilities("vio_scale", starts_with("iv")) |>
-#'   add_model("linear model", lm({dvs} ~ {ivs} * mod)) |>
-#'   expand_decisions()
-#'
-#' my_descriptives <- run_descriptives(full_pipeline)
-#'
-#' my_descriptives |>
-#'   reveal_reliabilities(vio_scale_alpha)
 reveal_reliabilities <- function(.descriptives, .which, .unpack_specs = "no"){
   which_sublist <- dplyr::enexprs(.which) |> as.character()
   which_sublist <- which_sublist != "NULL"

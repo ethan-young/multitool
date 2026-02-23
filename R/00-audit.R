@@ -153,98 +153,60 @@ show_code_postprocess <- function(.grid, decision_num, ...){
   show_code(.grid, decision_num, .step = "postprocess", ...)
 }
 
-#' @describeIn show_code Show the code for computing summary statistics
-#' @param summary_set numeric. For \code{show_code_summary_stats}, Which set of
-#'   summary statistics to print. Default is set to the \code{1}.
-#' @param copy logical, whether to copy code to clipboard
-#' @param console logical, whether to paste code into the console
-#' @param execute logical, whether to run the code
-#' @export
-show_code_summary_stats <- function(.grid, decision_num, summary_set = 1, copy = FALSE, console = TRUE, execute = FALSE, ...){
+show_result <-
+  function(
+    .multi,
+    decision_num,
+    type = "parameters",
+    ...,
+    .print_specs = TRUE
+  ){
+    results_slice <-
+      .multi |>
+      dplyr::filter(decision == decision_num)
 
-  code <-
-    run_universe_summary_stats(.grid, decision_num, run = FALSE)
+    if(type == "parameters"){
+      result <-
+        results_slice |>
+        unpack_model_parameters(..., .unpack_specs = "no")
+    }
 
-  if(is.null(code)){
-    rlang::warn("You don't have any summary statistics specified in your pipeline...")
-  } else{
-    if(copy){
-      suppressWarnings({clipr::write_clip(code[[summary_set]])})
-      message("Summary stats pipeline copied!")
+    if(type == "performance"){
+      result <-
+        results_slice |>
+        unpack_model_performance(..., .unpack_specs = "no")
     }
-    if(console){
-      message("Showing summary stats set ", summary_set, " of ",  " labeled '", names(code)[[summary_set]], "'")
-      message("Use the `summary_set` argument to see a different set of summary statistics")
-      message("Hit enter to run the code:")
-      rstudioapi::sendToConsole(code[[summary_set]], execute, ...)
-    } else{
-      message("Showing summary stats set ", summary_set, " of ",  " labeled '", names(code)[[summary_set]], "'")
-      message("Use the `summary_set` argument to see a different set of summary statistics")
-      cat(code[[summary_set]])
+
+    if(type == "post_process"){
+      result <-
+        results_slice |>
+        unpack_postprocess(..., .unpack_specs = "no")
     }
+
+    specs <-
+      .multi |>
+      unpack_specs(.how = "long") |>
+      dplyr::select(dplyr::where(~!is.list(.x))) |>
+      dplyr::mutate(
+        n_dis = dplyr::n_distinct(decision_choice),
+        .by = decision_set
+      ) |>
+      dplyr::filter(decision == 1, n_dis > 1) |>
+      dplyr::transmute(
+        decision,
+        print_out = glue::glue("{decision_set}: {decision_choice} ({decision_type})")
+      ) |>
+      tidyr::pivot_longer(
+        dplyr::everything(),
+        values_transform = as.character
+      ) |>
+      dplyr::distinct() |>
+      glue::glue_data(
+        "{ifelse(name == 'decision', 'Decision: ', '')}{value}",
+        .trim = FALSE
+      )
+
+    print(specs)
+    result
+
   }
-}
-
-#' @describeIn show_code Show the code for computing correlations
-#' @param corr_set numeric. For \code{show_code_corrs}, Which set of
-#'   correlations to print. Default is set to the \code{1}.
-#' @param copy logical, whether to copy code to clipboard
-#' @param console logical, whether to paste code into the console
-#' @param execute logical, whether to run the code
-#' @export
-show_code_corrs <- function(.grid, decision_num, corr_set = 1, copy = FALSE, console = TRUE, execute = FALSE, ...){
-
-  code <-
-    run_universe_corrs(.grid, decision_num, run = FALSE)
-
-  if(is.null(code)){
-    rlang::warn("You don't have any correlations specified in your pipeline...")
-  } else{
-    if(copy){
-      suppressWarnings({clipr::write_clip(code[[corr_set]])})
-      message("Correlation pipeline copied!")
-    }
-    if(console){
-      message("Showing correlation set ", corr_set, " of ", length(code),  " labeled '", names(code)[[corr_set]], "'")
-      message("Use the `corr_set` argument to see a different set of correlations")
-      message("Hit enter to run the code:")
-      rstudioapi::sendToConsole(code[[corr_set]], execute, ...)
-    } else{
-      message("Showing correlation set ", corr_set, " of ", length(code),  " labeled '", names(code)[[corr_set]], "'")
-      message("Use the `corr_set` argument to see a different set of correlations")
-      cat(code[[corr_set]])
-    }
-  }
-}
-
-#' @describeIn show_code Show the code for computing scale reliability
-#' @param rel_set numeric. For \code{show_code_reliabilities}, Which set of
-#'   reliabilities to print. Default is set to the \code{1}.
-#' @param copy logical, whether to copy code to clipboard
-#' @param console logical, whether to paste code into the console
-#' @param execute logical, whether to run the code
-#' @export
-show_code_reliabilities <- function(.grid, decision_num, rel_set = 1, copy = FALSE, console = TRUE, execute = FALSE, ...){
-
-  code <-
-    run_universe_reliabilities(.grid, decision_num, run = FALSE)
-
-  if(is.null(code)){
-    rlang::warn("You don't have any reliabilities specified in your pipeline...")
-  } else{
-    if(copy){
-      suppressWarnings({clipr::write_clip(code[[rel_set]])})
-      message("Reliability pipeline copied!")
-    }
-    if(console){
-      message("Showing reliability set ", rel_set, " of ", length(code),  " labeled '", names(code)[[rel_set]], "'")
-      message("Use the `rel_set` argument to see a different set of reliabilities")
-      message("Hit enter to run the code:")
-      rstudioapi::sendToConsole(code[[rel_set]], execute, ...)
-    } else{
-      message("Showing reliability set ", rel_set, " of ", length(code),  " labeled '", names(code)[[rel_set]], "'")
-      message("Use the `rel_set` argument to see a different set of reliabilities")
-      cat(code[[rel_set]])
-    }
-  }
-}
