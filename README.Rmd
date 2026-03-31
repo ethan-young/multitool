@@ -126,25 +126,25 @@ expanded_pipeline <- expand_decisions(full_pipeline)
 expanded_pipeline
 
 # Run the blueprint
-multiverse_results <- run_multiverse(expanded_pipeline)
+multiverse_results <- analyze_grid(expanded_pipeline)
 multiverse_results
 
 # Unpack model coefficients
 multiverse_results |> 
-  reveal_model_parameters()
+  unpack_model_parameters()
 
 # Unpack model fit statistics
 multiverse_results |> 
-  reveal_model_performance()
+  unpack_model_parameters()
 
 # Summarize model coefficients
 multiverse_results |> 
-  reveal_model_parameters() |> 
+  unpack_model_parameters() |> 
   group_by(parameter) |> 
-  condense(unstd_coef, list(mean = mean, median = median, sd = sd))
+  condense(coefficient, list(mean = mean, median = median, sd = sd))
 
 # Summarize fit statistics
 multiverse_results |> 
-  reveal_model_performance() |> 
+  unpack_model_performance() |> 
   condense(r2, list(mean = mean, sd = sd))
 ```

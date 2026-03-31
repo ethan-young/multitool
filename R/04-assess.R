@@ -70,18 +70,18 @@
 #'   analyze_grid()
 #'
 #' # Assess robustness of standardized coefficients
-#' assess_robustness(results)
+#' assess_robustness(results, .estimand = std_coefficient)
 #'
 #' # Assess raw coefficients
-#' assess_robustness(results, .estimand = unstd_coef)
+#' assess_robustness(results, .estimand = coefficient)
 #'
 #' # Assess std_coef with custom zero threshold
-#' assess_robustness(results, .estimand = std_coef, zero_threshold = .05)
+#' assess_robustness(results, .estimand = std_coefficient, zero_threshold = .05)
 #'
 #' # Stratified assessment by model type
-#' assess_robustness(results, .estimand = std_coef, .by = dvs)
+#' assess_robustness(results, .estimand = std_coefficient, .by = dvs)
 assess_robustness <-
-  function(.multi, .estimand = std_coef, zero_threshold = .01, .by = NULL){
+  function(.multi, .estimand, zero_threshold = .01, .by = NULL){
 
     estimand_summary <-
       .multi |>
@@ -248,15 +248,15 @@ assess_robustness <-
 #'
 #' # Decompose variance in standardized coefficients
 #' unpacked <- unpack_model_parameters(results)
-#' assess_decisions(unpacked)
+#' assess_decisions(unpacked, .estimand = std_coefficient)
 #'
 #' # Which decisions matter most for p-values?
 #' assess_decisions(unpacked, .estimand = p)
 #'
 #' # Decompose separately for each parameter
-#' assess_decisions(unpacked, .by = dvs)
+#' assess_decisions(unpacked, .estimand = p, .by = dvs)
 assess_decisions <-
-  function(.unpacked, .estimand = std_coef, .by = NULL){
+  function(.unpacked, .estimand, .by = NULL){
 
     sobol_df <-
       .unpacked |>

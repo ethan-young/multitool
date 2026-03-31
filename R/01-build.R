@@ -388,17 +388,22 @@ add_preprocess <- function(.df, process_name, code){
 #'   that the variables written in the formula actually exist in the underlying
 #'   data. You are also responsible for loading any packages that run a
 #'   particular model (e.g., \code{lme4} for mixed-models)
-#' @param additional_args a list of any additional arguments supplied to
-#'   \code{parameters::parameters()}.
-#' @param add_standardized logical. Indicates whether or not to produce
-#'   standardized model coefficients via
-#'   \code{parameters::standardize_parameters()}. This is most of the time
-#'   desirable, however, in some cases for some model types you might want to
-#'   skip this step. To do so, set to \code{FALSE}.
-#' @param add_performance whether or not to run
-#'   \code{performance::performance()} on the model. Defaults to \code{TRUE}.
-#'   Set to \code{FALSE} in computationally expensive situations or if model fit
-#'   statistics are not needed.
+#' @param model_coefs a function to extract coefficients from the model object.
+#'   The default is to use \code{parameters::parameters()} but this could be
+#'   also be \code{broom::tidy()} or any other function that summarizes model
+#'   output. Whichever function you choose must take a model object as the first
+#'   argument and return a \code{data.frame}.
+#' @param model_fit a function to summarize model fit statistics. The default is
+#'   to use \code{performance::performance()} but this could be also be
+#'   \code{broom::glance()} or any other function that summarizes model output.
+#'   Whichever function you choose must take a model object as the first
+#'   argument and return a \code{data.frame}.
+#' @param model_standardize a function to calculate standardized coefficients
+#'   from the model object. The default is to use
+#'   \code{parameters::standardize_parameters()} but this could be also be some
+#'   other function that standardizes model output. Whichever function you
+#'   choose must take a model object as the first argument and return a
+#'   \code{data.frame}.
 #'
 #' @return a \code{data.frame} with three columns: type, group, and code. Type
 #'   indicates the decision type, group is a decision, and the code is the
@@ -441,17 +446,16 @@ add_model <-
     .df,
     model_desc,
     code,
-    additional_args = NULL,
-    add_standardized = TRUE,
-    add_performance = TRUE
+    model_coefs = parameters::parameters(),
+    model_fit = performance::performance(),
+    model_standardize = parameters::standardize_parameters()
   ){
     code <- dplyr::enexprs(code)
     code_chr <- as.character(code) |> stringr::str_remove_all("\n|    ")
 
-    additional_args <- dplyr::enexprs(additional_args)
-    additional_args_chr <-
-      as.character(additional_args) |>
-      stringr::str_remove_all("\n|    ")
+    model_coefs <- dplyr::enexprs(model_coefs) |> as.character()
+    model_fit <- dplyr::enexprs(model_fit) |> as.character()
+    model_standardize <- dplyr::enexprs(model_standardize) |> as.character()
 
     data_chr <- dplyr::enexpr(.df) |> as.character()
     data_attr <- attr(.df, "base_df")
@@ -469,9 +473,9 @@ add_model <-
         type  = "models",
         group = model_desc,
         code  = code_chr,
-        additional_args = ifelse(additional_args == "NULL", NA, additional_args_chr),
-        add_standardized = add_standardized,
-        add_performance = add_performance
+        model_coefs_fn       = ifelse(model_coefs == "NULL", NA, model_coefs),
+        model_fit_fn         = ifelse(model_fit == "NULL", NA, model_fit),
+        model_standardize_fn = ifelse(model_standardize == "NULL", NA, model_standardize)
       )
 
     if(!is.null(data_attr)){
@@ -808,11 +812,6 @@ add_postprocess <- function(.df, postprocess_name, code){
 #'   add_variables("mods", starts_with("mod")) |>
 #'   add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
 #'   add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
-#'   add_summary_stats("iv_stats", starts_with("iv"), c("mean", "sd")) |>
-#'   add_summary_stats("dv_stats", starts_with("dv"), c("skewness", "kurtosis")) |>
-#'   add_correlations("predictors", matches("iv|mod|cov"), focus_set = c(cov1,cov2)) |>
-#'   add_correlations("outcomes", matches("dv|mod"), focus_set = matches("dv")) |>
-#'   add_reliabilities("unp_scale", c(iv1,iv2,iv3)) |>
 #'   add_model("no covariates", lm({dvs} ~ {ivs} * {mods})) |>
 #'   add_model("with covariates", lm({dvs} ~ {ivs} * {mods} + cov1)) |>
 #'   add_postprocess("aov", aov())
@@ -894,9 +893,9 @@ expand_decisions <-
             dplyr::transmute(
               model_meta = group,
               model = code,
-              model_args = additional_args,
-              model_standardize = add_standardized,
-              model_perform = add_performance
+              model_coefs_fn = model_coefs_fn,
+              model_fit_fn = model_fit_fn,
+              model_standardize_fn = model_standardize_fn
             ),
           by = "model"
         )
@@ -941,7 +940,11 @@ expand_decisions <-
         if(y == "models"){
           full_grid |>
             dplyr::select(decision, x, dplyr::starts_with("model")) |>
-            dplyr::mutate(model_args = stringr::str_replace(model_args, "NA", "")) |>
+            dplyr::mutate(
+              model_coefs_fn       = stringr::str_replace(model_coefs_fn, "NA", ""),
+              model_fit_fn         = stringr::str_replace(model_fit_fn, "NA", ""),
+              model_standardize_fn = stringr::str_replace(model_standardize_fn, "NA", "")
+            ) |>
             tidyr::nest("{y}" := -decision)
         }else if(y == "parameter_key"){
           full_grid |>

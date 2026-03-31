@@ -108,6 +108,9 @@ utils::globalVariables(
     "stage_x",
     "mean_output_var",
     "conditional_variance_ratio",
-    "n_dis"
+    "n_dis",
+    "model_coefs_fn",
+    "model_fit_fn",
+    "model_standardize_fn"
     )
 )

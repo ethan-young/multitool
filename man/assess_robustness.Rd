@@ -4,12 +4,7 @@
 \alias{assess_robustness}
 \title{Assess the robustness of multiverse analysis results}
 \usage{
-assess_robustness(
-  .multi,
-  .estimand = std_coef,
-  zero_threshold = 0.01,
-  .by = NULL
-)
+assess_robustness(.multi, .estimand, zero_threshold = 0.01, .by = NULL)
 }
 \arguments{
 \item{.multi}{An object returned by \code{\link{analyze_grid}} containing
@@ -85,14 +80,14 @@ results <-
   analyze_grid()
 
 # Assess robustness of standardized coefficients
-assess_robustness(results)
+assess_robustness(results, .estimand = std_coefficient)
 
 # Assess raw coefficients
-assess_robustness(results, .estimand = unstd_coef)
+assess_robustness(results, .estimand = coefficient)
 
 # Assess std_coef with custom zero threshold
-assess_robustness(results, .estimand = std_coef, zero_threshold = .05)
+assess_robustness(results, .estimand = std_coefficient, zero_threshold = .05)
 
 # Stratified assessment by model type
-assess_robustness(results, .estimand = std_coef, .by = dvs)
+assess_robustness(results, .estimand = std_coefficient, .by = dvs)
 }

@@ -64,7 +64,7 @@ unpack_specs <- function(.multi, .how = "wide"){
           c("preprocess","postprocess","corrs","summary_stats","reliabilities"))
       ) |>
       tidyr::unnest(dplyr::any_of(c("subgroups","variables","filters","models"))) |>
-      dplyr::select(-dplyr::matches("(model|args|standardize|perform)$")) |>
+      dplyr::select(-dplyr::matches("(model|fn)$")) |>
       dplyr::mutate(
         dplyr::across(
           dplyr::where(is.character),
@@ -331,13 +331,13 @@ unpack_postprocess <- function(.multi, .which, .unpack_specs = "wide"){
 #' pipeline_grid <- expand_decisions(full_pipeline)
 #'
 #' # Run the whole multiverse
-#' the_multiverse <- run_multiverse(pipeline_grid[1:10,])
+#' the_multiverse <- analyze_grid(pipeline_grid[1:10,])
 #'
 #' # Reveal and condense
 #' the_multiverse |>
-#'   reveal_model_parameters() |>
+#'   unpack_model_parameters() |>
 #'   filter(str_detect(parameter, "iv")) |>
-#'   condense(unstd_coef, list(mean = mean, median = median))
+#'   condense(coefficient, list(mean = mean, median = median))
 condense <- function(.unpacked, .what, .how, .group = NULL, list_cols = TRUE){
 
   if(list_cols){

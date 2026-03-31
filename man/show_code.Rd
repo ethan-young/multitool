@@ -13,6 +13,7 @@ show_code(
   .grid,
   decision_num,
   .step = "model",
+  .model_summary = NULL,
   .post_step = NULL,
   .execute = FALSE
 )
@@ -36,6 +37,9 @@ underlying code.}
 
 \item{.step}{a point along the pipeline for which you would like to show the
 underlying code. Defaults to the model.}
+
+\item{.model_summary}{a model summary function such as
+\code{parameters::parameters()} or \code{broom::tidy()}}
 
 \item{.post_step}{Only relevant if you are exposing a postprocessing step. If
 you have more than one postprocess, you can specify which you would like to

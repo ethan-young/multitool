@@ -79,11 +79,11 @@ full_pipeline <-
 pipeline_grid <- expand_decisions(full_pipeline)
 
 # Run the whole multiverse
-the_multiverse <- run_multiverse(pipeline_grid[1:10,])
+the_multiverse <- analyze_grid(pipeline_grid[1:10,])
 
 # Reveal and condense
 the_multiverse |>
-  reveal_model_parameters() |>
+  unpack_model_parameters() |>
   filter(str_detect(parameter, "iv")) |>
-  condense(unstd_coef, list(mean = mean, median = median))
+  condense(coefficient, list(mean = mean, median = median))
 }

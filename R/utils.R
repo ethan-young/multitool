@@ -180,11 +180,15 @@ build_pipeline_code <- function(.grid, decision_num){
       dplyr::pull(model) |>
       stringr::str_replace(string = _ ,"\\)$", ", data = _)")
 
-    additional_args <-
+    model_summaries <-
       grid_slice |>
       tidyr::unnest(models) |>
-      dplyr::pull(model_args) |>
-      stringr::str_remove_all("^list\\(|\\)$")
+      dplyr::select(
+        dplyr::any_of(
+          c("model_coefs_fn", "model_fit_fn", "model_standardize_fn")
+        )
+      ) |>
+      as.list()
   }
 
   if(stringr::str_detect(grid_elements, "postprocess")){
@@ -197,8 +201,7 @@ build_pipeline_code <- function(.grid, decision_num){
 
   list(
     pipeline = universe_pipeline,
-    model_args = additional_args
+    model_summaries = model_summaries
   )
+
 }
-
-

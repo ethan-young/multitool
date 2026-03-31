@@ -15,6 +15,8 @@
 #'   underlying code.
 #' @param .step a point along the pipeline for which you would like to show the
 #'   underlying code. Defaults to the model.
+#' @param .model_summary a model summary function such as
+#'   \code{parameters::parameters()} or \code{broom::tidy()}
 #' @param .post_step Only relevant if you are exposing a postprocessing step. If
 #'   you have more than one postprocess, you can specify which you would like to
 #'   expose by index or by name.
@@ -28,6 +30,7 @@ show_code <-
     .grid,
     decision_num,
     .step = "model",
+    .model_summary = NULL,
     .post_step = NULL,
     .execute = FALSE
   ){
@@ -35,9 +38,9 @@ show_code <-
       grid_type <- "multi"
       grid_slice <-
         .grid |>
-        dplyr::filter(decision == 1) |>
+        dplyr::filter(decision == decision_num) |>
         dplyr::select(decision, pipeline_code) |>
-        reveal(pipeline_code)
+        unpack_results(pipeline_code)
 
       grid_elements <- names(grid_slice)
     } else{
@@ -107,6 +110,18 @@ show_code <-
         dplyr::pull(dplyr::any_of(c(.step))) |>
         stringr::str_replace_all("\\|\\>", " |> \n  ") |>
         glue::glue(.trim = FALSE)
+    }
+
+    if(.step == "model" && !is.null(.model_summary)){
+      which_summary <-
+        grid_slice$model_summaries[[.model_summary]] |>
+        unlist()
+
+      code <-
+        glue::glue(
+          "{code} |> \n  {which_summary} \n\n",
+          .trim = FALSE
+        )
     }
 
     print(code)

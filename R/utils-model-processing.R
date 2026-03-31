@@ -22,10 +22,9 @@ run_universe_code_quietly <-
 process_model <-
   function(
     code,
-    standardize = TRUE,
-    run_performance = TRUE,
-    save_model = FALSE,
-    additional_args = "",
+    .model_coefs = NULL,
+    .model_fit = NULL,
+    .model_standardize = NULL,
     param_keys = NULL
   ){
 
@@ -37,79 +36,68 @@ process_model <-
       stringr::str_remove(".*\\|\\> ") |>
       stringr::str_remove("\\(.*\\)")
 
-    is_easystats <-
-      dplyr::case_when(
-        model_func %in% c("lmer", "glmer") ~ "merMod",
-        model_func == "feols" ~ "fixest",
-        TRUE ~ model_func
-      ) %in% parameters::supported_models()
-
     model_obj <- run_universe_code_quietly(code)
 
-    if(is_easystats){
-      ## Model coefficients
-      model_params <-
-        "model_obj$result" |>
-        paste(
-          " |> parameters::model_parameters(",
-          additional_args,
-          ") |> suppressMessages()",
-          collapse = " "
-        ) |>
+    if(.model_coefs != ""){
+      model_coefs <-
+        glue::glue("model_obj$result |> {.model_coefs} |> suppressMessages()") |>
         run_universe_code(env = rlang::current_env()) |>
-        dplyr::rename_with(tolower) |>
-        dplyr::rename(
-          unstd_coef = coefficient,
-          unstd_ci = ci,
-          unstd_ci_low = ci_low,
-          unstd_ci_high = ci_high
-        ) |>
-        tibble::as_tibble()
+        tibble::as_tibble() |>
+        dplyr::rename_with(tolower)
 
-      if(standardize){
+      if(.model_standardize != ""){
         model_std <-
-          "model_obj$result" |>
-          paste(" |> parameters::standardize_parameters() |> suppressMessages()", collapse = "") |>
-          run_universe_code(env = rlang::current_env())
+          glue::glue("model_obj$result |> {.model_standardize} |> suppressMessages()") |>
+          run_universe_code(env = rlang::current_env()) |>
+          tibble::as_tibble() |>
+          dplyr::rename_with(tolower) |>
+          dplyr::rename_with(
+            ~paste0("std_", .x),
+            -dplyr::matches("^std_")
+          )
 
-        model_params <-
-          model_params |>
+        term_col_coefs <- intersect(c("parameter", "term"), names(model_coefs))
+        term_col_std    <- intersect(c("std_parameter", "std_term"), names(model_std))
+
+        model_coefs <-
+          model_coefs |>
           dplyr::left_join(
-            model_std |>
-              dplyr::rename_with(tolower) |>
-              dplyr::rename(
-                std_coef = std_coefficient,
-                std_ci = ci,
-                std_ci_low = ci_low,
-                std_ci_high = ci_high
-              ),
-            dplyr::join_by(parameter)
+            model_std,
+            dplyr::join_by({{term_col_coefs}} == {{term_col_std}})
           )
       }
 
       if(!is.null(param_keys)){
-        model_params <-
-          model_params |>
-          dplyr::left_join(
-            param_keys,
-            dplyr::join_by(parameter)
-          ) |>
-          dplyr::relocate(parameter_key, .before = parameter)
+        term_col <- intersect(c("parameter", "term"), names(model_coefs))
+
+        if(length(term_col) > 0){
+          model_coefs <-
+            model_coefs |>
+            dplyr::left_join(
+              param_keys,
+              dplyr::join_by({{term_col}} == parameter)
+            ) |>
+            dplyr::relocate(parameter_key, .before = {{term_col}})
+        }
       }
 
-      ## Model fit
-      if(run_performance){
-        model_perform <-
-          "model_obj$result" |>
-          paste(
-            "|> performance::model_performance() |> suppressMessages()",
-            collapse = ""
-          ) |>
-          run_universe_code(env = rlang::current_env()) |>
-          tibble::as_tibble()
-      } else{
-        model_perform <- NA
-      }
+      model_coefs <- list(model_coefs)
+
+    } else{
+      model_coefs <- NULL
+    }
+
+    if(.model_fit != ""){
+      model_fit <-
+        glue::glue("model_obj$result |> {.model_fit} |> suppressMessages()") |>
+        run_universe_code(env = rlang::current_env()) |>
+        tibble::as_tibble() |>
+        dplyr::rename_with(tolower)
+
+      model_fit <- list(model_fit)
+
+    } else{
+      model_fit <- NULL
     }
 
     # Messages & Warnings
@@ -133,37 +121,15 @@ process_model <-
           )
       )
 
-    if(!is_easystats){
-      # Not easystats compatible
-      output_full <-
-        tibble::tibble(
-          "model_function" := model_func,
-          "model_full" := list(model_obj$result),
-          "model_warnings" := list(model_warnings),
-          "model_messages" := list(model_messages)
-        )
-    } else if(save_model){
-      # easystats compatible with full model
-      output_full <-
-        tibble::tibble(
-          "model_function" := model_func,
-          "model_object" := list(model_obj$result),
-          "model_parameters" := list(model_params),
-          "model_performance" := list(model_perform),
-          "model_warnings" := list(model_warnings),
-          "model_messages" := list(model_messages)
-        )
-    } else{
-      # Default, easystats compatible & lightweight
-      output_full <-
-        tibble::tibble(
-          "model_function" := model_func,
-          "model_parameters" := list(model_params),
-          "model_performance" := list(model_perform),
-          "model_warnings" := list(model_warnings),
-          "model_messages" := list(model_messages)
-        )
-    }
+    output_full <-
+      tibble::tibble(
+        "model_function" := model_func,
+        "model_parameters" := model_coefs,
+        "model_performance" := model_fit,
+        "model_warnings" := list(model_warnings),
+        "model_messages" := list(model_messages)
+      ) |>
+      dplyr::select(-dplyr::where(is.null))
 
     list(
       results = output_full,
@@ -393,27 +359,30 @@ execute_universe_model <-
       parameter_keys <- NULL
     }
 
-    add_standardized <-
+    model_coef_fn <-
       grid_slice |>
       dplyr::select(models) |>
       tidyr::unnest(dplyr::everything()) |>
-      dplyr::pull(model_standardize) |>
-      as.logical()
+      dplyr::pull(model_coefs_fn)
 
-    add_performance <-
+    model_fit_fn <-
       grid_slice |>
       dplyr::select(models) |>
       tidyr::unnest(dplyr::everything()) |>
-      dplyr::pull(model_perform) |>
-      as.logical()
+      dplyr::pull(model_fit_fn)
+
+    model_standardize_fn <-
+      grid_slice |>
+      dplyr::select(models) |>
+      tidyr::unnest(dplyr::everything()) |>
+      dplyr::pull(model_standardize_fn)
 
     focal_model <-
       process_model(
         code = model_code,
-        save_model = save_model,
-        standardize = add_standardized,
-        run_performance = add_performance,
-        additional_args = pipeline_code$model_args,
+        .model_coefs = model_coef_fn,
+        .model_fit = model_fit_fn,
+        .model_standardize = model_standardize_fn,
         param_keys = parameter_keys
       )
 

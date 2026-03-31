@@ -5,7 +5,7 @@
 \title{Decompose decision variance using Sobol sensitivity indices and variance
 dispersal}
 \usage{
-assess_decisions(.unpacked, .estimand = std_coef, .by = NULL)
+assess_decisions(.unpacked, .estimand, .by = NULL)
 }
 \arguments{
 \item{.unpacked}{A \code{data.frame} with unpacked multiverse results,
@@ -107,11 +107,11 @@ results <-
 
 # Decompose variance in standardized coefficients
 unpacked <- unpack_model_parameters(results)
-assess_decisions(unpacked)
+assess_decisions(unpacked, .estimand = std_coefficient)
 
 # Which decisions matter most for p-values?
 assess_decisions(unpacked, .estimand = p)
 
 # Decompose separately for each parameter
-assess_decisions(unpacked, .by = dvs)
+assess_decisions(unpacked, .estimand = p, .by = dvs)
 }

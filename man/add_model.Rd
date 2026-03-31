@@ -8,9 +8,9 @@ add_model(
   .df,
   model_desc,
   code,
-  additional_args = NULL,
-  add_standardized = TRUE,
-  add_performance = TRUE
+  model_coefs = parameters::parameters(),
+  model_fit = performance::performance(),
+  model_standardize = parameters::standardize_parameters()
 )
 }
 \arguments{
@@ -29,19 +29,24 @@ that the variables written in the formula actually exist in the underlying
 data. You are also responsible for loading any packages that run a
 particular model (e.g., \code{lme4} for mixed-models)}
 
-\item{additional_args}{a list of any additional arguments supplied to
-\code{parameters::parameters()}.}
+\item{model_coefs}{a function to extract coefficients from the model object.
+The default is to use \code{parameters::parameters()} but this could be
+also be \code{broom::tidy()} or any other function that summarizes model
+output. Whichever function you choose must take a model object as the first
+argument and return a \code{data.frame}.}
 
-\item{add_standardized}{logical. Indicates whether or not to produce
-standardized model coefficients via
-\code{parameters::standardize_parameters()}. This is most of the time
-desirable, however, in some cases for some model types you might want to
-skip this step. To do so, set to \code{FALSE}.}
+\item{model_fit}{a function to summarize model fit statistics. The default is
+to use \code{performance::performance()} but this could be also be
+\code{broom::glance()} or any other function that summarizes model output.
+Whichever function you choose must take a model object as the first
+argument and return a \code{data.frame}.}
 
-\item{add_performance}{whether or not to run
-\code{performance::performance()} on the model. Defaults to \code{TRUE}.
-Set to \code{FALSE} in computationally expensive situations or if model fit
-statistics are not needed.}
+\item{model_standardize}{a function to calculate standardized coefficients
+from the model object. The default is to use
+\code{parameters::standardize_parameters()} but this could be also be some
+other function that standardizes model output. Whichever function you
+choose must take a model object as the first argument and return a
+\code{data.frame}.}
 }
 \value{
 a \code{data.frame} with three columns: type, group, and code. Type
