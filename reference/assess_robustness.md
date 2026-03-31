@@ -10,12 +10,7 @@ distributional properties and sign consistency metrics.
 ## Usage
 
 ``` r
-assess_robustness(
-  .multi,
-  .estimand = std_coef,
-  zero_threshold = 0.01,
-  .by = NULL
-)
+assess_robustness(.multi, .estimand, zero_threshold = 0.01, .by = NULL)
 ```
 
 ## Arguments
@@ -118,18 +113,18 @@ results <-
 #> ! object 'the_data' not found
 
 # Assess robustness of standardized coefficients
-assess_robustness(results)
+assess_robustness(results, .estimand = std_coefficient)
 #> Error: object 'results' not found
 
 # Assess raw coefficients
-assess_robustness(results, .estimand = unstd_coef)
+assess_robustness(results, .estimand = coefficient)
 #> Error: object 'results' not found
 
 # Assess std_coef with custom zero threshold
-assess_robustness(results, .estimand = std_coef, zero_threshold = .05)
+assess_robustness(results, .estimand = std_coefficient, zero_threshold = .05)
 #> Error: object 'results' not found
 
 # Stratified assessment by model type
-assess_robustness(results, .estimand = std_coef, .by = dvs)
+assess_robustness(results, .estimand = std_coefficient, .by = dvs)
 #> Error: object 'results' not found
 ```

@@ -242,20 +242,20 @@ the_data |>
   add_variables(var_group = "dvs", dv1, dv2) |> 
   add_model("linear model", lm(dv1 ~ iv1 * mod))
 #> # A tibble: 12 × 6
-#>    type      group        code  additional_args add_standardized add_performance
-#>    <chr>     <chr>        <chr> <lgl>           <lgl>            <lgl>          
-#>  1 filters   include1     incl… NA              NA               NA             
-#>  2 filters   include1     incl… NA              NA               NA             
-#>  3 filters   include2     incl… NA              NA               NA             
-#>  4 filters   include2     incl… NA              NA               NA             
-#>  5 filters   include3     incl… NA              NA               NA             
-#>  6 filters   include3     incl… NA              NA               NA             
-#>  7 variables ivs          iv1   NA              NA               NA             
-#>  8 variables ivs          iv2   NA              NA               NA             
-#>  9 variables ivs          iv3   NA              NA               NA             
-#> 10 variables dvs          dv1   NA              NA               NA             
-#> 11 variables dvs          dv2   NA              NA               NA             
-#> 12 models    linear model lm(d… NA              TRUE             TRUE
+#>    type      group        code  model_coefs_fn model_fit_fn model_standardize_fn
+#>    <chr>     <chr>        <chr> <chr>          <chr>        <chr>               
+#>  1 filters   include1     incl… NA             NA           NA                  
+#>  2 filters   include1     incl… NA             NA           NA                  
+#>  3 filters   include2     incl… NA             NA           NA                  
+#>  4 filters   include2     incl… NA             NA           NA                  
+#>  5 filters   include3     incl… NA             NA           NA                  
+#>  6 filters   include3     incl… NA             NA           NA                  
+#>  7 variables ivs          iv1   NA             NA           NA                  
+#>  8 variables ivs          iv2   NA             NA           NA                  
+#>  9 variables ivs          iv3   NA             NA           NA                  
+#> 10 variables dvs          dv1   NA             NA           NA                  
+#> 11 variables dvs          dv2   NA             NA           NA                  
+#> 12 models    linear model lm(d… parameters::p… performance… parameters::standar…
 ```
 
 Above, the model is completely unquoted. It also has no `data` argument.
@@ -270,20 +270,20 @@ the_data |>
   add_variables(var_group = "dvs", dv1, dv2) |> 
   add_model("linear model", "lm(dv1 ~ iv1 * mod)")
 #> # A tibble: 12 × 6
-#>    type      group        code  additional_args add_standardized add_performance
-#>    <chr>     <chr>        <chr> <lgl>           <lgl>            <lgl>          
-#>  1 filters   include1     incl… NA              NA               NA             
-#>  2 filters   include1     incl… NA              NA               NA             
-#>  3 filters   include2     incl… NA              NA               NA             
-#>  4 filters   include2     incl… NA              NA               NA             
-#>  5 filters   include3     incl… NA              NA               NA             
-#>  6 filters   include3     incl… NA              NA               NA             
-#>  7 variables ivs          iv1   NA              NA               NA             
-#>  8 variables ivs          iv2   NA              NA               NA             
-#>  9 variables ivs          iv3   NA              NA               NA             
-#> 10 variables dvs          dv1   NA              NA               NA             
-#> 11 variables dvs          dv2   NA              NA               NA             
-#> 12 models    linear model lm(d… NA              TRUE             TRUE
+#>    type      group        code  model_coefs_fn model_fit_fn model_standardize_fn
+#>    <chr>     <chr>        <chr> <chr>          <chr>        <chr>               
+#>  1 filters   include1     incl… NA             NA           NA                  
+#>  2 filters   include1     incl… NA             NA           NA                  
+#>  3 filters   include2     incl… NA             NA           NA                  
+#>  4 filters   include2     incl… NA             NA           NA                  
+#>  5 filters   include3     incl… NA             NA           NA                  
+#>  6 filters   include3     incl… NA             NA           NA                  
+#>  7 variables ivs          iv1   NA             NA           NA                  
+#>  8 variables ivs          iv2   NA             NA           NA                  
+#>  9 variables ivs          iv3   NA             NA           NA                  
+#> 10 variables dvs          dv1   NA             NA           NA                  
+#> 11 variables dvs          dv2   NA             NA           NA                  
+#> 12 models    linear model lm(d… parameters::p… performance… parameters::standar…
 ```
 
 To make sure your
@@ -301,20 +301,20 @@ the_data |>
   add_variables(var_group = "dvs", dv1, dv2) |> 
   add_model("linear model", lm({dvs} ~ {ivs} * mod)) # see the {} here
 #> # A tibble: 12 × 6
-#>    type      group        code  additional_args add_standardized add_performance
-#>    <chr>     <chr>        <chr> <lgl>           <lgl>            <lgl>          
-#>  1 filters   include1     incl… NA              NA               NA             
-#>  2 filters   include1     incl… NA              NA               NA             
-#>  3 filters   include2     incl… NA              NA               NA             
-#>  4 filters   include2     incl… NA              NA               NA             
-#>  5 filters   include3     incl… NA              NA               NA             
-#>  6 filters   include3     incl… NA              NA               NA             
-#>  7 variables ivs          iv1   NA              NA               NA             
-#>  8 variables ivs          iv2   NA              NA               NA             
-#>  9 variables ivs          iv3   NA              NA               NA             
-#> 10 variables dvs          dv1   NA              NA               NA             
-#> 11 variables dvs          dv2   NA              NA               NA             
-#> 12 models    linear model lm({… NA              TRUE             TRUE
+#>    type      group        code  model_coefs_fn model_fit_fn model_standardize_fn
+#>    <chr>     <chr>        <chr> <chr>          <chr>        <chr>               
+#>  1 filters   include1     incl… NA             NA           NA                  
+#>  2 filters   include1     incl… NA             NA           NA                  
+#>  3 filters   include2     incl… NA             NA           NA                  
+#>  4 filters   include2     incl… NA             NA           NA                  
+#>  5 filters   include3     incl… NA             NA           NA                  
+#>  6 filters   include3     incl… NA             NA           NA                  
+#>  7 variables ivs          iv1   NA             NA           NA                  
+#>  8 variables ivs          iv2   NA             NA           NA                  
+#>  9 variables ivs          iv3   NA             NA           NA                  
+#> 10 variables dvs          dv1   NA             NA           NA                  
+#> 11 variables dvs          dv2   NA             NA           NA                  
+#> 12 models    linear model lm({… parameters::p… performance… parameters::standar…
 ```
 
 This allows `multitool` to insert the correct version of each variable
@@ -423,20 +423,20 @@ Or we could look at the models:
 ``` r
 expanded_pipeline |> unnest(models)
 #> # A tibble: 48 × 8
-#>    decision variables filters  model     model_meta model_args model_standardize
-#>       <dbl> <list>    <list>   <chr>     <chr>      <chr>      <chr>            
-#>  1        1 <tibble>  <tibble> lm(dv1 ~… linear mo… ""         TRUE             
-#>  2        2 <tibble>  <tibble> lm(dv2 ~… linear mo… ""         TRUE             
-#>  3        3 <tibble>  <tibble> lm(dv1 ~… linear mo… ""         TRUE             
-#>  4        4 <tibble>  <tibble> lm(dv2 ~… linear mo… ""         TRUE             
-#>  5        5 <tibble>  <tibble> lm(dv1 ~… linear mo… ""         TRUE             
-#>  6        6 <tibble>  <tibble> lm(dv2 ~… linear mo… ""         TRUE             
-#>  7        7 <tibble>  <tibble> lm(dv1 ~… linear mo… ""         TRUE             
-#>  8        8 <tibble>  <tibble> lm(dv2 ~… linear mo… ""         TRUE             
-#>  9        9 <tibble>  <tibble> lm(dv1 ~… linear mo… ""         TRUE             
-#> 10       10 <tibble>  <tibble> lm(dv2 ~… linear mo… ""         TRUE             
+#>    decision variables filters  model      model_meta model_coefs_fn model_fit_fn
+#>       <dbl> <list>    <list>   <chr>      <chr>      <chr>          <chr>       
+#>  1        1 <tibble>  <tibble> lm(dv1 ~ … linear mo… parameters::p… performance…
+#>  2        2 <tibble>  <tibble> lm(dv2 ~ … linear mo… parameters::p… performance…
+#>  3        3 <tibble>  <tibble> lm(dv1 ~ … linear mo… parameters::p… performance…
+#>  4        4 <tibble>  <tibble> lm(dv2 ~ … linear mo… parameters::p… performance…
+#>  5        5 <tibble>  <tibble> lm(dv1 ~ … linear mo… parameters::p… performance…
+#>  6        6 <tibble>  <tibble> lm(dv2 ~ … linear mo… parameters::p… performance…
+#>  7        7 <tibble>  <tibble> lm(dv1 ~ … linear mo… parameters::p… performance…
+#>  8        8 <tibble>  <tibble> lm(dv2 ~ … linear mo… parameters::p… performance…
+#>  9        9 <tibble>  <tibble> lm(dv1 ~ … linear mo… parameters::p… performance…
+#> 10       10 <tibble>  <tibble> lm(dv2 ~ … linear mo… parameters::p… performance…
 #> # ℹ 38 more rows
-#> # ℹ 1 more variable: model_perform <chr>
+#> # ℹ 1 more variable: model_standardize_fn <chr>
 ```
 
 Notice that, with the
@@ -449,20 +449,20 @@ the models and variable list columns:
 ``` r
 expanded_pipeline |> unnest(c(variables, models))
 #> # A tibble: 48 × 9
-#>    decision ivs   dvs   filters  model   model_meta model_args model_standardize
-#>       <dbl> <chr> <chr> <list>   <chr>   <chr>      <chr>      <chr>            
-#>  1        1 iv1   dv1   <tibble> lm(dv1… linear mo… ""         TRUE             
-#>  2        2 iv1   dv2   <tibble> lm(dv2… linear mo… ""         TRUE             
-#>  3        3 iv2   dv1   <tibble> lm(dv1… linear mo… ""         TRUE             
-#>  4        4 iv2   dv2   <tibble> lm(dv2… linear mo… ""         TRUE             
-#>  5        5 iv3   dv1   <tibble> lm(dv1… linear mo… ""         TRUE             
-#>  6        6 iv3   dv2   <tibble> lm(dv2… linear mo… ""         TRUE             
-#>  7        7 iv1   dv1   <tibble> lm(dv1… linear mo… ""         TRUE             
-#>  8        8 iv1   dv2   <tibble> lm(dv2… linear mo… ""         TRUE             
-#>  9        9 iv2   dv1   <tibble> lm(dv1… linear mo… ""         TRUE             
-#> 10       10 iv2   dv2   <tibble> lm(dv2… linear mo… ""         TRUE             
+#>    decision ivs   dvs   filters  model    model_meta model_coefs_fn model_fit_fn
+#>       <dbl> <chr> <chr> <list>   <chr>    <chr>      <chr>          <chr>       
+#>  1        1 iv1   dv1   <tibble> lm(dv1 … linear mo… parameters::p… performance…
+#>  2        2 iv1   dv2   <tibble> lm(dv2 … linear mo… parameters::p… performance…
+#>  3        3 iv2   dv1   <tibble> lm(dv1 … linear mo… parameters::p… performance…
+#>  4        4 iv2   dv2   <tibble> lm(dv2 … linear mo… parameters::p… performance…
+#>  5        5 iv3   dv1   <tibble> lm(dv1 … linear mo… parameters::p… performance…
+#>  6        6 iv3   dv2   <tibble> lm(dv2 … linear mo… parameters::p… performance…
+#>  7        7 iv1   dv1   <tibble> lm(dv1 … linear mo… parameters::p… performance…
+#>  8        8 iv1   dv2   <tibble> lm(dv2 … linear mo… parameters::p… performance…
+#>  9        9 iv2   dv1   <tibble> lm(dv1 … linear mo… parameters::p… performance…
+#> 10       10 iv2   dv2   <tibble> lm(dv2 … linear mo… parameters::p… performance…
 #> # ℹ 38 more rows
-#> # ℹ 1 more variable: model_perform <chr>
+#> # ℹ 1 more variable: model_standardize_fn <chr>
 ```
 
 ## Going further

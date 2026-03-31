@@ -77,24 +77,24 @@ the_data |>
   add_model("linear model", lm({dvs} ~ {ivs} * {mods})) |>
   add_postprocess("analysis of variance", aov())
 #> # A tibble: 18 × 6
-#>    type        group      code  additional_args add_standardized add_performance
-#>    <chr>       <chr>      <chr> <lgl>           <lgl>            <lgl>          
-#>  1 filters     include1   incl… NA              NA               NA             
-#>  2 filters     include1   incl… NA              NA               NA             
-#>  3 filters     include2   incl… NA              NA               NA             
-#>  4 filters     include2   incl… NA              NA               NA             
-#>  5 filters     include2   incl… NA              NA               NA             
-#>  6 filters     include3   incl… NA              NA               NA             
-#>  7 filters     include3   incl… NA              NA               NA             
-#>  8 variables   ivs        iv1   NA              NA               NA             
-#>  9 variables   ivs        iv2   NA              NA               NA             
-#> 10 variables   ivs        iv3   NA              NA               NA             
-#> 11 variables   dvs        dv1   NA              NA               NA             
-#> 12 variables   dvs        dv2   NA              NA               NA             
-#> 13 variables   mods       mod1  NA              NA               NA             
-#> 14 variables   mods       mod2  NA              NA               NA             
-#> 15 variables   mods       mod3  NA              NA               NA             
-#> 16 preprocess  scale_iv   muta… NA              NA               NA             
-#> 17 models      linear mo… lm({… NA              TRUE             TRUE           
-#> 18 postprocess analysis … aov() NA              NA               NA             
+#>    type        group      code  model_coefs_fn model_fit_fn model_standardize_fn
+#>    <chr>       <chr>      <chr> <chr>          <chr>        <chr>               
+#>  1 filters     include1   incl… NA             NA           NA                  
+#>  2 filters     include1   incl… NA             NA           NA                  
+#>  3 filters     include2   incl… NA             NA           NA                  
+#>  4 filters     include2   incl… NA             NA           NA                  
+#>  5 filters     include2   incl… NA             NA           NA                  
+#>  6 filters     include3   incl… NA             NA           NA                  
+#>  7 filters     include3   incl… NA             NA           NA                  
+#>  8 variables   ivs        iv1   NA             NA           NA                  
+#>  9 variables   ivs        iv2   NA             NA           NA                  
+#> 10 variables   ivs        iv3   NA             NA           NA                  
+#> 11 variables   dvs        dv1   NA             NA           NA                  
+#> 12 variables   dvs        dv2   NA             NA           NA                  
+#> 13 variables   mods       mod1  NA             NA           NA                  
+#> 14 variables   mods       mod2  NA             NA           NA                  
+#> 15 variables   mods       mod3  NA             NA           NA                  
+#> 16 preprocess  scale_iv   muta… NA             NA           NA                  
+#> 17 models      linear mo… lm({… parameters::p… performance… parameters::standar…
+#> 18 postprocess analysis … aov() NA             NA           NA                  
 ```

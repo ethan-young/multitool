@@ -58,7 +58,7 @@ decision set.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">assess_decisions</span><span class="op">(</span><span class="va">.unpacked</span>, .estimand <span class="op">=</span> <span class="va">std_coef</span>, .by <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">assess_decisions</span><span class="op">(</span><span class="va">.unpacked</span>, <span class="va">.estimand</span>, .by <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -172,7 +172,7 @@ relatively inconsequential.</p>
 <span class="r-in"><span><span class="co"># Decompose variance in standardized coefficients</span></span></span>
 <span class="r-in"><span><span class="va">unpacked</span> <span class="op">&lt;-</span> <span class="fu"><a href="unpack_results.html">unpack_model_parameters</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'results' not found</span>
-<span class="r-in"><span><span class="fu">assess_decisions</span><span class="op">(</span><span class="va">unpacked</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">assess_decisions</span><span class="op">(</span><span class="va">unpacked</span>, .estimand <span class="op">=</span> <span class="va">std_coefficient</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'unpacked' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Which decisions matter most for p-values?</span></span></span>
@@ -180,7 +180,7 @@ relatively inconsequential.</p>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'unpacked' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Decompose separately for each parameter</span></span></span>
-<span class="r-in"><span><span class="fu">assess_decisions</span><span class="op">(</span><span class="va">unpacked</span>, .by <span class="op">=</span> <span class="va">dvs</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">assess_decisions</span><span class="op">(</span><span class="va">unpacked</span>, .estimand <span class="op">=</span> <span class="va">p</span>, .by <span class="op">=</span> <span class="va">dvs</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'unpacked' not found</span>
 </code></pre></div>
     </div>

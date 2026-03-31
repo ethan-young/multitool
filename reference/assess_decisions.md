@@ -9,7 +9,7 @@ effects for each decision set.
 ## Usage
 
 ``` r
-assess_decisions(.unpacked, .estimand = std_coef, .by = NULL)
+assess_decisions(.unpacked, .estimand, .by = NULL)
 ```
 
 ## Arguments
@@ -133,7 +133,7 @@ results <-
 # Decompose variance in standardized coefficients
 unpacked <- unpack_model_parameters(results)
 #> Error: object 'results' not found
-assess_decisions(unpacked)
+assess_decisions(unpacked, .estimand = std_coefficient)
 #> Error: object 'unpacked' not found
 
 # Which decisions matter most for p-values?
@@ -141,6 +141,6 @@ assess_decisions(unpacked, .estimand = p)
 #> Error: object 'unpacked' not found
 
 # Decompose separately for each parameter
-assess_decisions(unpacked, .by = dvs)
+assess_decisions(unpacked, .estimand = p, .by = dvs)
 #> Error: object 'unpacked' not found
 ```

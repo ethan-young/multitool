@@ -15,9 +15,8 @@ CRAN release: 2025-09-03
   to visualize subgroups if they exist
 - Updated `reveal_*` functions to show subgroup specs, if they exist
 - Fixed an issue with `add_parameters()`
-- Added a parallel option for
-  [`run_multiverse()`](https://ethan-young.github.io/multitool/reference/run_multiverse.md)
-  via [furrr](https://github.com/DavisVaughan/furrr)
+- Added a parallel option for `run_multiverse()` via
+  [furrr](https://github.com/DavisVaughan/furrr)
 - Calculate standardized coefficients by default
 
 ## multitool 0.1.4

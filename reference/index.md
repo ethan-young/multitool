@@ -95,45 +95,8 @@ These functions still work and will stick around for awhile.
 
 - [`create_blueprint_graph()`](https://ethan-young.github.io/multitool/reference/create_blueprint_graph.md)
   **\[superseded\]** : Create a Analysis Pipeline diagram
-- [`run_multiverse()`](https://ethan-young.github.io/multitool/reference/run_multiverse.md)
-  **\[superseded\]** : Run a multiverse based on a complete decision
-  grid
-- [`run_multiverse_furrr()`](https://ethan-young.github.io/multitool/reference/run_multiverse_furrr.md)
-  **\[superseded\]** : Run a multi-core, multiverse based on a complete
-  decision grid
 
 ## Deprecated
 
 Functions that are no longer supported and will be removed in a future
 version.
-
-- [`add_correlations()`](https://ethan-young.github.io/multitool/reference/add_correlations.md)
-  **\[deprecated\]** :
-
-  Add correlations from the `correlation` package in `easystats`
-
-- [`add_reliabilities()`](https://ethan-young.github.io/multitool/reference/add_reliabilities.md)
-  **\[deprecated\]** : Add item reliabilities to a multiverse pipeline
-
-- [`add_summary_stats()`](https://ethan-young.github.io/multitool/reference/add_summary_stats.md)
-  **\[deprecated\]** : Add a set of descriptive statistics to compute
-  over a set of variables
-
-- [`reveal()`](https://ethan-young.github.io/multitool/reference/reveal.md)
-  **\[deprecated\]** : Reveal the contents of a multiverse analysis
-
-- [`reveal_model_messages()`](https://ethan-young.github.io/multitool/reference/reveal_model_messages.md)
-  **\[deprecated\]** : Reveal any messages about your models during a
-  multiverse analysis
-
-- [`reveal_model_parameters()`](https://ethan-young.github.io/multitool/reference/reveal_model_parameters.md)
-  **\[deprecated\]** : Reveal the model parameters of a multiverse
-  analysis
-
-- [`reveal_model_performance()`](https://ethan-young.github.io/multitool/reference/reveal_model_performance.md)
-  **\[deprecated\]** : Reveal the model performance/fit indices from a
-  multiverse analysis
-
-- [`reveal_model_warnings()`](https://ethan-young.github.io/multitool/reference/reveal_model_warnings.md)
-  **\[deprecated\]** : Reveal any warnings about your models during a
-  multiverse analysis

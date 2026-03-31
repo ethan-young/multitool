@@ -105,21 +105,21 @@ multiverse_results |>
   unnest(model_fitted) |> 
   unnest(model_parameters)
 #> # A tibble: 192 × 21
-#>    decision specifications   model_function parameter unstd_coef     se unstd_ci
-#>       <dbl> <list>           <chr>          <chr>          <dbl>  <dbl>    <dbl>
-#>  1        1 <tibble [1 × 3]> lm             (Interce…   0.00102  0.0560     0.95
-#>  2        1 <tibble [1 × 3]> lm             iv1        -0.000728 0.0538     0.95
-#>  3        1 <tibble [1 × 3]> lm             mod         0.0584   0.0623     0.95
-#>  4        1 <tibble [1 × 3]> lm             iv1:mod    -0.105    0.0585     0.95
-#>  5        2 <tibble [1 × 3]> lm             (Interce…   0.0807   0.0575     0.95
-#>  6        2 <tibble [1 × 3]> lm             iv1        -0.0230   0.0552     0.95
-#>  7        2 <tibble [1 × 3]> lm             mod        -0.142    0.0640     0.95
-#>  8        2 <tibble [1 × 3]> lm             iv1:mod    -0.0787   0.0601     0.95
-#>  9        3 <tibble [1 × 3]> lm             (Interce…  -0.00802  0.0561     0.95
-#> 10        3 <tibble [1 × 3]> lm             iv2         0.0229   0.0574     0.95
+#>    decision specifications   model_function parameter   coefficient     se    ci
+#>       <dbl> <list>           <chr>          <chr>             <dbl>  <dbl> <dbl>
+#>  1        1 <tibble [1 × 3]> lm             (Intercept)    0.00102  0.0560  0.95
+#>  2        1 <tibble [1 × 3]> lm             iv1           -0.000728 0.0538  0.95
+#>  3        1 <tibble [1 × 3]> lm             mod            0.0584   0.0623  0.95
+#>  4        1 <tibble [1 × 3]> lm             iv1:mod       -0.105    0.0585  0.95
+#>  5        2 <tibble [1 × 3]> lm             (Intercept)    0.0807   0.0575  0.95
+#>  6        2 <tibble [1 × 3]> lm             iv1           -0.0230   0.0552  0.95
+#>  7        2 <tibble [1 × 3]> lm             mod           -0.142    0.0640  0.95
+#>  8        2 <tibble [1 × 3]> lm             iv1:mod       -0.0787   0.0601  0.95
+#>  9        3 <tibble [1 × 3]> lm             (Intercept)   -0.00802  0.0561  0.95
+#> 10        3 <tibble [1 × 3]> lm             iv2            0.0229   0.0574  0.95
 #> # ℹ 182 more rows
-#> # ℹ 14 more variables: unstd_ci_low <dbl>, unstd_ci_high <dbl>, t <dbl>,
-#> #   df_error <int>, p <dbl>, std_coef <dbl>, std_ci <dbl>, std_ci_low <dbl>,
+#> # ℹ 14 more variables: ci_low <dbl>, ci_high <dbl>, t <dbl>, df_error <int>,
+#> #   p <dbl>, std_coefficient <dbl>, std_ci <dbl>, std_ci_low <dbl>,
 #> #   std_ci_high <dbl>, model_performance <list>, model_warnings <list>,
 #> #   model_messages <list>, pipeline_code <list>, timing_logs <list>
 ```
@@ -134,7 +134,7 @@ multiverse_results |>
   unnest(model_fitted) |>
   unnest(model_performance)
 #> # A tibble: 48 × 15
-#>    decision specifications   model_function model_parameters    AIC  AICc   BIC
+#>    decision specifications   model_function model_parameters    aic  aicc   bic
 #>       <dbl> <list>           <chr>          <list>            <dbl> <dbl> <dbl>
 #>  1        1 <tibble [1 × 3]> lm             <tibble [4 × 13]>  866.  866.  885.
 #>  2        2 <tibble [1 × 3]> lm             <tibble [4 × 13]>  883.  883.  901.
@@ -147,7 +147,7 @@ multiverse_results |>
 #>  9        9 <tibble [1 × 3]> lm             <tibble [4 × 13]>  872.  873.  891.
 #> 10       10 <tibble [1 × 3]> lm             <tibble [4 × 13]>  881.  882.  900.
 #> # ℹ 38 more rows
-#> # ℹ 8 more variables: R2 <dbl>, R2_adjusted <dbl>, RMSE <dbl>, Sigma <dbl>,
+#> # ℹ 8 more variables: r2 <dbl>, r2_adjusted <dbl>, rmse <dbl>, sigma <dbl>,
 #> #   model_warnings <list>, model_messages <list>, pipeline_code <list>,
 #> #   timing_logs <list>
 ```
@@ -157,36 +157,37 @@ provided by the modeling function. If something went wrong or you need
 to know something about a particular model, these columns will have
 captured messages and warnings printed by the modeling function.
 
-### Reveal
+### Unpack
 
 I wrote wrappers around the
 [`tidyr::unnest()`](https://tidyr.tidyverse.org/reference/unnest.html)
 workflow. The main function is
-[`reveal()`](https://ethan-young.github.io/multitool/reference/reveal.md).
+[`unpack_results()`](https://ethan-young.github.io/multitool/reference/unpack_results.md).
 Pass a multiverse results object to
-[`reveal()`](https://ethan-young.github.io/multitool/reference/reveal.md)
+[`unpack_results()`](https://ethan-young.github.io/multitool/reference/unpack_results.md)
 and tell it which columns to grab by indicating the column name in the
 `.what` argument:
 
 ``` r
 multiverse_results |> 
-  reveal(.what = model_fitted)
-#> # A tibble: 48 × 9
-#>    decision specifications   model_function model_parameters  model_performance
-#>       <dbl> <list>           <chr>          <list>            <list>           
-#>  1        1 <tibble [1 × 3]> lm             <tibble [4 × 13]> <tibble [1 × 7]> 
-#>  2        2 <tibble [1 × 3]> lm             <tibble [4 × 13]> <tibble [1 × 7]> 
-#>  3        3 <tibble [1 × 3]> lm             <tibble [4 × 13]> <tibble [1 × 7]> 
-#>  4        4 <tibble [1 × 3]> lm             <tibble [4 × 13]> <tibble [1 × 7]> 
-#>  5        5 <tibble [1 × 3]> lm             <tibble [4 × 13]> <tibble [1 × 7]> 
-#>  6        6 <tibble [1 × 3]> lm             <tibble [4 × 13]> <tibble [1 × 7]> 
-#>  7        7 <tibble [1 × 3]> lm             <tibble [4 × 13]> <tibble [1 × 7]> 
-#>  8        8 <tibble [1 × 3]> lm             <tibble [4 × 13]> <tibble [1 × 7]> 
-#>  9        9 <tibble [1 × 3]> lm             <tibble [4 × 13]> <tibble [1 × 7]> 
-#> 10       10 <tibble [1 × 3]> lm             <tibble [4 × 13]> <tibble [1 × 7]> 
+  unpack_results(.what = model_fitted)
+#> # A tibble: 48 × 14
+#>    decision ivs   dvs   include1     include2 include3 model_meta model_function
+#>       <dbl> <chr> <chr> <chr>        <chr>    <chr>    <chr>      <chr>         
+#>  1        1 iv1   dv1   include1 ==… include… include… linear mo… lm            
+#>  2        2 iv1   dv2   include1 ==… include… include… linear mo… lm            
+#>  3        3 iv2   dv1   include1 ==… include… include… linear mo… lm            
+#>  4        4 iv2   dv2   include1 ==… include… include… linear mo… lm            
+#>  5        5 iv3   dv1   include1 ==… include… include… linear mo… lm            
+#>  6        6 iv3   dv2   include1 ==… include… include… linear mo… lm            
+#>  7        7 iv1   dv1   include1 ==… include… include… linear mo… lm            
+#>  8        8 iv1   dv2   include1 ==… include… include… linear mo… lm            
+#>  9        9 iv2   dv1   include1 ==… include… include… linear mo… lm            
+#> 10       10 iv2   dv2   include1 ==… include… include… linear mo… lm            
 #> # ℹ 38 more rows
-#> # ℹ 4 more variables: model_warnings <list>, model_messages <list>,
-#> #   pipeline_code <list>, timing_logs <list>
+#> # ℹ 6 more variables: model_parameters <list>, model_performance <list>,
+#> #   model_warnings <list>, model_messages <list>, pipeline_code <list>,
+#> #   timing_logs <list>
 ```
 
 If you want to get straight to a specific result you can specify a
@@ -194,84 +195,83 @@ sub-list with the `.which` argument:
 
 ``` r
 multiverse_results |> 
-  reveal(.what = model_fitted, .which = model_parameters)
-#> # A tibble: 192 × 21
-#>    decision specifications   model_function parameter unstd_coef     se unstd_ci
-#>       <dbl> <list>           <chr>          <chr>          <dbl>  <dbl>    <dbl>
-#>  1        1 <tibble [1 × 3]> lm             (Interce…   0.00102  0.0560     0.95
-#>  2        1 <tibble [1 × 3]> lm             iv1        -0.000728 0.0538     0.95
-#>  3        1 <tibble [1 × 3]> lm             mod         0.0584   0.0623     0.95
-#>  4        1 <tibble [1 × 3]> lm             iv1:mod    -0.105    0.0585     0.95
-#>  5        2 <tibble [1 × 3]> lm             (Interce…   0.0807   0.0575     0.95
-#>  6        2 <tibble [1 × 3]> lm             iv1        -0.0230   0.0552     0.95
-#>  7        2 <tibble [1 × 3]> lm             mod        -0.142    0.0640     0.95
-#>  8        2 <tibble [1 × 3]> lm             iv1:mod    -0.0787   0.0601     0.95
-#>  9        3 <tibble [1 × 3]> lm             (Interce…  -0.00802  0.0561     0.95
-#> 10        3 <tibble [1 × 3]> lm             iv2         0.0229   0.0574     0.95
+  unpack_results(.what = model_fitted, .which = model_parameters)
+#> # A tibble: 192 × 26
+#>    decision ivs   dvs   include1     include2 include3 model_meta model_function
+#>       <dbl> <chr> <chr> <chr>        <chr>    <chr>    <chr>      <chr>         
+#>  1        1 iv1   dv1   include1 ==… include… include… linear mo… lm            
+#>  2        1 iv1   dv1   include1 ==… include… include… linear mo… lm            
+#>  3        1 iv1   dv1   include1 ==… include… include… linear mo… lm            
+#>  4        1 iv1   dv1   include1 ==… include… include… linear mo… lm            
+#>  5        2 iv1   dv2   include1 ==… include… include… linear mo… lm            
+#>  6        2 iv1   dv2   include1 ==… include… include… linear mo… lm            
+#>  7        2 iv1   dv2   include1 ==… include… include… linear mo… lm            
+#>  8        2 iv1   dv2   include1 ==… include… include… linear mo… lm            
+#>  9        3 iv2   dv1   include1 ==… include… include… linear mo… lm            
+#> 10        3 iv2   dv1   include1 ==… include… include… linear mo… lm            
 #> # ℹ 182 more rows
-#> # ℹ 14 more variables: unstd_ci_low <dbl>, unstd_ci_high <dbl>, t <dbl>,
-#> #   df_error <int>, p <dbl>, std_coef <dbl>, std_ci <dbl>, std_ci_low <dbl>,
-#> #   std_ci_high <dbl>, model_performance <list>, model_warnings <list>,
-#> #   model_messages <list>, pipeline_code <list>, timing_logs <list>
+#> # ℹ 18 more variables: parameter <chr>, coefficient <dbl>, se <dbl>, ci <dbl>,
+#> #   ci_low <dbl>, ci_high <dbl>, t <dbl>, df_error <int>, p <dbl>,
+#> #   std_coefficient <dbl>, std_ci <dbl>, std_ci_low <dbl>, std_ci_high <dbl>,
+#> #   model_performance <list>, model_warnings <list>, model_messages <list>,
+#> #   pipeline_code <list>, timing_logs <list>
 ```
 
-### `reveal_model_*`
+### `unpack_model_*`
 
 `multitool` will run and save anything you put in your pipeline but most
 often, you will want to look at model parameters and/or performance. To
 that end, there are a set of convenience functions for getting at the
-most common multiverse results: `reveal_model_parameters`,
-`reveal_model_performance`, `reveal_model_messages`, and
-`reveal_model_warnings`.
+most common multiverse results: `unpack_model_parameters`,
+`unpack_model_performance`, `unpack_model_messages`, and
+`unpack_model_warnings`.
 
-`reveal_model_parameters` unpacks the model parameters in your
+`unpack_model_parameters` unpacks the model parameters in your
 multiverse:
 
 ``` r
-multiverse_results |> 
-  reveal_model_parameters()
+multiverse_results |>
+  unpack_model_parameters()
 #> # A tibble: 192 × 21
-#>    decision specifications   model_function parameter unstd_coef     se unstd_ci
-#>       <dbl> <list>           <chr>          <chr>          <dbl>  <dbl>    <dbl>
-#>  1        1 <tibble [1 × 3]> lm             (Interce…   0.00102  0.0560     0.95
-#>  2        1 <tibble [1 × 3]> lm             iv1        -0.000728 0.0538     0.95
-#>  3        1 <tibble [1 × 3]> lm             mod         0.0584   0.0623     0.95
-#>  4        1 <tibble [1 × 3]> lm             iv1:mod    -0.105    0.0585     0.95
-#>  5        2 <tibble [1 × 3]> lm             (Interce…   0.0807   0.0575     0.95
-#>  6        2 <tibble [1 × 3]> lm             iv1        -0.0230   0.0552     0.95
-#>  7        2 <tibble [1 × 3]> lm             mod        -0.142    0.0640     0.95
-#>  8        2 <tibble [1 × 3]> lm             iv1:mod    -0.0787   0.0601     0.95
-#>  9        3 <tibble [1 × 3]> lm             (Interce…  -0.00802  0.0561     0.95
-#> 10        3 <tibble [1 × 3]> lm             iv2         0.0229   0.0574     0.95
+#>    decision ivs   dvs   include1     include2 include3 model_meta model_function
+#>       <dbl> <chr> <chr> <chr>        <chr>    <chr>    <chr>      <chr>         
+#>  1        1 iv1   dv1   include1 ==… include… include… linear mo… lm            
+#>  2        1 iv1   dv1   include1 ==… include… include… linear mo… lm            
+#>  3        1 iv1   dv1   include1 ==… include… include… linear mo… lm            
+#>  4        1 iv1   dv1   include1 ==… include… include… linear mo… lm            
+#>  5        2 iv1   dv2   include1 ==… include… include… linear mo… lm            
+#>  6        2 iv1   dv2   include1 ==… include… include… linear mo… lm            
+#>  7        2 iv1   dv2   include1 ==… include… include… linear mo… lm            
+#>  8        2 iv1   dv2   include1 ==… include… include… linear mo… lm            
+#>  9        3 iv2   dv1   include1 ==… include… include… linear mo… lm            
+#> 10        3 iv2   dv1   include1 ==… include… include… linear mo… lm            
 #> # ℹ 182 more rows
-#> # ℹ 14 more variables: unstd_ci_low <dbl>, unstd_ci_high <dbl>, t <dbl>,
-#> #   df_error <int>, p <dbl>, std_coef <dbl>, std_ci <dbl>, std_ci_low <dbl>,
-#> #   std_ci_high <dbl>, model_performance <list>, model_warnings <list>,
-#> #   model_messages <list>, pipeline_code <list>, timing_logs <list>
+#> # ℹ 13 more variables: parameter <chr>, coefficient <dbl>, se <dbl>, ci <dbl>,
+#> #   ci_low <dbl>, ci_high <dbl>, t <dbl>, df_error <int>, p <dbl>,
+#> #   std_coefficient <dbl>, std_ci <dbl>, std_ci_low <dbl>, std_ci_high <dbl>
 ```
 
-`reveal_model_performance` unpacks the model performance:
+`unpack_model_performance` unpacks the model performance:
 
 ``` r
-multiverse_results |> 
-  reveal_model_performance()
+multiverse_results |>
+  unpack_model_performance()
 #> # A tibble: 48 × 15
-#>    decision specifications   model_function model_parameters    AIC  AICc   BIC
-#>       <dbl> <list>           <chr>          <list>            <dbl> <dbl> <dbl>
-#>  1        1 <tibble [1 × 3]> lm             <tibble [4 × 13]>  866.  866.  885.
-#>  2        2 <tibble [1 × 3]> lm             <tibble [4 × 13]>  883.  883.  901.
-#>  3        3 <tibble [1 × 3]> lm             <tibble [4 × 13]>  868.  868.  887.
-#>  4        4 <tibble [1 × 3]> lm             <tibble [4 × 13]>  878.  878.  896.
-#>  5        5 <tibble [1 × 3]> lm             <tibble [4 × 13]>  867.  867.  886.
-#>  6        6 <tibble [1 × 3]> lm             <tibble [4 × 13]>  883.  883.  901.
-#>  7        7 <tibble [1 × 3]> lm             <tibble [4 × 13]>  870.  870.  889.
-#>  8        8 <tibble [1 × 3]> lm             <tibble [4 × 13]>  886.  887.  905.
-#>  9        9 <tibble [1 × 3]> lm             <tibble [4 × 13]>  872.  873.  891.
-#> 10       10 <tibble [1 × 3]> lm             <tibble [4 × 13]>  881.  882.  900.
+#>    decision ivs   dvs   include1     include2 include3 model_meta model_function
+#>       <dbl> <chr> <chr> <chr>        <chr>    <chr>    <chr>      <chr>         
+#>  1        1 iv1   dv1   include1 ==… include… include… linear mo… lm            
+#>  2        2 iv1   dv2   include1 ==… include… include… linear mo… lm            
+#>  3        3 iv2   dv1   include1 ==… include… include… linear mo… lm            
+#>  4        4 iv2   dv2   include1 ==… include… include… linear mo… lm            
+#>  5        5 iv3   dv1   include1 ==… include… include… linear mo… lm            
+#>  6        6 iv3   dv2   include1 ==… include… include… linear mo… lm            
+#>  7        7 iv1   dv1   include1 ==… include… include… linear mo… lm            
+#>  8        8 iv1   dv2   include1 ==… include… include… linear mo… lm            
+#>  9        9 iv2   dv1   include1 ==… include… include… linear mo… lm            
+#> 10       10 iv2   dv2   include1 ==… include… include… linear mo… lm            
 #> # ℹ 38 more rows
-#> # ℹ 8 more variables: R2 <dbl>, R2_adjusted <dbl>, RMSE <dbl>, Sigma <dbl>,
-#> #   model_warnings <list>, model_messages <list>, pipeline_code <list>,
-#> #   timing_logs <list>
+#> # ℹ 7 more variables: aic <dbl>, aicc <dbl>, bic <dbl>, r2 <dbl>,
+#> #   r2_adjusted <dbl>, rmse <dbl>, sigma <dbl>
 ```
 
 ### Unpacking Specifications
@@ -283,28 +283,25 @@ unpacking your decisions - `wide` or `long`. If you set
 is exactly the same as how your decisions appeared in your grid.
 
 ``` r
-multiverse_results |> 
-  reveal_model_parameters(.unpack_specs = "wide")
-#> # A tibble: 192 × 30
-#>    decision ivs   dvs   include1   include2 include3 model model_meta model_args
-#>       <dbl> <chr> <chr> <chr>      <chr>    <chr>    <chr> <chr>      <chr>     
-#>  1        1 iv1   dv1   include1 … include… include… lm(d… linear mo… ""        
-#>  2        1 iv1   dv1   include1 … include… include… lm(d… linear mo… ""        
-#>  3        1 iv1   dv1   include1 … include… include… lm(d… linear mo… ""        
-#>  4        1 iv1   dv1   include1 … include… include… lm(d… linear mo… ""        
-#>  5        2 iv1   dv2   include1 … include… include… lm(d… linear mo… ""        
-#>  6        2 iv1   dv2   include1 … include… include… lm(d… linear mo… ""        
-#>  7        2 iv1   dv2   include1 … include… include… lm(d… linear mo… ""        
-#>  8        2 iv1   dv2   include1 … include… include… lm(d… linear mo… ""        
-#>  9        3 iv2   dv1   include1 … include… include… lm(d… linear mo… ""        
-#> 10        3 iv2   dv1   include1 … include… include… lm(d… linear mo… ""        
+multiverse_results |>
+  unpack_model_parameters(.unpack_specs = "wide")
+#> # A tibble: 192 × 21
+#>    decision ivs   dvs   include1     include2 include3 model_meta model_function
+#>       <dbl> <chr> <chr> <chr>        <chr>    <chr>    <chr>      <chr>         
+#>  1        1 iv1   dv1   include1 ==… include… include… linear mo… lm            
+#>  2        1 iv1   dv1   include1 ==… include… include… linear mo… lm            
+#>  3        1 iv1   dv1   include1 ==… include… include… linear mo… lm            
+#>  4        1 iv1   dv1   include1 ==… include… include… linear mo… lm            
+#>  5        2 iv1   dv2   include1 ==… include… include… linear mo… lm            
+#>  6        2 iv1   dv2   include1 ==… include… include… linear mo… lm            
+#>  7        2 iv1   dv2   include1 ==… include… include… linear mo… lm            
+#>  8        2 iv1   dv2   include1 ==… include… include… linear mo… lm            
+#>  9        3 iv2   dv1   include1 ==… include… include… linear mo… lm            
+#> 10        3 iv2   dv1   include1 ==… include… include… linear mo… lm            
 #> # ℹ 182 more rows
-#> # ℹ 21 more variables: model_standardize <chr>, model_perform <chr>,
-#> #   model_function <chr>, parameter <chr>, unstd_coef <dbl>, se <dbl>,
-#> #   unstd_ci <dbl>, unstd_ci_low <dbl>, unstd_ci_high <dbl>, t <dbl>,
-#> #   df_error <int>, p <dbl>, std_coef <dbl>, std_ci <dbl>, std_ci_low <dbl>,
-#> #   std_ci_high <dbl>, model_performance <list>, model_warnings <list>,
-#> #   model_messages <list>, pipeline_code <list>, timing_logs <list>
+#> # ℹ 13 more variables: parameter <chr>, coefficient <dbl>, se <dbl>, ci <dbl>,
+#> #   ci_low <dbl>, ci_high <dbl>, t <dbl>, df_error <int>, p <dbl>,
+#> #   std_coefficient <dbl>, std_ci <dbl>, std_ci_low <dbl>, std_ci_high <dbl>
 ```
 
 If you set `.unpack_specs = 'long'`, your decisions get stacked into two
@@ -313,25 +310,24 @@ plotting a particular result from a multiverse analyses per different
 decision alternatives.
 
 ``` r
-multiverse_results |> 
-  reveal_model_performance(.unpack_specs = "long")
-#> # A tibble: 384 × 16
-#>    decision decision_set      alternatives model_function model_parameters   AIC
-#>       <dbl> <chr>             <chr>        <chr>          <list>           <dbl>
-#>  1        1 ivs               iv1          lm             <tibble>          866.
-#>  2        1 dvs               dv1          lm             <tibble>          866.
-#>  3        1 include1          include1 ==… lm             <tibble>          866.
-#>  4        1 include2          include2 !=… lm             <tibble>          866.
-#>  5        1 include3          include3 > … lm             <tibble>          866.
-#>  6        1 model             linear model lm             <tibble>          866.
-#>  7        1 model_standardize TRUE         lm             <tibble>          866.
-#>  8        1 model_perform     TRUE         lm             <tibble>          866.
-#>  9        2 ivs               iv1          lm             <tibble>          883.
-#> 10        2 dvs               dv2          lm             <tibble>          883.
-#> # ℹ 374 more rows
-#> # ℹ 10 more variables: AICc <dbl>, BIC <dbl>, R2 <dbl>, R2_adjusted <dbl>,
-#> #   RMSE <dbl>, Sigma <dbl>, model_warnings <list>, model_messages <list>,
-#> #   pipeline_code <list>, timing_logs <list>
+multiverse_results |>
+  unpack_model_performance(.unpack_specs = "long")
+#> # A tibble: 432 × 12
+#>    decision decision_type decision_set      decision_choice model_function   aic
+#>       <dbl> <chr>         <chr>             <chr>           <chr>          <dbl>
+#>  1        1 variables     ivs               iv1             lm              866.
+#>  2        1 variables     dvs               dv1             lm              866.
+#>  3        1 filters       include1          include1 == 0   lm              866.
+#>  4        1 filters       include2          include2 != 3   lm              866.
+#>  5        1 filters       include3          include3 > -2.5 lm              866.
+#>  6        1 models        model_meta        linear model    lm              866.
+#>  7        1 models        model_coefs_fn    parameters::pa… lm              866.
+#>  8        1 models        model_fit_fn      performance::p… lm              866.
+#>  9        1 models        model_standardiz… parameters::st… lm              866.
+#> 10        2 variables     ivs               iv1             lm              883.
+#> # ℹ 422 more rows
+#> # ℹ 6 more variables: aicc <dbl>, bic <dbl>, r2 <dbl>, r2_adjusted <dbl>,
+#> #   rmse <dbl>, sigma <dbl>
 ```
 
 ### Condense
@@ -354,22 +350,22 @@ case, we have `r2_mean` and `r2_median`.
 ``` r
 # model performance r2 summaries
 multiverse_results |>
-  reveal_model_performance() |> 
-  condense(R2, list(mean = mean, median = median))
+  unpack_model_performance() |>
+  condense(r2, list(mean = mean, median = median))
 #> # A tibble: 1 × 3
-#>   R2_mean R2_median R2_list   
+#>   r2_mean r2_median r2_list   
 #>     <dbl>     <dbl> <list>    
 #> 1  0.0142    0.0109 <dbl [48]>
 
 # model parameters for our predictor of interest
 multiverse_results |>
-  reveal_model_parameters() |> 
+  unpack_model_parameters() |>
   filter(str_detect(parameter, "iv")) |>
-  condense(unstd_coef, list(mean = mean, median = median))
+  condense(coefficient, list(mean = mean, median = median))
 #> # A tibble: 1 × 3
-#>   unstd_coef_mean unstd_coef_median unstd_coef_list
-#>             <dbl>             <dbl> <list>         
-#> 1        -0.00907           -0.0273 <dbl [96]>
+#>   coefficient_mean coefficient_median coefficient_list
+#>              <dbl>              <dbl> <list>          
+#> 1         -0.00907            -0.0273 <dbl [96]>
 ```
 
 In the last example, we have filtered our multiverse results to look at
@@ -385,20 +381,20 @@ might be more informative:
 
 ``` r
 multiverse_results |>
-  reveal_model_parameters(.unpack_specs = "wide") |> 
+  unpack_model_parameters(.unpack_specs = "wide") |>
   filter(str_detect(parameter, "iv")) |>
   group_by(ivs, dvs) |>
-  condense(unstd_coef, list(mean = mean, median = median))
+  condense(coefficient, list(mean = mean, median = median))
 #> # A tibble: 6 × 5
 #> # Groups:   ivs [3]
-#>   ivs   dvs   unstd_coef_mean unstd_coef_median unstd_coef_list
-#>   <chr> <chr>           <dbl>             <dbl> <list>         
-#> 1 iv1   dv1          -0.0372           -0.0228  <dbl [16]>     
-#> 2 iv1   dv2          -0.0535           -0.0547  <dbl [16]>     
-#> 3 iv2   dv1          -0.00545           0.00334 <dbl [16]>     
-#> 4 iv2   dv2           0.0530            0.0550  <dbl [16]>     
-#> 5 iv3   dv1           0.00918           0.00561 <dbl [16]>     
-#> 6 iv3   dv2          -0.0204           -0.0148  <dbl [16]>
+#>   ivs   dvs   coefficient_mean coefficient_median coefficient_list
+#>   <chr> <chr>            <dbl>              <dbl> <list>          
+#> 1 iv1   dv1           -0.0372            -0.0228  <dbl [16]>      
+#> 2 iv1   dv2           -0.0535            -0.0547  <dbl [16]>      
+#> 3 iv2   dv1           -0.00545            0.00334 <dbl [16]>      
+#> 4 iv2   dv2            0.0530             0.0550  <dbl [16]>      
+#> 5 iv3   dv1            0.00918            0.00561 <dbl [16]>      
+#> 6 iv3   dv2           -0.0204            -0.0148  <dbl [16]>
 ```
 
 If we were interested in all the terms of the model, we can leverage
@@ -406,27 +402,27 @@ If we were interested in all the terms of the model, we can leverage
 
 ``` r
 multiverse_results |>
-  reveal_model_parameters(.unpack_specs = "wide") |> 
+  unpack_model_parameters(.unpack_specs = "wide") |>
   group_by(parameter, dvs) |>
-  condense(unstd_coef, list(mean = mean, median = median))
+  condense(coefficient, list(mean = mean, median = median))
 #> # A tibble: 16 × 5
 #> # Groups:   parameter [8]
-#>    parameter   dvs   unstd_coef_mean unstd_coef_median unstd_coef_list
-#>    <chr>       <chr>           <dbl>             <dbl> <list>         
-#>  1 (Intercept) dv1           0.00431           0.00696 <dbl [24]>     
-#>  2 (Intercept) dv2           0.0701            0.0755  <dbl [24]>     
-#>  3 iv1         dv1          -0.00875          -0.00906 <dbl [8]>      
-#>  4 iv1         dv2          -0.0337           -0.0309  <dbl [8]>      
-#>  5 iv1:mod     dv1          -0.0656           -0.0647  <dbl [8]>      
-#>  6 iv1:mod     dv2          -0.0734           -0.0753  <dbl [8]>      
-#>  7 iv2         dv1           0.0115            0.0153  <dbl [8]>      
-#>  8 iv2         dv2           0.148             0.148   <dbl [8]>      
-#>  9 iv2:mod     dv1          -0.0224           -0.0205  <dbl [8]>      
-#> 10 iv2:mod     dv2          -0.0418           -0.0433  <dbl [8]>      
-#> 11 iv3         dv1           0.0613            0.0629  <dbl [8]>      
-#> 12 iv3         dv2           0.0230            0.0207  <dbl [8]>      
-#> 13 iv3:mod     dv1          -0.0430           -0.0423  <dbl [8]>      
-#> 14 iv3:mod     dv2          -0.0639           -0.0640  <dbl [8]>      
-#> 15 mod         dv1           0.0153            0.0121  <dbl [24]>     
-#> 16 mod         dv2          -0.117            -0.116   <dbl [24]>
+#>    parameter   dvs   coefficient_mean coefficient_median coefficient_list
+#>    <chr>       <chr>            <dbl>              <dbl> <list>          
+#>  1 (Intercept) dv1            0.00431            0.00696 <dbl [24]>      
+#>  2 (Intercept) dv2            0.0701             0.0755  <dbl [24]>      
+#>  3 iv1         dv1           -0.00875           -0.00906 <dbl [8]>       
+#>  4 iv1         dv2           -0.0337            -0.0309  <dbl [8]>       
+#>  5 iv1:mod     dv1           -0.0656            -0.0647  <dbl [8]>       
+#>  6 iv1:mod     dv2           -0.0734            -0.0753  <dbl [8]>       
+#>  7 iv2         dv1            0.0115             0.0153  <dbl [8]>       
+#>  8 iv2         dv2            0.148              0.148   <dbl [8]>       
+#>  9 iv2:mod     dv1           -0.0224            -0.0205  <dbl [8]>       
+#> 10 iv2:mod     dv2           -0.0418            -0.0433  <dbl [8]>       
+#> 11 iv3         dv1            0.0613             0.0629  <dbl [8]>       
+#> 12 iv3         dv2            0.0230             0.0207  <dbl [8]>       
+#> 13 iv3:mod     dv1           -0.0430            -0.0423  <dbl [8]>       
+#> 14 iv3:mod     dv2           -0.0639            -0.0640  <dbl [8]>       
+#> 15 mod         dv1            0.0153             0.0121  <dbl [24]>      
+#> 16 mod         dv2           -0.117             -0.116   <dbl [24]>
 ```

@@ -10,6 +10,7 @@ show_code(
   .grid,
   decision_num,
   .step = "model",
+  .model_summary = NULL,
   .post_step = NULL,
   .execute = FALSE
 )
@@ -43,6 +44,12 @@ show_code_postprocess(.grid, decision_num, ...)
 
   a point along the pipeline for which you would like to show the
   underlying code. Defaults to the model.
+
+- .model_summary:
+
+  a model summary function such as
+  [`parameters::parameters()`](https://easystats.github.io/parameters/reference/model_parameters.html)
+  or [`broom::tidy()`](https://generics.r-lib.org/reference/tidy.html)
 
 - .post_step:
 

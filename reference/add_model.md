@@ -9,9 +9,9 @@ add_model(
   .df,
   model_desc,
   code,
-  additional_args = NULL,
-  add_standardized = TRUE,
-  add_performance = TRUE
+  model_coefs = parameters::parameters(),
+  model_fit = performance::performance(),
+  model_standardize = parameters::standardize_parameters()
 )
 ```
 
@@ -38,26 +38,35 @@ add_model(
   data. You are also responsible for loading any packages that run a
   particular model (e.g., `lme4` for mixed-models)
 
-- additional_args:
+- model_coefs:
 
-  a list of any additional arguments supplied to
-  [`parameters::parameters()`](https://easystats.github.io/parameters/reference/model_parameters.html).
+  a function to extract coefficients from the model object. The default
+  is to use
+  [`parameters::parameters()`](https://easystats.github.io/parameters/reference/model_parameters.html)
+  but this could be also be
+  [`broom::tidy()`](https://generics.r-lib.org/reference/tidy.html) or
+  any other function that summarizes model output. Whichever function
+  you choose must take a model object as the first argument and return a
+  `data.frame`.
 
-- add_standardized:
+- model_fit:
 
-  logical. Indicates whether or not to produce standardized model
-  coefficients via
-  [`parameters::standardize_parameters()`](https://easystats.github.io/parameters/reference/standardize_parameters.html).
-  This is most of the time desirable, however, in some cases for some
-  model types you might want to skip this step. To do so, set to
-  `FALSE`.
-
-- add_performance:
-
-  whether or not to run
+  a function to summarize model fit statistics. The default is to use
   [`performance::performance()`](https://easystats.github.io/performance/reference/model_performance.html)
-  on the model. Defaults to `TRUE`. Set to `FALSE` in computationally
-  expensive situations or if model fit statistics are not needed.
+  but this could be also be
+  [`broom::glance()`](https://generics.r-lib.org/reference/glance.html)
+  or any other function that summarizes model output. Whichever function
+  you choose must take a model object as the first argument and return a
+  `data.frame`.
+
+- model_standardize:
+
+  a function to calculate standardized coefficients from the model
+  object. The default is to use
+  [`parameters::standardize_parameters()`](https://easystats.github.io/parameters/reference/standardize_parameters.html)
+  but this could be also be some other function that standardizes model
+  output. Whichever function you choose must take a model object as the
+  first argument and return a `data.frame`.
 
 ## Value
 
@@ -98,23 +107,23 @@ the_data |>
   add_preprocess("scale_iv", 'mutate({ivs} = scale({ivs}))') |>
   add_model("linear model", lm({dvs} ~ {ivs} * {mods}))
 #> # A tibble: 17 × 6
-#>    type       group       code  additional_args add_standardized add_performance
-#>    <chr>      <chr>       <chr> <lgl>           <lgl>            <lgl>          
-#>  1 filters    include1    incl… NA              NA               NA             
-#>  2 filters    include1    incl… NA              NA               NA             
-#>  3 filters    include2    incl… NA              NA               NA             
-#>  4 filters    include2    incl… NA              NA               NA             
-#>  5 filters    include2    incl… NA              NA               NA             
-#>  6 filters    include3    incl… NA              NA               NA             
-#>  7 filters    include3    incl… NA              NA               NA             
-#>  8 variables  ivs         iv1   NA              NA               NA             
-#>  9 variables  ivs         iv2   NA              NA               NA             
-#> 10 variables  ivs         iv3   NA              NA               NA             
-#> 11 variables  dvs         dv1   NA              NA               NA             
-#> 12 variables  dvs         dv2   NA              NA               NA             
-#> 13 variables  mods        mod1  NA              NA               NA             
-#> 14 variables  mods        mod2  NA              NA               NA             
-#> 15 variables  mods        mod3  NA              NA               NA             
-#> 16 preprocess scale_iv    muta… NA              NA               NA             
-#> 17 models     linear mod… lm({… NA              TRUE             TRUE           
+#>    type       group       code  model_coefs_fn model_fit_fn model_standardize_fn
+#>    <chr>      <chr>       <chr> <chr>          <chr>        <chr>               
+#>  1 filters    include1    incl… NA             NA           NA                  
+#>  2 filters    include1    incl… NA             NA           NA                  
+#>  3 filters    include2    incl… NA             NA           NA                  
+#>  4 filters    include2    incl… NA             NA           NA                  
+#>  5 filters    include2    incl… NA             NA           NA                  
+#>  6 filters    include3    incl… NA             NA           NA                  
+#>  7 filters    include3    incl… NA             NA           NA                  
+#>  8 variables  ivs         iv1   NA             NA           NA                  
+#>  9 variables  ivs         iv2   NA             NA           NA                  
+#> 10 variables  ivs         iv3   NA             NA           NA                  
+#> 11 variables  dvs         dv1   NA             NA           NA                  
+#> 12 variables  dvs         dv2   NA             NA           NA                  
+#> 13 variables  mods        mod1  NA             NA           NA                  
+#> 14 variables  mods        mod2  NA             NA           NA                  
+#> 15 variables  mods        mod3  NA             NA           NA                  
+#> 16 preprocess scale_iv    muta… NA             NA           NA                  
+#> 17 models     linear mod… lm({… parameters::p… performance… parameters::standar…
 ```
