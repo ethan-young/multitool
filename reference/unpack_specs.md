@@ -31,6 +31,7 @@ the unnested specifications of the analysis grid.
 ## Examples
 
 ``` r
+
 library(tidyverse)
 library(multitool)
 

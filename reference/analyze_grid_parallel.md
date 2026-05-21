@@ -99,8 +99,6 @@ pipeline_grid <- expand_decisions(full_pipeline)
 # Run the whole multiverse
 plan(multisession, workers = 4)
 the_multiverse <- analyze_grid_parallel(pipeline_grid[4,])
-#> Error in (function (.x, .f, ..., .progress = FALSE) {    map_("list", .x, .f, ..., .progress = .progress)})(.x = 4, .f = function (...) {    NULL    {        if (...furrr_progress) {            try(expr = {                cat("+", file = ...furrr_progress_con, sep = "")            }, silent = TRUE)        }    }    ...furrr_out <- ...furrr_fn(...)    ...furrr_out}): ℹ In index: 1.
-#> Caused by error:
-#> ! object 'the_data' not found
+#> Error in eval(mf, parent.frame()): object 'the_data' not found
 plan(sequential)
 ```

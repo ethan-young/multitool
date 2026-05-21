@@ -71,6 +71,7 @@ decision grid specified.
 ## Examples
 
 ``` r
+
 library(tidyverse)
 library(multitool)
 

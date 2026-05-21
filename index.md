@@ -12,6 +12,7 @@ Plan · Analyze · Explore
 Install from CRAN:
 
 ``` r
+
 install.packages("multitool")
 ```
 
@@ -19,6 +20,7 @@ You can install the development version of `multitool` from
 [GitHub](https://github.com/) with:
 
 ``` r
+
 # install.packages("devtools")
 devtools::install_github("ethan-young/multitool")
 ```
@@ -93,6 +95,7 @@ particular modelling pipeline.
 ## Usage
 
 ``` r
+
 # load packages
 library(tidyverse)
 library(multitool)

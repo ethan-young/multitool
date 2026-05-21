@@ -102,6 +102,7 @@ is relatively inconsequential.
 ## Examples
 
 ``` r
+
 library(tidyverse)
 library(multitool)
 

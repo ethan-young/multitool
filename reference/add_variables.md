@@ -38,6 +38,7 @@ will be appended as new rows.
 ## Examples
 
 ``` r
+
 library(tidyverse)
 library(multitool)
 

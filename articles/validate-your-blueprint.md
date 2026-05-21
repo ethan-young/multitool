@@ -12,6 +12,7 @@ have to with filtering alternatives or variable versions.
 First, we create our pipeline:
 
 ``` r
+
 # load libraries
 library(tidyverse)
 library(multitool)
@@ -46,6 +47,7 @@ There are a few `detect_*` functions for printing some metadata about
 your pipeline.
 
 ``` r
+
 # Number of unique analysis pipelines
 detect_multiverse_n(full_pipeline)
 #> [1] 48
@@ -67,6 +69,7 @@ If you have several filtering decisions, you can also print a summary of
 the sample sizes after each exclusion criteria is applied.
 
 ``` r
+
 summarize_filter_ns(full_pipeline)
 #> # A tibble: 6 × 4
 #>   filter_expression              variable n_retained n_excluded
@@ -83,6 +86,7 @@ Once you are satisfied with your pipeline metadata, you can expand it
 and test it further. To do so, expand into a full decision grid.
 
 ``` r
+
 expanded_pipeline <- expand_decisions(full_pipeline)
 ```
 
@@ -97,6 +101,7 @@ we can look at our filtering code for the first decision of our
 blueprint:
 
 ``` r
+
 # Take a look at the first filter decision
 expanded_pipeline |> show_code(decision_num = 1, .step = "filters")
 #> the_data |> 
@@ -109,6 +114,7 @@ analysis pipeline. For example, we can look at our model pipeline for
 decision 17 using `show_code_model(decision_num = 17)`:
 
 ``` r
+
 expanded_pipeline |> show_code_model(decision_num = 1)
 #> the_data |> 
 #>   collect() |> 

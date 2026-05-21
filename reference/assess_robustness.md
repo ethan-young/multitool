@@ -84,6 +84,7 @@ All numeric values are rounded to 5 decimal places.
 ## Examples
 
 ``` r
+
 library(tidyverse)
 library(multitool)
 

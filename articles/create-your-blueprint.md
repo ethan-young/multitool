@@ -6,6 +6,7 @@ First things first. `multitool` leverages the `tidyverse` package so
 lets load both:
 
 ``` r
+
 library(tidyverse)
 library(multitool)
 ```
@@ -26,6 +27,7 @@ include and which we might exclude (e.g., `include1`, `include2`,
 `include3`).
 
 ``` r
+
 the_data <-
   data.frame(
     id  = 1:500,
@@ -50,6 +52,7 @@ approach would be to specify a reasonable analysis pipeline. Something
 that looks like the following:
 
 ``` r
+
 # Filter out exclusions
 filtered_data <- 
   the_data |> 
@@ -92,6 +95,7 @@ including/excluding these cases is valid, we can generate all
 combinations:
 
 ``` r
+
 the_data |> 
   add_filters(include1 == 0, include2 != 3, include3 > -2.5)
 #> # A tibble: 6 × 3
@@ -145,6 +149,7 @@ versions of a variable, you can use
 [`add_variables()`](https://ethan-young.github.io/multitool/reference/add_variables.md).
 
 ``` r
+
 the_data |>
   add_variables(var_group = "ivs", iv1, iv2, iv3)
 #> # A tibble: 3 × 3
@@ -174,6 +179,7 @@ You can add as many variable sets as you want. For example, we might
 also want to analyze our two versions of the outcome, `dv1` and `dv2`.
 
 ``` r
+
 the_data |>
   add_variables(var_group = "ivs", iv1, iv2, iv3) |> 
   add_variables(var_group = "dvs", dv1, dv2)
@@ -198,6 +204,7 @@ variables. We can simply pipe new blueprint specifications into each
 other like so:
 
 ``` r
+
 the_data |>
   add_filters(include1 == 0, include2 != 3, include3 > -2.5) |> 
   add_variables(var_group = "ivs", iv1, iv2, iv3) |> 
@@ -236,6 +243,7 @@ so the user can simply paste a model function. For example, our call to
 Make sure to give your model a label with the `model_desc` argument.
 
 ``` r
+
 the_data |>
   add_filters(include1 == 0, include2 != 3, include3 > -2.5) |> 
   add_variables(var_group = "ivs", iv1, iv2, iv3) |> 
@@ -264,6 +272,7 @@ way (so you don’t have to). Note that you can still quote the model
 formula, if that is more your style.
 
 ``` r
+
 the_data |>
   add_filters(include1 == 0, include2 != 3, include3 > -2.5) |>
   add_variables(var_group = "ivs", iv1, iv2, iv3) |> 
@@ -295,6 +304,7 @@ was designed to interpret
 For example:
 
 ``` r
+
 the_data |>
   add_filters(include1 == 0, include2 != 3, include3 > -2.5) |> 
   add_variables(var_group = "ivs", iv1, iv2, iv3) |> 
@@ -341,6 +351,7 @@ Feed your pipeline to
 to see a chart of your multiverse pipeline plan:
 
 ``` r
+
 full_pipeline <- 
   the_data |>
   add_filters(include1 == 0, include2 != 3, include3 > -2.5) |> 
@@ -362,6 +373,7 @@ calling
 at the end of your blueprint pipeline:
 
 ``` r
+
 expanded_pipeline <- expand_decisions(full_pipeline)
 
 expanded_pipeline
@@ -392,6 +404,7 @@ blueprint should have `2*2*2*3*2` or 48 rows, which corresponds with our
 expanded pipeline:
 
 ``` r
+
 2*2*2*3*2 == nrow(expanded_pipeline)
 #> [1] TRUE
 ```
@@ -401,6 +414,7 @@ each list column by using `tidyr::unnest(<column name>)`. For example,
 we can look at the filters:
 
 ``` r
+
 expanded_pipeline |> unnest(filters)
 #> # A tibble: 48 × 6
 #>    decision variables        include1      include2      include3       models  
@@ -421,6 +435,7 @@ expanded_pipeline |> unnest(filters)
 Or we could look at the models:
 
 ``` r
+
 expanded_pipeline |> unnest(models)
 #> # A tibble: 48 × 8
 #>    decision variables filters  model      model_meta model_coefs_fn model_fit_fn
@@ -447,6 +462,7 @@ appropriately. You can check their correspondence by using
 the models and variable list columns:
 
 ``` r
+
 expanded_pipeline |> unnest(c(variables, models))
 #> # A tibble: 48 × 9
 #>    decision ivs   dvs   filters  model    model_meta model_coefs_fn model_fit_fn

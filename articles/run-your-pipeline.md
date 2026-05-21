@@ -7,6 +7,7 @@ multiverse-style analysis.
 Simply use `run_multiverse(<your expanded grid object>)`:
 
 ``` r
+
 library(tidyverse)
 library(multitool)
 
@@ -75,6 +76,7 @@ Inside the `model_fitted` column, `multitool` gives us 4 columns:
 `model_messages`.
 
 ``` r
+
 multiverse_results |> unnest(model_fitted)
 #> # A tibble: 48 × 9
 #>    decision specifications   model_function model_parameters  model_performance
@@ -101,6 +103,7 @@ coefficients and their associated standard errors, confidence intervals,
 test statistic, and p-values.
 
 ``` r
+
 multiverse_results |> 
   unnest(model_fitted) |> 
   unnest(model_parameters)
@@ -130,6 +133,7 @@ and BIC values, computed by running
 on each model in your grid.
 
 ``` r
+
 multiverse_results |> 
   unnest(model_fitted) |>
   unnest(model_performance)
@@ -169,6 +173,7 @@ and tell it which columns to grab by indicating the column name in the
 `.what` argument:
 
 ``` r
+
 multiverse_results |> 
   unpack_results(.what = model_fitted)
 #> # A tibble: 48 × 14
@@ -194,6 +199,7 @@ If you want to get straight to a specific result you can specify a
 sub-list with the `.which` argument:
 
 ``` r
+
 multiverse_results |> 
   unpack_results(.what = model_fitted, .which = model_parameters)
 #> # A tibble: 192 × 26
@@ -230,6 +236,7 @@ most common multiverse results: `unpack_model_parameters`,
 multiverse:
 
 ``` r
+
 multiverse_results |>
   unpack_model_parameters()
 #> # A tibble: 192 × 21
@@ -254,6 +261,7 @@ multiverse_results |>
 `unpack_model_performance` unpacks the model performance:
 
 ``` r
+
 multiverse_results |>
   unpack_model_performance()
 #> # A tibble: 48 × 15
@@ -283,6 +291,7 @@ unpacking your decisions - `wide` or `long`. If you set
 is exactly the same as how your decisions appeared in your grid.
 
 ``` r
+
 multiverse_results |>
   unpack_model_parameters(.unpack_specs = "wide")
 #> # A tibble: 192 × 21
@@ -310,6 +319,7 @@ plotting a particular result from a multiverse analyses per different
 decision alternatives.
 
 ``` r
+
 multiverse_results |>
   unpack_model_performance(.unpack_specs = "long")
 #> # A tibble: 432 × 12
@@ -348,6 +358,7 @@ takes a list in the form of
 case, we have `r2_mean` and `r2_median`.
 
 ``` r
+
 # model performance r2 summaries
 multiverse_results |>
   unpack_model_performance() |>
@@ -380,6 +391,7 @@ with
 might be more informative:
 
 ``` r
+
 multiverse_results |>
   unpack_model_parameters(.unpack_specs = "wide") |>
   filter(str_detect(parameter, "iv")) |>
@@ -401,6 +413,7 @@ If we were interested in all the terms of the model, we can leverage
 `group_by` further:
 
 ``` r
+
 multiverse_results |>
   unpack_model_parameters(.unpack_specs = "wide") |>
   group_by(parameter, dvs) |>

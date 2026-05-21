@@ -56,6 +56,7 @@ a summarized `tibble` containing a column for each summary method from
 ## Examples
 
 ``` r
+
 library(tidyverse)
 library(multitool)
 
