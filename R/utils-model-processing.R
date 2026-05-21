@@ -84,7 +84,25 @@ process_model <-
       model_coefs <- list(model_coefs)
 
     } else{
-      model_coefs <- NULL
+      # fallback: coef(summary()) coerced to tidy data.frame
+      clean_summary_names <- function(x){
+        x |>
+          stringr::str_replace_all("\\s+", "_") |>
+          stringr::str_replace_all("pr\\(>\\|[tz]\\|\\)", "p_value") |>
+          stringr::str_replace_all("std\\._error|std\\. error", "std_error") |>
+          stringr::str_replace_all("[^a-z0-9_]", "")
+      }
+
+      model_coefs <-
+        coef(summary(model_obj$result)) |>
+        as.data.frame() |>
+        dplyr::rename_with(tolower) |>
+        dplyr::rename_with(clean_summary_names) |>
+        tibble::rownames_to_column("term") |>
+        tibble::as_tibble()
+
+      model_coefs <- list(model_coefs)
+
     }
 
     if(.model_fit != ""){

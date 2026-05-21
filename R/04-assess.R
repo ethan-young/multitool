@@ -83,10 +83,15 @@
 assess_robustness <-
   function(.multi, .estimand, zero_threshold = .01, .by = NULL){
 
-    estimand_summary <-
+    unpacked_params <-
       .multi |>
-      unpack_model_parameters() |>
-      dplyr::rename(reference = parameter) |>
+      unpack_model_parameters()
+
+    term_col <- intersect(c("parameter", "term"), names(unpacked_params))
+
+    estimand_summary <-
+      unpacked_params |>
+      dplyr::rename(reference = {{term_col}}) |>
       dplyr::summarize(
         n_decisions = dplyr::n(),
         mean = mean({{.estimand}}),
@@ -356,11 +361,78 @@ assess_decisions <-
   }
 
 assess_choices <-
-  function(.unpacked){
+  function(.unpacked, .estimand = std_coef, zero_threshold = .01, .by = NULL){
 
-    .unpacked |>
-      dplyr::summarize(
+    choices_df <-
+      .unpacked |>
+      dplyr::select(decision:dplyr::ends_with("function"), {{.estimand}}, {{.by}}) |>
+      dplyr::select(-dplyr::matches("(model|args|perform|standardize|function)$")) |>
+      dplyr::select(dplyr::where(~dplyr::n_distinct(.x) > 1))
 
+    by_cols <-
+      .unpacked |>
+      dplyr::select({{.by}}) |>
+      names()
+
+    join_cols <- c("decision_set", "choice_value", by_cols)
+
+    choices_long <-
+      choices_df |>
+      tidyr::pivot_longer(
+        -c(decision, {{.estimand}}, {{.by}}),
+        names_to = "decision_set",
+        values_to = "choice_value"
       )
 
+    loo_reference <-
+      choices_long |>
+      dplyr::summarize(
+        conditional_n = dplyr::n(),
+        conditional_sum = sum({{.estimand}}),
+        .by = c(decision_set, choice_value, {{.by}})
+      ) |>
+      dplyr::mutate(
+        grand_n = sum(conditional_n),
+        grand_sum = sum(conditional_sum),
+        reference_mean = (grand_sum - conditional_sum) / (grand_n - conditional_n),
+        .by = c(decision_set, {{.by}})
+      ) |>
+      dplyr::select(dplyr::all_of(join_cols), reference_mean)
+
+    choice_summaries <-
+      choices_long |>
+      dplyr::summarize(
+        n_specs = dplyr::n(),
+        conditional_mean = mean({{.estimand}}),
+        conditional_median = stats::median({{.estimand}}),
+        conditional_iqr = stats::IQR({{.estimand}}),
+        p_positive = sum({{.estimand}} >  zero_threshold) / dplyr::n(),
+        p_negative = sum({{.estimand}} < -zero_threshold) / dplyr::n(),
+        p_zero = sum(
+          dplyr::between({{.estimand}}, -zero_threshold, zero_threshold)
+        ) / dplyr::n(),
+        .by = c(decision_set, choice_value, {{.by}})
+      ) |>
+      dplyr::mutate(
+        sign_consistency = pmax(p_positive, p_negative, p_zero)
+      )
+
+    choice_summaries |>
+      dplyr::left_join(loo_reference, by = join_cols) |>
+      dplyr::mutate(shift = conditional_mean - reference_mean) |>
+      dplyr::select(
+        dplyr::all_of(by_cols),
+        decision_set,
+        choice_value,
+        n_specs,
+        conditional_mean,
+        reference_mean,
+        shift,
+        conditional_median,
+        conditional_iqr,
+        p_positive,
+        p_negative,
+        p_zero,
+        sign_consistency
+      )
   }

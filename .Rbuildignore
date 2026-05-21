@@ -13,3 +13,5 @@ Icon
 ^\.github$
 ^data-raw$
 ^CRAN-SUBMISSION$
+^\.positai$
+^\.claude$

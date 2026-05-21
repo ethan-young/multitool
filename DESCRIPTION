@@ -38,6 +38,8 @@ Imports:
     performance,
     lifecycle
 Suggests: 
+    broom,
+    broom.mixed,
     clipr,
     mirai,
     carrier,
