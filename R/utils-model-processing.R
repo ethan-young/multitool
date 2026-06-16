@@ -3,12 +3,14 @@
 # and handling post-processing steps.
 
 # Execute code ------------------------------------------------------------
+#' @noRd
 run_universe_code <-
   function(code, ...){
     rlang::parse_expr(code) |>
       rlang::eval_tidy(...)
   }
 
+#' @noRd
 run_universe_code_quietly <-
   purrr::quietly(
     function(code, ...){
@@ -19,6 +21,7 @@ run_universe_code_quietly <-
 
 # Model Processing --------------------------------------------------------
 # Run and Process a model
+#' @noRd
 process_model <-
   function(
     code,
@@ -155,8 +158,15 @@ process_model <-
     )
   }
 
+#' Strip problematic attributes
+#' @noRd
+strip_attributes <- function(x, keep = c("names", "class", "row.names")) {
+  attributes(x) <- attributes(x)[keep]
+  x
+}
+
 #' Post-process a fitted model
-#' @keywords internal
+#' @noRd
 postprocess_model <-
   function(
     model,
@@ -169,7 +179,7 @@ postprocess_model <-
       stringr::str_remove("\\(.*\\)")
 
     postmodel_obj <-
-      glue::glue("model |> {code}") |>
+      glue::glue("model |> {code} |> strip_attributes()") |>
       run_universe_code_quietly(env = rlang::current_env())
 
     # Messages & Warnings
@@ -205,6 +215,7 @@ postprocess_model <-
   }
 
 # Collect results using easystats
+#' @noRd
 collect_quiet_results_easy <-
   function(
     code,
@@ -352,6 +363,7 @@ collect_quiet_results_easy <-
 
 # Model execution ---------------------------------------------------------
 # Execute a single universe specification
+#' @noRd
 execute_universe_model <-
   function(
     .grid,

@@ -22,6 +22,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Ethan Young \email{young.ethan.scott@gmail.com} (\href{https://orcid.org/0000-0002-8232-0184}{ORCID}) [copyright holder]
   \item Stefan Vermeent \email{p.c.s.vermeent@gmail.com} (\href{https://orcid.org/0000-0002-9595-5373}{ORCID})
 }
 

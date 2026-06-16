@@ -83,6 +83,7 @@ reference:
   - unpack_model_messages
   - condense
   - organize
+  - compose_view
 
 - title: Assess Decision Sensitivity/Robustness
   desc: >
@@ -91,6 +92,24 @@ reference:
   contents:
   - assess_robustness
   - assess_decisions
+
+- title: Build a report
+  desc: >
+    Given a set of anlzyed results, incrementally build a polished report
+  contents:
+  - configure_labels
+  - show_labels
+  - add_section
+  - show_section_content
+  - view_real_size
+  - preview_section
+  - initialize_doc
+  - layout_section
+  - generate_docs
+
+- title: Data
+  contents:
+  - coffee_quality
 
 - title: Superseded
   desc: >

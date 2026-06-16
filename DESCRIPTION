@@ -22,6 +22,7 @@ Description: Run the same analysis over a range of arbitrary data processing
     pipelines and summarize the results.
 License: MIT + file LICENSE
 Imports:
+    cli,
     correlation,
     DiagrammeR,
     dplyr,
@@ -34,9 +35,12 @@ Imports:
     stringr,
     tibble,
     tidyr,
+    patchwork,
     parameters,
     performance,
-    lifecycle
+    lifecycle,
+    ragg,
+    styler
 Suggests: 
     broom,
     broom.mixed,
@@ -55,10 +59,10 @@ Suggests:
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 VignetteBuilder: knitr
 URL: https://ethan-young.github.io/multitool/, https://github.com/ethan-young/multitool
 BugReports: https://github.com/ethan-young/multitool/issues
 Depends: 
     R (>= 4.2.0)
 LazyData: true
+Config/roxygen2/version: 8.0.0

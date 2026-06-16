@@ -1,3 +1,4 @@
+#' @noRd
 create_subgroup_nodes <- function(.grid){
 
   n_subgroup_datasets <- detect_n_subgroups(.grid)
@@ -40,6 +41,7 @@ create_subgroup_nodes <- function(.grid){
   }
 }
 
+#' @noRd
 create_var_nodes <- function(.grid){
 
   n_var_datasets <- detect_n_variables(.grid)
@@ -78,6 +80,7 @@ create_var_nodes <- function(.grid){
   }
 }
 
+#' @noRd
 create_filter_nodes <- function(.grid){
 
   filter_nodes <-
@@ -144,6 +147,7 @@ create_filter_nodes <- function(.grid){
   }
 }
 
+#' @noRd
 create_datasets_node <- function(.grid){
 
   n_datasets <- detect_multiverse_n(.grid, include_models = FALSE)
@@ -187,6 +191,7 @@ create_datasets_node <- function(.grid){
   }
 }
 
+#' @noRd
 create_descriptive_node <- function(.grid){
 
   descriptives <-
@@ -226,6 +231,7 @@ create_descriptive_node <- function(.grid){
   }
 }
 
+#' @noRd
 create_preprocess_node <- function(.grid){
   preprocesses <-
     .grid |>
@@ -246,6 +252,7 @@ create_preprocess_node <- function(.grid){
   }
 }
 
+#' @noRd
 create_postprocess_node <- function(.grid){
   postprocesses <-
     .grid |>
@@ -266,6 +273,7 @@ create_postprocess_node <- function(.grid){
   }
 }
 
+#' @noRd
 create_model_nodes <- function(.grid){
   multi_models <-
     .grid |>
@@ -287,6 +295,7 @@ create_model_nodes <- function(.grid){
   }
 }
 
+#' @noRd
 create_nmodels_node <- function(.grid){
   n_models <- detect_multiverse_n(.grid)
 
@@ -309,6 +318,7 @@ create_nmodels_node <- function(.grid){
   }
 }
 
+#' @noRd
 create_pipeline_ndf <- function(.grid){
 
   node_list <- list()

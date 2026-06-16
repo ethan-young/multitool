@@ -174,7 +174,7 @@ unpack_results <- function(.multi, .what, .which = NULL, .unpack_specs = "wide")
     unpack_specs(.unpack_specs) |>
     tidyr::unnest({{.what}})
 
-  if(!is.null(which)){
+  if (!rlang::quo_is_null(rlang::enquo(.which))) {
     unpacked <-
       unpacked |>
       tidyr::unnest({{.which}})
@@ -266,9 +266,14 @@ unpack_postprocess <- function(.multi, .which, .unpack_specs = "wide"){
     .multi |>
     unpack_results(
       {{.which}},
-      dplyr::ends_with("output"),
       .unpack_specs = .unpack_specs
     )
+
+  if (any(stringr::str_detect(names(revealed), "output$"))) {
+    revealed <-
+      revealed |>
+      tidyr::unnest(dplyr::ends_with("output"))
+  }
 
   revealed |>
     dplyr::select(dplyr::where(~!is.list(.x)))
@@ -412,4 +417,120 @@ organize <- function(.unpacked, .what, .group = NULL, focused = TRUE){
 
   organized
 
+}
+
+#' Compose a single analysis-ready data frame from a results grid.
+#'
+#' @description
+#' `compose_view()` assembles one tibble from selected components of a
+#' results object. You name the result components you want (model
+#' parameters, performance, post-processing output, pipeline code, timing
+#' logs), and `compose_view()` unpacks each one and left-joins them by
+#' `decision` into a single frame ready for plotting or tabling.
+#'
+#' Its job is deliberately narrow: it reconciles components that live at
+#' different grains into one frame and nothing else. It performs no
+#' transformation, summarizing, or reshaping of the results. Any such work is
+#' left to the caller, either with downstream `dplyr` on the returned frame or
+#' with per-layer `data` transformations at plot time.
+#'
+#' @param .multi a multiverse results object produced by
+#'   \code{\link{analyze_grid}} (or \code{\link{analyze_grid_parallel}}).
+#' @param ... result components to compose. Supply the bare column names of the
+#'   components shipped by `analyze_grid()`, for example `model_parameters`,
+#'   `model_performance`, `pipeline_code`, `timing_logs`, or the name of a
+#'   post-processing output column (e.g. `aov_fitted`). Arguments may be named
+#'   to control the prefix applied to that component's columns (see Details);
+#'   unnamed arguments receive an automatic prefix.
+#'
+#' @details
+#' The decision specifications are always included as the spine of the returned
+#' frame, so you never need to request them explicitly.
+#'
+#' \strong{Column prefixing.} To keep columns from different components from
+#' colliding, every value column is prefixed with its component's name; the
+#' join key `decision` and the specification columns are left unprefixed so
+#' they remain shared across components. When an argument is named, that name
+#' is used as the prefix. When an argument is unnamed, a prefix is assigned
+#' automatically:
+#' \itemize{
+#'   \item `model_parameters` becomes `params_`
+#'   \item `model_performance` becomes `perform_`
+#'   \item `pipeline_code` becomes `code_`
+#'   \item `timing_logs` becomes `timing_`
+#'   \item a post-processing column has its `_fitted` suffix removed
+#'     (e.g. `aov_fitted` becomes `aov_`)
+#' }
+#'
+#' \strong{Grain and broadcasting.} Components differ in granularity. Model
+#' parameters have one row per model term, while performance, timing, and
+#' pipeline code each have one row per decision. Because components are joined
+#' by `decision`, coarser components are broadcast across the rows of the
+#' finest component requested. For example, composing `model_parameters` with
+#' `model_performance` repeats each decision's performance values across that
+#' decision's term rows. This broadcasting is intended: it produces a frame
+#' where, for instance, a model fit statistic is available on every term row
+#' for annotation. Collapsing back to a coarser grain (e.g. one label per
+#' decision) is left to the caller at the point of use.
+#'
+#' @return A single \code{\link[tibble]{tibble}} containing the decision
+#'   specifications and the requested components, joined by `decision`. The row
+#'   grain matches the finest component requested, with coarser components
+#'   broadcast across it.
+#'
+#' @seealso \code{\link{unpack_results}} and the `unpack_model_*` functions for
+#'   extracting a single component; \code{\link{unpack_specs}} for the
+#'   specification grid.
+#'
+#' @export
+compose_view <- function(.multi, ...) {
+
+  requested_frames <- purrr::map_chr(rlang::enquos(...), rlang::as_name)
+  frames <- c("specs", requested_frames)
+  frame_names <- c("specs", names(requested_frames))
+
+  frame_names <-
+    purrr::map2_chr(frames, frame_names, function(frame, nm){
+
+      if(nm == "specs"){auto_nm <- "specs"}
+      else if(nm == '' & frame == "model_parameters"){auto_nm <- "params"}
+      else if(nm == '' & frame == "model_performance"){auto_nm <- "perform"}
+      else if(nm == '' & frame == "pipeline_code"){auto_nm <- "code"}
+      else if(nm == '' & frame == "timing_logs"){auto_nm <- "timing"}
+      else if(nm == ''){auto_nm <- stringr::str_remove(frame, "_fitted$")}
+      else{auto_nm <- nm}
+
+      auto_nm
+
+    })
+
+  unpacked_frames <-
+    purrr::map2(frames, frame_names, function(frame, nm) {
+      if (frame == "specs") {
+        .multi |> unpack_specs() |> dplyr::select(-dplyr::where(is.list))
+      } else if (frame == "model_parameters") {
+        .multi |>
+          unpack_model_parameters(.unpack_specs = "no") |>
+          dplyr::rename_with(~paste0(nm, "_", .x), -decision)
+      } else if (frame == "model_performance") {
+        .multi |>
+          unpack_model_performance(.unpack_specs = "no") |>
+          dplyr::rename_with(~paste0(nm, "_", .x), -decision)
+      } else if(frame %in% c("pipeline_code", "timing_logs")){
+        .multi |>
+          dplyr::select(decision, dplyr::all_of(frame)) |>
+          tidyr::unnest(dplyr::everything()) |>
+          dplyr::rename_with(~paste0(nm, "_", .x), -decision)
+      } else {
+        .multi |>
+          unpack_postprocess({{frame}}, .unpack_specs = "no") |>
+          dplyr::rename_with(~paste0(nm, "_", .x), -decision)
+      }
+    })
+
+  purrr::reduce(
+    unpacked_frames,
+    dplyr::left_join,
+    by = "decision"
+  )
 }

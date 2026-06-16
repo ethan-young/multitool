@@ -1411,3 +1411,62 @@
 #'       tidyr::nest(specifications = c(-decision, -dplyr::matches("fitted$|computed$|code$"))) |>
 #'       dplyr::select(decision, specifications, dplyr::everything())
 #'   }
+#'show_result <-
+#'  function(
+#'    .multi,
+#'    decision_num,
+#'    type = "parameters",
+#'    ...,
+#'    .print_specs = TRUE
+#'  ){
+#'    results_slice <-
+#'      .multi |>
+#'      dplyr::filter(decision == decision_num)
+#'
+#'    if(type == "parameters"){
+#'      result <-
+#'        results_slice |>
+#'        unpack_model_parameters(..., .unpack_specs = "no")
+#'    }
+#'
+#'    if(type == "performance"){
+#'      result <-
+#'        results_slice |>
+#'        unpack_model_performance(..., .unpack_specs = "no")
+#'    }
+#'
+#'    if(type == "post_process"){
+#'      result <-
+#'        results_slice |>
+#'        unpack_postprocess(..., .unpack_specs = "no")
+#'    }
+#'
+#'    specs <-
+#'      .multi |>
+#'      unpack_specs(.how = "long") |>
+#'      dplyr::select(dplyr::where(~!is.list(.x))) |>
+#'      dplyr::mutate(
+#'        n_dis = dplyr::n_distinct(decision_choice),
+#'        .by = decision_set
+#'      ) |>
+#'      dplyr::filter(decision == 1, n_dis > 1) |>
+#'      dplyr::transmute(
+#'        decision,
+#'        print_out = glue::glue("{decision_set}: {decision_choice} ({decision_type})")
+#'      ) |>
+#'      tidyr::pivot_longer(
+#'        dplyr::everything(),
+#'        values_transform = as.character
+#'      ) |>
+#'      dplyr::distinct() |>
+#'      glue::glue_data(
+#'        "{ifelse(name == 'decision', 'Decision: ', '')}{value}",
+#'        .trim = FALSE
+#'      )
+#'
+#'    if(print_specs){
+#'      print(specs)
+#'    }
+#'    result
+#'
+#'  }
