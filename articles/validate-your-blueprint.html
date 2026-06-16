@@ -158,17 +158,23 @@ our blueprint:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Take a look at the first filter decision</span></span>
 <span><span class="va">expanded_pipeline</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/show_code.html">show_code</a></span><span class="op">(</span>decision_num <span class="op">=</span> <span class="fl">1</span>, .step <span class="op">=</span> <span class="st">"filters"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; the_data |&gt; </span></span>
-<span><span class="co">#&gt;   collect() |&gt; </span></span>
+<span><span class="co">#&gt; Warning: Could not use `colored = TRUE`, as the package prettycode is not installed.</span></span>
+<span><span class="co">#&gt; Please install it if you want to see colored output or see</span></span>
+<span><span class="co">#&gt; `?styler::print.vertical()` for more information.</span></span>
+<span><span class="co">#&gt; the_data |&gt;</span></span>
+<span><span class="co">#&gt;   collect() |&gt;</span></span>
 <span><span class="co">#&gt;   filter(include1 == 0, include2 != 3, include3 &gt; -2.5)</span></span></code></pre></div>
 <p>These functions allow you to generate the relevant code along the
 analysis pipeline. For example, we can look at our model pipeline for
 decision 17 using <code>show_code_model(decision_num = 17)</code>:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">expanded_pipeline</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/show_code.html">show_code_model</a></span><span class="op">(</span>decision_num <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; the_data |&gt; </span></span>
-<span><span class="co">#&gt;   collect() |&gt; </span></span>
-<span><span class="co">#&gt;   filter(include1 == 0, include2 != 3, include3 &gt; -2.5) |&gt; </span></span>
+<span><span class="co">#&gt; Warning: Could not use `colored = TRUE`, as the package prettycode is not installed.</span></span>
+<span><span class="co">#&gt; Please install it if you want to see colored output or see</span></span>
+<span><span class="co">#&gt; `?styler::print.vertical()` for more information.</span></span>
+<span><span class="co">#&gt; the_data |&gt;</span></span>
+<span><span class="co">#&gt;   collect() |&gt;</span></span>
+<span><span class="co">#&gt;   filter(include1 == 0, include2 != 3, include3 &gt; -2.5) |&gt;</span></span>
 <span><span class="co">#&gt;   lm(dv1 ~ iv1 * mod, data = _)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

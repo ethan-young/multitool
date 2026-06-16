@@ -322,6 +322,8 @@ Unpack your results for viewing, plotting, and understanding
 - [`condense()`](https://ethan-young.github.io/multitool/reference/condense.md)
   [`organize()`](https://ethan-young.github.io/multitool/reference/condense.md)
   : Summarize multiverse parameters
+- [`compose_view()`](https://ethan-young.github.io/multitool/reference/compose_view.md)
+  : Compose a single analysis-ready data frame from a results grid.
 
 ## Assess Decision Sensitivity/Robustness
 
@@ -334,6 +336,34 @@ decisions.
 - [`assess_decisions()`](https://ethan-young.github.io/multitool/reference/assess_decisions.md)
   : Decompose decision variance using Sobol sensitivity indices and
   variance dispersal
+
+## Build a report
+
+Given a set of anlzyed results, incrementally build a polished report
+
+- [`configure_labels()`](https://ethan-young.github.io/multitool/reference/configure_labels.md)
+  : Configure human-readable labels for pipeline decisions
+- [`show_labels()`](https://ethan-young.github.io/multitool/reference/show_labels.md)
+  : Inspect or scaffold pipeline labels
+- [`add_section()`](https://ethan-young.github.io/multitool/reference/add_section.md)
+  : Add a content section to a report
+- [`show_section_content()`](https://ethan-young.github.io/multitool/reference/show_section_content.md)
+  : Inspect one section's content and code
+- [`view_real_size()`](https://ethan-young.github.io/multitool/reference/view_real_size.md)
+  : Preview a figure at its true output size
+- [`preview_section()`](https://ethan-young.github.io/multitool/reference/preview_section.md)
+  : Preview a report section's composed layout
+- [`initialize_doc()`](https://ethan-young.github.io/multitool/reference/initialize_doc.md)
+  : Begin assembling a report document
+- [`layout_section()`](https://ethan-young.github.io/multitool/reference/layout_section.md)
+  : Record a section's layout for assembly
+- [`generate_docs()`](https://ethan-young.github.io/multitool/reference/generate_docs.md)
+  : Render an assembled document
+
+## Data
+
+- [`coffee_quality`](https://ethan-young.github.io/multitool/reference/coffee_quality.md)
+  : Professional coffee quality ratings
 
 ## Superseded
 

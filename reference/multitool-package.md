@@ -23,5 +23,8 @@ Useful links:
 
 Authors:
 
+- Ethan Young <young.ethan.scott@gmail.com>
+  ([ORCID](https://orcid.org/0000-0002-8232-0184)) \[copyright holder\]
+
 - Stefan Vermeent <p.c.s.vermeent@gmail.com>
   ([ORCID](https://orcid.org/0000-0002-9595-5373))

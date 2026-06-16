@@ -104,8 +104,11 @@ blueprint:
 
 # Take a look at the first filter decision
 expanded_pipeline |> show_code(decision_num = 1, .step = "filters")
-#> the_data |> 
-#>   collect() |> 
+#> Warning: Could not use `colored = TRUE`, as the package prettycode is not installed.
+#> Please install it if you want to see colored output or see
+#> `?styler::print.vertical()` for more information.
+#> the_data |>
+#>   collect() |>
 #>   filter(include1 == 0, include2 != 3, include3 > -2.5)
 ```
 
@@ -116,8 +119,11 @@ decision 17 using `show_code_model(decision_num = 17)`:
 ``` r
 
 expanded_pipeline |> show_code_model(decision_num = 1)
-#> the_data |> 
-#>   collect() |> 
-#>   filter(include1 == 0, include2 != 3, include3 > -2.5) |> 
+#> Warning: Could not use `colored = TRUE`, as the package prettycode is not installed.
+#> Please install it if you want to see colored output or see
+#> `?styler::print.vertical()` for more information.
+#> the_data |>
+#>   collect() |>
+#>   filter(include1 == 0, include2 != 3, include3 > -2.5) |>
 #>   lm(dv1 ~ iv1 * mod, data = _)
 ```
