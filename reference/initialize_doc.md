@@ -1,7 +1,7 @@
 # Begin assembling a report document
 
 Starts a document from one or more report grids, producing a document
-object that subsequent
+grid that subsequent
 [`layout_section()`](https://ethan-young.github.io/multitool/reference/layout_section.md)
 calls fill in and
 [`generate_docs()`](https://ethan-young.github.io/multitool/reference/generate_docs.md)
@@ -13,9 +13,9 @@ sections here, lay each one out, then generate.
 ``` r
 initialize_doc(
   ...,
-  backend = "patchwork",
   default_asp_ratio = "wide",
   default_height = 7.5,
+  default_width = NULL,
   default_dpi = 96,
   default_margin = ggplot2::margin(0, 0, 0, 0, "in")
 )
@@ -29,21 +29,20 @@ initialize_doc(
   [`add_section()`](https://ethan-young.github.io/multitool/reference/add_section.md).
   Section ids must be unique across all supplied grids.
 
-- backend:
-
-  The rendering backend (default `"patchwork"`). Determines how
-  [`generate_docs()`](https://ethan-young.github.io/multitool/reference/generate_docs.md)
-  interprets each section's layout and what it produces.
-
 - default_asp_ratio:
 
   Default slide aspect ratio: `"wide"` (16:9, default) or `"full"`
-  (4:3).
+  (4:3). Used to derive the canvas width from `default_height` when
+  `default_width` is not given.
 
 - default_height:
 
-  Default slide height in inches (default `7.5`); the width follows the
-  aspect ratio.
+  Default slide height in inches (default `7.5`).
+
+- default_width:
+
+  Optional explicit slide width in inches. When `NULL` (default), the
+  width is derived from `default_height` and `default_asp_ratio`.
 
 - default_dpi:
 
@@ -57,10 +56,17 @@ initialize_doc(
 
 ## Value
 
-A document object: a list with a `settings` element (the document-level
-defaults) and a `grid` element (one row per section, with its
-subsections nested and its layout to be filled in by
-[`layout_section()`](https://ethan-young.github.io/multitool/reference/layout_section.md)).
+A document grid: a tibble with one row per section, the section's
+subsections nested in a `content` column, the document-level defaults
+denormalized across rows as `doc_*` columns (aspect ratio, dpi, margin,
+canvas width and height), and the per-section layout columns initialized
+empty (to be filled by
+[`layout_section()`](https://ethan-young.github.io/multitool/reference/layout_section.md))
+with a `laid_out` flag set `FALSE`. The names of the originating
+analysis grids are recorded in an `"analysis_grids"` attribute, so the
+grids can be shipped to workers if
+[`generate_docs()`](https://ethan-young.github.io/multitool/reference/generate_docs.md)
+renders in parallel.
 
 ## Details
 
@@ -89,13 +95,16 @@ can render it.
 
 ## Document-level defaults
 
-The settings given here — backend, aspect ratio, height, dpi, margin —
-are the document's defaults, applied to every section unless a section
+The settings given here — aspect ratio, height, width, dpi, margin — are
+the document's defaults, applied to every section unless a section
 overrides them in
 [`layout_section()`](https://ethan-young.github.io/multitool/reference/layout_section.md).
 The canvas is sized once for the whole document: slides are
-`default_height` inches tall, with width following the aspect ratio, so
-a single-document output is a uniform deck.
+`default_height` inches tall, with width either given explicitly via
+`default_width` or derived from the aspect ratio, so a single-document
+output is a uniform deck. The rendering backend and output mode are
+*not* set here; they are chosen later, at
+[`generate_docs()`](https://ethan-young.github.io/multitool/reference/generate_docs.md).
 
 ## See also
 
@@ -115,7 +124,7 @@ doc <-
   report |>
   initialize_doc(
     default_asp_ratio = "wide",
-    margin = ggplot2::margin(0.5, 0.5, 0.5, 0.5, "in")
+    default_margin    = ggplot2::margin(0.5, 0.5, 0.5, 0.5, "in")
   )
 
 # Multiple grids from divergent pipelines, one document
@@ -129,7 +138,7 @@ doc <-
 # Continue the chain
 doc <-
   doc |>
-  layout_section("estimates", .patchwork_syntax = sec_fig) |>
+  layout_section("estimates", patchwork_syntax = sec_fig) |>
   generate_docs(file = "deck.pdf")
 } # }
 ```

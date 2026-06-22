@@ -15,13 +15,14 @@ all at once, in
 layout_section(
   .doc,
   section,
-  .patchwork_syntax = NULL,
-  .inner_design = NULL,
-  .outer_design = "A",
+  patchwork_syntax = NULL,
+  inner_design = NULL,
+  outer_design = "A",
   add_title = TRUE,
   add_desc = TRUE,
   meta_pt_sizes = c(24, 16),
   txt_size = 6,
+  sec_margin = NULL,
   height = NULL,
   width = NULL
 )
@@ -31,27 +32,27 @@ layout_section(
 
 - .doc:
 
-  A document object from
+  A document grid from
   [`initialize_doc()`](https://ethan-young.github.io/multitool/reference/initialize_doc.md).
 
 - section:
 
   The `id` of the section to lay out. Must exist in the document.
 
-- .patchwork_syntax:
+- patchwork_syntax:
 
   Patchwork syntax composing the section's content slots — `sec_txt`,
   `sec_tbl`, `sec_fig` — e.g. `sec_txt + sec_fig`. Written unquoted;
   captured as code.
 
-- .inner_design:
+- inner_design:
 
   Optional patchwork design string arranging the content slots (the
-  *inner* layout). Applies when `.patchwork_syntax` uses no positional
+  *inner* layout). Applies when `patchwork_syntax` uses no positional
   operators (`|`, `/`). `NULL` (default) leaves arrangement to the
   syntax.
 
-- .outer_design:
+- outer_design:
 
   Patchwork design string placing the composed section on the page (the
   *outer* layout); defaults to `"A"` (full-bleed).
@@ -68,19 +69,31 @@ layout_section(
 
 - txt_size:
 
-  Point sizes for a textual section (if any). Defaults to 6.
+  Point size for a textual content slot, if any (default `6`).
+
+- sec_margin:
+
+  Optional per-section margin, given unquoted as a
+  [`ggplot2::margin()`](https://ggplot2.tidyverse.org/reference/element.html)
+  call (e.g. `margin(0.5, 0.5, 0.5, 0.5, "in")`); captured as code and
+  applied when this section is placed. `NULL` (default) uses the
+  document margin from
+  [`initialize_doc()`](https://ethan-young.github.io/multitool/reference/initialize_doc.md).
 
 - height, width:
 
-  Optional per-section canvas dimensions in inches. *In development*:
-  reserved for a future pile backend that renders each section as an
-  independent file. Ignored when the document is rendered as a single
-  uniform deck. `NULL` (default) uses the document canvas.
+  Optional per-section canvas dimensions in inches, used when writing a
+  pile (`output = "multiple"`/`"both"` in
+  [`generate_docs()`](https://ethan-young.github.io/multitool/reference/generate_docs.md)):
+  they override the document canvas for this section's standalone file.
+  In single-PDF output the canvas is uniform and these are ignored.
+  `NULL` (default) uses the document canvas.
 
 ## Value
 
-The document object, with this section's layout recorded. Returned so
-`layout_section()` calls can be chained.
+The document grid, with this section's layout recorded and its
+`laid_out` flag set `TRUE`. Returned so `layout_section()` calls can be
+chained.
 
 ## Details
 
@@ -88,7 +101,8 @@ The document object, with this section's layout recorded. Returned so
 each section in turn, building the document's structure as a readable
 sequence of calls.
 
-Layout settings left `NULL` are recorded as missing, so that
+Layout settings left at their `NULL`/default are recorded as missing, so
+that
 [`generate_docs()`](https://ethan-young.github.io/multitool/reference/generate_docs.md)
 can fall through to the document-level defaults set in
 [`initialize_doc()`](https://ethan-young.github.io/multitool/reference/initialize_doc.md).
@@ -105,11 +119,11 @@ through `layout_section()`.
 
 Each section has two layouts, the same distinction used in
 [`preview_section()`](https://ethan-young.github.io/multitool/reference/preview_section.md).
-The *inner* layout (`.patchwork_syntax` with `.inner_design`) arranges
-the section's own content — `sec_txt`, `sec_tbl`, `sec_fig` — into a
-composition. The *outer* layout (`.outer_design`) places that
-composition onto the page, full-bleed (`"A"`, the default) or in a
-region with reserved space (e.g. `"#AA"`).
+The *inner* layout (`patchwork_syntax` with `inner_design`) arranges the
+section's own content — `sec_txt`, `sec_tbl`, `sec_fig` — into a
+composition. The *outer* layout (`outer_design`) places that composition
+onto the page, full-bleed (`"A"`, the default) or in a region with
+reserved space (e.g. `"#AA"`).
 
 The layout recorded here is applied to *every* subsection of the section
 when the document is generated, so a section fanned out into many
@@ -134,13 +148,13 @@ doc <-
   initialize_doc() |>
   layout_section(
     "estimates",
-    .patchwork_syntax = sec_txt + sec_fig,
-    .inner_design     = "AABB"
+    patchwork_syntax = sec_txt + sec_fig,
+    inner_design     = "AABB"
   ) |>
   layout_section(
     "robustness",
-    .patchwork_syntax = sec_tbl,
-    add_desc          = FALSE
+    patchwork_syntax = sec_tbl,
+    add_desc         = FALSE
   )
 } # }
 ```

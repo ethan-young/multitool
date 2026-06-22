@@ -67,11 +67,21 @@ pipeline_grid <- expand_decisions(full_pipeline)
 
 # Run the whole multiverse
 the_multiverse <- analyze_grid(pipeline_grid[1:10,])
-#> Error in purrr::map(1:nrow(.grid), purrr::in_parallel(function(index,     ...) {    if (!is.null(libraries)) {        purrr::walk(rlang::parse_exprs(paste(glue::glue("library({c('multitool', 'dplyr', libraries)})"),             collapse = "; ")), rlang::eval_tidy)    }    if (!purrr::is_empty(custom_fns)) {        purrr::walk(rlang::parse_exprs(glue::glue("assign('{names(custom_fns)}', {custom_fns}, pos = .GlobalEnv)")),             rlang::eval_tidy)    }    start <- Sys.time()    analyzed_result <- execute_universe_model(.grid, decision_index = index,         save_model = save_model)    end <- Sys.time()    tidyr::nest(dplyr::mutate(analyzed_result, run_started = start,         run_ended = end, run_duration_seconds = end - start,         run_duration_minutes = (end - start)/60), timing_logs = dplyr::starts_with("run_"))}, .grid = .grid, execute_universe_model = execute_universe_model,     save_model = save_model, libraries = libraries, custom_fns = custom_fns),     .progress = show_progress): ℹ In index: 1.
-#> Caused by error:
-#> ! object 'the_data' not found
 
 # Reveal results of the linear model
 the_multiverse |> unpack_specs("wide")
-#> Error: object 'the_multiverse' not found
+#> # A tibble: 10 × 11
+#>    decision ivs   dvs   mods  include1 include2 include3 model_meta model_fitted
+#>       <dbl> <chr> <chr> <chr> <chr>    <chr>    <chr>    <chr>      <list>      
+#>  1        1 iv1   dv1   mod1  include… include… scale(i… linear_mo… <tibble>    
+#>  2        2 iv1   dv1   mod2  include… include… scale(i… linear_mo… <tibble>    
+#>  3        3 iv1   dv1   mod3  include… include… scale(i… linear_mo… <tibble>    
+#>  4        4 iv1   dv2   mod1  include… include… scale(i… linear_mo… <tibble>    
+#>  5        5 iv1   dv2   mod2  include… include… scale(i… linear_mo… <tibble>    
+#>  6        6 iv1   dv2   mod3  include… include… scale(i… linear_mo… <tibble>    
+#>  7        7 iv2   dv1   mod1  include… include… scale(i… linear_mo… <tibble>    
+#>  8        8 iv2   dv1   mod2  include… include… scale(i… linear_mo… <tibble>    
+#>  9        9 iv2   dv1   mod3  include… include… scale(i… linear_mo… <tibble>    
+#> 10       10 iv2   dv2   mod1  include… include… scale(i… linear_mo… <tibble>    
+#> # ℹ 2 more variables: pipeline_code <list>, timing_logs <list>
 ```

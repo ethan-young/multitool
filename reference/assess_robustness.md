@@ -109,23 +109,87 @@ results <-
   add_model("linear", lm({dvs} ~ {ivs})) |>
   expand_decisions() |>
   analyze_grid()
-#> Error in purrr::map(1:nrow(.grid), purrr::in_parallel(function(index,     ...) {    if (!is.null(libraries)) {        purrr::walk(rlang::parse_exprs(paste(glue::glue("library({c('multitool', 'dplyr', libraries)})"),             collapse = "; ")), rlang::eval_tidy)    }    if (!purrr::is_empty(custom_fns)) {        purrr::walk(rlang::parse_exprs(glue::glue("assign('{names(custom_fns)}', {custom_fns}, pos = .GlobalEnv)")),             rlang::eval_tidy)    }    start <- Sys.time()    analyzed_result <- execute_universe_model(.grid, decision_index = index,         save_model = save_model)    end <- Sys.time()    tidyr::nest(dplyr::mutate(analyzed_result, run_started = start,         run_ended = end, run_duration_seconds = end - start,         run_duration_minutes = (end - start)/60), timing_logs = dplyr::starts_with("run_"))}, .grid = .grid, execute_universe_model = execute_universe_model,     save_model = save_model, libraries = libraries, custom_fns = custom_fns),     .progress = show_progress): ℹ In index: 1.
-#> Caused by error:
-#> ! object 'the_data' not found
+#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■■       88% |  ETA:  0s
 
 # Assess robustness of standardized coefficients
 assess_robustness(results, .estimand = std_coefficient)
-#> Error: object 'results' not found
+#> # A tibble: 10 × 13
+#>    metric   metric_type reference n_decisions     mean   median     iqr      q05
+#>    <chr>    <chr>       <chr>           <dbl>    <dbl>    <dbl>   <dbl>    <dbl>
+#>  1 std_coe… parameter   (Interce…          16  0        0       0        0      
+#>  2 std_coe… parameter   iv1                 8 -1.44e-2 -6.78e-3 7.79e-2 -9.34e-2
+#>  3 std_coe… parameter   iv2                 8  1.62e-2  1.2 e-2 3.38e-2 -1.26e-2
+#>  4 aic      fit index   full mod…          16  1.11e+3  1.09e+3 3.86e+2  8.15e+2
+#>  5 aicc     fit index   full mod…          16  1.11e+3  1.09e+3 3.86e+2  8.15e+2
+#>  6 bic      fit index   full mod…          16  1.12e+3  1.10e+3 3.87e+2  8.26e+2
+#>  7 r2       fit index   full mod…          16  1.92e-3  8.10e-4 2.34e-3  1   e-5
+#>  8 r2_adju… fit index   full mod…          16 -7.2 e-4 -1.76e-3 2.02e-3 -2.45e-3
+#>  9 rmse     fit index   full mod…          16  9.71e-1  9.78e-1 2.82e-2  9.39e-1
+#> 10 sigma    fit index   full mod…          16  9.74e-1  9.81e-1 2.79e-2  9.41e-1
+#> # ℹ 5 more variables: q95 <dbl>, p_positive <dbl>, p_negative <dbl>,
+#> #   p_zero <dbl>, sign_entropy <dbl>
 
 # Assess raw coefficients
 assess_robustness(results, .estimand = coefficient)
-#> Error: object 'results' not found
+#> # A tibble: 10 × 13
+#>    metric   metric_type reference n_decisions     mean   median     iqr      q05
+#>    <chr>    <chr>       <chr>           <dbl>    <dbl>    <dbl>   <dbl>    <dbl>
+#>  1 coeffic… parameter   (Interce…          16 -1.26e-2 -1.67e-2 9.05e-2 -1.04e-1
+#>  2 coeffic… parameter   iv1                 8 -1.48e-2 -6.65e-3 7.51e-2 -9.20e-2
+#>  3 coeffic… parameter   iv2                 8  1.67e-2  1.20e-2 3.40e-2 -1.25e-2
+#>  4 aic      fit index   full mod…          16  1.11e+3  1.09e+3 3.86e+2  8.15e+2
+#>  5 aicc     fit index   full mod…          16  1.11e+3  1.09e+3 3.86e+2  8.15e+2
+#>  6 bic      fit index   full mod…          16  1.12e+3  1.10e+3 3.87e+2  8.26e+2
+#>  7 r2       fit index   full mod…          16  1.92e-3  8.10e-4 2.34e-3  1   e-5
+#>  8 r2_adju… fit index   full mod…          16 -7.2 e-4 -1.76e-3 2.02e-3 -2.45e-3
+#>  9 rmse     fit index   full mod…          16  9.71e-1  9.78e-1 2.82e-2  9.39e-1
+#> 10 sigma    fit index   full mod…          16  9.74e-1  9.81e-1 2.79e-2  9.41e-1
+#> # ℹ 5 more variables: q95 <dbl>, p_positive <dbl>, p_negative <dbl>,
+#> #   p_zero <dbl>, sign_entropy <dbl>
 
 # Assess std_coef with custom zero threshold
 assess_robustness(results, .estimand = std_coefficient, zero_threshold = .05)
-#> Error: object 'results' not found
+#> # A tibble: 10 × 13
+#>    metric   metric_type reference n_decisions     mean   median     iqr      q05
+#>    <chr>    <chr>       <chr>           <dbl>    <dbl>    <dbl>   <dbl>    <dbl>
+#>  1 std_coe… parameter   (Interce…          16  0        0       0        0      
+#>  2 std_coe… parameter   iv1                 8 -1.44e-2 -6.78e-3 7.79e-2 -9.34e-2
+#>  3 std_coe… parameter   iv2                 8  1.62e-2  1.2 e-2 3.38e-2 -1.26e-2
+#>  4 aic      fit index   full mod…          16  1.11e+3  1.09e+3 3.86e+2  8.15e+2
+#>  5 aicc     fit index   full mod…          16  1.11e+3  1.09e+3 3.86e+2  8.15e+2
+#>  6 bic      fit index   full mod…          16  1.12e+3  1.10e+3 3.87e+2  8.26e+2
+#>  7 r2       fit index   full mod…          16  1.92e-3  8.10e-4 2.34e-3  1   e-5
+#>  8 r2_adju… fit index   full mod…          16 -7.2 e-4 -1.76e-3 2.02e-3 -2.45e-3
+#>  9 rmse     fit index   full mod…          16  9.71e-1  9.78e-1 2.82e-2  9.39e-1
+#> 10 sigma    fit index   full mod…          16  9.74e-1  9.81e-1 2.79e-2  9.41e-1
+#> # ℹ 5 more variables: q95 <dbl>, p_positive <dbl>, p_negative <dbl>,
+#> #   p_zero <dbl>, sign_entropy <dbl>
 
 # Stratified assessment by model type
 assess_robustness(results, .estimand = std_coefficient, .by = dvs)
-#> Error: object 'results' not found
+#> # A tibble: 20 × 14
+#>    metric      metric_type reference dvs   n_decisions     mean   median     iqr
+#>    <chr>       <chr>       <chr>     <chr>       <dbl>    <dbl>    <dbl>   <dbl>
+#>  1 std_coeffi… parameter   (Interce… dv1             8  0        0       0      
+#>  2 std_coeffi… parameter   iv1       dv1             4 -5.95e-2 -5.72e-2 3.79e-2
+#>  3 std_coeffi… parameter   (Interce… dv2             8  0        0       0      
+#>  4 std_coeffi… parameter   iv1       dv2             4  3.07e-2  2.80e-2 2.24e-2
+#>  5 std_coeffi… parameter   iv2       dv1             4  2.94e-2  2.78e-2 2.47e-2
+#>  6 std_coeffi… parameter   iv2       dv2             4  3   e-3 -2.84e-3 1.95e-2
+#>  7 aic         fit index   full mod… dv1             8  1.12e+3  1.12e+3 3.86e+2
+#>  8 aicc        fit index   full mod… dv1             8  1.12e+3  1.12e+3 3.86e+2
+#>  9 bic         fit index   full mod… dv1             8  1.13e+3  1.13e+3 3.87e+2
+#> 10 r2          fit index   full mod… dv1             8  2.96e-3  1.72e-3 3.34e-3
+#> 11 r2_adjusted fit index   full mod… dv1             8  3.2 e-4 -8.7 e-4 2.21e-3
+#> 12 rmse        fit index   full mod… dv1             8  9.88e-1  9.88e-1 4.75e-3
+#> 13 sigma       fit index   full mod… dv1             8  9.91e-1  9.90e-1 4.58e-3
+#> 14 aic         fit index   full mod… dv2             8  1.10e+3  1.09e+3 3.56e+2
+#> 15 aicc        fit index   full mod… dv2             8  1.10e+3  1.09e+3 3.56e+2
+#> 16 bic         fit index   full mod… dv2             8  1.11e+3  1.10e+3 3.57e+2
+#> 17 r2          fit index   full mod… dv2             8  8.9 e-4  3.9 e-4 1.03e-3
+#> 18 r2_adjusted fit index   full mod… dv2             8 -1.76e-3 -1.95e-3 4.9 e-4
+#> 19 rmse        fit index   full mod… dv2             8  9.54e-1  9.53e-1 2.89e-2
+#> 20 sigma       fit index   full mod… dv2             8  9.57e-1  9.56e-1 2.84e-2
+#> # ℹ 6 more variables: q05 <dbl>, q95 <dbl>, p_positive <dbl>, p_negative <dbl>,
+#> #   p_zero <dbl>, sign_entropy <dbl>
 ```

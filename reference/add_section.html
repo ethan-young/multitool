@@ -115,23 +115,33 @@ combination. When <code>NULL</code>, the section is a single unit.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A report grid (a tibble) with one row per subsection, carrying the
-section's id, the realized <code>sec_txt</code>/<code>sec_tbl</code>/<code>sec_fig</code> content, a nested
-<code>code</code> column holding the generating code for each, and per-subsection
-titles and descriptions. The originating grid name is recorded as an
-<code>"analysis_grid"</code> attribute so successive <code>add_section()</code> calls can chain.</p>
+    <p>A report grid (a tibble) with one row per subsection. Each row
+carries the section's id, the per-subsection title and description, and the
+content-generating code for each channel in the <code>sec_txt</code>, <code>sec_tbl</code>, and
+<code>sec_fig</code> columns — full pipelines from the analysis grid through the
+content function, stored as code and evaluated only when the section is
+previewed or generated. Empty channels hold <code>"NULL"</code>. The originating grid
+name is recorded as an <code>"analysis_grid"</code> attribute so successive
+<code>add_section()</code> calls can chain.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The content functions (<code>txt.fn</code>, <code>tbl.fn</code>, <code>fig.fn</code>) are captured as code,
-recorded so the section remains a transparent, auditable artifact, then run
-against the section's data to realize the actual text, table, and figure
-objects. Both the realized content and the generating code are stored, so a
-section can be rendered <em>and</em> inspected.</p>
-<p>Each content slot stores both the realized object (<code>sec_txt</code>, <code>sec_tbl</code>,
-<code>sec_fig</code>) and its code (nested under <code>code</code>), supporting the package's
-code-as-artifact principle: a section can be rendered into a report and also
-read back as the exact code that produced it.</p>
+    <p><code>add_section()</code> records the content functions (<code>txt.fn</code>, <code>tbl.fn</code>, <code>fig.fn</code>)
+as code; it does not run them. Realization is deferred to the moment a
+section is previewed (<code><a href="preview_section.html">preview_section()</a></code>) or the document is generated
+(<code><a href="generate_docs.html">generate_docs()</a></code>), so defining a section is cheap no matter how many
+subsections it fans out into. The stored code <em>is</em> the section — it is read
+back when inspecting, and evaluated when rendering.</p>
+<p><code>add_section()</code> stores code, not rendered output. The <code>sec_txt</code>, <code>sec_tbl</code>,
+and <code>sec_fig</code> columns each hold a complete pipeline — the analysis grid,
+through <code>report_data</code>, through the content function — as an evaluable string.
+Nothing is rendered here; realization happens downstream. This is the
+package's code-as-artifact principle in its strongest form: a section is
+fully described by readable, re-runnable code, inspectable with
+<code><a href="show_section_content.html">show_section_content()</a></code> and rendered only at preview or generation time.</p>
+<p>Deferring realization also keeps <code>add_section()</code> fast: a section fanned out
+into many subsections costs no rendering at definition time, since the
+content is rendered later — once — when the document is built.</p>
 <p>Content functions have access only to the gathered section data, not to the
 section's metadata fields — a figure title, for instance, belongs inside
 <code>fig.fn</code>, while a section- or slide-level heading belongs in <code>title</code>.</p>
@@ -154,9 +164,9 @@ function whose first argument is the data, written with parentheses as
 data is piped into the content function, the function must be written as a
 call (with parentheses), not a bare name.</p>
 <p>A section need not have all three content types. Any of <code>txt.fn</code>, <code>tbl.fn</code>,
-or <code>fig.fn</code> may be left <code>NULL</code>, in which case that content slot is empty
-(stored as <code>NULL</code>) and simply omitted wherever the section is rendered. A
-figure-only section, a table-plus-text section, or any combination is valid.</p>
+or <code>fig.fn</code> may be left <code>NULL</code>, in which case that content slot is empty and
+simply omitted wherever the section is rendered. A figure-only section, a
+table-plus-text section, or any combination is valid.</p>
     </div>
     <div class="section level2">
     <h2 id="sections-and-subsections">Sections and subsections<a class="anchor" aria-label="anchor" href="#sections-and-subsections"></a></h2>
@@ -175,7 +185,7 @@ subsections to vary over).</p>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="compose_view.html">compose_view()</a></code> for gathering results for section reporting;
-<code><a href="show_section_content.html">show_section_content()</a></code> to inspect one section's realized content and code;
+<code><a href="show_section_content.html">show_section_content()</a></code> to inspect one section's content code and render it;
 <code><a href="preview_section.html">preview_section()</a></code> to preview a section's composed layout;
 <code><a href="layout_section.html">layout_section()</a></code> and <code><a href="generate_docs.html">generate_docs()</a></code> to assemble sections into a document.</p></div>
     </div>

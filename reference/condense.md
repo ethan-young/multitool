@@ -92,14 +92,14 @@ pipeline_grid <- expand_decisions(full_pipeline)
 
 # Run the whole multiverse
 the_multiverse <- analyze_grid(pipeline_grid[1:10,])
-#> Error in purrr::map(1:nrow(.grid), purrr::in_parallel(function(index,     ...) {    if (!is.null(libraries)) {        purrr::walk(rlang::parse_exprs(paste(glue::glue("library({c('multitool', 'dplyr', libraries)})"),             collapse = "; ")), rlang::eval_tidy)    }    if (!purrr::is_empty(custom_fns)) {        purrr::walk(rlang::parse_exprs(glue::glue("assign('{names(custom_fns)}', {custom_fns}, pos = .GlobalEnv)")),             rlang::eval_tidy)    }    start <- Sys.time()    analyzed_result <- execute_universe_model(.grid, decision_index = index,         save_model = save_model)    end <- Sys.time()    tidyr::nest(dplyr::mutate(analyzed_result, run_started = start,         run_ended = end, run_duration_seconds = end - start,         run_duration_minutes = (end - start)/60), timing_logs = dplyr::starts_with("run_"))}, .grid = .grid, execute_universe_model = execute_universe_model,     save_model = save_model, libraries = libraries, custom_fns = custom_fns),     .progress = show_progress): ℹ In index: 1.
-#> Caused by error:
-#> ! object 'the_data' not found
 
 # Reveal and condense
 the_multiverse |>
   unpack_model_parameters() |>
   filter(str_detect(parameter, "iv")) |>
   condense(coefficient, list(mean = mean, median = median))
-#> Error: object 'the_multiverse' not found
+#> # A tibble: 1 × 3
+#>   coefficient_mean coefficient_median coefficient_list
+#>              <dbl>              <dbl> <list>          
+#> 1           0.0157             0.0261 <dbl [20]>      
 ```

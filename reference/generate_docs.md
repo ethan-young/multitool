@@ -5,18 +5,19 @@ Renders a document — built with
 and laid out with
 [`layout_section()`](https://ethan-young.github.io/multitool/reference/layout_section.md)
 — into output. This is the terminal step of the assembly chain: it
-composes every section's content according to the recorded layouts and
-produces the final artifact.
+renders every section's content according to the recorded layouts, then
+writes the result through the chosen backend.
 
 ## Usage
 
 ``` r
 generate_docs(
   .doc,
-  file = NULL,
-  output = c("single", "pile"),
-  extension = "png",
-  dir = "multitool_report"
+  file,
+  backend = "patchwork",
+  output = c("single", "multiple", "both"),
+  dir = NULL,
+  globals = NULL
 )
 ```
 
@@ -24,7 +25,7 @@ generate_docs(
 
 - .doc:
 
-  A laid-out document object from the
+  A laid-out document grid from the
   [`initialize_doc()`](https://ethan-young.github.io/multitool/reference/initialize_doc.md)
   /
   [`layout_section()`](https://ethan-young.github.io/multitool/reference/layout_section.md)
@@ -32,20 +33,33 @@ generate_docs(
 
 - file:
 
-  Output file path for `"single"` mode (e.g. `"report.pdf"`).
+  Output file path. In `"single"` mode this is the PDF; in `"multiple"`
+  mode its extension determines the per-page file type and its stem
+  names the files.
+
+- backend:
+
+  The rendering backend (default `"patchwork"`). Determines how each
+  section's recorded layout is composed and written. The architecture
+  dispatches on the backend, so other backends can interpret the same
+  recorded layouts differently in future.
 
 - output:
 
-  `"single"` (default) for one multi-page deck, or `"pile"` for one file
-  per section (in development).
-
-- extension:
-
-  File extension for `"pile"` mode (default `"png"`).
+  One of `"single"` (default, one multi-page PDF), `"multiple"` (one
+  file per page), or `"both"`.
 
 - dir:
 
-  Output directory for `"pile"` mode (default `"multitool_report"`).
+  Output directory for `"multiple"`/`"both"` modes. `NULL` (default)
+  writes to the current directory.
+
+- globals:
+
+  Optional character vector of names of global objects (functions or
+  data) that section content references but that cannot be auto-detected
+  from the stored code. Named here, they are shipped to workers for
+  parallel rendering.
 
 ## Value
 
@@ -55,10 +69,9 @@ the output file(s).
 ## Details
 
 Before rendering, `generate_docs()` checks that every section in the
-document has been laid out, resolves each section's effective settings
-(section overrides falling through to document defaults), and hands the
-result to the backend named in
-[`initialize_doc()`](https://ethan-young.github.io/multitool/reference/initialize_doc.md).
+document has been laid out. It then renders each subsection's content to
+a placed page object and hands those pages to the backend to write to
+disk.
 
 Every section must be laid out before rendering. If any section was
 added to the document but never passed through
@@ -66,34 +79,50 @@ added to the document but never passed through
 `generate_docs()` stops and names the un-laid-out sections, rather than
 silently dropping or mis-rendering them.
 
-Effective settings are resolved per section as a cascade: a value set on
+Effective settings are resolved per page as a cascade: a value set on
 the section in
 [`layout_section()`](https://ethan-young.github.io/multitool/reference/layout_section.md)
 takes precedence, otherwise the document default from
 [`initialize_doc()`](https://ethan-young.github.io/multitool/reference/initialize_doc.md)
 applies. In `"single"` mode the canvas is held uniform across all pages
 (so the deck reads as a coherent whole); per-section canvas dimensions
-apply only in `"pile"` mode.
+apply only when writing a pile.
 
 ## Output modes
 
 `output = "single"` produces one multi-page document — a deck — with
-every section (and its subsections) as pages of uniform size. This is
-the working mode for the patchwork backend, rendering a single PDF.
+every section (and its subsections) as pages of uniform size, written as
+a single PDF.
 
-`output = "pile"` is *in development*: it will render each section as an
-independent file (using `extension` and `dir`), the mode in which
-per-section dimensions from
+`output = "multiple"` writes each page as its own file (a "pile"), named
+by section and subsection, into `dir`. The file type follows the
+extension of `file`. Per-section dimensions from
 [`layout_section()`](https://ethan-young.github.io/multitool/reference/layout_section.md)
-take effect.
+take effect in this mode.
 
-## Backends
+`output = "both"` produces the single PDF *and* the pile of per-page
+files.
 
-The backend is set in
-[`initialize_doc()`](https://ethan-young.github.io/multitool/reference/initialize_doc.md).
-`"patchwork"` composes each section with patchwork and renders it; the
-architecture dispatches on the backend, so other backends can interpret
-the same recorded layouts differently in future.
+## Parallel rendering
+
+If [`mirai::daemons()`](https://mirai.r-lib.org/reference/daemons.html)
+have been provisioned before calling `generate_docs()`, content
+rendering (and, for `"multiple"`/`"both"`, file writing) is distributed
+across the daemons; otherwise it runs sequentially. Parallelism helps
+for large documents and adds overhead for small ones, so it is opt-in
+via daemon provisioning rather than on by default. When rendering in
+parallel, the daemons must have the same graphical session setup as the
+host — in particular any custom theme (e.g. via
+[`theme_set()`](https://ggplot2.tidyverse.org/reference/get_theme.html))
+and fonts — or pages will render against the workers' defaults.
+Replicate that setup on the daemons with
+[`mirai::everywhere()`](https://mirai.r-lib.org/reference/everywhere.html)
+before generating.
+
+Functions and objects that a section's content code references are
+shipped to the workers automatically when they can be detected from the
+stored code; anything that cannot be detected (for example a data object
+referenced indirectly) can be named in `globals`.
 
 ## See also
 
@@ -110,8 +139,8 @@ to preview a section before assembling.
 if (FALSE) { # \dontrun{
 report |>
   initialize_doc() |>
-  layout_section("estimates", .patchwork_syntax = sec_txt + sec_fig) |>
-  layout_section("robustness", .patchwork_syntax = sec_tbl) |>
+  layout_section("estimates", patchwork_syntax = sec_txt + sec_fig) |>
+  layout_section("robustness", patchwork_syntax = sec_tbl) |>
   generate_docs(file = "report.pdf")
 } # }
 ```

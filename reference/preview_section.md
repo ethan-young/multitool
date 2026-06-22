@@ -19,11 +19,11 @@ preview_section(
   add_title = TRUE,
   add_desc = TRUE,
   codify = TRUE,
-  .patchwork_syntax = NULL,
-  .mode = "slide",
-  .inner_design = NULL,
-  .outer_design = "A",
-  .txt_size = 6,
+  patchwork_syntax = NULL,
+  mode = "slide",
+  inner_design = NULL,
+  outer_design = "A",
+  txt_size = 6,
   ...
 )
 ```
@@ -55,20 +55,20 @@ preview_section(
   Whether to print a call to `layout_section` based on preview settings.
   Defaults to `TRUE`.
 
-- .patchwork_syntax:
+- patchwork_syntax:
 
   Patchwork syntax composing the section's content slots — `sec_txt`,
   `sec_tbl`, `sec_fig` — e.g. `sec_txt + sec_fig`. Slots that are empty
   for this section render as blank spacers.
 
-- .mode:
+- mode:
 
   Passed to
   [`view_real_size()`](https://ethan-young.github.io/multitool/reference/view_real_size.md)
   as `mode`; `"slide"` (default) previews the composition placed on a
   slide canvas.
 
-- .inner_design:
+- inner_design:
 
   Optional patchwork design string arranging the content slots (the
   *inner* layout). Applies only when `.patchwork_syntax` uses no
@@ -76,12 +76,12 @@ preview_section(
   [`view_real_size()`](https://ethan-young.github.io/multitool/reference/view_real_size.md)
   and patchwork's layout documentation.
 
-- .outer_design:
+- outer_design:
 
   Patchwork design string placing the composed section on the slide (the
   *outer* layout); defaults to `"A"` (full-bleed).
 
-- .txt_size:
+- txt_size:
 
   The size of text to appear when a composition contains a textual
   section. Defaults to 6.
@@ -148,8 +148,8 @@ if (FALSE) { # \dontrun{
 preview_section(
   report,
   section           = "estimates",
-  .patchwork_syntax = sec_txt + sec_fig,
-  .inner_design     = "AABB"
+  patchwork_syntax = sec_txt + sec_fig,
+  inner_design     = "AABB"
 )
 
 # Preview with the section title shown, content in the right two-thirds
@@ -157,8 +157,8 @@ preview_section(
   report,
   section           = "estimates",
   add_title         = TRUE,
-  .patchwork_syntax = sec_fig,
-  .outer_design     = "#AA"
+  patchwork_syntax = sec_fig,
+  outer_design     = "#AA"
 )
 } # }
 ```

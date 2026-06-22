@@ -127,21 +127,44 @@ results <-
   add_model("linear", lm({dvs} ~ {ivs})) |>
   expand_decisions() |>
   analyze_grid()
-#> Error in purrr::map(1:nrow(.grid), purrr::in_parallel(function(index,     ...) {    if (!is.null(libraries)) {        purrr::walk(rlang::parse_exprs(paste(glue::glue("library({c('multitool', 'dplyr', libraries)})"),             collapse = "; ")), rlang::eval_tidy)    }    if (!purrr::is_empty(custom_fns)) {        purrr::walk(rlang::parse_exprs(glue::glue("assign('{names(custom_fns)}', {custom_fns}, pos = .GlobalEnv)")),             rlang::eval_tidy)    }    start <- Sys.time()    analyzed_result <- execute_universe_model(.grid, decision_index = index,         save_model = save_model)    end <- Sys.time()    tidyr::nest(dplyr::mutate(analyzed_result, run_started = start,         run_ended = end, run_duration_seconds = end - start,         run_duration_minutes = (end - start)/60), timing_logs = dplyr::starts_with("run_"))}, .grid = .grid, execute_universe_model = execute_universe_model,     save_model = save_model, libraries = libraries, custom_fns = custom_fns),     .progress = show_progress): ℹ In index: 1.
-#> Caused by error:
-#> ! object 'the_data' not found
 
 # Decompose variance in standardized coefficients
 unpacked <- unpack_model_parameters(results)
-#> Error: object 'results' not found
 assess_decisions(unpacked, .estimand = std_coefficient)
-#> Error: object 'unpacked' not found
+#> Joining with `by = join_by(decision_set, total_variance)`
+#> Joining with `by = join_by(decision_set)`
+#> # A tibble: 4 × 5
+#>   decision_set main_effect total_effect interaction_effect variance_reduction
+#>   <chr>              <dbl>        <dbl>              <dbl>              <dbl>
+#> 1 ivs            0.0000343        0.836              0.836          0.0000343
+#> 2 dvs            0.0478           0.952              0.904          0.0478   
+#> 3 include1       0.000840         0.810              0.809          0.000840 
+#> 4 include2       0.0438           0.917              0.874          0.0438   
 
 # Which decisions matter most for p-values?
 assess_decisions(unpacked, .estimand = p)
-#> Error: object 'unpacked' not found
+#> Joining with `by = join_by(decision_set, total_variance)`
+#> Joining with `by = join_by(decision_set)`
+#> # A tibble: 4 × 5
+#>   decision_set main_effect total_effect interaction_effect variance_reduction
+#>   <chr>              <dbl>        <dbl>              <dbl>              <dbl>
+#> 1 ivs            0.0000804        0.615              0.615          0.0000804
+#> 2 dvs            0.00815          0.934              0.926          0.00815  
+#> 3 include1       0.0478           0.619              0.571          0.0478   
+#> 4 include2       0.0170           0.909              0.892          0.0170   
 
 # Decompose separately for each parameter
 assess_decisions(unpacked, .estimand = p, .by = dvs)
-#> Error: object 'unpacked' not found
+#> Joining with `by = join_by(decision_set, dvs, total_variance)`
+#> Joining with `by = join_by(dvs, decision_set)`
+#> # A tibble: 6 × 6
+#>   dvs   decision_set main_effect total_effect interaction_effect
+#>   <chr> <chr>              <dbl>        <dbl>              <dbl>
+#> 1 dv1   ivs               0.0324        0.411              0.379
+#> 2 dv1   include1          0.0593        0.430              0.370
+#> 3 dv1   include2          0.512         0.908              0.396
+#> 4 dv2   ivs               0.0322        0.791              0.759
+#> 5 dv2   include1          0.0393        0.782              0.743
+#> 6 dv2   include2          0.157         0.924              0.767
+#> # ℹ 1 more variable: variance_reduction <dbl>
 ```

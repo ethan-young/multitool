@@ -66,25 +66,40 @@ add_section(
 
 ## Value
 
-A report grid (a tibble) with one row per subsection, carrying the
-section's id, the realized `sec_txt`/`sec_tbl`/`sec_fig` content, a
-nested `code` column holding the generating code for each, and
-per-subsection titles and descriptions. The originating grid name is
-recorded as an `"analysis_grid"` attribute so successive `add_section()`
-calls can chain.
+A report grid (a tibble) with one row per subsection. Each row carries
+the section's id, the per-subsection title and description, and the
+content-generating code for each channel in the `sec_txt`, `sec_tbl`,
+and `sec_fig` columns — full pipelines from the analysis grid through
+the content function, stored as code and evaluated only when the section
+is previewed or generated. Empty channels hold `"NULL"`. The originating
+grid name is recorded as an `"analysis_grid"` attribute so successive
+`add_section()` calls can chain.
 
 ## Details
 
-The content functions (`txt.fn`, `tbl.fn`, `fig.fn`) are captured as
-code, recorded so the section remains a transparent, auditable artifact,
-then run against the section's data to realize the actual text, table,
-and figure objects. Both the realized content and the generating code
-are stored, so a section can be rendered *and* inspected.
+`add_section()` records the content functions (`txt.fn`, `tbl.fn`,
+`fig.fn`) as code; it does not run them. Realization is deferred to the
+moment a section is previewed
+([`preview_section()`](https://ethan-young.github.io/multitool/reference/preview_section.md))
+or the document is generated
+([`generate_docs()`](https://ethan-young.github.io/multitool/reference/generate_docs.md)),
+so defining a section is cheap no matter how many subsections it fans
+out into. The stored code *is* the section — it is read back when
+inspecting, and evaluated when rendering.
 
-Each content slot stores both the realized object (`sec_txt`, `sec_tbl`,
-`sec_fig`) and its code (nested under `code`), supporting the package's
-code-as-artifact principle: a section can be rendered into a report and
-also read back as the exact code that produced it.
+`add_section()` stores code, not rendered output. The `sec_txt`,
+`sec_tbl`, and `sec_fig` columns each hold a complete pipeline — the
+analysis grid, through `report_data`, through the content function — as
+an evaluable string. Nothing is rendered here; realization happens
+downstream. This is the package's code-as-artifact principle in its
+strongest form: a section is fully described by readable, re-runnable
+code, inspectable with
+[`show_section_content()`](https://ethan-young.github.io/multitool/reference/show_section_content.md)
+and rendered only at preview or generation time.
+
+Deferring realization also keeps `add_section()` fast: a section fanned
+out into many subsections costs no rendering at definition time, since
+the content is rendered later — once — when the document is built.
 
 Content functions have access only to the gathered section data, not to
 the section's metadata fields — a figure title, for instance, belongs
@@ -113,9 +128,9 @@ function must be written as a call (with parentheses), not a bare name.
 
 A section need not have all three content types. Any of `txt.fn`,
 `tbl.fn`, or `fig.fn` may be left `NULL`, in which case that content
-slot is empty (stored as `NULL`) and simply omitted wherever the section
-is rendered. A figure-only section, a table-plus-text section, or any
-combination is valid.
+slot is empty and simply omitted wherever the section is rendered. A
+figure-only section, a table-plus-text section, or any combination is
+valid.
 
 ## Sections and subsections
 
@@ -137,7 +152,7 @@ description, and glue interpolation of the `.by` columns does not apply
 [`compose_view()`](https://ethan-young.github.io/multitool/reference/compose_view.md)
 for gathering results for section reporting;
 [`show_section_content()`](https://ethan-young.github.io/multitool/reference/show_section_content.md)
-to inspect one section's realized content and code;
+to inspect one section's content code and render it;
 [`preview_section()`](https://ethan-young.github.io/multitool/reference/preview_section.md)
 to preview a section's composed layout;
 [`layout_section()`](https://ethan-young.github.io/multitool/reference/layout_section.md)

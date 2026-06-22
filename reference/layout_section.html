@@ -64,13 +64,14 @@ once, in <code><a href="generate_docs.html">generate_docs()</a></code>.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">layout_section</span><span class="op">(</span></span>
 <span>  <span class="va">.doc</span>,</span>
 <span>  <span class="va">section</span>,</span>
-<span>  .patchwork_syntax <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  .inner_design <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  .outer_design <span class="op">=</span> <span class="st">"A"</span>,</span>
+<span>  patchwork_syntax <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  inner_design <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  outer_design <span class="op">=</span> <span class="st">"A"</span>,</span>
 <span>  add_title <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  add_desc <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  meta_pt_sizes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">24</span>, <span class="fl">16</span><span class="op">)</span>,</span>
 <span>  txt_size <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>  sec_margin <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  height <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  width <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -81,7 +82,7 @@ once, in <code><a href="generate_docs.html">generate_docs()</a></code>.</p>
 
 
 <dl><dt id="arg--doc">.doc<a class="anchor" aria-label="anchor" href="#arg--doc"></a></dt>
-<dd><p>A document object from <code><a href="initialize_doc.html">initialize_doc()</a></code>.</p></dd>
+<dd><p>A document grid from <code><a href="initialize_doc.html">initialize_doc()</a></code>.</p></dd>
 
 
 <dt id="arg-section">section<a class="anchor" aria-label="anchor" href="#arg-section"></a></dt>
@@ -89,27 +90,27 @@ once, in <code><a href="generate_docs.html">generate_docs()</a></code>.</p>
 document.</p></dd>
 
 
-<dt id="arg--patchwork-syntax">.patchwork_syntax<a class="anchor" aria-label="anchor" href="#arg--patchwork-syntax"></a></dt>
+<dt id="arg-patchwork-syntax">patchwork_syntax<a class="anchor" aria-label="anchor" href="#arg-patchwork-syntax"></a></dt>
 <dd><p>Patchwork syntax composing the section's content
 slots — <code>sec_txt</code>, <code>sec_tbl</code>, <code>sec_fig</code> — e.g. <code>sec_txt + sec_fig</code>. Written
 unquoted; captured as code.</p></dd>
 
 
-<dt id="arg--inner-design">.inner_design<a class="anchor" aria-label="anchor" href="#arg--inner-design"></a></dt>
+<dt id="arg-inner-design">inner_design<a class="anchor" aria-label="anchor" href="#arg-inner-design"></a></dt>
 <dd><p>Optional patchwork design string arranging the content
-slots (the <em>inner</em> layout). Applies when <code>.patchwork_syntax</code> uses no
+slots (the <em>inner</em> layout). Applies when <code>patchwork_syntax</code> uses no
 positional operators (<code>|</code>, <code>/</code>). <code>NULL</code> (default) leaves arrangement to the
 syntax.</p></dd>
 
 
-<dt id="arg--outer-design">.outer_design<a class="anchor" aria-label="anchor" href="#arg--outer-design"></a></dt>
+<dt id="arg-outer-design">outer_design<a class="anchor" aria-label="anchor" href="#arg-outer-design"></a></dt>
 <dd><p>Patchwork design string placing the composed section on
 the page (the <em>outer</em> layout); defaults to <code>"A"</code> (full-bleed).</p></dd>
 
 
 <dt id="arg-add-title-add-desc">add_title, add_desc<a class="anchor" aria-label="anchor" href="#arg-add-title-add-desc"></a></dt>
-<dd><p>Whether to show the section's title and
-description when rendered (default <code>TRUE</code> for both).</p></dd>
+<dd><p>Whether to show the section's title and description
+when rendered (default <code>TRUE</code> for both).</p></dd>
 
 
 <dt id="arg-meta-pt-sizes">meta_pt_sizes<a class="anchor" aria-label="anchor" href="#arg-meta-pt-sizes"></a></dt>
@@ -118,27 +119,36 @@ numeric (default <code>c(24, 16)</code>).</p></dd>
 
 
 <dt id="arg-txt-size">txt_size<a class="anchor" aria-label="anchor" href="#arg-txt-size"></a></dt>
-<dd><p>Point sizes for a textual section (if any). Defaults to 6.</p></dd>
+<dd><p>Point size for a textual content slot, if any (default <code>6</code>).</p></dd>
+
+
+<dt id="arg-sec-margin">sec_margin<a class="anchor" aria-label="anchor" href="#arg-sec-margin"></a></dt>
+<dd><p>Optional per-section margin, given unquoted as a
+<code><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">ggplot2::margin()</a></code> call (e.g. <code>margin(0.5, 0.5, 0.5, 0.5, "in")</code>); captured
+as code and applied when this section is placed. <code>NULL</code> (default) uses the
+document margin from <code><a href="initialize_doc.html">initialize_doc()</a></code>.</p></dd>
 
 
 <dt id="arg-height-width">height, width<a class="anchor" aria-label="anchor" href="#arg-height-width"></a></dt>
-<dd><p>Optional per-section canvas dimensions in inches. <em>In
-development</em>: reserved for a future pile backend that renders each section
-as an independent file. Ignored when the document is rendered as a single
-uniform deck. <code>NULL</code> (default) uses the document canvas.</p></dd>
+<dd><p>Optional per-section canvas dimensions in inches, used
+when writing a pile (<code>output = "multiple"</code>/<code>"both"</code> in <code><a href="generate_docs.html">generate_docs()</a></code>):
+they override the document canvas for this section's standalone file. In
+single-PDF output the canvas is uniform and these are ignored. <code>NULL</code>
+(default) uses the document canvas.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>The document object, with this section's layout recorded. Returned so
-<code>layout_section()</code> calls can be chained.</p>
+    <p>The document grid, with this section's layout recorded and its
+<code>laid_out</code> flag set <code>TRUE</code>. Returned so <code>layout_section()</code> calls can be
+chained.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><code>layout_section()</code> is chainable: pipe one call into the next to lay out each
 section in turn, building the document's structure as a readable sequence of
 calls.</p>
-<p>Layout settings left <code>NULL</code> are recorded as missing, so that
+<p>Layout settings left at their <code>NULL</code>/default are recorded as missing, so that
 <code><a href="generate_docs.html">generate_docs()</a></code> can fall through to the document-level defaults set in
 <code><a href="initialize_doc.html">initialize_doc()</a></code>. This cascade — section setting if given, document default
 otherwise — lets most sections inherit a consistent look while individual
@@ -152,9 +162,9 @@ report any section that was added to the document but never passed through
 
 
 <p>Each section has two layouts, the same distinction used in
-<code><a href="preview_section.html">preview_section()</a></code>. The <em>inner</em> layout (<code>.patchwork_syntax</code> with
-<code>.inner_design</code>) arranges the section's own content — <code>sec_txt</code>, <code>sec_tbl</code>,
-<code>sec_fig</code> — into a composition. The <em>outer</em> layout (<code>.outer_design</code>) places
+<code><a href="preview_section.html">preview_section()</a></code>. The <em>inner</em> layout (<code>patchwork_syntax</code> with
+<code>inner_design</code>) arranges the section's own content — <code>sec_txt</code>, <code>sec_tbl</code>,
+<code>sec_fig</code> — into a composition. The <em>outer</em> layout (<code>outer_design</code>) places
 that composition onto the page, full-bleed (<code>"A"</code>, the default) or in a
 region with reserved space (e.g. <code>"#AA"</code>).</p>
 <p>The layout recorded here is applied to <em>every</em> subsection of the section when
@@ -177,13 +187,13 @@ render it.</p></div>
 <span class="r-in"><span>  <span class="fu"><a href="initialize_doc.html">initialize_doc</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">layout_section</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="st">"estimates"</span>,</span></span>
-<span class="r-in"><span>    .patchwork_syntax <span class="op">=</span> <span class="va">sec_txt</span> <span class="op">+</span> <span class="va">sec_fig</span>,</span></span>
-<span class="r-in"><span>    .inner_design     <span class="op">=</span> <span class="st">"AABB"</span></span></span>
+<span class="r-in"><span>    patchwork_syntax <span class="op">=</span> <span class="va">sec_txt</span> <span class="op">+</span> <span class="va">sec_fig</span>,</span></span>
+<span class="r-in"><span>    inner_design     <span class="op">=</span> <span class="st">"AABB"</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">layout_section</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="st">"robustness"</span>,</span></span>
-<span class="r-in"><span>    .patchwork_syntax <span class="op">=</span> <span class="va">sec_tbl</span>,</span></span>
-<span class="r-in"><span>    add_desc          <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>    patchwork_syntax <span class="op">=</span> <span class="va">sec_tbl</span>,</span></span>
+<span class="r-in"><span>    add_desc         <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

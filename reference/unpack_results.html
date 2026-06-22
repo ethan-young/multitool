@@ -147,13 +147,29 @@ decision grid specified.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Run the whole multiverse</span></span></span>
 <span class="r-in"><span><span class="va">the_multiverse</span> <span class="op">&lt;-</span> <span class="fu"><a href="analyze_grid.html">analyze_grid</a></span><span class="op">(</span><span class="va">pipeline_grid</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,<span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in purrr::map(1:nrow(.grid), purrr::in_parallel(function(index,     ...) {    if (!is.null(libraries)) {        purrr::walk(rlang::parse_exprs(paste(glue::glue("library({c('multitool', 'dplyr', libraries)})"),             collapse = "; ")), rlang::eval_tidy)    }    if (!purrr::is_empty(custom_fns)) {        purrr::walk(rlang::parse_exprs(glue::glue("assign('{names(custom_fns)}', {custom_fns}, pos = .GlobalEnv)")),             rlang::eval_tidy)    }    start &lt;- Sys.time()    analyzed_result &lt;- execute_universe_model(.grid, decision_index = index,         save_model = save_model)    end &lt;- Sys.time()    tidyr::nest(dplyr::mutate(analyzed_result, run_started = start,         run_ended = end, run_duration_seconds = end - start,         run_duration_minutes = (end - start)/60), timing_logs = dplyr::starts_with("run_"))}, .grid = .grid, execute_universe_model = execute_universe_model,     save_model = save_model, libraries = libraries, custom_fns = custom_fns),     .progress = show_progress):</span> <span style="color: #00BBBB;">ℹ</span> In index: 1.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> object 'the_data' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Reveal results of the linear model</span></span></span>
 <span class="r-in"><span><span class="va">the_multiverse</span> <span class="op">|&gt;</span> <span class="fu">unpack_results</span><span class="op">(</span><span class="va">model_fitted</span>, <span class="va">model_parameters</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'the_multiverse' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 50 × 27</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    decision ivs   dvs   mods  include1      include2      include3    model_meta</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>        1 iv1   dv1   mod1  include1 == 0 include2 != 3 scale(incl… linear_mo…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>        1 iv1   dv1   mod1  include1 == 0 include2 != 3 scale(incl… linear_mo…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>        1 iv1   dv1   mod1  include1 == 0 include2 != 3 scale(incl… linear_mo…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>        1 iv1   dv1   mod1  include1 == 0 include2 != 3 scale(incl… linear_mo…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span>        1 iv1   dv1   mod1  include1 == 0 include2 != 3 scale(incl… linear_mo…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>        2 iv1   dv1   mod2  include1 == 0 include2 != 3 scale(incl… linear_mo…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>        2 iv1   dv1   mod2  include1 == 0 include2 != 3 scale(incl… linear_mo…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>        2 iv1   dv1   mod2  include1 == 0 include2 != 3 scale(incl… linear_mo…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>        2 iv1   dv1   mod2  include1 == 0 include2 != 3 scale(incl… linear_mo…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>        2 iv1   dv1   mod2  include1 == 0 include2 != 3 scale(incl… linear_mo…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 40 more rows</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 19 more variables: model_function &lt;chr&gt;, parameter &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   coefficient &lt;dbl&gt;, se &lt;dbl&gt;, ci &lt;dbl&gt;, ci_low &lt;dbl&gt;, ci_high &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   t &lt;dbl&gt;, df_error &lt;int&gt;, p &lt;dbl&gt;, std_coefficient &lt;dbl&gt;, std_ci &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   std_ci_low &lt;dbl&gt;, std_ci_high &lt;dbl&gt;, model_performance &lt;list&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   model_warnings &lt;list&gt;, model_messages &lt;list&gt;, pipeline_code &lt;list&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   timing_logs &lt;list&gt;</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

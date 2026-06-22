@@ -12,7 +12,12 @@ back.
 ## Usage
 
 ``` r
-show_section_content(.report, section, sub_section = NULL, content = "figure")
+show_section_content(
+  .report,
+  section,
+  sub_section = NULL,
+  content = c("fig", "txt", "tbl")
+)
 ```
 
 ## Arguments
@@ -33,8 +38,7 @@ show_section_content(.report, section, sub_section = NULL, content = "figure")
 
 - content:
 
-  Which content channel to show: `"figure"` (default), `"text"`, or
-  `"tbl"`.
+  Which content channel to show: `"fig"` (default), `"txt"`, or `"tbl"`.
 
 ## Value
 
@@ -83,6 +87,6 @@ show_section_content(
 )
 
 # Capture the returned object
-fig <- show_section_content(report, "estimates", content = "figure")
+fig <- show_section_content(report, "estimates", content = "fig")
 } # }
 ```
