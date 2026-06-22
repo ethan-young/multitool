@@ -7,51 +7,59 @@
 layout_section(
   .doc,
   section,
-  .patchwork_syntax = NULL,
-  .inner_design = NULL,
-  .outer_design = "A",
+  patchwork_syntax = NULL,
+  inner_design = NULL,
+  outer_design = "A",
   add_title = TRUE,
   add_desc = TRUE,
   meta_pt_sizes = c(24, 16),
   txt_size = 6,
+  sec_margin = NULL,
   height = NULL,
   width = NULL
 )
 }
 \arguments{
-\item{.doc}{A document object from \code{\link[=initialize_doc]{initialize_doc()}}.}
+\item{.doc}{A document grid from \code{\link[=initialize_doc]{initialize_doc()}}.}
 
 \item{section}{The \code{id} of the section to lay out. Must exist in the
 document.}
 
-\item{.patchwork_syntax}{Patchwork syntax composing the section's content
+\item{patchwork_syntax}{Patchwork syntax composing the section's content
 slots — \code{sec_txt}, \code{sec_tbl}, \code{sec_fig} — e.g. \code{sec_txt + sec_fig}. Written
 unquoted; captured as code.}
 
-\item{.inner_design}{Optional patchwork design string arranging the content
-slots (the \emph{inner} layout). Applies when \code{.patchwork_syntax} uses no
+\item{inner_design}{Optional patchwork design string arranging the content
+slots (the \emph{inner} layout). Applies when \code{patchwork_syntax} uses no
 positional operators (\code{|}, \code{/}). \code{NULL} (default) leaves arrangement to the
 syntax.}
 
-\item{.outer_design}{Patchwork design string placing the composed section on
+\item{outer_design}{Patchwork design string placing the composed section on
 the page (the \emph{outer} layout); defaults to \code{"A"} (full-bleed).}
 
-\item{add_title, add_desc}{Whether to show the section's title and
-description when rendered (default \code{TRUE} for both).}
+\item{add_title, add_desc}{Whether to show the section's title and description
+when rendered (default \code{TRUE} for both).}
 
 \item{meta_pt_sizes}{Point sizes for the title and description, as a length-2
 numeric (default \code{c(24, 16)}).}
 
-\item{txt_size}{Point sizes for a textual section (if any). Defaults to 6.}
+\item{txt_size}{Point size for a textual content slot, if any (default \code{6}).}
 
-\item{height, width}{Optional per-section canvas dimensions in inches. \emph{In
-development}: reserved for a future pile backend that renders each section
-as an independent file. Ignored when the document is rendered as a single
-uniform deck. \code{NULL} (default) uses the document canvas.}
+\item{sec_margin}{Optional per-section margin, given unquoted as a
+\code{\link[ggplot2:margin]{ggplot2::margin()}} call (e.g. \code{margin(0.5, 0.5, 0.5, 0.5, "in")}); captured
+as code and applied when this section is placed. \code{NULL} (default) uses the
+document margin from \code{\link[=initialize_doc]{initialize_doc()}}.}
+
+\item{height, width}{Optional per-section canvas dimensions in inches, used
+when writing a pile (\code{output = "multiple"}/\code{"both"} in \code{\link[=generate_docs]{generate_docs()}}):
+they override the document canvas for this section's standalone file. In
+single-PDF output the canvas is uniform and these are ignored. \code{NULL}
+(default) uses the document canvas.}
 }
 \value{
-The document object, with this section's layout recorded. Returned so
-\code{layout_section()} calls can be chained.
+The document grid, with this section's layout recorded and its
+\code{laid_out} flag set \code{TRUE}. Returned so \code{layout_section()} calls can be
+chained.
 }
 \description{
 Specifies how one section should be composed and placed when the document is
@@ -66,7 +74,7 @@ once, in \code{\link[=generate_docs]{generate_docs()}}.
 section in turn, building the document's structure as a readable sequence of
 calls.
 
-Layout settings left \code{NULL} are recorded as missing, so that
+Layout settings left at their \code{NULL}/default are recorded as missing, so that
 \code{\link[=generate_docs]{generate_docs()}} can fall through to the document-level defaults set in
 \code{\link[=initialize_doc]{initialize_doc()}}. This cascade — section setting if given, document default
 otherwise — lets most sections inherit a consistent look while individual
@@ -79,9 +87,9 @@ report any section that was added to the document but never passed through
 \section{Inner and outer layout}{
 
 Each section has two layouts, the same distinction used in
-\code{\link[=preview_section]{preview_section()}}. The \emph{inner} layout (\code{.patchwork_syntax} with
-\code{.inner_design}) arranges the section's own content — \code{sec_txt}, \code{sec_tbl},
-\code{sec_fig} — into a composition. The \emph{outer} layout (\code{.outer_design}) places
+\code{\link[=preview_section]{preview_section()}}. The \emph{inner} layout (\code{patchwork_syntax} with
+\code{inner_design}) arranges the section's own content — \code{sec_txt}, \code{sec_tbl},
+\code{sec_fig} — into a composition. The \emph{outer} layout (\code{outer_design}) places
 that composition onto the page, full-bleed (\code{"A"}, the default) or in a
 region with reserved space (e.g. \code{"#AA"}).
 
@@ -97,13 +105,13 @@ doc <-
   initialize_doc() |>
   layout_section(
     "estimates",
-    .patchwork_syntax = sec_txt + sec_fig,
-    .inner_design     = "AABB"
+    patchwork_syntax = sec_txt + sec_fig,
+    inner_design     = "AABB"
   ) |>
   layout_section(
     "robustness",
-    .patchwork_syntax = sec_tbl,
-    add_desc          = FALSE
+    patchwork_syntax = sec_tbl,
+    add_desc         = FALSE
   )
 }
 

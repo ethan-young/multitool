@@ -210,11 +210,12 @@ show_labels <- function(.object, .code = FALSE) {
 #' gathered data. Sections accumulate: piping one `add_section()` into the next
 #' builds a multi-section report grid.
 #'
-#' The content functions (`txt.fn`, `tbl.fn`, `fig.fn`) are captured as code,
-#' recorded so the section remains a transparent, auditable artifact, then run
-#' against the section's data to realize the actual text, table, and figure
-#' objects. Both the realized content and the generating code are stored, so a
-#' section can be rendered *and* inspected.
+#' `add_section()` records the content functions (`txt.fn`, `tbl.fn`, `fig.fn`)
+#' as code; it does not run them. Realization is deferred to the moment a
+#' section is previewed ([preview_section()]) or the document is generated
+#' ([generate_docs()]), so defining a section is cheap no matter how many
+#' subsections it fans out into. The stored code *is* the section — it is read
+#' back when inspecting, and evaluated when rendering.
 #'
 #' @section Section content: gather, then distil:
 #' A section is built in two steps. First, `report_data` gathers the data the
@@ -234,9 +235,9 @@ show_labels <- function(.object, .code = FALSE) {
 #' call (with parentheses), not a bare name.
 #'
 #' A section need not have all three content types. Any of `txt.fn`, `tbl.fn`,
-#' or `fig.fn` may be left `NULL`, in which case that content slot is empty
-#' (stored as `NULL`) and simply omitted wherever the section is rendered. A
-#' figure-only section, a table-plus-text section, or any combination is valid.
+#' or `fig.fn` may be left `NULL`, in which case that content slot is empty and
+#' simply omitted wherever the section is rendered. A figure-only section, a
+#' table-plus-text section, or any combination is valid.
 #'
 #' @section Sections and subsections:
 #' When `.by` is supplied, the section is *fanned out* into one subsection per
@@ -271,17 +272,27 @@ show_labels <- function(.object, .code = FALSE) {
 #' @param .by Columns that split the section into subsections, one per unique
 #'   combination. When `NULL`, the section is a single unit.
 #'
-#' @return A report grid (a tibble) with one row per subsection, carrying the
-#'   section's id, the realized `sec_txt`/`sec_tbl`/`sec_fig` content, a nested
-#'   `code` column holding the generating code for each, and per-subsection
-#'   titles and descriptions. The originating grid name is recorded as an
-#'   `"analysis_grid"` attribute so successive `add_section()` calls can chain.
+#' @return A report grid (a tibble) with one row per subsection. Each row
+#'   carries the section's id, the per-subsection title and description, and the
+#'   content-generating code for each channel in the `sec_txt`, `sec_tbl`, and
+#'   `sec_fig` columns — full pipelines from the analysis grid through the
+#'   content function, stored as code and evaluated only when the section is
+#'   previewed or generated. Empty channels hold `"NULL"`. The originating grid
+#'   name is recorded as an `"analysis_grid"` attribute so successive
+#'   `add_section()` calls can chain.
 #'
 #' @details
-#' Each content slot stores both the realized object (`sec_txt`, `sec_tbl`,
-#' `sec_fig`) and its code (nested under `code`), supporting the package's
-#' code-as-artifact principle: a section can be rendered into a report and also
-#' read back as the exact code that produced it.
+#' `add_section()` stores code, not rendered output. The `sec_txt`, `sec_tbl`,
+#' and `sec_fig` columns each hold a complete pipeline — the analysis grid,
+#' through `report_data`, through the content function — as an evaluable string.
+#' Nothing is rendered here; realization happens downstream. This is the
+#' package's code-as-artifact principle in its strongest form: a section is
+#' fully described by readable, re-runnable code, inspectable with
+#' [show_section_content()] and rendered only at preview or generation time.
+#'
+#' Deferring realization also keeps `add_section()` fast: a section fanned out
+#' into many subsections costs no rendering at definition time, since the
+#' content is rendered later — once — when the document is built.
 #'
 #' Content functions have access only to the gathered section data, not to the
 #' section's metadata fields — a figure title, for instance, belongs inside
@@ -289,7 +300,7 @@ show_labels <- function(.object, .code = FALSE) {
 #'
 #' @seealso
 #'   [compose_view()] for gathering results for section reporting;
-#'   [show_section_content()] to inspect one section's realized content and code;
+#'   [show_section_content()] to inspect one section's content code and render it;
 #'   [preview_section()] to preview a section's composed layout;
 #'   [layout_section()] and [generate_docs()] to assemble sections into a document.
 #'
@@ -441,16 +452,10 @@ add_section <-
             sec_fig_fn != "NULL",
             glue::glue("{sec_piping} |> {sec_fig_fn}"),
             sec_fig_fn
-          )
-      ) |>
-      dplyr::mutate(
-        dplyr::across(c(sec_txt, sec_tbl, sec_fig), ~.x, .names = "code_{.col}")
-      ) |>
-      tidyr::nest(code = dplyr::starts_with("code")) |>
-      dplyr::mutate(
-        sec_txt = purrr::map(sec_txt, \(x) rlang::parse_expr(x) |> rlang::eval_tidy()),
-        sec_tbl = purrr::map(sec_tbl, \(x) rlang::parse_expr(x) |> rlang::eval_tidy()),
-        sec_fig = purrr::map(sec_fig, \(x) rlang::parse_expr(x) |> rlang::eval_tidy())
+          ),
+        sec_txt_fn,
+        sec_tbl_fn,
+        sec_fig_fn
       )
 
     if(!is.null(data_attr)){
@@ -480,8 +485,8 @@ add_section <-
 #' @param section The `id` of the section to inspect.
 #' @param sub_section The `sec_sub_id` of the subsection to show. If `NULL`
 #'   (default), a subsection is sampled at random.
-#' @param content Which content channel to show: `"figure"` (default),
-#'   `"text"`, or `"tbl"`.
+#' @param content Which content channel to show: `"fig"` (default),
+#'   `"txt"`, or `"tbl"`.
 #'
 #' @return The realized content object for the chosen channel and subsection,
 #'   returned invisibly. Called primarily for its console output: the section's
@@ -515,46 +520,45 @@ add_section <-
 #' )
 #'
 #' # Capture the returned object
-#' fig <- show_section_content(report, "estimates", content = "figure")
+#' fig <- show_section_content(report, "estimates", content = "fig")
 #' }
 #'
 #' @export
 show_section_content <-
-  function(.report, section, sub_section = NULL, content = "figure"){
+  function(
+    .report,
+    section,
+    sub_section = NULL,
+    content = c("fig", "txt", "tbl")
+  ){
+
+    content <- match.arg(content)   # validates + prevents typo'd content values
 
     report_section <-
       .report |>
-      dplyr::filter(sec_id == section) |>
-      tidyr::unnest(code)
+      dplyr::filter(sec_id == section)
 
-    if(is.null(sub_section)){
-      report_section <-
-        report_section |>
-        dplyr::slice_sample()
-    } else{
-      report_section <-
-        report_section |>
-        dplyr::filter(sec_sub_id == sub_section)
+    if (is.null(sub_section)) {
+      report_section <- report_section |> dplyr::slice_sample(n = 1)
+    } else {
+      report_section <- report_section |> dplyr::filter(sec_sub_id == sub_section)
     }
 
-    report_section <-
-      report_section |>
-      dplyr::mutate(
-        content_col =
-          dplyr::case_when(
-            content == "figure" ~ sec_fig,
-            content == "text" ~ sec_txt,
-            content == "tbl" ~ sec_tbl,
-            TRUE ~ NA
-          ),
-        content_code =
-          dplyr::case_when(
-            content == "figure" ~ code_sec_fig,
-            content == "text" ~ code_sec_txt,
-            content == "tbl" ~ code_sec_tbl,
-            TRUE ~ NA
-          )
+    if (nrow(report_section) != 1) {
+      stop(
+        "Expected exactly one subsection for section '", section,
+        "'; found ", nrow(report_section), ".",
+        call. = FALSE
       )
+    }
+
+    code_str <-
+      report_section |>
+      dplyr::pull(
+        switch(content, fig = sec_fig, txt = sec_txt, tbl = sec_tbl)
+      )
+
+    label <- switch(content, fig = "Figure", txt = "Text", tbl = "Table")
 
     cat(
       glue::glue_data(
@@ -565,30 +569,32 @@ show_section_content <-
       )
     )
 
+    # Empty channel: report and return early rather than printing NULL.
+    if (identical(code_str, "NULL")) {
+      cat(glue::glue("{label}: (this section has no {tolower(label)} content)\n\n"))
+      return(invisible(NULL))
+    }
+
+    # Evaluate ONCE; reuse for display and return.
+    realized <-
+      code_str |>
+      rlang::parse_expr() |>
+      rlang::eval_tidy()
+
+    plot_pane <- "(see plot pane for figure and rendered tables)"
+
     cat(
       glue::glue(
-        "{stringr::str_to_title(content)}:",
-        "{ifelse(content == 'figure','\n(see plot pane)', '')}",
-        "\n\n"
+        "{label}:\n{ifelse(content != 'txt', plot_pane, '')}\n",
+        .trim = FALSE
       )
     )
+    print(realized)
 
-    report_section |>
-      dplyr::pull(content_col) |>
-      print()
+    cat(glue::glue("{label} Code:\n\n"))
+    print(styler::style_text(code_str))
 
-    cat(glue::glue("{stringr::str_to_title(content)} Code:\n\n"))
-
-    report_section |>
-      dplyr::pull(content_code) |>
-      styler::style_text() |>
-      print()
-
-    invisible(
-      report_section |>
-        dplyr::pull(content_col) |>
-        purrr::pluck(1)
-    )
+    invisible(realized)
   }
 
 #' Preview a figure at its true output size
@@ -808,18 +814,18 @@ view_real_size <-
 #'   section's stored title and description; empty values are omitted.
 #' @param codify Whether to print a call to `layout_section` based on preview
 #'   settings. Defaults to `TRUE`.
-#' @param .patchwork_syntax Patchwork syntax composing the section's content
+#' @param patchwork_syntax Patchwork syntax composing the section's content
 #'   slots — `sec_txt`, `sec_tbl`, `sec_fig` — e.g. `sec_txt + sec_fig`. Slots
 #'   that are empty for this section render as blank spacers.
-#' @param .mode Passed to [view_real_size()] as `mode`; `"slide"` (default)
+#' @param mode Passed to [view_real_size()] as `mode`; `"slide"` (default)
 #'   previews the composition placed on a slide canvas.
-#' @param .inner_design Optional patchwork design string arranging the content
+#' @param inner_design Optional patchwork design string arranging the content
 #'   slots (the *inner* layout). Applies only when `.patchwork_syntax` uses no
 #'   positional operators (`|`, `/`); see [view_real_size()] and patchwork's
 #'   layout documentation.
-#' @param .outer_design Patchwork design string placing the composed section on
+#' @param outer_design Patchwork design string placing the composed section on
 #'   the slide (the *outer* layout); defaults to `"A"` (full-bleed).
-#' @param .txt_size The size of text to appear when a composition contains a
+#' @param txt_size The size of text to appear when a composition contains a
 #'   textual section. Defaults to 6.
 #' @param ... Passed to [view_real_size()] — e.g. `asp_ratio`, `anchor_height`,
 #'   `dpi`, `margin`, `pt_sizes` — to control the slide canvas and styling.
@@ -843,8 +849,8 @@ view_real_size <-
 #' preview_section(
 #'   report,
 #'   section           = "estimates",
-#'   .patchwork_syntax = sec_txt + sec_fig,
-#'   .inner_design     = "AABB"
+#'   patchwork_syntax = sec_txt + sec_fig,
+#'   inner_design     = "AABB"
 #' )
 #'
 #' # Preview with the section title shown, content in the right two-thirds
@@ -852,8 +858,8 @@ view_real_size <-
 #'   report,
 #'   section           = "estimates",
 #'   add_title         = TRUE,
-#'   .patchwork_syntax = sec_fig,
-#'   .outer_design     = "#AA"
+#'   patchwork_syntax = sec_fig,
+#'   outer_design     = "#AA"
 #' )
 #' }
 #'
@@ -866,21 +872,20 @@ preview_section <-
     add_title = TRUE,
     add_desc = TRUE,
     codify = TRUE,
-    .patchwork_syntax = NULL,
-    .mode = "slide",
-    .inner_design = NULL,
-    .outer_design = "A",
-    .txt_size = 6,
+    patchwork_syntax = NULL,
+    mode = "slide",
+    inner_design = NULL,
+    outer_design = "A",
+    txt_size = 6,
     ...
   ){
 
-    patch_syntax <- dplyr::enexprs(.patchwork_syntax)
+    patch_syntax <- dplyr::enexprs(patchwork_syntax)
     patch_syntax_chr <- as.character(patch_syntax)
 
     report_section <-
       .report |>
-      dplyr::filter(sec_id == section) |>
-      tidyr::unnest(code)
+      dplyr::filter(sec_id == section)
 
     if(is.null(sub_section)){
       report_section <-
@@ -896,8 +901,8 @@ preview_section <-
       compose_partition(
         report_section,
         .syntax = patch_syntax_chr,
-        .design = .inner_design,
-        .txt_size = .txt_size
+        .design = inner_design,
+        .txt_size = txt_size
       )
 
     inner_fig <- composed_section$inner_fig
@@ -922,11 +927,11 @@ preview_section <-
 
     if(codify){
       inner_line <-
-        if(is.null(.inner_design)){
+        if(is.null(inner_design)){
           ''
         } else {
           glue::glue(
-            ".inner_design = '{.inner_design}',"
+            "inner_design = '{inner_design}',"
           )
         }
 
@@ -935,9 +940,9 @@ preview_section <-
           "\n\n",
           "layout_section(",
           "section = '{section}',",
-          ".patchwork_syntax = {patch_syntax_chr},",
+          "patchwork_syntax = {patch_syntax_chr},",
           "{str_replace_all(inner_line, '\n', '\\\\\\\\n')}",
-          ".outer_design = '{.outer_design}',",
+          "outer_design = '{outer_design}',",
           "add_title = {add_title},",
           "add_desc = {add_desc}",
           ")",
@@ -954,8 +959,8 @@ preview_section <-
 
     view_real_size(
       .fig = inner_fig,
-      mode = .mode,
-      design = .outer_design,
+      mode = mode,
+      design = outer_design,
       frame = FALSE,
       title = p_title,
       subtitle = p_desc,
@@ -966,7 +971,7 @@ preview_section <-
 
 #' Begin assembling a report document
 #'
-#' Starts a document from one or more report grids, producing a document object
+#' Starts a document from one or more report grids, producing a document grid
 #' that subsequent [layout_section()] calls fill in and [generate_docs()]
 #' renders. This is the head of the assembly chain: gather your built sections
 #' here, lay each one out, then generate.
@@ -974,39 +979,46 @@ preview_section <-
 #' Multiple report grids may be supplied. This supports the common case where a
 #' single research question spans several analysis pipelines whose decision
 #' spaces diverge enough to be built separately, yet belong in one document. The
-#' grids are combined into a single universe of sections, and `layout_section()`
-#' and `generate_docs()` treat them uniformly thereafter.
+#' grids are combined into a single universe of sections, and [layout_section()]
+#' and [generate_docs()] treat them uniformly thereafter.
 #'
 #' @section Document-level defaults:
-#' The settings given here — backend, aspect ratio, height, dpi, margin — are
-#' the document's defaults, applied to every section unless a section overrides
-#' them in [layout_section()]. The canvas is sized once for the whole document:
-#' slides are `default_height` inches tall, with width following the aspect
-#' ratio, so a single-document output is a uniform deck.
+#' The settings given here — aspect ratio, height, width, dpi, margin — are the
+#' document's defaults, applied to every section unless a section overrides them
+#' in [layout_section()]. The canvas is sized once for the whole document:
+#' slides are `default_height` inches tall, with width either given explicitly
+#' via `default_width` or derived from the aspect ratio, so a single-document
+#' output is a uniform deck. The rendering backend and output mode are *not* set
+#' here; they are chosen later, at [generate_docs()].
 #'
 #' @param ... One or more report grids, each built with [add_section()]. Section
 #'   ids must be unique across all supplied grids.
-#' @param backend The rendering backend (default `"patchwork"`). Determines how
-#'   [generate_docs()] interprets each section's layout and what it produces.
 #' @param default_asp_ratio Default slide aspect ratio: `"wide"` (16:9, default)
-#'   or `"full"` (4:3).
-#' @param default_height Default slide height in inches (default `7.5`); the
-#'   width follows the aspect ratio.
+#'   or `"full"` (4:3). Used to derive the canvas width from `default_height`
+#'   when `default_width` is not given.
+#' @param default_height Default slide height in inches (default `7.5`).
+#' @param default_width Optional explicit slide width in inches. When `NULL`
+#'   (default), the width is derived from `default_height` and
+#'   `default_asp_ratio`.
 #' @param default_dpi Default rendering resolution (default `96`).
 #' @param default_margin Default slide margin, a [ggplot2::margin()] object
 #'   (default zero on all sides). May be given in any unit.
 #'
-#' @return A document object: a list with a `settings` element (the
-#'   document-level defaults) and a `grid` element (one row per section, with
-#'   its subsections nested and its layout to be filled in by
-#'   [layout_section()]).
+#' @return A document grid: a tibble with one row per section, the section's
+#'   subsections nested in a `content` column, the document-level defaults
+#'   denormalized across rows as `doc_*` columns (aspect ratio, dpi, margin,
+#'   canvas width and height), and the per-section layout columns initialized
+#'   empty (to be filled by [layout_section()]) with a `laid_out` flag set
+#'   `FALSE`. The names of the originating analysis grids are recorded in an
+#'   `"analysis_grids"` attribute, so the grids can be shipped to workers if
+#'   [generate_docs()] renders in parallel.
 #'
 #' @details
-#' Section ids must be unique across all supplied grids, since `layout_section()`
-#' and `generate_docs()` address sections by id. If the same id appears in more
+#' Section ids must be unique across all supplied grids, since [layout_section()]
+#' and [generate_docs()] address sections by id. If the same id appears in more
 #' than one grid, `initialize_doc()` stops and reports the collisions, so the
-#' ambiguity is caught at assembly time rather than producing a confusing
-#' result later.
+#' ambiguity is caught at assembly time rather than producing a confusing result
+#' later.
 #'
 #' Each section begins un-laid-out; it must be passed through [layout_section()]
 #' before [generate_docs()] can render it.
@@ -1023,7 +1035,7 @@ preview_section <-
 #'   report |>
 #'   initialize_doc(
 #'     default_asp_ratio = "wide",
-#'     margin = ggplot2::margin(0.5, 0.5, 0.5, 0.5, "in")
+#'     default_margin    = ggplot2::margin(0.5, 0.5, 0.5, 0.5, "in")
 #'   )
 #'
 #' # Multiple grids from divergent pipelines, one document
@@ -1037,7 +1049,7 @@ preview_section <-
 #' # Continue the chain
 #' doc <-
 #'   doc |>
-#'   layout_section("estimates", .patchwork_syntax = sec_fig) |>
+#'   layout_section("estimates", patchwork_syntax = sec_fig) |>
 #'   generate_docs(file = "deck.pdf")
 #' }
 #'
@@ -1045,21 +1057,35 @@ preview_section <-
 initialize_doc <-
   function(
     ...,
-    backend          = "patchwork",
     default_asp_ratio = "wide",
     default_height    = 7.5,
+    default_width     = NULL,
     default_dpi       = 96,
     default_margin    = ggplot2::margin(0, 0, 0, 0, "in")
   ) {
 
+    # capture the names of the analysis grids and save them out
+    # as columns in doc_grid for each layer so they can be passed
+    # to workers later for possible parallel runs
+
     aspect   <- if (default_asp_ratio == "wide") 16 / 9 else 4 / 3
-    canvas_w <- default_height * aspect
+    canvas_w <-
+      if(is.null(default_width)) default_height * aspect else default_width
     canvas_h <- default_height
+
+    doc_margin <- as.character(dplyr::enexprs(default_margin))
 
     report_grids <- list(...)
     if (length(report_grids) == 0) {
       stop("initialize_doc() needs at least one report grid.", call. = FALSE)
     }
+
+    analysis_grids <-
+      purrr::map(
+        report_grids, function(x){
+          attr(x, "analysis_grid")
+        }
+      )
 
     combined_grid <- dplyr::bind_rows(report_grids, .id = "report_index")
 
@@ -1079,34 +1105,32 @@ initialize_doc <-
       )
     }
 
-    grid <-
+    doc_grid <-
       combined_grid |>
       tidyr::nest(content = -c(report_index, sec_id)) |>
       dplyr::mutate(
-        patchwork_syntax   = NA_character_,
-        inner_layout       = NA_character_,
-        outer_layout       = NA_character_,
-        section_incl_title = NA,
-        section_incl_desc  = NA,
-        section_width      = NA_real_,
-        section_height     = NA_real_,
-        section_meta_sizes = list(NULL),
-        section_txt_size   = NA_real_,
-        laid_out           = FALSE
+        doc_asp_ratio            = default_asp_ratio,
+        doc_dpi                  = default_dpi,
+        doc_margin               = doc_margin,
+        doc_canvas_width         = canvas_w,
+        doc_canvas_height        = canvas_h,
+        section_patchwork_syntax = NA_character_,
+        section_inner_layout     = NA_character_,
+        section_outer_layout     = NA_character_,
+        section_incl_title       = NA,
+        section_incl_desc        = NA,
+        section_margin           = NA_character_,
+        section_width            = NA_real_,
+        section_height           = NA_real_,
+        section_title_size       = NA_real_,
+        section_subtitle_size    = NA_real_,
+        section_txt_size         = NA_real_,
+        laid_out                 = FALSE
       )
 
-    list(
-      settings =
-        list(
-          backend       = backend,
-          asp_ratio     = default_asp_ratio,
-          dpi           = default_dpi,
-          margin        = default_margin,
-          canvas_width  = canvas_w,
-          canvas_height = canvas_h
-        ),
-      grid = grid
-    )
+    attr(doc_grid, "analysis_grids") <- analysis_grids
+    doc_grid
+
   }
 
 #' Record a section's layout for assembly
@@ -1124,9 +1148,9 @@ initialize_doc <-
 #'
 #' @section Inner and outer layout:
 #' Each section has two layouts, the same distinction used in
-#' [preview_section()]. The *inner* layout (`.patchwork_syntax` with
-#' `.inner_design`) arranges the section's own content — `sec_txt`, `sec_tbl`,
-#' `sec_fig` — into a composition. The *outer* layout (`.outer_design`) places
+#' [preview_section()]. The *inner* layout (`patchwork_syntax` with
+#' `inner_design`) arranges the section's own content — `sec_txt`, `sec_tbl`,
+#' `sec_fig` — into a composition. The *outer* layout (`outer_design`) places
 #' that composition onto the page, full-bleed (`"A"`, the default) or in a
 #' region with reserved space (e.g. `"#AA"`).
 #'
@@ -1134,33 +1158,39 @@ initialize_doc <-
 #' the document is generated, so a section fanned out into many subsections is
 #' composed consistently across all of them.
 #'
-#' @param .doc A document object from [initialize_doc()].
+#' @param .doc A document grid from [initialize_doc()].
 #' @param section The `id` of the section to lay out. Must exist in the
 #'   document.
-#' @param .patchwork_syntax Patchwork syntax composing the section's content
+#' @param patchwork_syntax Patchwork syntax composing the section's content
 #'   slots — `sec_txt`, `sec_tbl`, `sec_fig` — e.g. `sec_txt + sec_fig`. Written
 #'   unquoted; captured as code.
-#' @param .inner_design Optional patchwork design string arranging the content
-#'   slots (the *inner* layout). Applies when `.patchwork_syntax` uses no
+#' @param inner_design Optional patchwork design string arranging the content
+#'   slots (the *inner* layout). Applies when `patchwork_syntax` uses no
 #'   positional operators (`|`, `/`). `NULL` (default) leaves arrangement to the
 #'   syntax.
-#' @param .outer_design Patchwork design string placing the composed section on
+#' @param outer_design Patchwork design string placing the composed section on
 #'   the page (the *outer* layout); defaults to `"A"` (full-bleed).
-#' @param add_title,add_desc Whether to show the section's title and
-#'   description when rendered (default `TRUE` for both).
+#' @param add_title,add_desc Whether to show the section's title and description
+#'   when rendered (default `TRUE` for both).
 #' @param meta_pt_sizes Point sizes for the title and description, as a length-2
 #'   numeric (default `c(24, 16)`).
-#' @param txt_size Point sizes for a textual section (if any). Defaults to 6.
-#' @param height,width Optional per-section canvas dimensions in inches. *In
-#'   development*: reserved for a future pile backend that renders each section
-#'   as an independent file. Ignored when the document is rendered as a single
-#'   uniform deck. `NULL` (default) uses the document canvas.
+#' @param txt_size Point size for a textual content slot, if any (default `6`).
+#' @param sec_margin Optional per-section margin, given unquoted as a
+#'   [ggplot2::margin()] call (e.g. `margin(0.5, 0.5, 0.5, 0.5, "in")`); captured
+#'   as code and applied when this section is placed. `NULL` (default) uses the
+#'   document margin from [initialize_doc()].
+#' @param height,width Optional per-section canvas dimensions in inches, used
+#'   when writing a pile (`output = "multiple"`/`"both"` in [generate_docs()]):
+#'   they override the document canvas for this section's standalone file. In
+#'   single-PDF output the canvas is uniform and these are ignored. `NULL`
+#'   (default) uses the document canvas.
 #'
-#' @return The document object, with this section's layout recorded. Returned so
-#'   `layout_section()` calls can be chained.
+#' @return The document grid, with this section's layout recorded and its
+#'   `laid_out` flag set `TRUE`. Returned so `layout_section()` calls can be
+#'   chained.
 #'
 #' @details
-#' Layout settings left `NULL` are recorded as missing, so that
+#' Layout settings left at their `NULL`/default are recorded as missing, so that
 #' [generate_docs()] can fall through to the document-level defaults set in
 #' [initialize_doc()]. This cascade — section setting if given, document default
 #' otherwise — lets most sections inherit a consistent look while individual
@@ -1183,13 +1213,13 @@ initialize_doc <-
 #'   initialize_doc() |>
 #'   layout_section(
 #'     "estimates",
-#'     .patchwork_syntax = sec_txt + sec_fig,
-#'     .inner_design     = "AABB"
+#'     patchwork_syntax = sec_txt + sec_fig,
+#'     inner_design     = "AABB"
 #'   ) |>
 #'   layout_section(
 #'     "robustness",
-#'     .patchwork_syntax = sec_tbl,
-#'     add_desc          = FALSE
+#'     patchwork_syntax = sec_tbl,
+#'     add_desc         = FALSE
 #'   )
 #' }
 #'
@@ -1198,42 +1228,53 @@ layout_section <-
   function(
     .doc,
     section,
-    .patchwork_syntax = NULL,
-    .inner_design     = NULL,
-    .outer_design     = "A",
+    patchwork_syntax = NULL,
+    inner_design     = NULL,
+    outer_design     = "A",
     add_title = TRUE,
     add_desc  = TRUE,
     meta_pt_sizes  = c(24, 16),
     txt_size = 6,
+    sec_margin = NULL,
     height = NULL,
     width  = NULL
   ){
 
-    patch_syntax_chr <- as.character(dplyr::enexprs(.patchwork_syntax))
+    patch_syntax_chr <- as.character(dplyr::enexprs(patchwork_syntax))
 
-    if (!section %in% .doc$grid$sec_id) {
+    sec_margin <- as.character(dplyr::enexprs(sec_margin))
+
+    if(sec_margin == "NULL"){
+      sec_margin <- NULL
+    } else{
+      sec_margin <- paste0("ggplot2::", sec_margin)
+    }
+
+    if (!section %in% .doc$sec_id) {
       stop("No section with sec_id = '", section, "' in this document.",
            call. = FALSE)
     }
 
     section_settings <-
       dplyr::tibble(
-        sec_id             = section,
-        patchwork_syntax   = patch_syntax_chr,
-        inner_layout       = .inner_design %||% NA_character_,
-        outer_layout       = .outer_design,
-        section_incl_title = add_title,
-        section_incl_desc  = add_desc,
-        section_width      = width  %||% NA_real_,
-        section_height     = height %||% NA_real_,
-        section_meta_sizes = list(meta_pt_sizes),
-        section_txt_size   = txt_size,
-        laid_out           = TRUE
+        sec_id                   = section,
+        section_patchwork_syntax = patch_syntax_chr,
+        section_inner_layout     = inner_design %||% NA_character_,
+        section_outer_layout     = outer_design,
+        section_incl_title       = add_title,
+        section_incl_desc        = add_desc,
+        section_margin           = sec_margin %||% NA_character_,
+        section_width            = width  %||% NA_real_,
+        section_height           = height %||% NA_real_,
+        section_title_size       = meta_pt_sizes[1],
+        section_subtitle_size    = meta_pt_sizes[2],
+        section_txt_size         = txt_size,
+        laid_out                 = TRUE
       )
 
-    .doc$grid <-
+    .doc <-
       dplyr::rows_update(
-        .doc$grid,
+        .doc,
         section_settings,
         by = "sec_id"
       )
@@ -1245,30 +1286,58 @@ layout_section <-
 #'
 #' Renders a document — built with [initialize_doc()] and laid out with
 #' [layout_section()] — into output. This is the terminal step of the assembly
-#' chain: it composes every section's content according to the recorded layouts
-#' and produces the final artifact.
+#' chain: it renders every section's content according to the recorded layouts,
+#' then writes the result through the chosen backend.
 #'
 #' Before rendering, `generate_docs()` checks that every section in the document
-#' has been laid out, resolves each section's effective settings (section
-#' overrides falling through to document defaults), and hands the result to the
-#' backend named in [initialize_doc()].
+#' has been laid out. It then renders each subsection's content to a placed page
+#' object and hands those pages to the backend to write to disk.
 #'
 #' @section Output modes:
 #' `output = "single"` produces one multi-page document — a deck — with every
-#' section (and its subsections) as pages of uniform size. This is the working
-#' mode for the patchwork backend, rendering a single PDF.
+#' section (and its subsections) as pages of uniform size, written as a single
+#' PDF.
 #'
-#' `output = "pile"` is *in development*: it will render each section as an
-#' independent file (using `extension` and `dir`), the mode in which
-#' per-section dimensions from [layout_section()] take effect.
+#' `output = "multiple"` writes each page as its own file (a "pile"), named by
+#' section and subsection, into `dir`. The file type follows the extension of
+#' `file`. Per-section dimensions from [layout_section()] take effect in this
+#' mode.
 #'
-#' @param .doc A laid-out document object from the
+#' `output = "both"` produces the single PDF *and* the pile of per-page files.
+#'
+#' @section Parallel rendering:
+#' If [mirai::daemons()] have been provisioned before calling `generate_docs()`,
+#' content rendering (and, for `"multiple"`/`"both"`, file writing) is
+#' distributed across the daemons; otherwise it runs sequentially. Parallelism
+#' helps for large documents and adds overhead for small ones, so it is opt-in
+#' via daemon provisioning rather than on by default. When rendering in
+#' parallel, the daemons must have the same graphical session setup as the host
+#' — in particular any custom theme (e.g. via `theme_set()`) and fonts — or
+#' pages will render against the workers' defaults. Replicate that setup on the
+#' daemons with [mirai::everywhere()] before generating.
+#'
+#' Functions and objects that a section's content code references are shipped to
+#' the workers automatically when they can be detected from the stored code;
+#' anything that cannot be detected (for example a data object referenced
+#' indirectly) can be named in `globals`.
+#'
+#' @param .doc A laid-out document grid from the
 #'   [initialize_doc()] / [layout_section()] chain.
-#' @param file Output file path for `"single"` mode (e.g. `"report.pdf"`).
-#' @param output `"single"` (default) for one multi-page deck, or `"pile"` for
-#'   one file per section (in development).
-#' @param extension File extension for `"pile"` mode (default `"png"`).
-#' @param dir Output directory for `"pile"` mode (default `"multitool_report"`).
+#' @param file Output file path. In `"single"` mode this is the PDF; in
+#'   `"multiple"` mode its extension determines the per-page file type and its
+#'   stem names the files.
+#' @param backend The rendering backend (default `"patchwork"`). Determines how
+#'   each section's recorded layout is composed and written. The architecture
+#'   dispatches on the backend, so other backends can interpret the same recorded
+#'   layouts differently in future.
+#' @param output One of `"single"` (default, one multi-page PDF),
+#'   `"multiple"` (one file per page), or `"both"`.
+#' @param dir Output directory for `"multiple"`/`"both"` modes. `NULL` (default)
+#'   writes to the current directory.
+#' @param globals Optional character vector of names of global objects
+#'   (functions or data) that section content references but that cannot be
+#'   auto-detected from the stored code. Named here, they are shipped to workers
+#'   for parallel rendering.
 #'
 #' @return Invisibly, the path(s) written. Called for the side effect of
 #'   producing the output file(s).
@@ -1279,16 +1348,11 @@ layout_section <-
 #' stops and names the un-laid-out sections, rather than silently dropping or
 #' mis-rendering them.
 #'
-#' Effective settings are resolved per section as a cascade: a value set on the
-#' section in [layout_section()] takes precedence, otherwise the document
-#' default from [initialize_doc()] applies. In `"single"` mode the canvas is
-#' held uniform across all pages (so the deck reads as a coherent whole);
-#' per-section canvas dimensions apply only in `"pile"` mode.
-#'
-#' @section Backends:
-#' The backend is set in [initialize_doc()]. `"patchwork"` composes each section
-#' with patchwork and renders it; the architecture dispatches on the backend, so
-#' other backends can interpret the same recorded layouts differently in future.
+#' Effective settings are resolved per page as a cascade: a value set on the
+#' section in [layout_section()] takes precedence, otherwise the document default
+#' from [initialize_doc()] applies. In `"single"` mode the canvas is held uniform
+#' across all pages (so the deck reads as a coherent whole); per-section canvas
+#' dimensions apply only when writing a pile.
 #'
 #' @seealso
 #'   [initialize_doc()] to begin a document; [layout_section()] to lay out its
@@ -1298,8 +1362,8 @@ layout_section <-
 #' \dontrun{
 #' report |>
 #'   initialize_doc() |>
-#'   layout_section("estimates", .patchwork_syntax = sec_txt + sec_fig) |>
-#'   layout_section("robustness", .patchwork_syntax = sec_tbl) |>
+#'   layout_section("estimates", patchwork_syntax = sec_txt + sec_fig) |>
+#'   layout_section("robustness", patchwork_syntax = sec_tbl) |>
 #'   generate_docs(file = "report.pdf")
 #' }
 #'
@@ -1307,17 +1371,16 @@ layout_section <-
 generate_docs <-
   function(
     .doc,
-    file = NULL,
-    output = c("single", "pile"),
-    extension = "png",
-    dir = "multitool_report"
+    file,
+    backend = "patchwork",
+    output = c("single", "multiple", "both"),
+    dir = NULL,
+    globals = NULL
   ) {
 
     output   <- match.arg(output)
-    settings <- .doc$settings
-    grid     <- .doc$grid
 
-    not_laid <- grid |> dplyr::filter(!laid_out) |> dplyr::pull(sec_id)
+    not_laid <- .doc |> dplyr::filter(!laid_out) |> dplyr::pull(sec_id)
     if (length(not_laid) > 0) {
       stop(
         "These sections were initialized but never laid out via ",
@@ -1326,25 +1389,19 @@ generate_docs <-
       )
     }
 
-    resolved <-
-      grid |>
-      dplyr::mutate(
-        eff_margin    = list(settings$margin),
-        eff_meta_sizes = section_meta_sizes,
-        eff_txt_size = section_txt_size,
-        eff_width =
-          if (output == "pile")
-            dplyr::coalesce(section_width,  settings$canvas_width)
-        else settings$canvas_width,
-        eff_height =
-          if (output == "pile")
-            dplyr::coalesce(section_height, settings$canvas_height)
-        else settings$canvas_height
-      )
+    rendered_grid <- generate_content(.doc, .export = globals)
 
     switch(
-      settings$backend,
-      patchwork = render_patchwork(resolved, settings, output, file, dir),
-      stop("Unknown backend: ", settings$backend, call. = FALSE)
+      backend,
+      patchwork =
+        render_patchwork(
+          rendered_grid,
+          file = file,
+          output = output,
+          dir = dir
+        ),
+      stop("Unknown backend: ", backend, call. = FALSE)
     )
   }
+
+

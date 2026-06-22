@@ -35,9 +35,9 @@ compose_partition <-
 
     mask <-
       list(
-        sec_txt = if (is.null(raw_txt)) patchwork::plot_spacer() else raw_txt,
-        sec_tbl = if (is.null(raw_tbl)) patchwork::plot_spacer() else raw_tbl,
-        sec_fig = if (is.null(raw_fig)) patchwork::plot_spacer() else raw_fig
+        sec_txt = if(is.null(raw_txt)) patchwork::plot_spacer() else raw_txt,
+        sec_tbl = if(is.null(raw_tbl)) patchwork::plot_spacer() else raw_tbl,
+        sec_fig = if(is.null(raw_fig)) patchwork::plot_spacer() else raw_fig
       )
 
     if (!is.null(.design) && stringr::str_detect(.syntax, "\\/|\\|", negate = TRUE)) {
@@ -45,7 +45,9 @@ compose_partition <-
         glue::glue("{.syntax} + patchwork::plot_layout(design = '{.design}')") |>
         rlang::parse_expr()
     } else {
-      composed_expr <- rlang::parse_expr(.syntax)
+      composed_expr <-
+        glue::glue("{.syntax} + patchwork::plot_layout()") |>
+        rlang::parse_expr()
     }
 
     composed <- rlang::eval_tidy(composed_expr, data = mask)
@@ -187,6 +189,8 @@ realize_slot <-
   function(value, kind = c("txt", "tbl", "fig"), txt_size = 6) {
     kind <- match.arg(kind)
 
+    value <- rlang::parse_expr(value) |> rlang::eval_tidy()
+
     is_empty <-
       is.null(value) ||
       (is.atomic(value) && length(value) == 0) ||
@@ -264,6 +268,189 @@ temp_fig <- function(.p, canvas, dpi){
 
 }
 
+#' Render contents of each section
+#'
+#' Composes every section's subsections to be fed to a back-end file writer.
+#'
+#' @noRd
+generate_content <-
+  function(.doc, .export = NULL){
+
+    analysis_grid_nms <- attr(.doc, "analysis_grids")
+
+    analysis_grids <-
+      purrr::map(
+        analysis_grid_nms,
+        \(x) rlang::parse_expr(x) |> rlang::eval_tidy()
+      )
+
+    doc_grid <-
+      .doc |>
+      tidyr::unnest(content)
+
+    referenced_syms <-
+      doc_grid |>
+      dplyr::select(sec_txt, sec_tbl, sec_fig) |>   # the full pipelines
+      unlist() |>
+      purrr::discard(\(x) x == "NULL") |>
+      purrr::map(\(code) all.names(rlang::parse_expr(code))) |>
+      unlist() |>
+      unique()
+
+    auto_fns <-
+      referenced_syms |>
+      purrr::keep(
+        \(s) exists(s, envir = .GlobalEnv, inherits = FALSE) &&
+          is.function(get(s, envir = .GlobalEnv))
+      )
+
+    globals_to_keep <-
+      if(!is.null(.export)){
+        c(auto_fns, .export)
+      } else{
+        auto_fns
+      }
+
+    shipped_objs <-
+      .GlobalEnv |>
+      as.list() |>
+      purrr::keep_at(\(nm) nm %in% globals_to_keep)
+
+    rendered_df <-
+      purrr::pmap(
+        doc_grid,
+        purrr::in_parallel(
+          \(
+            report_index,
+            sec_id,
+            sec_sub_id,
+            sec_title,
+            sec_description,
+            sec_txt,
+            sec_tbl,
+            sec_fig,
+            doc_backend,
+            doc_asp_ratio,
+            doc_dpi,
+            doc_margin,
+            doc_canvas_width,
+            doc_canvas_height,
+            section_patchwork_syntax,
+            section_inner_layout,
+            section_outer_layout,
+            section_incl_title,
+            section_incl_desc,
+            section_margin,
+            section_width,
+            section_height,
+            section_title_size,
+            section_subtitle_size,
+            section_txt_size,
+            laid_out,
+            ...
+          ){
+
+            for (pkg in c("multitool", "dplyr", "ggplot2")){
+              library(pkg, character.only = TRUE)
+            }
+
+            purrr::walk2(
+              analysis_grid_nms, analysis_grids,
+              \(x, y) assign(x, y, envir = .GlobalEnv)
+            )
+
+            purrr::iwalk(
+              shipped_objs,
+              \(x, idx) assign(idx, x, envir = .GlobalEnv)
+            )
+
+            partition_df <-
+              tibble::tibble(
+                sec_txt = sec_txt,
+                sec_tbl = sec_tbl,
+                sec_fig = sec_fig,
+                sec_title = sec_title,
+                sec_description = sec_description
+              )
+
+            composition <-
+              compose_partition(
+                partition_df,
+                .syntax = section_patchwork_syntax,
+                .design = if (is.na(section_inner_layout)) NULL else section_inner_layout,
+                .txt_size = section_txt_size
+              )
+
+            curr_margin <-
+              if(is.na(section_margin)){
+                rlang::parse_expr(doc_margin) |> rlang::eval_tidy()
+              }else {
+                rlang::parse_expr(section_margin) |> rlang::eval_tidy()
+              }
+
+            rendered_canvas <-
+              place_on_canvas(
+                inner_fig = composition$inner_fig,
+                .margin   = curr_margin,
+                .design   = section_outer_layout,
+                .title    = if(section_incl_title) composition$title else NULL,
+                .subtitle = if(section_incl_desc)  composition$desc else NULL,
+                .frame    = FALSE,
+                .sizes    = c(section_title_size, section_subtitle_size)
+              )
+
+            tibble::tibble(
+              report_index = report_index,
+              sec_id = sec_id,
+              sec_sub_id = sec_sub_id,
+              rendered_content = list(rendered_canvas)
+            )
+
+          },
+          shipped_objs = shipped_objs,
+          analysis_grid_nms = analysis_grid_nms,
+          analysis_grids = analysis_grids,
+          compose_partition = compose_partition,
+          place_on_canvas   = place_on_canvas,
+          realize_slot = realize_slot
+        )
+      )
+
+    dplyr::inner_join(
+      doc_grid,
+      purrr::list_rbind(rendered_df),
+      dplyr::join_by(report_index, sec_id, sec_sub_id)
+    )
+  }
+
+#' Call a render engine to generate files based on a document grid
+#'
+#' @noRd
+generate_files <-
+  function(
+    .rendered_df,
+    file,
+    backend,
+    output,
+    dir,
+    ...
+  ){
+    output <- match.arg(output)
+    if (backend == "patchwork") {
+      render_patchwork(
+        .rendered_df = .rendered_df,
+        file = file,
+        output = output,
+        dir = dir,
+        ...
+      )
+    } else {
+      stop("Unknown backend: ", backend, call. = FALSE)
+    }
+  }
+
+
+
 #' Render a laid-out document with the patchwork backend
 #'
 #' Composes every section's subsections into placed pages and writes them as a
@@ -271,103 +458,108 @@ temp_fig <- function(.p, canvas, dpi){
 #'
 #' @noRd
 render_patchwork <-
-  function(resolved, settings, output, file, dir) {
+  function(.rendered_df, file, output, dir) {
 
     if(is.null(file)){
       stop("generate_docs() requires a `file`.", call. = FALSE)
     }
 
     stem <- tools::file_path_sans_ext(basename(file))
-    ext <- tools::file_ext(basename(file))
-
-    pages <-
-      resolved |>
-      dplyr::mutate(
-        section_pages =
-          purrr::pmap(
-            list(
-              content      = content,
-              syntax       = patchwork_syntax,
-              inner_design = inner_layout,
-              outer_design = outer_layout,
-              incl_title   = section_incl_title,
-              incl_desc    = section_incl_desc,
-              margin       = eff_margin,
-              meta_sizes   = eff_meta_sizes,
-              txt_size    = eff_txt_size
-            ),
-            \(content, syntax, inner_design, outer_design,
-              incl_title, incl_desc, margin, meta_sizes, txt_size) {
-              content |>
-                dplyr::arrange(sec_sub_id) |>
-                dplyr::group_split(sec_sub_id) |>
-                purrr::map(\(sub_row) {
-                  part <-
-                    compose_partition(
-                      row     = sub_row,
-                      .syntax = syntax,
-                      .design = if (is.na(inner_design)) NULL else inner_design,
-                      .txt_size = txt_size
-                    )
-                  place_on_canvas(
-                    inner_fig = part$inner_fig,
-                    .margin   = margin,
-                    .design   = outer_design,
-                    .title    = if (incl_title) part$title    else NULL,
-                    .subtitle = if (incl_desc)  part$desc else NULL,
-                    .frame    = FALSE,
-                    .sizes    = meta_sizes
-                  )
-                })
-            }
-          )
-      )
-
-    all_pages <-
-      pages |>
-      dplyr::pull(section_pages) |>
-      purrr::list_flatten()
-
-    if(length(all_pages) == 0){
-      stop(
-        "Nothing to render: the document has no laid-out sections.",
-        call. = FALSE
-      )
-    }
-
-    if (output == "single") {
-      grDevices::pdf(
-        file    = glue::glue("{stem}.pdf"),
-        width   = settings$canvas_width,
-        height  = settings$canvas_height,
-        onefile = TRUE
-      )
-      on.exit(grDevices::dev.off(), add = TRUE)
-
-      purrr::walk(all_pages, print)
-      invisible(file)
-
-    } else {
-      if (is.null(dir)) {
-        dir <- "."
-      } else if (!dir.exists(dir)) {
-        dir.create(dir, recursive = TRUE)
+    ext <-
+      if(tools::file_ext(basename(file)) == ""){
+        "png"
+      }else{
+        tools::file_ext(basename(file))
       }
 
-      paths <-
-        purrr::imap_chr(all_pages, \(pg, i) {
-          out <- file.path(dir, glue::glue("{stem}-page-{i}.{ext}"))
-          ggplot2::ggsave(
-            plot     = pg,
-            filename = out,
-            width    = settings$canvas_width,
-            height   = settings$canvas_height,
-            units    = "in",
-            dpi      = settings$dpi
-          )
-          out
-        })
+    canvas_width  <- .rendered_df |> dplyr::pull(doc_canvas_width)  |> unique()
+    canvas_height <- .rendered_df |> dplyr::pull(doc_canvas_height) |> unique()
+    doc_dpi       <- .rendered_df |> dplyr::pull(doc_dpi)           |> unique()
 
-      invisible(paths)
+    if(output %in% c("single", "both")){
+
+      pdf_path <- glue::glue("{stem}.pdf")
+
+      dev_before <- grDevices::dev.cur()
+
+      suppressWarnings(
+        try(
+          grDevices::cairo_pdf(
+            filename = pdf_path,
+            width    = canvas_width,
+            height   = canvas_height,
+            onefile  = TRUE
+          ),
+          silent = TRUE
+        )
+      )
+
+      dev_after <- grDevices::dev.cur()
+
+      used_cairo <- !identical(dev_before, dev_after)
+
+      if(!used_cairo){
+        if (grDevices::dev.cur() != 1L) grDevices::dev.off()
+
+        rlang::inform(
+          c(
+            "cairo_pdf unavailable; using base pdf().",
+            i = "For custom fonts, enable cairo or use pile output."
+          ),
+          .frequency = "once",
+          .frequency_id = "multitool_pdf_device"
+        )
+
+        grDevices::pdf(
+          file = pdf_path,
+          width    = canvas_width,
+          height   = canvas_height,
+          onefile = TRUE
+        )
+      }
+
+      .rendered_df |>
+        dplyr::pull(rendered_content) |>
+        purrr::walk(print)
+
+      grDevices::dev.off()
+
+    }
+
+    if(output %in% c("multiple", "both")) {
+      if (is.null(dir)) dir <- stem
+      if (!dir.exists(dir)) dir.create(dir, recursive = TRUE)
+
+      paths <-
+        .rendered_df |>
+        dplyr::transmute(
+          path =
+            file.path(dir, glue::glue("{stem}-{sec_id}-{sec_sub_id}.{ext}")),
+          dpi = doc_dpi,
+          width =
+            ifelse(is.na(section_width), doc_canvas_width, section_width),
+          height =
+            ifelse(is.na(section_height), doc_canvas_height, section_height),
+          content = rendered_content
+        )
+
+      purrr::pwalk(
+        paths,
+        purrr::in_parallel(
+          \(path, dpi, width, height, content) {
+            for (pkg in c("ggplot2")){
+              library(pkg, character.only = TRUE)
+            }
+            ggplot2::ggsave(
+              plot = content, filename = path,
+              width = width, height = height, units = "in", dpi = dpi
+            )
+          }
+        )
+      )
+
+      invisible(paths$path)
+    } else {
+      invisible(file)
     }
   }

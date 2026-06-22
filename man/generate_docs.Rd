@@ -6,24 +6,36 @@
 \usage{
 generate_docs(
   .doc,
-  file = NULL,
-  output = c("single", "pile"),
-  extension = "png",
-  dir = "multitool_report"
+  file,
+  backend = "patchwork",
+  output = c("single", "multiple", "both"),
+  dir = NULL,
+  globals = NULL
 )
 }
 \arguments{
-\item{.doc}{A laid-out document object from the
+\item{.doc}{A laid-out document grid from the
 \code{\link[=initialize_doc]{initialize_doc()}} / \code{\link[=layout_section]{layout_section()}} chain.}
 
-\item{file}{Output file path for \code{"single"} mode (e.g. \code{"report.pdf"}).}
+\item{file}{Output file path. In \code{"single"} mode this is the PDF; in
+\code{"multiple"} mode its extension determines the per-page file type and its
+stem names the files.}
 
-\item{output}{\code{"single"} (default) for one multi-page deck, or \code{"pile"} for
-one file per section (in development).}
+\item{backend}{The rendering backend (default \code{"patchwork"}). Determines how
+each section's recorded layout is composed and written. The architecture
+dispatches on the backend, so other backends can interpret the same recorded
+layouts differently in future.}
 
-\item{extension}{File extension for \code{"pile"} mode (default \code{"png"}).}
+\item{output}{One of \code{"single"} (default, one multi-page PDF),
+\code{"multiple"} (one file per page), or \code{"both"}.}
 
-\item{dir}{Output directory for \code{"pile"} mode (default \code{"multitool_report"}).}
+\item{dir}{Output directory for \code{"multiple"}/\code{"both"} modes. \code{NULL} (default)
+writes to the current directory.}
+
+\item{globals}{Optional character vector of names of global objects
+(functions or data) that section content references but that cannot be
+auto-detected from the stored code. Named here, they are shipped to workers
+for parallel rendering.}
 }
 \value{
 Invisibly, the path(s) written. Called for the side effect of
@@ -32,50 +44,63 @@ producing the output file(s).
 \description{
 Renders a document — built with \code{\link[=initialize_doc]{initialize_doc()}} and laid out with
 \code{\link[=layout_section]{layout_section()}} — into output. This is the terminal step of the assembly
-chain: it composes every section's content according to the recorded layouts
-and produces the final artifact.
+chain: it renders every section's content according to the recorded layouts,
+then writes the result through the chosen backend.
 }
 \details{
 Before rendering, \code{generate_docs()} checks that every section in the document
-has been laid out, resolves each section's effective settings (section
-overrides falling through to document defaults), and hands the result to the
-backend named in \code{\link[=initialize_doc]{initialize_doc()}}.
+has been laid out. It then renders each subsection's content to a placed page
+object and hands those pages to the backend to write to disk.
 
 Every section must be laid out before rendering. If any section was added to
 the document but never passed through \code{\link[=layout_section]{layout_section()}}, \code{generate_docs()}
 stops and names the un-laid-out sections, rather than silently dropping or
 mis-rendering them.
 
-Effective settings are resolved per section as a cascade: a value set on the
-section in \code{\link[=layout_section]{layout_section()}} takes precedence, otherwise the document
-default from \code{\link[=initialize_doc]{initialize_doc()}} applies. In \code{"single"} mode the canvas is
-held uniform across all pages (so the deck reads as a coherent whole);
-per-section canvas dimensions apply only in \code{"pile"} mode.
+Effective settings are resolved per page as a cascade: a value set on the
+section in \code{\link[=layout_section]{layout_section()}} takes precedence, otherwise the document default
+from \code{\link[=initialize_doc]{initialize_doc()}} applies. In \code{"single"} mode the canvas is held uniform
+across all pages (so the deck reads as a coherent whole); per-section canvas
+dimensions apply only when writing a pile.
 }
 \section{Output modes}{
 
 \code{output = "single"} produces one multi-page document — a deck — with every
-section (and its subsections) as pages of uniform size. This is the working
-mode for the patchwork backend, rendering a single PDF.
+section (and its subsections) as pages of uniform size, written as a single
+PDF.
 
-\code{output = "pile"} is \emph{in development}: it will render each section as an
-independent file (using \code{extension} and \code{dir}), the mode in which
-per-section dimensions from \code{\link[=layout_section]{layout_section()}} take effect.
+\code{output = "multiple"} writes each page as its own file (a "pile"), named by
+section and subsection, into \code{dir}. The file type follows the extension of
+\code{file}. Per-section dimensions from \code{\link[=layout_section]{layout_section()}} take effect in this
+mode.
+
+\code{output = "both"} produces the single PDF \emph{and} the pile of per-page files.
 }
 
-\section{Backends}{
+\section{Parallel rendering}{
 
-The backend is set in \code{\link[=initialize_doc]{initialize_doc()}}. \code{"patchwork"} composes each section
-with patchwork and renders it; the architecture dispatches on the backend, so
-other backends can interpret the same recorded layouts differently in future.
+If \code{\link[mirai:daemons]{mirai::daemons()}} have been provisioned before calling \code{generate_docs()},
+content rendering (and, for \code{"multiple"}/\code{"both"}, file writing) is
+distributed across the daemons; otherwise it runs sequentially. Parallelism
+helps for large documents and adds overhead for small ones, so it is opt-in
+via daemon provisioning rather than on by default. When rendering in
+parallel, the daemons must have the same graphical session setup as the host
+— in particular any custom theme (e.g. via \code{theme_set()}) and fonts — or
+pages will render against the workers' defaults. Replicate that setup on the
+daemons with \code{\link[mirai:everywhere]{mirai::everywhere()}} before generating.
+
+Functions and objects that a section's content code references are shipped to
+the workers automatically when they can be detected from the stored code;
+anything that cannot be detected (for example a data object referenced
+indirectly) can be named in \code{globals}.
 }
 
 \examples{
 \dontrun{
 report |>
   initialize_doc() |>
-  layout_section("estimates", .patchwork_syntax = sec_txt + sec_fig) |>
-  layout_section("robustness", .patchwork_syntax = sec_tbl) |>
+  layout_section("estimates", patchwork_syntax = sec_txt + sec_fig) |>
+  layout_section("robustness", patchwork_syntax = sec_tbl) |>
   generate_docs(file = "report.pdf")
 }
 

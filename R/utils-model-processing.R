@@ -162,7 +162,7 @@ process_model <-
 #' @noRd
 strip_attributes <- function(x, keep = c("names", "class", "row.names")) {
   attributes(x) <- attributes(x)[keep]
-  x
+  as.data.frame(x)
 }
 
 #' Post-process a fitted model

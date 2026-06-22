@@ -44,11 +44,14 @@ the section is rendered.}
 combination. When \code{NULL}, the section is a single unit.}
 }
 \value{
-A report grid (a tibble) with one row per subsection, carrying the
-section's id, the realized \code{sec_txt}/\code{sec_tbl}/\code{sec_fig} content, a nested
-\code{code} column holding the generating code for each, and per-subsection
-titles and descriptions. The originating grid name is recorded as an
-\code{"analysis_grid"} attribute so successive \code{add_section()} calls can chain.
+A report grid (a tibble) with one row per subsection. Each row
+carries the section's id, the per-subsection title and description, and the
+content-generating code for each channel in the \code{sec_txt}, \code{sec_tbl}, and
+\code{sec_fig} columns — full pipelines from the analysis grid through the
+content function, stored as code and evaluated only when the section is
+previewed or generated. Empty channels hold \code{"NULL"}. The originating grid
+name is recorded as an \code{"analysis_grid"} attribute so successive
+\code{add_section()} calls can chain.
 }
 \description{
 Defines a section of a report by attaching content-generating code to an
@@ -58,16 +61,24 @@ gathered data. Sections accumulate: piping one \code{add_section()} into the nex
 builds a multi-section report grid.
 }
 \details{
-The content functions (\code{txt.fn}, \code{tbl.fn}, \code{fig.fn}) are captured as code,
-recorded so the section remains a transparent, auditable artifact, then run
-against the section's data to realize the actual text, table, and figure
-objects. Both the realized content and the generating code are stored, so a
-section can be rendered \emph{and} inspected.
+\code{add_section()} records the content functions (\code{txt.fn}, \code{tbl.fn}, \code{fig.fn})
+as code; it does not run them. Realization is deferred to the moment a
+section is previewed (\code{\link[=preview_section]{preview_section()}}) or the document is generated
+(\code{\link[=generate_docs]{generate_docs()}}), so defining a section is cheap no matter how many
+subsections it fans out into. The stored code \emph{is} the section — it is read
+back when inspecting, and evaluated when rendering.
 
-Each content slot stores both the realized object (\code{sec_txt}, \code{sec_tbl},
-\code{sec_fig}) and its code (nested under \code{code}), supporting the package's
-code-as-artifact principle: a section can be rendered into a report and also
-read back as the exact code that produced it.
+\code{add_section()} stores code, not rendered output. The \code{sec_txt}, \code{sec_tbl},
+and \code{sec_fig} columns each hold a complete pipeline — the analysis grid,
+through \code{report_data}, through the content function — as an evaluable string.
+Nothing is rendered here; realization happens downstream. This is the
+package's code-as-artifact principle in its strongest form: a section is
+fully described by readable, re-runnable code, inspectable with
+\code{\link[=show_section_content]{show_section_content()}} and rendered only at preview or generation time.
+
+Deferring realization also keeps \code{add_section()} fast: a section fanned out
+into many subsections costs no rendering at definition time, since the
+content is rendered later — once — when the document is built.
 
 Content functions have access only to the gathered section data, not to the
 section's metadata fields — a figure title, for instance, belongs inside
@@ -92,9 +103,9 @@ data is piped into the content function, the function must be written as a
 call (with parentheses), not a bare name.
 
 A section need not have all three content types. Any of \code{txt.fn}, \code{tbl.fn},
-or \code{fig.fn} may be left \code{NULL}, in which case that content slot is empty
-(stored as \code{NULL}) and simply omitted wherever the section is rendered. A
-figure-only section, a table-plus-text section, or any combination is valid.
+or \code{fig.fn} may be left \code{NULL}, in which case that content slot is empty and
+simply omitted wherever the section is rendered. A figure-only section, a
+table-plus-text section, or any combination is valid.
 }
 
 \section{Sections and subsections}{
@@ -139,7 +150,7 @@ report <-
 }
 \seealso{
 \code{\link[=compose_view]{compose_view()}} for gathering results for section reporting;
-\code{\link[=show_section_content]{show_section_content()}} to inspect one section's realized content and code;
+\code{\link[=show_section_content]{show_section_content()}} to inspect one section's content code and render it;
 \code{\link[=preview_section]{preview_section()}} to preview a section's composed layout;
 \code{\link[=layout_section]{layout_section()}} and \code{\link[=generate_docs]{generate_docs()}} to assemble sections into a document.
 }

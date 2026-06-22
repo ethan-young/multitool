@@ -1,29 +1,90 @@
 #' Perform all analyses over a complete decision grid
 #'
-#' @param .grid a \code{tibble} produced by \code{\link{expand_decisions}}
-#' @param save_model logical, indicates whether to save the model object in its
-#'   entirety. The default is \code{FALSE} because model objects are usually
-#'   large and under the hood, \code{\link[parameters]{parameters}} and
-#'   \code{\link[performance]{performance}} is used to summarize the most useful
-#'   model information.
+#' Executes the analysis pipeline for every row of an expanded decision grid,
+#' returning tidied results for each. Execution is parallel-ready: if
+#' [mirai::daemons()] have been provisioned, the rows are distributed across the
+#' daemons; otherwise they run sequentially. `analyze_grid()` never sets up
+#' daemons itself — you provision them, and the function uses them if present.
+#'
+#' @param .grid a \code{tibble} produced by \code{\link{expand_decisions}}.
 #' @param show_progress logical, whether to show a progress bar while running.
-#' @param libraries a vector of character strings naming the packages you want
-#'   to load when executing parallel processing. Internally, this will call
-#'   \code{library} dynamically to ensure that any functions specific to a
-#'   package you are using are available during execution on the individual
-#'   workers. Only relevant if you have called \code{mirai::daemons()}.
-#' @param ... this also reserved for parallel processing. Any custom functions
-#'   you might use your pipeline (e.g., a custom post processing step), can be
-#'   passed here in the form of \code{custom_func = custom_func}. This will be
-#'   passed along to \code{purrr::in_parallel} to make them available on the
-#'   independent workers.
+#' @param ship_base_df logical (default \code{TRUE}). Controls how the base data
+#'   frame reaches the workers when running in parallel. When \code{TRUE}, the
+#'   base data frame named in the grid's \code{"base_df"} attribute is resolved
+#'   in the calling environment, shipped to each worker, and assigned there by
+#'   name — the simplest option, suited to small-to-moderate in-memory data.
+#'   When \code{FALSE}, the base data frame is not shipped; you are responsible
+#'   for making it available on the workers under the name the pipeline code
+#'   references, typically by establishing it on the daemons beforehand with
+#'   [mirai::everywhere()] (e.g. opening an Arrow dataset on each worker). Use
+#'   \code{FALSE} for large or externally-stored data you do not want copied to
+#'   every worker. Has no effect when running sequentially.
+#' @param libraries a character vector naming packages to load on each worker.
+#'   Internally this calls \code{library()} dynamically so that functions from
+#'   the packages your pipeline uses are available during execution on the
+#'   workers. Relevant when running in parallel via \code{mirai::daemons()};
+#'   include here any package your pipeline code calls that is not attached by
+#'   default.
+#' @param ... Custom functions your pipeline references (e.g. a custom
+#'   post-processing step), passed as \code{name = function} pairs (for example
+#'   \code{my_step = my_step}). Each is made available on the workers under the
+#'   given name, so pipeline code that calls it by name resolves. The name must
+#'   match the name used in the pipeline.
 #'
 #' @return a single \code{tibble} containing tidied results for the model and
 #'   any post-processing tests/tasks. For each unique test (e.g., an \code{lm}
 #'   or \code{aov} called on an \code{lm}), a list column with the function name
 #'   is created with \code{\link[parameters]{parameters}} and
 #'   \code{\link[performance]{performance}} and any warnings or messages printed
-#'   while fitting the models.
+#'   while fitting the models. A \code{timing_logs} list column records the
+#'   start, end, and duration of each row's run. The grid's \code{"pipeline"}
+#'   attribute is carried through to the result.
+#'
+#' @section Parallel execution:
+#' To run in parallel, provision daemons before calling, e.g.
+#' \code{mirai::daemons(6)}. Each worker loads \code{multitool}, \code{dplyr},
+#' and any packages named in \code{libraries}; receives any custom functions
+#' passed through \code{...}; and (when \code{ship_base_df = TRUE}) the base
+#' data frame. With no daemons set, execution falls back to sequential and these
+#' provisions still apply locally. For large data, prefer
+#' \code{ship_base_df = FALSE} with the data established on the daemons via
+#' [mirai::everywhere()], or an Arrow partition path baked into the pipeline so
+#' each worker reads its own slice from storage.
+#'
+#' @section Establishing the data on workers yourself (`ship_base_df = FALSE`):
+#' With \code{ship_base_df = FALSE}, \code{analyze_grid()} does not ship the base
+#' data frame — you are responsible for making it available on each worker, under
+#' the same name your pipeline references. This avoids copying large data to
+#' every worker: instead each worker holds its own handle (for example an Arrow
+#' dataset opened from storage), established once with [mirai::everywhere()].
+#'
+#' Two rules make this work. First, the object must live in each worker's global
+#' environment, because that is where the pipeline code is resolved; the reliable
+#' way to put it there is \code{evalq(..., envir = .GlobalEnv)} inside
+#' \code{everywhere()}. Second, the name must match the grid's \code{"base_df"}
+#' attribute exactly — the pipeline code refers to the data by that name, so the
+#' object you establish must carry it.
+#'
+#' \preformatted{
+#' # name must match attr(.grid, "base_df"), e.g. "coffee_analysis_df"
+#' mirai::daemons(6)
+#' mirai::everywhere(
+#'   evalq(
+#'     {
+#'       library(arrow)
+#'       coffee_analysis_df <- open_dataset("/absolute/path/to/data/")
+#'     },
+#'     envir = .GlobalEnv
+#'   )
+#' )
+#' analyzed_grid <- analyze_grid(pipeline_grid, ship_base_df = FALSE)
+#' mirai::daemons(0)
+#' }
+#'
+#' If the object is missing or misnamed on the workers, the pipeline code fails
+#' to find it; because the failure occurs inside worker evaluation it may surface
+#' as an opaque error rather than a clear "object not found", so check the name
+#' match first if a parallel run with \code{ship_base_df = FALSE} fails.
 #' @export
 #'
 #' @examples
@@ -60,22 +121,40 @@
 #'   add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
 #'   add_model("no covariates",lm({dvs} ~ {ivs} * {mods})) |>
 #'   add_model("covariate", lm({dvs} ~ {ivs} * {mods} + cov1)) |>
-#'   add_postprocess("aov", aov())
+#'   add_postprocess("ptp", predict())
 #'
 #' pipeline_grid <- expand_decisions(full_pipeline)
 #'
-#' # analyze the grid
+#' # analyze the grid (sequential)
 #' analyzed_grid <- analyze_grid(pipeline_grid[1:10,])
+#'
+#' \dontrun{
+#' # analyze in parallel: provision daemons first
+#' mirai::daemons(6)
+#' analyzed_grid <- analyze_grid(pipeline_grid)
+#' mirai::daemons(0)
+#' }
 analyze_grid <-
   function(
     .grid,
-    save_model = FALSE,
     show_progress = TRUE,
+    ship_base_df = TRUE,
     libraries = NULL,
     ...
   ){
 
     custom_fns <- list(...)
+
+    base_df_name <-
+      attr(.grid, "base_df")
+
+    if (ship_base_df) {
+      base_df <-
+        rlang::parse_expr(attr(.grid, "base_df")) |>
+        rlang::eval_tidy(env = parent.frame())
+    } else {
+      base_df <- NULL
+    }
 
     analyzed_grid <-
       purrr::map(
@@ -83,27 +162,26 @@ analyze_grid <-
         purrr::in_parallel(
           function(index, ...){
 
-            if(!is.null(libraries)){
-              glue::glue("library({c('multitool', 'dplyr', libraries)})") |>
-                paste(collapse = "; ") |>
-                rlang::parse_exprs() |>
-                purrr::walk(rlang::eval_tidy)
+            pkgs <- c("multitool", "dplyr", libraries)
+            for (pkg in pkgs) {
+              library(pkg, character.only = TRUE)
             }
 
-            if(!purrr::is_empty(custom_fns)){
-              glue::glue(
-                "assign('{names(custom_fns)}', {custom_fns}, pos = .GlobalEnv)"
-              ) |>
-                rlang::parse_exprs() |>
-                purrr::walk(rlang::eval_tidy)
+            if(ship_base_df){
+              assign(base_df_name, base_df, envir = .GlobalEnv)
+            }
+
+            if (!purrr::is_empty(custom_fns)) {
+              for (nm in names(custom_fns)) {
+                assign(nm, custom_fns[[nm]], envir = .GlobalEnv)
+              }
             }
 
             start <- Sys.time()
             analyzed_result <-
               execute_universe_model(
                 .grid,
-                decision_index = index,
-                save_model = save_model
+                decision_index = index
               )
             end <- Sys.time()
 
@@ -117,8 +195,10 @@ analyze_grid <-
               tidyr::nest(timing_logs = dplyr::starts_with("run_"))
           },
           .grid = .grid,
+          ship_base_df = ship_base_df,
+          base_df_name = base_df_name,
+          base_df = base_df,
           execute_universe_model = execute_universe_model,
-          save_model = save_model,
           libraries = libraries,
           custom_fns = custom_fns
         ),
@@ -188,8 +268,7 @@ analyze_grid <-
 #'   add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
 #'   add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
 #'   add_model("no covariates",lm({dvs} ~ {ivs} * {mods})) |>
-#'   add_model("covariate", lm({dvs} ~ {ivs} * {mods} + cov1)) |>
-#'   add_postprocess("aov", aov())
+#'   add_model("covariate", lm({dvs} ~ {ivs} * {mods} + cov1))
 #'
 #' pipeline_grid <- expand_decisions(full_pipeline)
 #'

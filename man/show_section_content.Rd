@@ -4,7 +4,12 @@
 \alias{show_section_content}
 \title{Inspect one section's content and code}
 \usage{
-show_section_content(.report, section, sub_section = NULL, content = "figure")
+show_section_content(
+  .report,
+  section,
+  sub_section = NULL,
+  content = c("fig", "txt", "tbl")
+)
 }
 \arguments{
 \item{.report}{A report grid produced by \code{\link[=add_section]{add_section()}}.}
@@ -14,8 +19,8 @@ show_section_content(.report, section, sub_section = NULL, content = "figure")
 \item{sub_section}{The \code{sec_sub_id} of the subsection to show. If \code{NULL}
 (default), a subsection is sampled at random.}
 
-\item{content}{Which content channel to show: \code{"figure"} (default),
-\code{"text"}, or \code{"tbl"}.}
+\item{content}{Which content channel to show: \code{"fig"} (default),
+\code{"txt"}, or \code{"tbl"}.}
 }
 \value{
 The realized content object for the chosen channel and subsection,
@@ -57,7 +62,7 @@ show_section_content(
 )
 
 # Capture the returned object
-fig <- show_section_content(report, "estimates", content = "figure")
+fig <- show_section_content(report, "estimates", content = "fig")
 }
 
 }

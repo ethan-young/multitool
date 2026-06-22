@@ -45,7 +45,6 @@ Suggests:
     broom,
     broom.mixed,
     clipr,
-    mirai,
     carrier,
     flextable,
     future,
@@ -53,6 +52,7 @@ Suggests:
     ggplot2,
     ggtext,
     knitr,
+    mirai,
     rmarkdown,
     testthat (>= 3.0.0),
     tidyverse

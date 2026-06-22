@@ -6,9 +6,9 @@
 \usage{
 initialize_doc(
   ...,
-  backend = "patchwork",
   default_asp_ratio = "wide",
   default_height = 7.5,
+  default_width = NULL,
   default_dpi = 96,
   default_margin = ggplot2::margin(0, 0, 0, 0, "in")
 )
@@ -17,14 +17,15 @@ initialize_doc(
 \item{...}{One or more report grids, each built with \code{\link[=add_section]{add_section()}}. Section
 ids must be unique across all supplied grids.}
 
-\item{backend}{The rendering backend (default \code{"patchwork"}). Determines how
-\code{\link[=generate_docs]{generate_docs()}} interprets each section's layout and what it produces.}
-
 \item{default_asp_ratio}{Default slide aspect ratio: \code{"wide"} (16:9, default)
-or \code{"full"} (4:3).}
+or \code{"full"} (4:3). Used to derive the canvas width from \code{default_height}
+when \code{default_width} is not given.}
 
-\item{default_height}{Default slide height in inches (default \code{7.5}); the
-width follows the aspect ratio.}
+\item{default_height}{Default slide height in inches (default \code{7.5}).}
+
+\item{default_width}{Optional explicit slide width in inches. When \code{NULL}
+(default), the width is derived from \code{default_height} and
+\code{default_asp_ratio}.}
 
 \item{default_dpi}{Default rendering resolution (default \code{96}).}
 
@@ -32,13 +33,17 @@ width follows the aspect ratio.}
 (default zero on all sides). May be given in any unit.}
 }
 \value{
-A document object: a list with a \code{settings} element (the
-document-level defaults) and a \code{grid} element (one row per section, with
-its subsections nested and its layout to be filled in by
-\code{\link[=layout_section]{layout_section()}}).
+A document grid: a tibble with one row per section, the section's
+subsections nested in a \code{content} column, the document-level defaults
+denormalized across rows as \verb{doc_*} columns (aspect ratio, dpi, margin,
+canvas width and height), and the per-section layout columns initialized
+empty (to be filled by \code{\link[=layout_section]{layout_section()}}) with a \code{laid_out} flag set
+\code{FALSE}. The names of the originating analysis grids are recorded in an
+\code{"analysis_grids"} attribute, so the grids can be shipped to workers if
+\code{\link[=generate_docs]{generate_docs()}} renders in parallel.
 }
 \description{
-Starts a document from one or more report grids, producing a document object
+Starts a document from one or more report grids, producing a document grid
 that subsequent \code{\link[=layout_section]{layout_section()}} calls fill in and \code{\link[=generate_docs]{generate_docs()}}
 renders. This is the head of the assembly chain: gather your built sections
 here, lay each one out, then generate.
@@ -47,25 +52,27 @@ here, lay each one out, then generate.
 Multiple report grids may be supplied. This supports the common case where a
 single research question spans several analysis pipelines whose decision
 spaces diverge enough to be built separately, yet belong in one document. The
-grids are combined into a single universe of sections, and \code{layout_section()}
-and \code{generate_docs()} treat them uniformly thereafter.
+grids are combined into a single universe of sections, and \code{\link[=layout_section]{layout_section()}}
+and \code{\link[=generate_docs]{generate_docs()}} treat them uniformly thereafter.
 
-Section ids must be unique across all supplied grids, since \code{layout_section()}
-and \code{generate_docs()} address sections by id. If the same id appears in more
+Section ids must be unique across all supplied grids, since \code{\link[=layout_section]{layout_section()}}
+and \code{\link[=generate_docs]{generate_docs()}} address sections by id. If the same id appears in more
 than one grid, \code{initialize_doc()} stops and reports the collisions, so the
-ambiguity is caught at assembly time rather than producing a confusing
-result later.
+ambiguity is caught at assembly time rather than producing a confusing result
+later.
 
 Each section begins un-laid-out; it must be passed through \code{\link[=layout_section]{layout_section()}}
 before \code{\link[=generate_docs]{generate_docs()}} can render it.
 }
 \section{Document-level defaults}{
 
-The settings given here — backend, aspect ratio, height, dpi, margin — are
-the document's defaults, applied to every section unless a section overrides
-them in \code{\link[=layout_section]{layout_section()}}. The canvas is sized once for the whole document:
-slides are \code{default_height} inches tall, with width following the aspect
-ratio, so a single-document output is a uniform deck.
+The settings given here — aspect ratio, height, width, dpi, margin — are the
+document's defaults, applied to every section unless a section overrides them
+in \code{\link[=layout_section]{layout_section()}}. The canvas is sized once for the whole document:
+slides are \code{default_height} inches tall, with width either given explicitly
+via \code{default_width} or derived from the aspect ratio, so a single-document
+output is a uniform deck. The rendering backend and output mode are \emph{not} set
+here; they are chosen later, at \code{\link[=generate_docs]{generate_docs()}}.
 }
 
 \examples{
@@ -75,7 +82,7 @@ doc <-
   report |>
   initialize_doc(
     default_asp_ratio = "wide",
-    margin = ggplot2::margin(0.5, 0.5, 0.5, 0.5, "in")
+    default_margin    = ggplot2::margin(0.5, 0.5, 0.5, 0.5, "in")
   )
 
 # Multiple grids from divergent pipelines, one document
@@ -89,7 +96,7 @@ doc <-
 # Continue the chain
 doc <-
   doc |>
-  layout_section("estimates", .patchwork_syntax = sec_fig) |>
+  layout_section("estimates", patchwork_syntax = sec_fig) |>
   generate_docs(file = "deck.pdf")
 }
 

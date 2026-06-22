@@ -11,11 +11,11 @@ preview_section(
   add_title = TRUE,
   add_desc = TRUE,
   codify = TRUE,
-  .patchwork_syntax = NULL,
-  .mode = "slide",
-  .inner_design = NULL,
-  .outer_design = "A",
-  .txt_size = 6,
+  patchwork_syntax = NULL,
+  mode = "slide",
+  inner_design = NULL,
+  outer_design = "A",
+  txt_size = 6,
   ...
 )
 }
@@ -34,22 +34,22 @@ section's stored title and description; empty values are omitted.}
 \item{codify}{Whether to print a call to \code{layout_section} based on preview
 settings. Defaults to \code{TRUE}.}
 
-\item{.patchwork_syntax}{Patchwork syntax composing the section's content
+\item{patchwork_syntax}{Patchwork syntax composing the section's content
 slots — \code{sec_txt}, \code{sec_tbl}, \code{sec_fig} — e.g. \code{sec_txt + sec_fig}. Slots
 that are empty for this section render as blank spacers.}
 
-\item{.mode}{Passed to \code{\link[=view_real_size]{view_real_size()}} as \code{mode}; \code{"slide"} (default)
+\item{mode}{Passed to \code{\link[=view_real_size]{view_real_size()}} as \code{mode}; \code{"slide"} (default)
 previews the composition placed on a slide canvas.}
 
-\item{.inner_design}{Optional patchwork design string arranging the content
+\item{inner_design}{Optional patchwork design string arranging the content
 slots (the \emph{inner} layout). Applies only when \code{.patchwork_syntax} uses no
 positional operators (\code{|}, \code{/}); see \code{\link[=view_real_size]{view_real_size()}} and patchwork's
 layout documentation.}
 
-\item{.outer_design}{Patchwork design string placing the composed section on
+\item{outer_design}{Patchwork design string placing the composed section on
 the slide (the \emph{outer} layout); defaults to \code{"A"} (full-bleed).}
 
-\item{.txt_size}{The size of text to appear when a composition contains a
+\item{txt_size}{The size of text to appear when a composition contains a
 textual section. Defaults to 6.}
 
 \item{...}{Passed to \code{\link[=view_real_size]{view_real_size()}} — e.g. \code{asp_ratio}, \code{anchor_height},
@@ -100,8 +100,8 @@ rest blank.
 preview_section(
   report,
   section           = "estimates",
-  .patchwork_syntax = sec_txt + sec_fig,
-  .inner_design     = "AABB"
+  patchwork_syntax = sec_txt + sec_fig,
+  inner_design     = "AABB"
 )
 
 # Preview with the section title shown, content in the right two-thirds
@@ -109,8 +109,8 @@ preview_section(
   report,
   section           = "estimates",
   add_title         = TRUE,
-  .patchwork_syntax = sec_fig,
-  .outer_design     = "#AA"
+  patchwork_syntax = sec_fig,
+  outer_design     = "#AA"
 )
 }
 

@@ -73,8 +73,7 @@ full_pipeline <-
   add_preprocess(process_name = "scale_iv", 'mutate({ivs} = scale({ivs}))') |>
   add_preprocess(process_name = "scale_mod", mutate({mods} := scale({mods}))) |>
   add_model("no covariates",lm({dvs} ~ {ivs} * {mods})) |>
-  add_model("covariate", lm({dvs} ~ {ivs} * {mods} + cov1)) |>
-  add_postprocess("aov", aov())
+  add_model("covariate", lm({dvs} ~ {ivs} * {mods} + cov1))
 
 pipeline_grid <- expand_decisions(full_pipeline)
 

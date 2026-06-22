@@ -162,6 +162,9 @@ utils::globalVariables(
     "section_meta_sizes",
     "section_txt_size",
     "eff_meta_sizes",
-    "eff_txt_size"
+    "eff_txt_size",
+    "doc_canvas_height",
+    "doc_canvas_width",
+    "rendered_content"
   )
 )
