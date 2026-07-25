@@ -16,6 +16,7 @@ preview_section(
   inner_design = NULL,
   outer_design = "A",
   txt_size = 6,
+  txt_family = NULL,
   ...
 )
 }
@@ -51,6 +52,8 @@ the slide (the \emph{outer} layout); defaults to \code{"A"} (full-bleed).}
 
 \item{txt_size}{The size of text to appear when a composition contains a
 textual section. Defaults to 6.}
+
+\item{txt_family}{The font used for textual section.}
 
 \item{...}{Passed to \code{\link[=view_real_size]{view_real_size()}} — e.g. \code{asp_ratio}, \code{anchor_height},
 \code{dpi}, \code{margin}, \code{pt_sizes} — to control the slide canvas and styling.}

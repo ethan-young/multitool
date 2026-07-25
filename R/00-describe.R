@@ -347,3 +347,87 @@ summarize_filter_ns <- function(.pipeline){
     dplyr::bind_rows()
 
 }
+
+filter_overlap <- function(.pipeline, redundant = TRUE) {
+
+  data_chr <- attr(.pipeline, "base_df")
+
+  base_df <-
+    rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
+    rlang::eval_tidy(env = parent.frame())
+
+  all_rows <- base_df |> dplyr::mutate(.row_id = dplyr::row_number())
+
+  filter_exprs <-
+    .pipeline |>
+    dplyr::filter(type == "filters") |>
+    dplyr::filter(!stringr::str_detect(code, "%in% unique")) |>
+    dplyr::pull(code)
+
+  if (length(filter_exprs) < 2) {
+    rlang::abort(
+      "Need at least two non-trivial filters to compute pairwise overlap."
+    )
+  }
+
+  # Each filter's excluded-row set: rows it removes (not retained).
+  exclusion_sets <-
+    filter_exprs |>
+    rlang::set_names() |>
+    purrr::map(function(expr) {
+      retained <-
+        all_rows |>
+        dplyr::filter(rlang::parse_expr(expr) |> rlang::eval_tidy()) |>
+        dplyr::pull(.row_id)
+
+      setdiff(all_rows$.row_id, retained)
+    })
+
+  # All ordered pairs, diagonal removed. Ordered (not exp1 < exp2) so that
+  # filter_1 is a complete anchor: every comparison a filter takes part in
+  # appears in its own filter_1 rows.
+  combos <-
+    tidyr::expand_grid(
+      filter_1 = names(exclusion_sets),
+      filter_2 = names(exclusion_sets)
+    ) |>
+    dplyr::filter(filter_1 != filter_2)
+
+  overlap <-
+    purrr::pmap(
+      combos,
+      function(filter_1, filter_2) {
+        set1 <- exclusion_sets[[filter_1]]
+        set2 <- exclusion_sets[[filter_2]]
+
+        n_shared <- length(intersect(set1, set2))
+        n_union  <- length(union(set1, set2))
+
+        tibble::tibble(
+          base_df_n          = nrow(base_df),
+          filter1            = filter_1,
+          filter2            = filter_2,
+          filter1_excluded   = length(set1),
+          filter2_excluded   = length(set2),
+          total_excluded     = n_union,
+          filter1_unique     = length(setdiff(set1, set2)),
+          filter2_unique     = length(setdiff(set2, set1)),
+          overlap_n          = n_shared,
+          overlap_pct_total  = if (n_union == 0) NA_real_ else n_shared / n_union,
+          filter1_pct_shared = if (length(set1) == 0) NA_real_ else n_shared / length(set1),
+          filter2_pct_shared = if (length(set1) == 0) NA_real_ else n_shared / length(set2),
+        )
+      }
+    ) |>
+    purrr::list_rbind()
+
+  # Like correlation::correlation(redundant = ), keep every ordered pair by
+  # default; when FALSE, collapse to one row per unordered pair.
+  if (!redundant) {
+    overlap <-
+      overlap |>
+      dplyr::filter(filter1 < filter2)
+  }
+
+  overlap
+}

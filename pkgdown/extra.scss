@@ -1,0 +1,112 @@
+// =============================================================================
+// ESY brand — pkgdown extra.scss  (the :rules half of esy-brand.scss)
+// =============================================================================
+// Place at:  inst/pkgdown/extra.scss   in the multitool package.
+// pkgdown appends this AFTER Bootstrap compiles, so these rules override the
+// compiled output. Variable DEFAULTS are NOT here — they live in _pkgdown.yml
+// under template.bslib (see esy-pkgdown-bslib.yml).
+//
+// NOTE: no @import for Lato here. _pkgdown.yml's base_font:{google:"Lato"}
+// already loads it; importing again would double-request the font.
+
+// SCSS variables for the shadow values (local to this file; pkgdown already
+// has the Bootstrap $variables from the bslib block).
+$esy-pink:           #f0506e;
+$esy-ink:            #000000;
+$esy-muted:          #999999;
+$esy-inset:          #f8f8f8;
+$esy-shadow-resting: 0 5px 15px rgba(0, 0, 0, 0.08);   // uikit card resting
+$esy-shadow-hover:   0 14px 25px rgba(0, 0, 0, 0.16);  // uikit card hover lift
+
+// --- Type scale: reproduce the UIkit personal-site heading sizes -------------
+// Source values pulled directly from uikit.my-theme.css (lines 275-318).
+// Base body is 16px / 1.5, which already matches Bootstrap's default, so the
+// work here is the HEADINGS, whose ratios and responsive steps differ from
+// Bootstrap's. UIkit headings are normal-weight in #333 (line ~250); if you
+// prefer bold headings keep headings-font-weight:"bold" in _pkgdown.yml and
+// delete the font-weight line below.
+//
+// NOTE: also set font_scale: 1.0 (not 1.1) in _pkgdown.yml, or every size
+// here is multiplied by 1.1 and the match breaks.
+h1, .h1 { font-size: 2.23125rem; line-height: 1.2; }
+h2, .h2 { font-size: 1.7rem;     line-height: 1.3; }
+h3, .h3 { font-size: 1.5rem;     line-height: 1.4; }
+h4, .h4 { font-size: 1.25rem;    line-height: 1.4; }
+h5, .h5 { font-size: 1rem;       line-height: 1.4; }
+h6, .h6 { font-size: 0.875rem;   line-height: 1.4; }
+
+// UIkit headings were normal-weight grey, not bold black. Comment out this
+// block if you'd rather keep Bootstrap/your bold headings.
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  color: #333;
+}
+
+// UIkit bumps h1/h2 up at >=960px (its tablet-landscape breakpoint).
+@media (min-width: 960px) {
+  h1, .h1 { font-size: 2.625rem; }
+  h2, .h2 { font-size: 2rem; }
+}
+
+// UIkit body-text helpers, in case multitool articles use them.
+.text-lead  { font-size: 1.5rem;   line-height: 1.5; }   // uikit .uk-text-lead
+.text-small { font-size: 0.875rem; line-height: 1.5; }   // uikit .uk-text-small
+
+// --- Body-link hover: UIkit's blue -> pink inversion (THE signature) ---------// Set here as a post-Bootstrap rule rather than via a bslib variable, because
+// `primary` only controls navbar/sidebar hover, and whether bs_theme() accepts
+// `link-hover-color` as a passthrough Sass var is version-dependent. A raw CSS
+// rule appended after Bootstrap is guaranteed to win. The :not() guards keep
+// navbar/brand links on their own (navbar-controlled) styling.
+a:not(.nav-link):not(.navbar-brand) {
+  text-decoration: none;          // uikit: no underline at rest (line 45)
+}
+a:not(.nav-link):not(.navbar-brand):hover {
+  color: $esy-pink;               // uikit link hover (line 51)
+}
+
+// --- Card: resting + hover lift (uikit .uk-card-hover, ~line 2636) -----------
+.card {
+  box-shadow: $esy-shadow-resting;
+  transition: box-shadow 0.1s ease-in-out;
+}
+.card:hover {
+  box-shadow: $esy-shadow-hover;
+}
+
+// --- Badge: small, rounded, bold (uikit card-badge) --------------------------
+.badge {
+  border-radius: 5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+// --- Meta / secondary text (uikit .uk-text-meta, lines 7192/7197/7200) -------
+.text-meta {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: $esy-muted !important;
+}
+.text-meta a { color: $esy-muted; }
+.text-meta a:hover { color: $esy-ink; text-decoration: none; }
+
+// --- Card titles: bold & tight (uikit line 2681) -----------------------------
+.card-title {
+  font-size: 1.5rem;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+// --- Inline code: pink on inset gray (uikit signature, lines 86/89) ----------
+// bslib already set $code-color/$code-bg, but pkgdown's reference pages style
+// code heavily; re-assert to win specificity.
+:not(pre) > code {
+  //color: $esy-pink;
+  background: $esy-inset;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+// --- Respect reduced-motion --------------------------------------------------
+@media (prefers-reduced-motion: reduce) {
+  .card { transition: none; }
+}

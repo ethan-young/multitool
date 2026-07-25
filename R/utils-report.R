@@ -10,10 +10,11 @@ compose_partition <-
     row,
     .syntax = NULL,
     .design = NULL,
-    .txt_size = 6
+    .txt_size = 6,
+    .txt_family = NULL
   ){
 
-    raw_txt <- row |> dplyr::pull(sec_txt) |> purrr::pluck(1) |> realize_slot("txt", txt_size = .txt_size)
+    raw_txt <- row |> dplyr::pull(sec_txt) |> purrr::pluck(1) |> realize_slot("txt", txt_size = .txt_size, txt_family = .txt_family)
     raw_tbl <- row |> dplyr::pull(sec_tbl) |> purrr::pluck(1) |> realize_slot("tbl")
     raw_fig <- row |> dplyr::pull(sec_fig) |> purrr::pluck(1) |> realize_slot("fig")
 
@@ -186,7 +187,7 @@ parse_design <- function(design){
 #'
 #' @noRd
 realize_slot <-
-  function(value, kind = c("txt", "tbl", "fig"), txt_size = 6) {
+  function(value, kind = c("txt", "tbl", "fig"), txt_size = 6, txt_family = NULL) {
     kind <- match.arg(kind)
 
     value <- rlang::parse_expr(value) |> rlang::eval_tidy()
@@ -207,6 +208,7 @@ realize_slot <-
           ggtext::geom_textbox(
             ggplot2::aes(x = 0, y = 0, label = label),
             size = txt_size,
+            family = txt_family,
             minwidth = grid::unit(1, "npc"),
             minheight =  grid::unit(1, "npc"),
             valign = .5,
@@ -346,6 +348,7 @@ generate_content <-
             section_title_size,
             section_subtitle_size,
             section_txt_size,
+            section_txt_family,
             laid_out,
             ...
           ){
@@ -378,7 +381,8 @@ generate_content <-
                 partition_df,
                 .syntax = section_patchwork_syntax,
                 .design = if (is.na(section_inner_layout)) NULL else section_inner_layout,
-                .txt_size = section_txt_size
+                .txt_size = section_txt_size,
+                .txt_family = if (is.na(section_txt_family)) NULL else section_txt_family
               )
 
             curr_margin <-

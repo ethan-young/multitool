@@ -165,6 +165,11 @@ utils::globalVariables(
     "eff_txt_size",
     "doc_canvas_height",
     "doc_canvas_width",
-    "rendered_content"
+    "rendered_content",
+    "filter_1",
+    "filter_2",
+    "filter1",
+    "filter2",
+    ".row_id"
   )
 )

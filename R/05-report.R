@@ -827,6 +827,7 @@ view_real_size <-
 #'   the slide (the *outer* layout); defaults to `"A"` (full-bleed).
 #' @param txt_size The size of text to appear when a composition contains a
 #'   textual section. Defaults to 6.
+#' @param txt_family The font used for textual section.
 #' @param ... Passed to [view_real_size()] — e.g. `asp_ratio`, `anchor_height`,
 #'   `dpi`, `margin`, `pt_sizes` — to control the slide canvas and styling.
 #'
@@ -877,6 +878,7 @@ preview_section <-
     inner_design = NULL,
     outer_design = "A",
     txt_size = 6,
+    txt_family = NULL,
     ...
   ){
 
@@ -902,7 +904,8 @@ preview_section <-
         report_section,
         .syntax = patch_syntax_chr,
         .design = inner_design,
-        .txt_size = txt_size
+        .txt_size = txt_size,
+        .txt_family = txt_family
       )
 
     inner_fig <- composed_section$inner_fig
@@ -1125,6 +1128,7 @@ initialize_doc <-
         section_title_size       = NA_real_,
         section_subtitle_size    = NA_real_,
         section_txt_size         = NA_real_,
+        section_txt_family       = NA_character_,
         laid_out                 = FALSE
       )
 
@@ -1175,6 +1179,7 @@ initialize_doc <-
 #' @param meta_pt_sizes Point sizes for the title and description, as a length-2
 #'   numeric (default `c(24, 16)`).
 #' @param txt_size Point size for a textual content slot, if any (default `6`).
+#' @param txt_family Font family for a textuial content slot.
 #' @param sec_margin Optional per-section margin, given unquoted as a
 #'   [ggplot2::margin()] call (e.g. `margin(0.5, 0.5, 0.5, 0.5, "in")`); captured
 #'   as code and applied when this section is placed. `NULL` (default) uses the
@@ -1235,6 +1240,7 @@ layout_section <-
     add_desc  = TRUE,
     meta_pt_sizes  = c(24, 16),
     txt_size = 6,
+    txt_family = NULL,
     sec_margin = NULL,
     height = NULL,
     width  = NULL
@@ -1269,6 +1275,7 @@ layout_section <-
         section_title_size       = meta_pt_sizes[1],
         section_subtitle_size    = meta_pt_sizes[2],
         section_txt_size         = txt_size,
+        section_txt_family       = txt_family %||% NA_character_,
         laid_out                 = TRUE
       )
 

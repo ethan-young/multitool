@@ -1,0 +1,56 @@
+# =============================================================================
+# ESY brand — pkgdown template block
+# =============================================================================
+# Paste this `template:` block into multitool's _pkgdown.yml (top level).
+# It carries the brand :defaults from esy-brand.scss as bslib variables, which
+# pkgdown injects BEFORE Bootstrap compiles. The :rules half lives separately
+# in inst/pkgdown/extra.scss (pkgdown appends that AFTER Bootstrap).
+#
+# bslib accepts a mix of named shortcuts (primary, base_font, ...) and raw
+# Bootstrap Sass variable names. Raw $variables are passed straight through to
+# sass, so anything not covered by a named shortcut (e.g. $link-hover-color)
+# goes under bslib as `"$variable": value`.
+#
+# After editing, rebuild CSS quickly with:  pkgdown::init_site()  (then refresh)
+# or a full  pkgdown::build_site().
+
+template:
+  bootstrap: 5
+  bslib:
+    # --- Color (named shortcuts) -------------------------------------------
+    # primary = link color + navbar/sidebar hover tint (uikit blue, line 43)
+    primary: "#1e87f0"
+    # fg/bg drive the gray ramp; keep near-black ink on white (uikit lines 19/21)
+    fg: "#000000"
+    bg: "#ffffff"
+
+    # --- Fonts (named shortcuts; pkgdown fetches Google fonts automatically) -
+    base_font: { google: "Lato" }
+    heading_font: { google: "Lato" }
+    code_font: { google: "Source Code Pro" }  # closest CDN match to Consolas
+
+    # --- Raw Bootstrap Sass variables (passed through to sass) --------------
+    # The defining uikit gesture: links go blue -> pink on hover (lines 43/51).
+    # `primary` above sets the blue; this sets the hover pink explicitly so
+    # Bootstrap doesn't compute its own darker-blue hover shade.
+    "$link-color": "#1e87f0"
+    "$link-hover-color": "#f0506e"
+    "$link-decoration": "none"            # uikit: links not underlined (line 45)
+    "$link-hover-decoration": "underline" # ...until hover (line 52)
+
+    # Shape: uikit border-rounded = 5px (line 8025)
+    "$border-radius": "5px"
+    "$border-radius-sm": "3px"
+    "$border-radius-lg": "8px"
+
+    # Borders / muted text / inset background (uikit grays)
+    "$border-color": "#e5e5e5"
+    "$text-muted": "#999999"
+
+    # Inline code: pink on inset gray (uikit lines 86/89)
+    "$code-color": "#f0506e"
+    "$code-bg": "#f8f8f8"
+
+    # Card chrome
+    "$card-border-color": "#e5e5e5"
+    "$card-cap-bg": "#f8f8f8"

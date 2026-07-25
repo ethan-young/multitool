@@ -6,20 +6,25 @@ home:
 
 template:
   bootstrap: 5
-  theme: arrow-light
+  theme: monochrome
   navbar:
     type: light
   bslib:
     base_font: {google: "Lato"}
-    code_font: {google: "Fira Code"}
-    font_scale: 1.1
+    heading_font: {google: "Lato"}
+    code_font: {google: {family: "Fira Code", wght: [400, 600]}}
+    font_scale: 1
     line-height-base: "1.5"
     headings-font-weight: "bold"
     bg: "#fff"
+    fg: "#000"
+    primary: "#1e87f0"
     code-bg: "#f8f8f8"
     pre-bg: "#f8f8f8"
     pre-border: "#f8f8f8"
-    fg: "#000"
+    code-color: "#1e87f0"
+    border-radius: "5px"
+    border-color: "#e5e5e5"
     secondary: "#f8f8f8"
     light: "white"
   includes:
