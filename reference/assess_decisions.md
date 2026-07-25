@@ -127,6 +127,7 @@ results <-
   add_model("linear", lm({dvs} ~ {ivs})) |>
   expand_decisions() |>
   analyze_grid()
+#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■■       88% |  ETA:  0s
 
 # Decompose variance in standardized coefficients
 unpacked <- unpack_model_parameters(results)

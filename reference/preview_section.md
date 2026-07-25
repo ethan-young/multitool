@@ -24,6 +24,7 @@ preview_section(
   inner_design = NULL,
   outer_design = "A",
   txt_size = 6,
+  txt_family = NULL,
   ...
 )
 ```
@@ -85,6 +86,10 @@ preview_section(
 
   The size of text to appear when a composition contains a textual
   section. Defaults to 6.
+
+- txt_family:
+
+  The font used for textual section.
 
 - ...:
 

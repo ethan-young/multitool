@@ -1,3 +1,21 @@
 pre{
   border: none;
+  background: #f8f8f8;
+  color: #404040;
+  font-weight: bold;
+  font-size: 0.875rem;
 }
+
+button.btn.btn-primary.btn-copy-ex > i{
+  color: white;
+}
+
+pre code span.co { color: #1B998B; font-style: italic;}  /* comments */
+pre code span.st { color: #1B998B; }                     /* strings */
+pre code span.fl,                                        /* floats   */
+pre code span.dv,                                        /* integers */
+pre code span.bn { color: #7086C2; }                     /* hex/oct  */
+pre code span.cn { color: #7086C2; }                     /* TRUE/FALSE/NULL/NA */
+pre code span.op { color: #404040; }                        /* operators, <- %>% */
+pre code span.kw { color: #1e87f0; }    /* if/else/for + special fns */
+pre code span.fu { color: #404040; }     /* function calls */

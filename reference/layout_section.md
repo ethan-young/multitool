@@ -22,6 +22,7 @@ layout_section(
   add_desc = TRUE,
   meta_pt_sizes = c(24, 16),
   txt_size = 6,
+  txt_family = NULL,
   sec_margin = NULL,
   height = NULL,
   width = NULL
@@ -70,6 +71,10 @@ layout_section(
 - txt_size:
 
   Point size for a textual content slot, if any (default `6`).
+
+- txt_family:
+
+  Font family for a textuial content slot.
 
 - sec_margin:
 
