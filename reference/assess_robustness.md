@@ -109,7 +109,7 @@ results <-
   add_model("linear", lm({dvs} ~ {ivs})) |>
   expand_decisions() |>
   analyze_grid()
-#>  ■■■■■■■■■■■■■■■■■■■■■■■■■■■       88% |  ETA:  0s
+#>  ■■■■■■■■■■■■■■■■                  50% |  ETA:  1s
 
 # Assess robustness of standardized coefficients
 assess_robustness(results, .estimand = std_coefficient)
