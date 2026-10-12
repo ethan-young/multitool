@@ -164,13 +164,16 @@ add_subgroups <- function(.df, ..., .only = NULL){
   }
 
   base_df <-
-    rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
+    #rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
+    data_chr |>
+    rlang::parse_expr() |>
     rlang::eval_tidy(env = parent.frame())
 
   subgroups <-
     base_df |>
     dplyr::select(...) |>
     dplyr::distinct() |>
+    dplyr::collect() |>
     dplyr::mutate(
       dplyr::across(
         dplyr::where(\(x) is.character(x) | is.factor(x)),
@@ -266,14 +269,16 @@ add_variables <- function(.df, var_group, ...){
   }
 
   base_df <-
-    rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
+    #rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
+    data_chr |>
+    rlang::parse_expr() |>
     rlang::eval_tidy(env = parent.frame())
 
   grid_prep <-
     tibble::tibble(
       type  = "variables",
       group = var_group,
-      code  = base_df |> dplyr::select(...) |> names()
+      code  = base_df |> dplyr::select(...) |> colnames()
     )
 
   if(!is.null(data_attr)){
