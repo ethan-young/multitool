@@ -46,7 +46,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">add_subgroups</span><span class="op">(</span><span class="va">.df</span>, <span class="va">...</span>, .only <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">add_subgroups</span><span class="op">(</span><span class="va">.df</span>, <span class="va">...</span>, .use_partitions <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -63,9 +63,9 @@ along as an attribute.</p></dd>
 <dd><p>sub group variable(s) in your data whose values specify groupings.</p></dd>
 
 
-<dt id="arg--only">.only<a class="anchor" aria-label="anchor" href="#arg--only"></a></dt>
-<dd><p>a character vector of sub group values to include. The default
-includes all sub group values for each sub group variable.</p></dd>
+<dt id="arg--use-partitions">.use_partitions<a class="anchor" aria-label="anchor" href="#arg--use-partitions"></a></dt>
+<dd><p>whether or not to search an arrow pointer table's
+partitioning for subgroup names and values. Defaults to <code>FALSE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -113,11 +113,20 @@ decisions will be appended as new rows.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">the_data</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">add_subgroups</span><span class="op">(</span><span class="va">group</span>, .only <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 3</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   type      group code </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> subgroups group 1    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> subgroups group 3    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1,003 × 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    type      group  code              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> subgroups group  2                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> subgroups .only1 1                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> subgroups .only2 0.430849126351421 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> subgroups group  1                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> subgroups .only1 2                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> subgroups .only2 1.60863536001445  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> subgroups .only1 3                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> subgroups .only2 -0.749096299794574</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> subgroups group  3                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> subgroups .only1 4                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 993 more rows</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

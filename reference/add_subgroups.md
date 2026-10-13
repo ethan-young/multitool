@@ -5,7 +5,7 @@ Add sub groups to the multiverse pipeline
 ## Usage
 
 ``` r
-add_subgroups(.df, ..., .only = NULL)
+add_subgroups(.df, ..., .use_partitions = FALSE)
 ```
 
 ## Arguments
@@ -20,10 +20,10 @@ add_subgroups(.df, ..., .only = NULL)
 
   sub group variable(s) in your data whose values specify groupings.
 
-- .only:
+- .use_partitions:
 
-  a character vector of sub group values to include. The default
-  includes all sub group values for each sub group variable.
+  whether or not to search an arrow pointer table's partitioning for
+  subgroup names and values. Defaults to `FALSE`.
 
 ## Value
 
@@ -70,9 +70,18 @@ the_data |>
 
 the_data |>
   add_subgroups(group, .only = c(1,3))
-#> # A tibble: 2 × 3
-#>   type      group code 
-#>   <chr>     <chr> <chr>
-#> 1 subgroups group 1    
-#> 2 subgroups group 3    
+#> # A tibble: 1,003 × 3
+#>    type      group  code              
+#>    <chr>     <chr>  <chr>             
+#>  1 subgroups group  2                 
+#>  2 subgroups .only1 1                 
+#>  3 subgroups .only2 0.430849126351421 
+#>  4 subgroups group  1                 
+#>  5 subgroups .only1 2                 
+#>  6 subgroups .only2 1.60863536001445  
+#>  7 subgroups .only1 3                 
+#>  8 subgroups .only2 -0.749096299794574
+#>  9 subgroups group  3                 
+#> 10 subgroups .only1 4                 
+#> # ℹ 993 more rows
 ```
