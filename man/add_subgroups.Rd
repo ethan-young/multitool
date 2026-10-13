@@ -4,7 +4,7 @@
 \alias{add_subgroups}
 \title{Add sub groups to the multiverse pipeline}
 \usage{
-add_subgroups(.df, ..., .only = NULL)
+add_subgroups(.df, ..., .use_partitions = FALSE)
 }
 \arguments{
 \item{.df}{The original \code{data.frame}(e.g., base data set). If part of
@@ -13,8 +13,8 @@ along as an attribute.}
 
 \item{...}{sub group variable(s) in your data whose values specify groupings.}
 
-\item{.only}{a character vector of sub group values to include. The default
-includes all sub group values for each sub group variable.}
+\item{.use_partitions}{whether or not to search an arrow pointer table's
+partitioning for subgroup names and values. Defaults to \code{FALSE}.}
 }
 \value{
 a \code{data.frame} with three columns: type, group, and code. Type

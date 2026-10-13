@@ -22,6 +22,7 @@ Description: Run the same analysis over a range of arbitrary data processing
     pipelines and summarize the results.
 License: MIT + file LICENSE
 Imports:
+    arrow,
     cli,
     correlation,
     DiagrammeR,
@@ -65,4 +66,4 @@ BugReports: https://github.com/ethan-young/multitool/issues
 Depends: 
     R (>= 4.2.0)
 LazyData: true
-Config/roxygen2/version: 8.0.0
+Config/roxygen2/version: 8.1.0

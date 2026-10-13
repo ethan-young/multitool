@@ -205,3 +205,77 @@ build_pipeline_code <- function(.grid, decision_num){
   )
 
 }
+
+# Arrow file systems ------------------------------------------------------
+detect_partitions <- function(arrow_ds) {
+  field_names <- arrow_ds$schema$names
+
+  tibble::tibble(dir = arrow_ds$files) |>
+    dplyr::mutate(dir = stringr::str_remove(dir, "/[^/]+$")) |>
+    dplyr::distinct(dir) |>
+    dplyr::mutate(combination = dplyr::row_number()) |>
+    tidyr::separate_longer_delim(dir, delim = "/") |>
+    dplyr::filter(stringr::str_detect(dir, "=")) |>
+    tidyr::separate_wider_delim(
+      dir,
+      delim    = "=",
+      names    = c("field", "value"),
+      too_many = "merge"
+    ) |>
+    dplyr::filter(field %in% field_names) |>
+    tidyr::pivot_wider(
+      id_cols     = combination,
+      names_from  = field,
+      values_from = value
+    ) |>
+    dplyr::select(-combination) |>
+    dplyr::distinct()
+}
+
+cast_to_field <- function(raw_values, field_name, schema) {
+  target_type <- schema[[field_name]]$type
+
+  path_values <-
+    raw_values |>
+    dplyr::na_if("__HIVE_DEFAULT_PARTITION__") |>
+    arrow::Array$create()
+
+  path_values$cast(target_type) |> as.vector()
+}
+
+type_partitions <- function(partition_tbl, arrow_ds) {
+
+  partition_tbl |>
+    dplyr::mutate(
+      dplyr::across(
+        dplyr::everything(),
+        \(raw_values) cast_to_field(raw_values, dplyr::cur_column(), arrow_ds$schema)
+      )
+    )
+}
+
+check_partition_source <- function(base_df) {
+  if (!inherits(base_df, "FileSystemDataset")) {
+    rlang::abort(
+      c(
+        "`.use_partitions = TRUE` requires a dataset opened with `arrow::open_dataset()`.",
+        x = glue::glue("The base data is a <{class(base_df)[1]}>."),
+        i = "Set `.use_partitions = FALSE` to read subgroups from columns."
+      )
+    )
+  }
+}
+
+check_subgroups_partitioned <- function(subgroup_names, partition_tbl) {
+  not_partitioned <- setdiff(subgroup_names, names(partition_tbl))
+
+  if (length(not_partitioned) > 0) {
+    rlang::abort(
+      c(
+        "With `.use_partitions = TRUE`, every subgroup variable must be a hive partition.",
+        x = glue::glue("Not partitions: {stringr::str_flatten_comma(not_partitioned)}"),
+        i = glue::glue("Partitions found: {stringr::str_flatten_comma(names(partition_tbl))}")
+      )
+    )
+  }
+}

@@ -51,7 +51,9 @@ add_filters <- function(.df, ..., remove_do_nothing = FALSE){
   }
 
   base_df <-
-    rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
+    #rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
+    data_chr |>
+    rlang::parse_expr() |>
     rlang::eval_tidy(env = parent.frame())
 
   filter_exprs <- dplyr::enexprs(...)
@@ -116,8 +118,8 @@ add_filters <- function(.df, ..., remove_do_nothing = FALSE){
 #'   set of add_* decision functions in a pipeline, the base data will be passed
 #'   along as an attribute.
 #' @param ... sub group variable(s) in your data whose values specify groupings.
-#' @param .only a character vector of sub group values to include. The default
-#'   includes all sub group values for each sub group variable.
+#' @param .use_partitions whether or not to search an arrow pointer table's
+#'   partitioning for subgroup names and values. Defaults to `FALSE`.
 #'
 #' @return a \code{data.frame} with three columns: type, group, and code. Type
 #'   indicates the decision type, group is a decision, and the code is the
@@ -155,7 +157,7 @@ add_filters <- function(.df, ..., remove_do_nothing = FALSE){
 #'
 #' the_data |>
 #'   add_subgroups(group, .only = c(1,3))
-add_subgroups <- function(.df, ..., .only = NULL){
+add_subgroups <- function(.df, ..., .use_partitions = FALSE){
   data_chr <- dplyr::enexpr(.df) |> as.character()
   data_attr <- attr(.df, "base_df")
 
@@ -169,8 +171,25 @@ add_subgroups <- function(.df, ..., .only = NULL){
     rlang::parse_expr() |>
     rlang::eval_tidy(env = parent.frame())
 
+  if(.use_partitions){
+    check_partition_source(base_df)
+
+    subgroup_names <- base_df |> dplyr::select(...) |> names()
+    partition_tbl  <- detect_partitions(base_df)
+
+    check_subgroups_partitioned(subgroup_names, partition_tbl)
+
+    subgroups_df <-
+      partition_tbl |>
+      dplyr::select(dplyr::all_of(subgroup_names)) |>
+      type_partitions(base_df)
+
+  } else {
+    subgroups_df <- base_df
+  }
+
   subgroups <-
-    base_df |>
+    subgroups_df |>
     dplyr::select(...) |>
     dplyr::distinct() |>
     dplyr::collect() |>
@@ -191,18 +210,8 @@ add_subgroups <- function(.df, ..., .only = NULL){
     ) |>
     dplyr::relocate(type, .before = group) |>
     dplyr::distinct()
-  #dplyr::arrange(group, code)
 
-  if(is.null(.only)){
-    grid_prep <-
-      subgroups
-  } else{
-    grid_prep <-
-      subgroups |>
-      dplyr::filter(
-        code %in% .only
-      )
-  }
+  grid_prep <- subgroups
 
   if(!is.null(data_attr)){
     grid_prep <- dplyr::bind_rows(.df, grid_prep)
@@ -278,7 +287,7 @@ add_variables <- function(.df, var_group, ...){
     tibble::tibble(
       type  = "variables",
       group = var_group,
-      code  = base_df |> dplyr::select(...) |> colnames()
+      code  = base_df |> dplyr::select(...) |> names()
     )
 
   if(!is.null(data_attr)){
@@ -358,7 +367,9 @@ add_preprocess <- function(.df, process_name, code){
   }
 
   base_df <-
-    rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
+    #rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
+    data_chr |>
+    rlang::parse_expr() |>
     rlang::eval_tidy(env = parent.frame())
 
   grid_prep <-
@@ -470,7 +481,9 @@ add_model <-
     }
 
     base_df <-
-      rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
+      #rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
+      data_chr |>
+      rlang::parse_expr() |>
       rlang::eval_tidy(env = parent.frame())
 
     grid_prep <-
@@ -556,7 +569,9 @@ add_parameter_keys <- function(.df, parameter_group, parameter_name){
   }
 
   base_df <-
-    rlang::parse_expr(data_chr) |>
+    #rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
+    data_chr |>
+    rlang::parse_expr() |>
     rlang::eval_tidy(env = parent.frame())
 
   grid_prep <-
@@ -642,7 +657,9 @@ add_model_descriptives <- function(.df, desc_name, code){
   }
 
   base_df <-
-    rlang::parse_expr(data_chr) |>
+    #rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
+    data_chr |>
+    rlang::parse_expr() |>
     rlang::eval_tidy(env = parent.frame())
 
   grid_prep <-
@@ -735,7 +752,9 @@ add_postprocess <- function(.df, postprocess_name, code){
   }
 
   base_df <-
-    rlang::parse_expr(data_chr) |>
+    #rlang::parse_expr(paste(data_chr, "|> dplyr::collect()")) |>
+    data_chr |>
+    rlang::parse_expr() |>
     rlang::eval_tidy(env = parent.frame())
 
   grid_prep <-

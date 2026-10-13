@@ -47,17 +47,23 @@ export(unpack_specs)
 export(view_real_size)
 export(visualize_pipeline)
 importFrom(correlation,correlation)
-importFrom(dplyr,across)
-importFrom(dplyr,filter)
-importFrom(dplyr,mutate)
-importFrom(dplyr,rename)
-importFrom(dplyr,rename_with)
-importFrom(dplyr,select)
-importFrom(dplyr,summarize)
+importFrom(dplyr,
+  across,
+  filter,
+  mutate,
+  rename,
+  rename_with,
+  select,
+  summarize
+)
 importFrom(lifecycle,deprecated)
-importFrom(moments,kurtosis)
-importFrom(moments,skewness)
-importFrom(performance,cronbachs_alpha)
-importFrom(performance,item_intercor)
-importFrom(performance,item_reliability)
+importFrom(moments,
+  kurtosis,
+  skewness
+)
+importFrom(performance,
+  cronbachs_alpha,
+  item_intercor,
+  item_reliability
+)
 importFrom(tibble,tibble)

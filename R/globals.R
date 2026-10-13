@@ -170,6 +170,8 @@ utils::globalVariables(
     "filter_2",
     "filter1",
     "filter2",
-    ".row_id"
+    ".row_id",
+    "field",
+    "combination"
   )
 )
