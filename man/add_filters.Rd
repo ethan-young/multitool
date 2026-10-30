@@ -14,10 +14,10 @@ along as an attribute.}
 \item{...}{logical expressions to be used with \code{\link[dplyr]{filter}}
 separated by commas. Expressions should not be quoted.}
 
-\item{remove_do_nothing}{logical, \code{FALSE} by default. Indicates whether to
-include an specification where no filters are applied to the data.
-Typically this is desirable, but on a occasion you may wan to turn this
-functionally off.}
+\item{remove_do_nothing}{logical, \code{FALSE} by default. Indicates whether
+to remove a specification where no filters are applied to the data.
+Typically, a 'no filter' specification is desirable, but on a occasion you
+may wan to turn this functionally off.}
 }
 \value{
 a \code{data.frame} with three columns: type, group, and code. Type

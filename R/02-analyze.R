@@ -25,6 +25,13 @@
 #'   workers. Relevant when running in parallel via \code{mirai::daemons()};
 #'   include here any package your pipeline code calls that is not attached by
 #'   default.
+#' @param .on_break what happens when a decision halts (a condition with
+#'   \code{on_fail = "halt"} fails) or errors. \code{"stop"} (default) stops
+#'   the run at the first one, naming the decision and step. \code{"record"}
+#'   runs every decision and records each one's outcome in
+#'   \code{status}, with the step and message in \code{run_logs}; the run
+#'   ends with a warning summarizing any halts and errors. Conditions with
+#'   \code{on_fail = "skip"} never stop the run.
 #' @param ... Custom functions your pipeline references (e.g. a custom
 #'   post-processing step), passed as \code{name = function} pairs (for example
 #'   \code{my_step = my_step}). Each is made available on the workers under the
@@ -140,8 +147,10 @@ analyze_grid <-
     show_progress = TRUE,
     ship_base_df = TRUE,
     libraries = NULL,
+    .on_break = c("stop", "record"),
     ...
   ){
+    .on_break <- rlang::arg_match(.on_break)
 
     custom_fns <- list(...)
 
@@ -181,7 +190,8 @@ analyze_grid <-
             analyzed_result <-
               execute_universe_model(
                 .grid,
-                decision_index = index
+                decision_index = index,
+                .on_break = .on_break
               )
             end <- Sys.time()
 
@@ -189,10 +199,20 @@ analyze_grid <-
               dplyr::mutate(
                 run_started = start,
                 run_ended = end,
-                run_duration_seconds = end-start,
-                run_duration_minutes = (end-start)/60
+                run_duration_seconds = as.numeric(difftime(end, start, units = "secs")),
+                run_duration_minutes = run_duration_seconds/60
               ) |>
-              tidyr::nest(timing_logs = dplyr::starts_with("run_"))
+              tidyr::nest(
+                run_logs =
+                  c(
+                    failed_step,
+                    run_message,
+                    run_started,
+                    run_ended,
+                    run_duration_seconds,
+                    run_duration_minutes
+                  )
+              )
           },
           .grid = .grid,
           ship_base_df = ship_base_df,
@@ -200,7 +220,8 @@ analyze_grid <-
           base_df = base_df,
           execute_universe_model = execute_universe_model,
           libraries = libraries,
-          custom_fns = custom_fns
+          custom_fns = custom_fns,
+          .on_break = .on_break
         ),
         .progress = show_progress
       )
@@ -208,6 +229,20 @@ analyze_grid <-
     results <- purrr::list_rbind(analyzed_grid)
 
     attr(results, "pipeline") <- attr(.grid, "pipeline")
+
+    if(.on_break == "record"){
+      n_error  <- sum(results$status == "error")
+      n_halted <- sum(results$status == "halted")
+
+      if(n_error + n_halted > 0){
+        rlang::warn(
+          c(
+            glue::glue("{n_error} decision(s) had errors and {n_halted} halted."),
+            i = "Filter on `status`; `failed_step` and `run_message` say where and why."
+          )
+        )
+      }
+    }
 
     results
 

@@ -20,6 +20,54 @@ run_universe_code_quietly <-
   )
 
 # Model Processing --------------------------------------------------------
+#' Process run conditions
+#' @noRd
+process_conditions <- function(.df, conditions){
+
+  # each test runs with the data piped into its front
+  test_results <-
+    purrr::map(conditions$test, \(test_code){
+      glue::glue(".df |> {test_code}") |>
+        rlang::parse_expr() |>
+        rlang::eval_tidy(env = rlang::current_env())
+    })
+
+  not_single_logical <- !purrr::map_lgl(test_results, rlang::is_scalar_logical)
+
+  if(any(not_single_logical)){
+    rlang::abort(
+      c(
+        "Each condition test must return a single TRUE or FALSE.",
+        x = glue::glue("Check: {stringr::str_flatten_comma(conditions$condition[not_single_logical])}")
+      )
+    )
+  }
+
+  condition_results <-
+    conditions |>
+    dplyr::mutate(
+      result = purrr::list_c(test_results),
+      # a test that can't be evaluated to TRUE (NA) counts as failed
+      implied_action = dplyr::if_else(dplyr::coalesce(result, FALSE), "proceed", on_fail)
+    )
+
+  # halt takes priority over skip, and skip over proceed
+  action <-
+    if(any(condition_results$implied_action == "halt")){
+      "halt"
+    } else if(any(condition_results$implied_action == "skip")){
+      "skip"
+    } else{
+      "proceed"
+    }
+
+  list(
+    data              = .df,
+    condition_results = condition_results,
+    action            = action
+  )
+}
+
 # Run and Process a model
 #' @noRd
 process_model <-
@@ -28,7 +76,8 @@ process_model <-
     .model_coefs = NULL,
     .model_fit = NULL,
     .model_standardize = NULL,
-    param_keys = NULL
+    param_keys = NULL,
+    env = rlang::caller_env()
   ){
 
     model_results <- list()
@@ -39,7 +88,7 @@ process_model <-
       stringr::str_remove(".*\\|\\> ") |>
       stringr::str_remove("\\(.*\\)")
 
-    model_obj <- run_universe_code_quietly(code)
+    model_obj <- run_universe_code_quietly(code, env = env)
 
     if(.model_coefs != ""){
       model_coefs <-
@@ -124,22 +173,12 @@ process_model <-
     # Messages & Warnings
     model_messages <-
       tibble::tibble(
-        model_messages =
-          ifelse(
-            purrr::is_empty(model_obj$messages),
-            NA,
-            model_obj$messages
-          )
+        model_messages = if(purrr::is_empty(model_obj$messages)) NA_character_ else model_obj$messages
       )
 
     model_warnings <-
       tibble::tibble(
-        model_warnings =
-          ifelse(
-            purrr::is_empty(model_obj$warnings),
-            NA,
-            model_obj$warnings
-          )
+        model_warnings = if(purrr::is_empty(model_obj$warnings)) NA_character_ else model_obj$warnings
       )
 
     output_full <-
@@ -157,6 +196,7 @@ process_model <-
       model = model_obj$result
     )
   }
+
 
 #' Strip problematic attributes
 #' @noRd
@@ -368,17 +408,29 @@ execute_universe_model <-
   function(
     .grid,
     decision_index,
+    .on_break = "stop",
     save_model = FALSE
   ){
     stopifnot("models" %in% names(.grid))
 
+    # set up the universe
     grid_slice <-
       .grid |>
       dplyr::filter(decision == decision_index)
 
     pipeline_code <- build_pipeline_code(.grid, decision_num = decision_index)
 
-    model_code <- get_code(pipeline_code$pipeline, "model")
+    pipeline_elements <- names(pipeline_code$pipeline)
+
+    # data creation code, it creates model_data later
+    data_step <- pipeline_elements[match("model", pipeline_elements) - 1]
+
+    # modeling code, model_data is created later
+    model_code <-
+      glue::glue(
+        "model_data |> {pipeline_code$pipeline$model}"
+      ) |>
+      as.character()
 
     if("parameter_keys" %in% names(.grid)){
       parameter_keys <-
@@ -389,33 +441,12 @@ execute_universe_model <-
       parameter_keys <- NULL
     }
 
-    model_coef_fn <-
+    model_settings <-
       grid_slice |>
       dplyr::select(models) |>
-      tidyr::unnest(dplyr::everything()) |>
-      dplyr::pull(model_coefs_fn)
+      tidyr::unnest(dplyr::everything())
 
-    model_fit_fn <-
-      grid_slice |>
-      dplyr::select(models) |>
-      tidyr::unnest(dplyr::everything()) |>
-      dplyr::pull(model_fit_fn)
-
-    model_standardize_fn <-
-      grid_slice |>
-      dplyr::select(models) |>
-      tidyr::unnest(dplyr::everything()) |>
-      dplyr::pull(model_standardize_fn)
-
-    focal_model <-
-      process_model(
-        code = model_code,
-        .model_coefs = model_coef_fn,
-        .model_fit = model_fit_fn,
-        .model_standardize = model_standardize_fn,
-        param_keys = parameter_keys
-      )
-
+    # meta data about the universe is saved regardless of errors
     results <- list()
 
     results$specifications <-
@@ -423,44 +454,163 @@ execute_universe_model <-
       dplyr::select(-dplyr::any_of("parameter_keys")) |>
       tidyr::nest(specifications = c(-decision))
 
-    results$focal_model <-
-      tibble::tibble(
-        model_fitted = list(focal_model$result)
+    pipeline_steps <-
+      pipeline_code$pipeline[names(pipeline_code$pipeline) != "postprocess"]
+
+    step_code <-
+      purrr::map(
+        seq_along(pipeline_steps),
+        \(i) list_to_pipeline(pipeline_steps[seq_len(i)])
+      ) |>
+      rlang::set_names(names(pipeline_steps))
+
+    postprocess_code <-
+      purrr::map(
+        pipeline_code$pipeline$postprocess,
+        \(code) list_to_pipeline(list(step_code$model, code))
       )
 
-    if("postprocess" %in% names(.grid)){
-      postprocessing_code <- pipeline_code$pipeline$postprocess
-
-      results$postprocess <-
-        purrr::map2(
-          postprocessing_code,
-          names(postprocessing_code),
-          function(code, func){
-            tibble::tibble(
-              "{func}_fitted" :=
-                list(
-                  postprocess_model(focal_model$model, code)
-                )
-            )
-          }
-        )
-    }
-
-    pipeline_ref <- purrr::list_flatten(pipeline_code$pipeline)
-
     results$pipeline_code <-
-      purrr::map(seq_along(pipeline_ref), function(step){
-        tibble::tibble(
-          pipeline_step = names(pipeline_ref[step]),
-          code = list_to_pipeline(pipeline_ref[1:step])
-        )
-      }) |>
-      purrr::list_rbind() |>
-      dplyr::mutate(
-        pipeline_step = stringr::str_remove(pipeline_step, "postprocess_")
-      ) |>
-      tidyr::pivot_wider(names_from = pipeline_step, values_from = code) |>
+      c(step_code, postprocess_code) |>
+      purrr::map(as.character) |>
+      tibble::as_tibble_row() |>
       tidyr::nest(pipeline_code = dplyr::everything())
 
-    purrr::reduce(results, dplyr::bind_cols)
+    # run the universe in steps: data -> conditions -> model -> postprocess
+    # if an error occurs, current_step records the step where it happened
+    current_step <- "data"
+
+    run_outcome <-
+      rlang::try_fetch(
+        {
+          data_run <-
+            get_code(pipeline_code$pipeline, data_step) |>
+            run_universe_code_quietly()
+
+          model_data <- data_run$result
+
+          results$data_steps <-
+            tibble::tibble(
+              data_rows = nrow(model_data),
+              data_warnings =
+                list(tibble::tibble(
+                  data_warnings =
+                    if(purrr::is_empty(data_run$warnings)) NA_character_ else data_run$warnings
+                )),
+              data_messages =
+                list(tibble::tibble(
+                  data_messages =
+                    if(purrr::is_empty(data_run$messages)) NA_character_ else data_run$messages
+                ))
+            ) |>
+            tidyr::nest(data_logs = dplyr::everything())
+
+          condition_action <- "proceed"
+
+          if(!is.null(pipeline_code$conditions)){
+            current_step <- "conditions"
+
+            curr_test <- process_conditions(model_data, pipeline_code$conditions)
+
+            results$condition_results <-
+              curr_test$condition_results |>
+              tidyr::nest(condition_results = dplyr::everything())
+
+            condition_action <- curr_test$action
+          }
+
+          if(condition_action == "proceed"){
+            current_step <- "model"
+
+            focal_model <-
+              process_model(
+                code = model_code,
+                .model_coefs = model_settings$model_coefs_fn,
+                .model_fit = model_settings$model_fit_fn,
+                .model_standardize = model_settings$model_standardize_fn,
+                param_keys = parameter_keys,
+                env = rlang::current_env()
+              )
+
+            results$focal_model <-
+              tibble::tibble(model_fitted = list(focal_model$results))
+
+            if(!is.null(pipeline_code$pipeline$postprocess)){
+              postprocessing_code <- pipeline_code$pipeline$postprocess
+
+              results$postprocess <-
+                purrr::map2(
+                  postprocessing_code,
+                  names(postprocessing_code),
+                  \(code, func){
+                    # update step to the current postprocess
+                    current_step <<- glue::glue("postprocess ({func})")
+
+                    tibble::tibble(
+                      "{func}_fitted" := list(postprocess_model(focal_model$model, code))
+                    )
+                  }
+                )
+            }
+
+            tibble::tibble(
+              status = "completed",
+              failed_step = NA_character_,
+              run_message = NA_character_
+            )
+
+          } else{
+            failed_conditions <-
+              curr_test$condition_results |>
+              dplyr::filter(implied_action == condition_action)
+
+            tibble::tibble(
+              status  = if(condition_action == "halt") "halted" else "skipped",
+              failed_step = "conditions",
+              run_message = stringr::str_flatten_comma(failed_conditions$condition)
+            )
+          }
+        },
+        error = function(cnd){
+          if(.on_break == "stop"){
+            rlang::abort(
+              glue::glue("Decision {decision_index} failed at the {current_step} step."),
+              parent = cnd,
+              class = "multitool_decision_error"
+            )
+          }
+
+          tibble::tibble(
+            status  = "error",
+            failed_step = as.character(current_step),
+            run_message = rlang::cnd_message(cnd)
+          )
+        }
+      )
+
+    # a halt stops the run unless failures are being recorded
+    if(.on_break == "stop" && run_outcome$status == "halted"){
+      rlang::abort(
+        c(
+          glue::glue("Decision {decision_index} failed a condition with `on_fail = \"halt\"`."),
+          x = glue::glue("Failed: {run_outcome$run_message}"),
+          i = glue::glue("See the tests with `show_code_conditions(<grid>, {decision_index})`.")
+        ),
+        class = "multitool_condition_halt"
+      )
+    }
+
+    results$run_outcome <- run_outcome
+
+    purrr::reduce(results, dplyr::bind_cols) |>
+      dplyr::select(
+        decision,
+        status,
+        failed_step,
+        run_message,
+        specifications,
+        dplyr::any_of(c("data_logs", "condition_results")),
+        dplyr::ends_with("fitted"),
+        pipeline_code
+      )
   }

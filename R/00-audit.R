@@ -48,7 +48,7 @@ show_code <-
       grid_slice <- build_pipeline_code(.grid, decision_num)
       grid_elements <-
         .grid |>
-        rename_with(
+        dplyr::rename_with(
           ~stringr::str_replace(.x, "models", "model")
         ) |>
         names()
@@ -102,6 +102,38 @@ show_code <-
       )
     }
 
+    if(.step == "conditions" && grid_type == "grid"){
+      pipeline_elements <- names(grid_slice$pipeline)
+
+      # conditions see the data exactly as it reaches the model
+      data_step <- pipeline_elements[match("model", pipeline_elements) - 1]
+
+      data_code <- get_code(grid_slice$pipeline, data_step, for_print = TRUE)
+
+      condition_code <-
+        glue::glue_data(
+          grid_slice$conditions,
+          "# {condition} (on fail: {on_fail})\n{data_code} |> \n  {test}\n\n"
+        ) |>
+        paste(collapse = "")
+
+      print(styler::style_text(condition_code))
+
+      if(.execute){
+        condition_data <-
+          get_code(grid_slice$pipeline, data_step) |>
+          rlang::parse_expr() |>
+          rlang::eval_tidy()
+
+        checked <- process_conditions(condition_data, grid_slice$conditions)
+
+        print(checked$condition_results)
+        print(glue::glue("Action: {checked$action}"))
+      }
+
+      return(invisible(NULL))
+    }
+
     if(grid_type == "grid"){
       code <- get_code(grid_slice$pipeline, .step, for_print = TRUE)
     } else if(grid_type == "multi"){
@@ -109,7 +141,7 @@ show_code <-
         grid_slice |>
         dplyr::pull(dplyr::any_of(c(.step))) |>
         stringr::str_replace_all("\\|\\>", " |> \n  ") |>
-        glue::glue(.trim = FALSE)
+        glue::as_glue()
     }
 
     if(.step == "model" && !is.null(.model_summary)){
@@ -152,6 +184,13 @@ show_code_filters <- function(.grid, decision_num, ...){
 #' @export
 show_code_preprocess <- function(.grid, decision_num, ...){
   show_code(.grid, decision_num, .step = "preprocess", ...)
+}
+
+#' @describeIn show_code Show the conditions code, optionally run the test
+#' @param ... additional arguments passed to \code{show_code()}
+#' @export
+show_code_conditions <- function(.grid, decision_num, ...){
+  show_code(.grid, decision_num, .step = "conditions", ...)
 }
 
 #' @describeIn show_code Show the code up to the modeling stage

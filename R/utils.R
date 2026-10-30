@@ -1,69 +1,86 @@
 # multitool internal utilities
 
 
+# Build functions ---------------------------------------------------------
+capture_base_data <- function(.df, df_expr, env){
+  force(df_expr)
+
+  base_df_name <- attr(.df, "base_df")
+
+  # first verb in the pipeline: .df is the base data itself
+  if(is.null(base_df_name)){
+    if(!rlang::is_symbol(df_expr)){
+      rlang::abort(
+        c(
+          "A pipeline must start from a named data object.",
+          x = glue::glue("The pipeline starts from `{rlang::expr_text(df_expr)}`."),
+          i = "Assign the data to a name first (e.g., `my_data <- ...`), then pipe `my_data` into the add_* functions."
+        )
+      )
+    }
+
+    return(list(name = rlang::as_string(df_expr), data = .df))
+  }
+
+  list(
+    name = base_df_name,
+    data = rlang::env_get(env, base_df_name, inherit = TRUE)
+  )
+}
+
+append_decisions <- function(.df, decisions, base){
+  if(!is.null(attr(.df, "base_df"))){
+    decisions <- dplyr::bind_rows(.df, decisions)
+  }
+
+  attr(decisions, "base_df") <- base$name
+  decisions
+}
+
+
+
 # Grid Expansion ----------------------------------------------------------
 # Prepare decision grid for expansion
 df_to_expand_prep <- function(decision_grid, decision_group, alternatives){
-
-  grid_prep <-
+  alternatives_by_group <-
     decision_grid |>
-    dplyr::distinct({{decision_group}}) |>
-    dplyr::pull() |>
-    purrr::map(function(x){
-      vect <-
-        decision_grid |>
-        dplyr::filter({{decision_group}} == x) |>
-        dplyr::pull({{alternatives}})
+    dplyr::summarise(
+      alternatives = list({{ alternatives }}),
+      .by = {{ decision_group }}
+    )
 
-      vect_chr <- paste0("'", vect, "'", collapse=",")
-
-      new_vect <- glue::glue("{x} = c({paste0(vect_chr)})") |> as.character()
-    })
-
-  grid_prep
+  rlang::set_names(
+    alternatives_by_group$alternatives,
+    dplyr::pull(alternatives_by_group, {{ decision_group }})
+  )
 }
 
 # Expand prepared grid
 df_to_expand <- function(prep){
-
-  glue::glue("tidyr::expand_grid({paste(prep, collapse = ', ')})") |>
-    rlang::parse_expr() |>
-    rlang::eval_tidy()
-
+  tidyr::expand_grid(!!!prep)
 }
 
 # Pipeline Code Building --------------------------------------------------
 # Convert pipeline list to code string
 list_to_pipeline <- function(pipeline, for_print = FALSE, execute = FALSE){
 
-  # if(for_print){
-  #   separator <- " |> \n  "
-  # } else{
-  #   separator <- " |> "
-  # }
+  pipeline_code <-
+    pipeline |>
+    purrr::compact() |>
+    paste(collapse = " |> ")
 
   if(for_print){
     pipeline_code <-
-      pipeline |>
-      purrr::compact() |>
-      paste(collapse = " |> ") |>
-      stringr::str_replace_all("( *)\\|\\>( *)", " |> \n  ") |>
-      glue::glue(.trim = FALSE)
-  } else{
-    pipeline_code <-
-      pipeline |>
-      purrr::compact() |>
-      paste(collapse = " |> ") |>
-      glue::glue(.trim = FALSE)
+      pipeline_code |>
+      stringr::str_replace_all("( *)\\|\\>( *)", " |> \n  ")
   }
 
+  pipeline_code <- glue::as_glue(pipeline_code)
+
   if(execute){
-    result <-
-      pipeline_code |>
+    pipeline_code |>
       rlang::parse_expr() |>
       rlang::eval_tidy()
-
-    result
   } else{
     pipeline_code
   }
@@ -72,16 +89,38 @@ list_to_pipeline <- function(pipeline, for_print = FALSE, execute = FALSE){
 # Get code up to a specific elementl
 get_code <- function(pipeline_list, which_element, for_print = FALSE){
   pipeline_elements <- names(pipeline_list)
-  code <- pipeline_list[1:which(pipeline_elements == which_element)]
+
+  if(!which_element %in% pipeline_elements){
+    rlang::abort(
+      c(
+        glue::glue("This decision's code has no `{which_element}` step."),
+        i = glue::glue("Steps available: {stringr::str_flatten_comma(pipeline_elements)}")
+      )
+    )
+  }
+
+  code <- pipeline_list[seq_len(match(which_element, pipeline_elements))]
   list_to_pipeline(code, for_print = for_print)
 }
 
 # Build pipeline code for a decision
 build_pipeline_code <- function(.grid, decision_num){
 
+  universe_conditions <- NULL
+  model_summaries     <- NULL
+
   data_chr <- attr(.grid, "base_df")
   subgroup_in_path <- attr(.grid, "subgroup_in_path")
   pointer <- attr(.grid, "pointer_path")
+
+  if(isTRUE(subgroup_in_path) && is.null(pointer)){
+    rlang::abort(
+      c(
+        "This grid sets `subgroup_in_path` but has no `pointer_path`.",
+        i = "Expand the pipeline again with `.pointer_path`, or with `.subgroup_in_path = FALSE`."
+      )
+    )
+  }
 
   if(!is.null(pointer)){
     data_chr <- glue::glue("open_dataset('{pointer}')")
@@ -117,30 +156,27 @@ build_pipeline_code <- function(.grid, decision_num){
       dplyr::pull(subgroups) |>
       unlist()
 
-    if(!subgroup_in_path){
+    if(isTRUE(subgroup_in_path)){
+      # each subgroup is a hive directory; arrow writes missing values to a default partition
       subgroup_string <-
-        purrr::map2_chr(
-          .x = names(subgroup_vars), .y = subgroup_vars,
-          \(x, y) glue::glue("{x} == {y}")
-        ) |>
+        purrr::map2_chr(names(subgroup_vars), subgroup_vars, \(x, y){
+          value <- if(y == "NA") "__HIVE_DEFAULT_PARTITION__" else stringr::str_remove_all(y, stringr::fixed('"'))
+          glue::glue("{x}={value}")
+        }) |>
+        paste0(collapse = "/")
+
+      universe_pipeline$original_data <-
+        glue::glue("open_dataset('{pointer}/{subgroup_string}/')")
+    } else{
+      # `x == NA` matches no rows, so missing values are selected with is.na()
+      subgroup_string <-
+        purrr::map2_chr(names(subgroup_vars), subgroup_vars, \(x, y){
+          if(y == "NA") glue::glue("is.na({x})") else glue::glue("{x} == {y}")
+        }) |>
         paste0(collapse = ", ")
 
       universe_pipeline$subgroups <-
         glue::glue("filter({subgroup_string})")
-    }
-
-    if(subgroup_in_path & !is.null(pointer)){
-      subgroup_string <-
-        purrr::map2_chr(
-          .x = names(subgroup_vars), .y = subgroup_vars,
-          \(x, y) glue::glue("{x}={stringr::str_remove_all(y, '\\\"')}")
-        ) |>
-        paste0(collapse = "/")
-
-      universe_pipeline$original_data <-
-        glue::glue(
-          "open_dataset('{pointer}/{subgroup_string}/')"
-        )
     }
 
     if(collect_after == "subgroups"){
@@ -173,6 +209,13 @@ build_pipeline_code <- function(.grid, decision_num){
     }
   }
 
+  if(stringr::str_detect(grid_elements, "conditions")){
+    universe_conditions <-
+      grid_slice |>
+      dplyr::pull(conditions) |>
+      purrr::pluck(1)
+  }
+
   if(stringr::str_detect(grid_elements, "models")){
     universe_pipeline$model <-
       grid_slice |>
@@ -200,7 +243,8 @@ build_pipeline_code <- function(.grid, decision_num){
   }
 
   list(
-    pipeline = universe_pipeline,
+    pipeline        = universe_pipeline,
+    conditions      = universe_conditions,
     model_summaries = model_summaries
   )
 

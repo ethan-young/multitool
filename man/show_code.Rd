@@ -5,6 +5,7 @@
 \alias{show_code_subgroups}
 \alias{show_code_filters}
 \alias{show_code_preprocess}
+\alias{show_code_conditions}
 \alias{show_code_model}
 \alias{show_code_postprocess}
 \title{Show multiverse data code pipelines}
@@ -23,6 +24,8 @@ show_code_subgroups(.grid, decision_num, ...)
 show_code_filters(.grid, decision_num, ...)
 
 show_code_preprocess(.grid, decision_num, ...)
+
+show_code_conditions(.grid, decision_num, ...)
 
 show_code_model(.grid, decision_num, ...)
 
@@ -71,6 +74,8 @@ it.
 \item \code{show_code_filters()}: Show the code up to the filtering stage
 
 \item \code{show_code_preprocess()}: Show the code up to the preprocessing stage
+
+\item \code{show_code_conditions()}: Show the conditions code, optionally run the test
 
 \item \code{show_code_model()}: Show the code up to the modeling stage
 

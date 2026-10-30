@@ -1,3 +1,6 @@
+# stored pipeline code uses dplyr verbs without namespaces, as analyze_grid()'s workers expect
+library(dplyr)
+
 make_data <- function(){
 
   data.frame(

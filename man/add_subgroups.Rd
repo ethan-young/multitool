@@ -52,7 +52,4 @@ the_data <-
 
 the_data |>
   add_subgroups(group)
-
-the_data |>
-  add_subgroups(group, .only = c(1,3))
 }

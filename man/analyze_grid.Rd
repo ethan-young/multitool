@@ -9,6 +9,7 @@ analyze_grid(
   show_progress = TRUE,
   ship_base_df = TRUE,
   libraries = NULL,
+  .on_break = c("stop", "record"),
   ...
 )
 }
@@ -35,6 +36,14 @@ the packages your pipeline uses are available during execution on the
 workers. Relevant when running in parallel via \code{mirai::daemons()};
 include here any package your pipeline code calls that is not attached by
 default.}
+
+\item{.on_break}{what happens when a decision halts (a condition with
+\code{on_fail = "halt"} fails) or errors. \code{"stop"} (default) stops
+the run at the first one, naming the decision and step. \code{"record"}
+runs every decision and records each one's outcome in
+\code{status}, with the step and message in \code{run_logs}; the run
+ends with a warning summarizing any halts and errors. Conditions with
+\code{on_fail = "skip"} never stop the run.}
 
 \item{...}{Custom functions your pipeline references (e.g. a custom
 post-processing step), passed as \code{name = function} pairs (for example

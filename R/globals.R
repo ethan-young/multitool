@@ -172,6 +172,22 @@ utils::globalVariables(
     "filter2",
     ".row_id",
     "field",
-    "combination"
+    "combination",
+    ".variable_values",
+    "conditions",
+    "n_types",
+    "on_fail",
+    "result",
+    "settings",
+    "data_logs",
+    "implied_action",
+    "run_status",
+    "failed_step",
+    "run_duration_minutes",
+    "run_duration_seconds",
+    "run_ended",
+    "run_message",
+    "run_started",
+    "status"
   )
 )
