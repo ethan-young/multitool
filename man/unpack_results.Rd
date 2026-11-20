@@ -9,43 +9,81 @@
 \alias{unpack_postprocess}
 \title{Unpack a component of your analyzed grid}
 \usage{
-unpack_results(.multi, .what, .which = NULL, .unpack_specs = "wide")
+unpack_results(
+  .multi,
+  .what,
+  .which = NULL,
+  .unpack_specs = "wide",
+  .include_unfinished = FALSE
+)
 
-unpack_model_parameters(.multi, effect_key = NULL, .unpack_specs = "wide")
+unpack_model_parameters(
+  .multi,
+  effect_key = NULL,
+  .unpack_specs = "wide",
+  .include_unfinished = FALSE
+)
 
-unpack_model_performance(.multi, .unpack_specs = "wide")
+unpack_model_performance(
+  .multi,
+  .unpack_specs = "wide",
+  .include_unfinished = FALSE
+)
 
-unpack_model_warnings(.multi, .unpack_specs = "wide")
+unpack_model_warnings(
+  .multi,
+  .unpack_specs = "wide",
+  .include_unfinished = FALSE
+)
 
-unpack_model_messages(.multi, .unpack_specs = "wide")
+unpack_model_messages(
+  .multi,
+  .unpack_specs = "wide",
+  .include_unfinished = FALSE
+)
 
-unpack_postprocess(.multi, .which, .unpack_specs = "wide")
+unpack_postprocess(
+  .multi,
+  .which = NULL,
+  .unpack_specs = "wide",
+  .include_unfinished = FALSE
+)
 }
 \arguments{
 \item{.multi}{a multiverse list-column \code{tibble} produced by
 \code{\link{analyze_grid}}.}
 
-\item{.what}{the name of a list-column you would like to unpack}
+\item{.what}{the results column to unpack, such as \code{model_fitted} or a
+postprocessing column such as \code{anova_fitted}.}
 
-\item{.which}{any sub-list columns you would like to unpack}
+\item{.which}{for \code{unpack_results()}: an optional column inside
+\code{.what} to unpack further, such as \code{model_parameters}, or a
+tidyselect helper. For \code{unpack_postprocess()}: the postprocessing
+column to unpack, such as \code{anova_fitted} (the step's name without
+\code{_fitted} also works). If \code{NULL}, the first one is unpacked and
+the others are listed in a message.}
 
-\item{.unpack_specs}{character, options are \code{"no"}, \code{"wide"}, or
-\code{"long"}. \code{"no"} (default) keeps specifications in a list column,
-\code{wide} unnests specifications with each specification category as a
-column. \code{"long"} unnests specifications and stacks them into long
-format, which stacks specifications into a \code{decision_type},
-\code{decision_set} and \code{decision_choice} columns. This is mainly
-useful for plotting.}
+\item{.unpack_specs}{how to present the specifications: \code{"wide"}
+(default), \code{"long"}, \code{"no"}, or \code{"drop"}. See
+\code{\link{unpack_specs}}.}
 
-\item{effect_key}{character, if you added parameter keys to your pipeline,
-you can specify if you would like filter the parameters using one of your
-parameter keys. This is useful when different variables are being switched
-out across the multiverse but represent the same effect of interest.}
+\item{.include_unfinished}{logical, \code{FALSE} by default. Decisions that
+were skipped, halted, or errored before producing \code{.what} have no
+results to unpack. If \code{FALSE}, they are left out and a message reports
+how many, by status. If \code{TRUE}, they are kept as rows with missing
+results; summaries of such output should drop or handle the missing values.}
+
+\item{effect_key}{character, optional. If your pipeline has parameter keys
+(see \code{\link{add_parameter_keys}}), keep only the parameters matching
+this key. This is useful when the variables change across decisions but
+represent the same effect of interest.}
 }
 \value{
-the unnested part of the multiverse requested. This usually contains
-the particular estimates or statistics you would like to analyze over the
-decision grid specified.
+a \code{tibble} with \code{decision}, \code{status}, the
+specifications as requested by \code{.unpack_specs}, and the requested
+output. Nothing else is returned; use \code{\link{unpack_logs}} for
+information about how each decision ran and \code{\link{show_code}} for its
+code.
 }
 \description{
 Unpack a component of your analyzed grid
@@ -60,7 +98,8 @@ Unpack a component of your analyzed grid
 
 \item \code{unpack_model_messages()}: Unpack the model messages
 
-\item \code{unpack_postprocess()}: Unpack a post-processing result
+\item \code{unpack_postprocess()}: Unpack a postprocessing step's output. Choose
+the step with \code{.which}, using the name given in the pipeline.
 
 }}
 \examples{
@@ -96,7 +135,7 @@ full_pipeline <-
   add_variables("mods", starts_with("mod")) |>
   add_model("linear_model", lm({dvs} ~ {ivs} * {mods} + cov1))
 
-pipeline_grid <- expand_decisions(full_pipeline)
+pipeline_grid <- expand_pipeline(full_pipeline)
 
 # Run the whole multiverse
 the_multiverse <- analyze_grid(pipeline_grid[1:10,])

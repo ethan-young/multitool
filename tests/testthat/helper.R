@@ -31,3 +31,33 @@ make_pipeline <- function(the_data){
     add_variables("mods", starts_with("mod"))
 
 }
+
+# results with completed and skipped decisions, two postprocessing steps, and
+# optionally a parameter key, for testing the unpack_* functions
+make_results <- function(with_keys = TRUE){
+  unpack_data <-
+    tibble::tibble(
+      x        = rnorm(30),
+      z        = rnorm(30),
+      y_varies = rnorm(30),
+      y_flat   = 5,
+      keep     = rep(c(0, 1), 15)
+    )
+
+  a_pipeline <-
+    unpack_data |>
+    add_filters(keep == 1) |>
+    add_variables("dvs", y_varies, y_flat) |>
+    add_condition("dv varies", with(var({dvs}) > 0), on_fail = "skip") |>
+    add_model("linear", lm({dvs} ~ x + z))
+
+  if(with_keys){
+    a_pipeline <- a_pipeline |> add_parameter_keys("slope", "x")
+  }
+
+  a_pipeline |>
+    add_postprocess("anova", anova()) |>
+    add_postprocess("coefficients", coef()) |>
+    expand_pipeline() |>
+    analyze_grid(show_progress = FALSE)
+}

@@ -1,168 +1,159 @@
-#' Show multiverse data code pipelines
+#' Show the code behind one decision
 #'
-#' \code{show_code} is the generic function. All \code{show_code*} functions are
-#' simple wrappers of \code{show_code}.
+#' \code{show_code} is the generic function. All \code{show_code_*} functions
+#' are simple wrappers of \code{show_code}.
 #'
-#' Each \code{show_code*} function should be self-explanatory - they indicate
-#' where along the multiverse pipeline to extract code. The goal of these
-#' functions is to create a window into each data/model combination and allow
-#' the user to inspect specific decisions straight from the code that produced
-#' it.
+#' Each \code{show_code_*} function indicates where along the pipeline to
+#' extract code. The goal of these functions is to open a window into each
+#' decision and let you inspect it straight from the code that produced it.
+#' The code is the same whether it comes from a grid (built on the fly) or from
+#' analyzed results (stored when the decision ran).
 #'
-#' @param .grid a full decision grid created by \code{\link{expand_decisions}}
-#'   or a fully analyzed grid produced by \code{\link{analyze_grid}}.
-#' @param decision_num numeric. Indicates which decision set in the grid to show
-#'   underlying code.
-#' @param .step a point along the pipeline for which you would like to show the
-#'   underlying code. Defaults to the model.
-#' @param .model_summary a model summary function such as
-#'   \code{parameters::parameters()} or \code{broom::tidy()}
-#' @param .post_step Only relevant if you are exposing a postprocessing step. If
-#'   you have more than one postprocess, you can specify which you would like to
-#'   expose by index or by name.
-#' @param .execute logical, whether or not to run the code as well as print it.
+#' @param .grid a decision grid created by \code{\link{expand_pipeline}}, or
+#'   analyzed results produced by \code{\link{analyze_grid}}.
+#' @param decision_num numeric. The decision whose code to show.
+#' @param .step the point along the pipeline to show code for: one of the
+#'   main steps (\code{"original_data"}, \code{"collect"}, \code{"subgroups"},
+#'   \code{"filters"}, \code{"preprocess"}, \code{"model"}), or one of the
+#'   steps that can have several parts (\code{"conditions"},
+#'   \code{"model_summary"}, \code{"postprocess"}). Defaults to
+#'   \code{"model"}.
+#' @param .which for \code{"conditions"}, \code{"model_summary"}, and
+#'   \code{"postprocess"}: which part to show, by name or by position. If
+#'   \code{NULL} (the default), the first is shown and the others are listed
+#'   in a message. Model summaries are named \code{"coefs"}, \code{"fit"}, and
+#'   \code{"standardize"}; conditions and postprocessing steps use the names
+#'   given in the pipeline.
+#' @param .execute logical, whether to run the code as well as print it.
 #'
-#' @returns the code that generated results up to the specified point in an
-#'   analysis pipeline.
+#' @returns the code, invisibly, after printing it. The code for main steps
+#'   runs from the base data through that step; conditions run on the data as
+#'   it reaches the model; model summaries and postprocessing run on the fitted
+#'   model.
 #' @export
 show_code <-
   function(
     .grid,
     decision_num,
     .step = "model",
-    .model_summary = NULL,
-    .post_step = NULL,
+    .which = NULL,
     .execute = FALSE
   ){
-    if("specifications" %in% names(.grid)){
-      grid_type <- "multi"
-      grid_slice <-
-        .grid |>
-        dplyr::filter(decision == decision_num) |>
-        dplyr::select(decision, pipeline_code) |>
-        unpack_results(pipeline_code)
 
-      grid_elements <- names(grid_slice)
-    } else{
-      grid_type <- "grid"
-      grid_slice <- build_pipeline_code(.grid, decision_num)
-      grid_elements <-
-        .grid |>
-        dplyr::rename_with(
-          ~stringr::str_replace(.x, "models", "model")
-        ) |>
-        names()
-    }
-
-    if(.step == "postprocess" & grid_type == "grid"){
-      if(!is.null(.post_step)){
-        grid_slice$pipeline$postprocess <-
-          grid_slice$pipeline$postprocess[[.post_step]]
-      } else{
-        grid_slice$pipeline$postprocess <-
-          grid_slice$pipeline$postprocess[[1]]
-      }
-    } else if(.step == "postprocess" & grid_type == "multi"){
-      grid_slice <-
-        grid_slice |>
-        dplyr::select(
-          -dplyr::any_of(
-            c(
-              "decision",
-              "original_data",
-              "collect",
-              "subgroups",
-              "filters",
-              "preprocess",
-              "model"
-            )
-          )
-        )
-      if(!is.null(.post_step)){
-        grid_slice <-
-          grid_slice |>
-          dplyr::select(.post_step)
-
-        .step <- names(grid_slice)
-
-      } else{
-        grid_slice <-
-          grid_slice |>
-          dplyr::select(1)
-
-        .step <- names(grid_slice)
-      }
-    }
-
-    if(!.step %in% grid_elements){
+    if(!decision_num %in% .grid$decision){
       rlang::abort(
-        glue::glue(
-          "You don't have a {.step} step specified in your pipeline..."
-        )
+        glue::glue("There is no decision {decision_num} in this grid.")
       )
     }
 
-    if(.step == "conditions" && grid_type == "grid"){
-      pipeline_elements <- names(grid_slice$pipeline)
+    # this decision's code: stored in analyzed results, built from a grid
+    if("pipeline_code" %in% names(.grid)){
+      step_code <-
+        .grid |>
+        dplyr::filter(decision == decision_num) |>
+        dplyr::pull(pipeline_code) |>
+        purrr::pluck(1)
+    } else{
+      step_code <-
+        build_pipeline_code(.grid, decision_num) |>
+        build_step_code()
+    }
 
-      # conditions see the data exactly as it reaches the model
-      data_step <- pipeline_elements[match("model", pipeline_elements) - 1]
+    # steps with several parts: show one, by name, position, or the first
+    substep_prefixes <-
+      c(
+        conditions    = "condition_",
+        model_summary = "summary_",
+        postprocess   = "postprocess_"
+      )
 
-      data_code <- get_code(grid_slice$pipeline, data_step, for_print = TRUE)
+    if(.step %in% names(substep_prefixes)){
+      prefix <- substep_prefixes[[.step]]
 
-      condition_code <-
-        glue::glue_data(
-          grid_slice$conditions,
-          "# {condition} (on fail: {on_fail})\n{data_code} |> \n  {test}\n\n"
-        ) |>
-        paste(collapse = "")
+      available <-
+        names(step_code)[stringr::str_starts(names(step_code), prefix)] |>
+        stringr::str_remove(paste0("^", prefix))
 
-      print(styler::style_text(condition_code))
-
-      if(.execute){
-        condition_data <-
-          get_code(grid_slice$pipeline, data_step) |>
-          rlang::parse_expr() |>
-          rlang::eval_tidy()
-
-        checked <- process_conditions(condition_data, grid_slice$conditions)
-
-        print(checked$condition_results)
-        print(glue::glue("Action: {checked$action}"))
+      if(length(available) == 0){
+        rlang::abort(
+          glue::glue("Decision {decision_num} has no {.step} steps.")
+        )
       }
 
-      return(invisible(NULL))
-    }
+      chosen <-
+        if(is.null(.which)){
+          available[1]
+        } else if(is.numeric(.which)){
+          available[.which]
+        } else{
+          .which
+        }
 
-    if(grid_type == "grid"){
-      code <- get_code(grid_slice$pipeline, .step, for_print = TRUE)
-    } else if(grid_type == "multi"){
-      code <-
-        grid_slice |>
-        dplyr::pull(dplyr::any_of(c(.step))) |>
-        stringr::str_replace_all("\\|\\>", " |> \n  ") |>
-        glue::as_glue()
-    }
+      chosen <- stringr::str_remove(chosen, "_fitted$")
 
-    if(.step == "model" && !is.null(.model_summary)){
-      which_summary <-
-        grid_slice$model_summaries[[.model_summary]] |>
-        unlist()
-
-      code <-
-        glue::glue(
-          "{code} |> \n  {which_summary} \n\n",
-          .trim = FALSE
+      if(is.na(chosen) || !chosen %in% available){
+        rlang::abort(
+          c(
+            glue::glue("No {.step} step `{.which}`."),
+            i = glue::glue(
+              "Available: {stringr::str_flatten_comma(available)}"
+            )
+          )
         )
+      }
+
+      if(is.null(.which) && length(available) > 1){
+        rlang::inform(
+          glue::glue(
+            "Showing `{chosen}`. ",
+            "Also available: {stringr::str_flatten_comma(available[-1])}. ",
+            "Choose one with `.which`."
+          )
+        )
+      }
+
+      code_column <- paste0(prefix, chosen)
+    } else{
+      main_steps <-
+        names(step_code)[
+          !stringr::str_detect(
+            names(step_code),
+            "^(condition|summary|postprocess)_"
+          )
+        ]
+
+      if(!.step %in% main_steps){
+        rlang::abort(
+          c(
+            glue::glue("This decision's code has no `{.step}` step."),
+            i = glue::glue(
+              "Steps available: ",
+              "{stringr::str_flatten_comma(
+                c(main_steps, names(substep_prefixes))
+              )}"
+            )
+          )
+        )
+      }
+
+      code_column <- .step
     }
+
+    code <-
+      step_code[[code_column]] |>
+      stringr::str_replace_all(" \\|> ", " |> \n  ") |>
+      glue::as_glue()
 
     print(styler::style_text(code))
 
     if(.execute){
-      rlang::parse_expr(code) |>
+      code |>
+        rlang::parse_expr() |>
         rlang::eval_tidy() |>
         print()
     }
+
+    invisible(code)
   }
 
 #' @describeIn show_code Show the code up to the subgroups stage
@@ -186,7 +177,8 @@ show_code_preprocess <- function(.grid, decision_num, ...){
   show_code(.grid, decision_num, .step = "preprocess", ...)
 }
 
-#' @describeIn show_code Show the conditions code, optionally run the test
+#' @describeIn show_code Show the code for a condition: the data as it
+#'   reaches the model, followed by the condition's test
 #' @param ... additional arguments passed to \code{show_code()}
 #' @export
 show_code_conditions <- function(.grid, decision_num, ...){
@@ -200,11 +192,17 @@ show_code_model <- function(.grid, decision_num, ...){
   show_code(.grid, decision_num, .step = "model", ...)
 }
 
-#' @describeIn show_code Show the code up to the post-processing stage
+#' @describeIn show_code Show the code for a model summary, such as the
+#'   model's coefficients or fit statistics
+#' @param ... additional arguments passed to \code{show_code()}
+#' @export
+show_code_model_summary <- function(.grid, decision_num, ...){
+  show_code(.grid, decision_num, .step = "model_summary", ...)
+}
+
+#' @describeIn show_code Show the code for a postprocessing step
 #' @param ... additional arguments passed to \code{show_code()}
 #' @export
 show_code_postprocess <- function(.grid, decision_num, ...){
   show_code(.grid, decision_num, .step = "postprocess", ...)
 }
-
-

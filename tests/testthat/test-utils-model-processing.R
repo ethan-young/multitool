@@ -76,8 +76,8 @@ test_that("each postprocess step's stored code runs on the model, not the previo
 
   stored_code <- results$pipeline_code[[1]]
 
-  expect_match(stored_code$coefficients, "lm\\(.*\\) \\|> coef\\(\\)$")
-  expect_no_match(stored_code$coefficients, "anova")
+  expect_match(stored_code$postprocess_coefficients, "lm\\(.*\\) \\|> coef\\(\\)$")
+  expect_no_match(stored_code$postprocess_coefficients, "anova")
 })
 
 test_that("running data and model separately matches running the full chain", {

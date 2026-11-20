@@ -8,39 +8,33 @@ dispersal}
 assess_decisions(.unpacked, .estimand, .by = NULL)
 }
 \arguments{
-\item{.unpacked}{A \code{data.frame} with unpacked multiverse results,
-typically produced by \code{\link{unpack_model_parameters}} or
-\code{\link{unpack_model_performance}}. Must contain columns for each
-decision type (filters, variables, models, etc.) and the focal estimand.}
+\item{.unpacked}{unpacked results with wide specifications, typically from
+\code{\link{unpack_model_parameters}} or
+\code{\link{unpack_model_performance}} with the default \code{.unpack_specs
+= "wide"}.}
 
-\item{.estimand}{The numeric outcome variable to decompose. Defaults to
-\code{std_coef} (standardized coefficients). Use unquoted column names with
-tidy evaluation.}
+\item{.estimand}{the numeric column to decompose, such as
+\code{std_coefficient} or \code{p}. Use an unquoted column name.}
 
-\item{.by}{Optional grouping variable(s) for stratified decomposition. The
-variance decomposition will be computed separately for each group. Useful
-for examining whether decision importance varies across different model
-variables or subgroups. Use unquoted column names.}
+\item{.by}{optional columns to decompose within, such as \code{parameter} or
+\code{dvs}. Use unquoted column names.}
 }
 \value{
-A \code{data.frame} with one row per decision set, containing:
+a \code{tibble} with one row per decision set (and per \code{.by}
+group, whose columns come first):
 \describe{
-\item{decision_set}{Name of the decision type (e.g., "filters",
-"variables", "model")}
-\item{main_effect}{First-order Sobol index. Proportion of total variance
-explained by this decision set alone, averaging over all other
-decisions. Ranges from 0 (no effect) to 1 (explains all variance)}
-\item{total_effect}{Total Sobol index. Proportion of total variance
-explained by this decision set including all its interactions with
-other decisions. Always ≥ main_effect}
-\item{interaction_effect}{Total effect minus main effect. Proportion of
-variance due to interactions between this decision and others}
-\item{variance_reduction}{Proportion of variance eliminated by fixing
-this decision to a single option. Also called "expected reduction in
-variance" or EVPPI (Expected Value of Perfect Parameter Information)}
+\item{decision_set}{a specification column, such as a filtered
+variable, a variable group, or \code{model_meta}}
+\item{main_effect}{the share of the estimate's variance explained by
+this decision alone: the variance of its choice means, divided by
+the total variance}
+\item{total_effect}{the share explained by this decision including its
+interactions with every other decision: the variance left when all
+other decisions are held fixed, averaged over those combinations}
+\item{interaction_effect}{\code{total_effect} minus
+\code{main_effect}: the share that depends on how this decision
+combines with others}
 }
-
-If \code{.by} is specified, grouping columns appear first.
 }
 \description{
 Quantifies how much each decision type (e.g., filters, variables, models)
@@ -55,28 +49,25 @@ This function implements a Sobol-style decomposition where "decision sets"
 produce different specifications. The decomposition reveals which analytical
 choices have the strongest influence on results.
 
-The function computes four complementary variance measures:
+Each specification column with more than one choice is treated as a
+factor, and the decomposition is computed exactly from the grid rather than
+by simulation. Averages are weighted by the number of decisions behind
+them, so the indices remain correct when skipped or halted decisions leave
+some combinations empty. Total effects are most reliable when the grid is
+complete: a combination with only one remaining decision has nothing to
+vary within it.
 
-\strong{Main effect (first-order Sobol):} How much does this decision
-matter on average, ignoring interactions? Computed by averaging the
-estimand over all combinations of other decisions, then computing the
-variance of those conditional means.
+The function needs one row per decision within \code{.by}. Unpacked
+parameters have one row per parameter, so filter to one parameter or add
+\code{parameter} to \code{.by}. Every row needs a value for
+\code{.estimand}; missing estimates stop the function. Decisions that
+didn't complete are already left out by unpacking.
 
-\strong{Total effect (total-order Sobol):} How much variance remains when
-we fix all decisions \emph{except} this one? Includes the decision's main
-effect plus all interactions involving it.
-
-\strong{Interaction effect:} The gap between total and main effects,
-showing how much the decision's impact depends on other choices.
-
-\strong{Variance reduction:} How much would total variance decrease if we
-picked one option for this decision? Useful for prioritizing which
-decisions to "fix" to reduce result instability.
-
-Interpretation: A decision with high main effect drives results
-independently. A decision with high interaction effect matters, but
-differently depending on other choices. A decision with low total effect is
-relatively inconsequential.
+A decision with a high main effect moves the estimate on its own. One with
+a high interaction effect matters, but in ways that depend on other
+choices. One with a low total effect makes little difference. Use
+\code{\link{assess_choices}} to see which choices within a decision are
+responsible.
 }
 \examples{
 
@@ -102,16 +93,16 @@ results <-
   add_variables("ivs", iv1, iv2) |>
   add_variables("dvs", dv1, dv2) |>
   add_model("linear", lm({dvs} ~ {ivs})) |>
-  expand_decisions() |>
+  expand_pipeline() |>
   analyze_grid()
 
 # Decompose variance in standardized coefficients
 unpacked <- unpack_model_parameters(results)
-assess_decisions(unpacked, .estimand = std_coefficient)
+assess_decisions(unpacked, .estimand = std_coefficient, .by = parameter)
 
 # Which decisions matter most for p-values?
-assess_decisions(unpacked, .estimand = p)
+assess_decisions(unpacked, .estimand = p, .by = parameter)
 
 # Decompose separately for each parameter
-assess_decisions(unpacked, .estimand = p, .by = dvs)
+assess_decisions(unpacked, .estimand = p, .by = c(parameter, dvs))
 }

@@ -250,6 +250,51 @@ build_pipeline_code <- function(.grid, decision_num){
 
 }
 
+# Build runnable code for every step of one decision
+# Main steps are chains from the data through that step
+# conditions run on the data as it reaches the model
+# postprocessing runs on the model
+build_step_code <- function(pipeline_code){
+  pipeline_steps <-
+    pipeline_code$pipeline[names(pipeline_code$pipeline) != "postprocess"]
+
+  step_code <-
+    purrr::map(
+      seq_along(pipeline_steps),
+      \(i) list_to_pipeline(pipeline_steps[seq_len(i)])
+    ) |>
+    rlang::set_names(names(pipeline_steps))
+
+  data_step <- names(pipeline_steps)[match("model", names(pipeline_steps)) - 1]
+
+  summary_code <-
+    pipeline_code$model_summaries |>
+    purrr::map(unlist) |>
+    purrr::discard(\(code) is.null(code) || identical(code, "")) |>
+    purrr::map(\(code) list_to_pipeline(list(step_code$model, code))) |>
+    rlang::set_names(\(nm) paste0("summary_", stringr::str_remove_all(nm, "^model_|_fn$")))
+
+
+  condition_code <-
+    purrr::map(
+      pipeline_code$conditions$test,
+      \(test) list_to_pipeline(list(step_code[[data_step]], test))
+    ) |>
+    rlang::set_names(paste0("condition_", pipeline_code$conditions$condition))
+
+  postprocess_code <-
+    purrr::map(
+      pipeline_code$pipeline$postprocess,
+      \(code) list_to_pipeline(list(step_code$model, code))
+    ) |>
+    rlang::set_names(paste0("postprocess_", names(pipeline_code$pipeline$postprocess)))
+
+  c(step_code, condition_code, summary_code, postprocess_code) |>
+    purrr::map(as.character) |>
+    tibble::as_tibble_row()
+}
+
+
 # Arrow file systems ------------------------------------------------------
 detect_partitions <- function(arrow_ds) {
   field_names <- arrow_ds$schema$names

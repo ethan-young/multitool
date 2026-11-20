@@ -4,22 +4,23 @@
 \alias{unpack_specs}
 \title{Unpack the decision grid of specifications for your modeling pipeline}
 \usage{
-unpack_specs(.multi, .how = "wide")
+unpack_specs(.multi, .how = c("wide", "long", "no", "drop"))
 }
 \arguments{
 \item{.multi}{a multiverse list-column \code{tibble} produced by
 \code{\link{analyze_grid}}.}
 
-\item{.how}{character, options are \code{"no"}, \code{"wide"}, or
-\code{"long"}. \code{"no"} (default) keeps specifications in a list column,
-\code{wide} unnests specifications with each specification category as a
-column. \code{"long"} unnests specifications and stacks them into long
-format, which stacks specifications into a \code{decision_type},
-\code{decision_set} and \code{decision_choice} columns. This is mainly
-useful for plotting.}
+\item{.how}{how to present the specifications: \code{"wide"} (default)
+unnests them with one column per decision; \code{"long"} stacks them
+into \code{decision_type}, \code{decision_set}, and
+\code{decision_choice} columns, which is mainly useful for plotting;
+\code{"no"} keeps them in the nested \code{specifications} column;
+\code{"drop"} removes them.}
 }
 \value{
-the unnested specifications of the analysis grid.
+the results with specifications presented as requested. Steps
+that are the same in every decision (preprocessing, conditions,
+postprocessing) are not specifications and are left out.
 }
 \description{
 Unpack the decision grid of specifications for your modeling pipeline
@@ -57,7 +58,7 @@ full_pipeline <-
   add_variables("mods", starts_with("mod")) |>
   add_model("linear_model", lm({dvs} ~ {ivs} * {mods} + cov1))
 
-pipeline_grid <- expand_decisions(full_pipeline)
+pipeline_grid <- expand_pipeline(full_pipeline)
 
 # Run the whole multiverse
 the_multiverse <- analyze_grid(pipeline_grid[1:10,])

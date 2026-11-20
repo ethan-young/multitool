@@ -7,15 +7,15 @@
 \alias{show_code_preprocess}
 \alias{show_code_conditions}
 \alias{show_code_model}
+\alias{show_code_model_summary}
 \alias{show_code_postprocess}
-\title{Show multiverse data code pipelines}
+\title{Show the code behind one decision}
 \usage{
 show_code(
   .grid,
   decision_num,
   .step = "model",
-  .model_summary = NULL,
-  .post_step = NULL,
+  .which = NULL,
   .execute = FALSE
 )
 
@@ -29,43 +29,50 @@ show_code_conditions(.grid, decision_num, ...)
 
 show_code_model(.grid, decision_num, ...)
 
+show_code_model_summary(.grid, decision_num, ...)
+
 show_code_postprocess(.grid, decision_num, ...)
 }
 \arguments{
-\item{.grid}{a full decision grid created by \code{\link{expand_decisions}}
-or a fully analyzed grid produced by \code{\link{analyze_grid}}.}
+\item{.grid}{a decision grid created by \code{\link{expand_pipeline}}, or
+analyzed results produced by \code{\link{analyze_grid}}.}
 
-\item{decision_num}{numeric. Indicates which decision set in the grid to show
-underlying code.}
+\item{decision_num}{numeric. The decision whose code to show.}
 
-\item{.step}{a point along the pipeline for which you would like to show the
-underlying code. Defaults to the model.}
+\item{.step}{the point along the pipeline to show code for: one of the
+main steps (\code{"original_data"}, \code{"collect"}, \code{"subgroups"},
+\code{"filters"}, \code{"preprocess"}, \code{"model"}), or one of the
+steps that can have several parts (\code{"conditions"},
+\code{"model_summary"}, \code{"postprocess"}). Defaults to
+\code{"model"}.}
 
-\item{.model_summary}{a model summary function such as
-\code{parameters::parameters()} or \code{broom::tidy()}}
+\item{.which}{for \code{"conditions"}, \code{"model_summary"}, and
+\code{"postprocess"}: which part to show, by name or by position. If
+\code{NULL} (the default), the first is shown and the others are listed
+in a message. Model summaries are named \code{"coefs"}, \code{"fit"}, and
+\code{"standardize"}; conditions and postprocessing steps use the names
+given in the pipeline.}
 
-\item{.post_step}{Only relevant if you are exposing a postprocessing step. If
-you have more than one postprocess, you can specify which you would like to
-expose by index or by name.}
-
-\item{.execute}{logical, whether or not to run the code as well as print it.}
+\item{.execute}{logical, whether to run the code as well as print it.}
 
 \item{...}{additional arguments passed to \code{show_code()}}
 }
 \value{
-the code that generated results up to the specified point in an
-analysis pipeline.
+the code, invisibly, after printing it. The code for main steps
+runs from the base data through that step; conditions run on the data as
+it reaches the model; model summaries and postprocessing run on the fitted
+model.
 }
 \description{
-\code{show_code} is the generic function. All \code{show_code*} functions are
-simple wrappers of \code{show_code}.
+\code{show_code} is the generic function. All \code{show_code_*} functions
+are simple wrappers of \code{show_code}.
 }
 \details{
-Each \code{show_code*} function should be self-explanatory - they indicate
-where along the multiverse pipeline to extract code. The goal of these
-functions is to create a window into each data/model combination and allow
-the user to inspect specific decisions straight from the code that produced
-it.
+Each \code{show_code_*} function indicates where along the pipeline to
+extract code. The goal of these functions is to open a window into each
+decision and let you inspect it straight from the code that produced it.
+The code is the same whether it comes from a grid (built on the fly) or from
+analyzed results (stored when the decision ran).
 }
 \section{Functions}{
 \itemize{
@@ -75,10 +82,14 @@ it.
 
 \item \code{show_code_preprocess()}: Show the code up to the preprocessing stage
 
-\item \code{show_code_conditions()}: Show the conditions code, optionally run the test
+\item \code{show_code_conditions()}: Show the code for a condition: the data as it
+reaches the model, followed by the condition's test
 
 \item \code{show_code_model()}: Show the code up to the modeling stage
 
-\item \code{show_code_postprocess()}: Show the code up to the post-processing stage
+\item \code{show_code_model_summary()}: Show the code for a model summary, such as the
+model's coefficients or fit statistics
+
+\item \code{show_code_postprocess()}: Show the code for a postprocessing step
 
 }}

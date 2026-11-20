@@ -6,7 +6,7 @@
 #' daemons; otherwise they run sequentially. `analyze_grid()` never sets up
 #' daemons itself — you provision them, and the function uses them if present.
 #'
-#' @param .grid a \code{tibble} produced by \code{\link{expand_decisions}}.
+#' @param .grid a \code{tibble} produced by \code{\link{expand_pipeline}}.
 #' @param show_progress logical, whether to show a progress bar while running.
 #' @param ship_base_df logical (default \code{TRUE}). Controls how the base data
 #'   frame reaches the workers when running in parallel. When \code{TRUE}, the
@@ -130,7 +130,7 @@
 #'   add_model("covariate", lm({dvs} ~ {ivs} * {mods} + cov1)) |>
 #'   add_postprocess("ptp", predict())
 #'
-#' pipeline_grid <- expand_decisions(full_pipeline)
+#' pipeline_grid <- expand_pipeline(full_pipeline)
 #'
 #' # analyze the grid (sequential)
 #' analyzed_grid <- analyze_grid(pipeline_grid[1:10,])
@@ -251,11 +251,6 @@ analyze_grid <-
 #' Analyze a complete decision grid in parallel
 #'
 #' @param .grid a \code{tibble} produced by \code{\link{expand_decisions}}
-#' @param save_model logical, indicates whether to save the model object in its
-#'   entirety. The default is \code{FALSE} because model objects are usually
-#'   large and under the hood, \code{\link[parameters]{parameters}} and
-#'   \code{\link[performance]{performance}} is used to summarize the most useful
-#'   model information.
 #' @param show_progress logical, whether to show a progress bar while running.
 #' @param furrr_globals any global objects to pass to \code{furrr_options}
 #' @param furrr_packages character vector, any packages to load inside parallel
@@ -314,7 +309,6 @@ analyze_grid <-
 analyze_grid_parallel <-
   function(
     .grid,
-    save_model = FALSE,
     show_progress = TRUE,
     furrr_globals = NULL,
     furrr_packages = c("multitool", "dplyr", "tidyr")
@@ -340,8 +334,7 @@ analyze_grid_parallel <-
           analyzed_result <-
             execute_universe_model(
               .grid,
-              decision_index = index,
-              save_model = save_model
+              decision_index = index
             )
           end <- Sys.time()
 

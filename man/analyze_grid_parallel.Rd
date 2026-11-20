@@ -6,7 +6,6 @@
 \usage{
 analyze_grid_parallel(
   .grid,
-  save_model = FALSE,
   show_progress = TRUE,
   furrr_globals = NULL,
   furrr_packages = c("multitool", "dplyr", "tidyr")
@@ -14,12 +13,6 @@ analyze_grid_parallel(
 }
 \arguments{
 \item{.grid}{a \code{tibble} produced by \code{\link{expand_decisions}}}
-
-\item{save_model}{logical, indicates whether to save the model object in its
-entirety. The default is \code{FALSE} because model objects are usually
-large and under the hood, \code{\link[parameters]{parameters}} and
-\code{\link[performance]{performance}} is used to summarize the most useful
-model information.}
 
 \item{show_progress}{logical, whether to show a progress bar while running.}
 

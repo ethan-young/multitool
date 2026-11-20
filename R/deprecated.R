@@ -1470,3 +1470,149 @@
 #'    result
 #'
 #'  }
+# Collect results using easystats
+#' @noRd
+#'collect_quiet_results_easy <-
+#'  function(
+#'    code,
+#'    standardize = TRUE,
+#'    save_model = FALSE,
+#'    post_process = FALSE,
+#'    additional_args = ""
+#'  ){
+#'
+#'    quiet_results <- list()
+#'
+#'    model_func <-
+#'      code |>
+#'      stringr::str_extract("\\|\\>[^\\|\\>].*$") |>
+#'      stringr::str_remove(".*\\|\\> ") |>
+#'      stringr::str_remove("\\(.*\\)")
+#'
+#'    is_easystats <-
+#'      ifelse(
+#'        model_func %in% c("lmer", "glmer"),
+#'        "merMod",
+#'        model_func
+#'      ) %in% parameters::supported_models()
+#'
+#'    quiet_results$model <- run_universe_code_quietly(code)
+#'
+#'    if(is_easystats){
+#'      ## Model coefficients
+#'      quiet_results$params <-
+#'        #code
+#'        "quiet_results$model$result" |>
+#'        paste(
+#'          "|> parameters::parameters(",
+#'          additional_args,
+#'          ") |> suppressMessages()",
+#'          collapse = " "
+#'        ) |>
+#'        run_universe_code_quietly(env = rlang::current_env())
+#'
+#'      ## Model fit
+#'      quiet_results$performance <-
+#'        #code |>
+#'        "quiet_results$model$result" |>
+#'        paste("|> performance::model_performance() |> suppressMessages()", collapse = " ") |>
+#'        run_universe_code_quietly(env = rlang::current_env())
+#'    }
+#'
+#'    ## Warnings and Messages
+#'    warnings <-
+#'      purrr::map_df(quiet_results, "warnings") |>
+#'      dplyr::rename_with(~paste0("warning_", .x))
+#'    messages <-
+#'      purrr::map_df(quiet_results, "messages") |>
+#'      dplyr::rename_with(~paste0("message_", .x))
+#'
+#'    results <-
+#'      tibble::tibble(
+#'        "model_code" := code
+#'      )
+#'
+#'    if(save_model || !is_easystats){
+#'      results <-
+#'        dplyr::bind_cols(
+#'          results,
+#'          tibble::tibble("model_full" := list(quiet_results$model$result))
+#'        )
+#'    }
+#'
+#'    if(is_easystats & !save_model){
+#'      if(post_process){
+#'        final_results <-
+#'          dplyr::bind_cols(
+#'            results,
+#'            tibble::tibble(
+#'              "{model_func}_parameters" := list(quiet_results$params$result),
+#'              "{model_func}_warnings" := list(warnings),
+#'              "{model_func}_messages" := list(messages)
+#'            )
+#'          )
+#'      } else{
+#'
+#'        model_results <-
+#'          quiet_results$params$result |>
+#'          dplyr::rename_with(tolower) |>
+#'          dplyr::rename(
+#'            unstd_coef = coefficient,
+#'            unstd_ci = ci,
+#'            unstd_ci_low = ci_low,
+#'            unstd_ci_high = ci_high
+#'          )
+#'
+#'        if(standardize){
+#'
+#'          quiet_results$std_params <-
+#'            #code |>
+#'            "quiet_results$model$result" |>
+#'            paste("|> parameters::standardize_parameters() |> suppressMessages()", collapse = " ") |>
+#'            run_universe_code_quietly(env = rlang::current_env())
+#'
+#'          model_results <-
+#'            dplyr::left_join(
+#'              model_results,
+#'              quiet_results$std_params$result |>
+#'                dplyr::rename_with(tolower) |>
+#'                dplyr::rename(
+#'                  std_coef = std_coefficient,
+#'                  std_ci = ci,
+#'                  std_ci_low = ci_low,
+#'                  std_ci_high = ci_high
+#'                ),
+#'              dplyr::join_by(parameter)
+#'            )
+#'        }
+#'
+#'        final_results <-
+#'          dplyr::bind_cols(
+#'            results,
+#'            tibble::tibble(
+#'              model_function = model_func,
+#'              model_parameters = list(model_results),
+#'              model_performance =
+#'                list(
+#'                  quiet_results$performance$result |>
+#'                    dplyr::rename_with(tolower)
+#'                )
+#'            ) |>
+#'              mutate(
+#'                "model_warnings" := list(warnings),
+#'                "model_messages" := list(messages)
+#'              )
+#'          )
+#'      }
+#'    } else{
+#'      final_results <-
+#'        results |>
+#'        mutate(
+#'          "model_warnings" := list(warnings),
+#'          "model_messages" := list(messages)
+#'        )
+#'    }
+#'
+#'    final_results
+#'
+#'  }

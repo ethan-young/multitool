@@ -4,45 +4,55 @@
 \alias{assess_robustness}
 \title{Assess the robustness of multiverse analysis results}
 \usage{
-assess_robustness(.multi, .estimand, zero_threshold = 0.01, .by = NULL)
+assess_robustness(
+  .multi,
+  .estimand,
+  zero_threshold = 0.01,
+  .by = NULL,
+  .reference = NULL
+)
 }
 \arguments{
-\item{.multi}{An object returned by \code{\link{analyze_grid}} containing
-results from a \code{multitool} pipeline.}
+\item{.multi}{results from \code{\link{analyze_grid}}. The model
+parameters and fit statistics are unpacked here, so unlike
+\code{\link{assess_decisions}} this function takes results directly.}
 
-\item{.estimand}{The parameter or coefficient to assess. Defaults to
-\code{std_coef} (standardized coefficients). Can be any numeric column from
-the model parameters, performance, or a post-processing analysis (e.g.,
-\code{unstd_coef}, \code{r2}, \code{p_value}). Use unquoted column names
-with tidy evaluation.}
+\item{.estimand}{the model parameter column to assess, such as
+\code{std_coefficient}, \code{coefficient}, or \code{p}. Use an unquoted
+column name. Fit statistics are always summarized as well.}
 
-\item{zero_threshold}{Numeric value defining the threshold for "practically
-zero" effects. Effects between \code{-zero_threshold} and
-\code{+zero_threshold} are classified as zero. Defaults to \code{.01}. Used
-to compute sign entropy and proportion of positive/negative/zero effects.}
+\item{zero_threshold}{the size below which an effect counts as practically
+zero: estimates between \code{-zero_threshold} and \code{zero_threshold}
+are classified as zero. Defaults to \code{.01}.}
 
-\item{.by}{Optional grouping variable(s) for stratified summaries. Useful for
-examining robustness within specific subsets of decisions (e.g., different
-models or subgroups). Use unquoted column names.}
+\item{.by}{optional specification columns to summarize within, such as
+\code{dvs}. Use unquoted column names.}
+
+\item{.reference}{the column naming each effect. By default the
+\code{parameter} (or \code{term}) column, so each parameter is
+summarized separately. When variables vary across decisions, use
+\code{.reference = parameter_key} to summarize one effect across all of
+its variables (see \code{\link{add_parameter_keys}}).}
 }
 \value{
-A \code{data.frame} with the following columns:
+a \code{tibble} with one row per effect (and per fit statistic),
+with columns:
 \describe{
-\item{metric}{Name of the summarized metric (e.g., "std_coef", "AIC")}
-\item{metric_type}{Type of metric: "parameter" for model coefficients or
-"fit index" for model fit statistics}
-\item{reference}{The parameter being summarized (e.g., variable name) or
-"full model" for fit indices}
-\item{n_decisions}{Number of specifications contributing to the summary}
-\item{mean, median, iqr, q05, q95}{Distributional summaries of the metric}
-\item{p_positive, p_negative, p_zero}{Proportion of specifications with
-positive, negative, or practically zero effects}
-\item{sign_entropy}{Shannon entropy of the sign distribution, measuring
-inconsistency in effect direction across specifications. Ranges from 0
-(perfect consistency) to ~1.58 (maximum inconsistency)}
+\item{metric}{the summarized column, e.g. \code{"std_coefficient"} or
+\code{"aic"}}
+\item{metric_type}{\code{"parameter"} or \code{"fit index"}}
+\item{reference}{the effect, or \code{"full model"} for fit
+statistics}
+\item{n_decisions}{decisions with a non-missing value}
+\item{n_missing}{decisions where the value is missing}
+\item{mean, median, iqr, q05, q95}{the distribution across decisions}
+\item{p_positive, p_negative, p_zero}{the share of decisions with a
+positive, negative, or practically zero estimate (parameters only)}
+\item{sign_entropy}{Shannon entropy of the sign distribution: 0 when
+every decision agrees in sign, up to about 1.58 when positive,
+negative, and zero are equally common (parameters only)}
 }
-
-All numeric values are rounded to 5 decimal places.
+Numeric values are rounded to 5 decimal places.
 }
 \description{
 Summarizes the distribution of a particular model parameter, fit statistics,
@@ -51,6 +61,11 @@ post-processing step. The summaries are computed over all specifications in
 the analysis grid. This function helps evaluate whether results are robust to
 analytical decisions by computing key distributional properties and sign
 consistency metrics.
+}
+\details{
+Only completed decisions are summarized. Decisions that were
+skipped, halted, or errored have no model results; unpacking leaves them
+out and reports how many.
 }
 \examples{
 
@@ -76,7 +91,7 @@ results <-
   add_variables("ivs", iv1, iv2) |>
   add_variables("dvs", dv1, dv2) |>
   add_model("linear", lm({dvs} ~ {ivs})) |>
-  expand_decisions() |>
+  expand_pipeline() |>
   analyze_grid()
 
 # Assess robustness of standardized coefficients
@@ -90,4 +105,16 @@ assess_robustness(results, .estimand = std_coefficient, zero_threshold = .05)
 
 # Stratified assessment by model type
 assess_robustness(results, .estimand = std_coefficient, .by = dvs)
+
+# Assess one effect across the iv choices, using a parameter key
+results_keyed <-
+  the_data |>
+  add_filters(include1 == 0, include2 != 3) |>
+  add_variables("ivs", iv1, iv2) |>
+  add_model("linear", lm(dv1 ~ {ivs})) |>
+  add_parameter_keys("focal slope", "{ivs}") |>
+  expand_pipeline() |>
+  analyze_grid()
+
+assess_robustness(results_keyed, std_coefficient, .reference = parameter_key)
 }

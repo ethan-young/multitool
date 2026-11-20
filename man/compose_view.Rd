@@ -8,7 +8,7 @@ compose_view(.multi, ...)
 }
 \arguments{
 \item{.multi}{a multiverse results object produced by
-\code{\link{analyze_grid}} (or \code{\link{analyze_grid_parallel}}).}
+\code{\link{analyze_grid}}.}
 
 \item{...}{result components to compose. Supply the bare column names of the
 components shipped by \code{analyze_grid()}, for example \code{model_parameters},
@@ -24,11 +24,11 @@ grain matches the finest component requested, with coarser components
 broadcast across it.
 }
 \description{
-\code{compose_view()} assembles one tibble from selected components of a
-results object. You name the result components you want (model
-parameters, performance, post-processing output, pipeline code, timing
-logs), and \code{compose_view()} unpacks each one and left-joins them by
-\code{decision} into a single frame ready for plotting or tabling.
+\code{compose_view()} assembles one tibble from selected components
+of a results object. You name the result components you want (model
+parameters, performance, post-processing output, pipeline code, timing logs),
+and \code{compose_view()} unpacks each one and left-joins them by \code{decision} into
+a single frame ready for plotting or tabling.
 
 Its job is deliberately narrow: it reconciles components that live at
 different grains into one frame and nothing else. It performs no
@@ -37,20 +37,27 @@ left to the caller, either with downstream \code{dplyr} on the returned frame or
 with per-layer \code{data} transformations at plot time.
 }
 \details{
-The decision specifications are always included as the spine of the returned
-frame, so you never need to request them explicitly.
+The specifications, including each decision's \code{status}, are
+always included as the spine of the returned frame, so you never need to
+request them. Decisions that were skipped, halted, or errored stay in the
+frame: their specifications and status are present, and components they never
+produced are missing.
+
+Requesting \code{pipeline_code} includes every step's code, along with each
+condition (\code{condition_}), model summary (\code{summary_}), and
+postprocessing step (\code{postprocess_}).
 
 \strong{Column prefixing.} To keep columns from different components from
-colliding, every value column is prefixed with its component's name; the
-join key \code{decision} and the specification columns are left unprefixed so
-they remain shared across components. When an argument is named, that name
-is used as the prefix. When an argument is unnamed, a prefix is assigned
+colliding, every value column is prefixed with its component's name; the join
+key \code{decision} and the specification columns are left unprefixed so they
+remain shared across components. When an argument is named, that name is used
+as the prefix. When an argument is unnamed, a prefix is assigned
 automatically:
 \itemize{
 \item \code{model_parameters} becomes \code{params_}
 \item \code{model_performance} becomes \code{perform_}
 \item \code{pipeline_code} becomes \code{code_}
-\item \code{timing_logs} becomes \code{timing_}
+\item \code{run_logs} becomes \code{run_}
 \item a post-processing column has its \verb{_fitted} suffix removed
 (e.g. \code{aov_fitted} becomes \code{aov_})
 }
@@ -58,13 +65,13 @@ automatically:
 \strong{Grain and broadcasting.} Components differ in granularity. Model
 parameters have one row per model term, while performance, timing, and
 pipeline code each have one row per decision. Because components are joined
-by \code{decision}, coarser components are broadcast across the rows of the
-finest component requested. For example, composing \code{model_parameters} with
+by \code{decision}, coarser components are broadcast across the rows of the finest
+component requested. For example, composing \code{model_parameters} with
 \code{model_performance} repeats each decision's performance values across that
 decision's term rows. This broadcasting is intended: it produces a frame
-where, for instance, a model fit statistic is available on every term row
-for annotation. Collapsing back to a coarser grain (e.g. one label per
-decision) is left to the caller at the point of use.
+where, for instance, a model fit statistic is available on every term row for
+annotation. Collapsing back to a coarser grain (e.g. one label per decision)
+is left to the caller at the point of use.
 }
 \seealso{
 \code{\link{unpack_results}} and the \verb{unpack_model_*} functions for

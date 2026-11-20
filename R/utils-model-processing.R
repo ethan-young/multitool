@@ -225,181 +225,27 @@ postprocess_model <-
     # Messages & Warnings
     postmodel_messages <-
       tibble::tibble(
-        model_messages =
-          ifelse(
-            purrr::is_empty(postmodel_obj$messages),
-            NA,
-            postmodel_obj$messages
-          )
+        postprocess_messages =
+          if(purrr::is_empty(postmodel_obj$messages)) NA_character_ else postmodel_obj$messages
       )
 
     postmodel_warnings <-
       tibble::tibble(
-        model_warnings =
-          ifelse(
-            purrr::is_empty(postmodel_obj$warnings),
-            NA,
-            postmodel_obj$warnings
-          )
+        postprocess_warnings = if(purrr::is_empty(postmodel_obj$warnings)) NA_character_ else postmodel_obj$warnings
       )
 
     postmodel_output_full <-
       tibble::tibble(
-        "{postmodel_func}_function" := postmodel_func,
-        "{postmodel_func}_output" := list(postmodel_obj$result),
-        "{postmodel_func}_warnings" := list(postmodel_warnings),
-        "{postmodel_func}_messages" := list(postmodel_messages)
+        postprocess_function = postmodel_func,
+        postprocess_output   = list(postmodel_obj$result),
+        postprocess_warnings = list(postmodel_warnings),
+        postprocess_messages = list(postmodel_messages)
       )
 
     postmodel_output_full
   }
 
-# Collect results using easystats
-#' @noRd
-collect_quiet_results_easy <-
-  function(
-    code,
-    standardize = TRUE,
-    save_model = FALSE,
-    post_process = FALSE,
-    additional_args = ""
-  ){
 
-    quiet_results <- list()
-
-    model_func <-
-      code |>
-      stringr::str_extract("\\|\\>[^\\|\\>].*$") |>
-      stringr::str_remove(".*\\|\\> ") |>
-      stringr::str_remove("\\(.*\\)")
-
-    is_easystats <-
-      ifelse(
-        model_func %in% c("lmer", "glmer"),
-        "merMod",
-        model_func
-      ) %in% parameters::supported_models()
-
-    quiet_results$model <- run_universe_code_quietly(code)
-
-    if(is_easystats){
-      ## Model coefficients
-      quiet_results$params <-
-        #code
-        "quiet_results$model$result" |>
-        paste(
-          "|> parameters::parameters(",
-          additional_args,
-          ") |> suppressMessages()",
-          collapse = " "
-        ) |>
-        run_universe_code_quietly(env = rlang::current_env())
-
-      ## Model fit
-      quiet_results$performance <-
-        #code |>
-        "quiet_results$model$result" |>
-        paste("|> performance::model_performance() |> suppressMessages()", collapse = " ") |>
-        run_universe_code_quietly(env = rlang::current_env())
-    }
-
-    ## Warnings and Messages
-    warnings <-
-      purrr::map_df(quiet_results, "warnings") |>
-      dplyr::rename_with(~paste0("warning_", .x))
-    messages <-
-      purrr::map_df(quiet_results, "messages") |>
-      dplyr::rename_with(~paste0("message_", .x))
-
-    results <-
-      tibble::tibble(
-        "model_code" := code
-      )
-
-    if(save_model || !is_easystats){
-      results <-
-        dplyr::bind_cols(
-          results,
-          tibble::tibble("model_full" := list(quiet_results$model$result))
-        )
-    }
-
-    if(is_easystats & !save_model){
-      if(post_process){
-        final_results <-
-          dplyr::bind_cols(
-            results,
-            tibble::tibble(
-              "{model_func}_parameters" := list(quiet_results$params$result),
-              "{model_func}_warnings" := list(warnings),
-              "{model_func}_messages" := list(messages)
-            )
-          )
-      } else{
-
-        model_results <-
-          quiet_results$params$result |>
-          dplyr::rename_with(tolower) |>
-          dplyr::rename(
-            unstd_coef = coefficient,
-            unstd_ci = ci,
-            unstd_ci_low = ci_low,
-            unstd_ci_high = ci_high
-          )
-
-        if(standardize){
-
-          quiet_results$std_params <-
-            #code |>
-            "quiet_results$model$result" |>
-            paste("|> parameters::standardize_parameters() |> suppressMessages()", collapse = " ") |>
-            run_universe_code_quietly(env = rlang::current_env())
-
-          model_results <-
-            dplyr::left_join(
-              model_results,
-              quiet_results$std_params$result |>
-                dplyr::rename_with(tolower) |>
-                dplyr::rename(
-                  std_coef = std_coefficient,
-                  std_ci = ci,
-                  std_ci_low = ci_low,
-                  std_ci_high = ci_high
-                ),
-              dplyr::join_by(parameter)
-            )
-        }
-
-        final_results <-
-          dplyr::bind_cols(
-            results,
-            tibble::tibble(
-              model_function = model_func,
-              model_parameters = list(model_results),
-              model_performance =
-                list(
-                  quiet_results$performance$result |>
-                    dplyr::rename_with(tolower)
-                )
-            ) |>
-              mutate(
-                "model_warnings" := list(warnings),
-                "model_messages" := list(messages)
-              )
-          )
-      }
-    } else{
-      final_results <-
-        results |>
-        mutate(
-          "model_warnings" := list(warnings),
-          "model_messages" := list(messages)
-        )
-    }
-
-    final_results
-
-  }
 
 # Model execution ---------------------------------------------------------
 # Execute a single universe specification
@@ -408,8 +254,7 @@ execute_universe_model <-
   function(
     .grid,
     decision_index,
-    .on_break = "stop",
-    save_model = FALSE
+    .on_break = "stop"
   ){
     stopifnot("models" %in% names(.grid))
 
@@ -454,26 +299,8 @@ execute_universe_model <-
       dplyr::select(-dplyr::any_of("parameter_keys")) |>
       tidyr::nest(specifications = c(-decision))
 
-    pipeline_steps <-
-      pipeline_code$pipeline[names(pipeline_code$pipeline) != "postprocess"]
-
-    step_code <-
-      purrr::map(
-        seq_along(pipeline_steps),
-        \(i) list_to_pipeline(pipeline_steps[seq_len(i)])
-      ) |>
-      rlang::set_names(names(pipeline_steps))
-
-    postprocess_code <-
-      purrr::map(
-        pipeline_code$pipeline$postprocess,
-        \(code) list_to_pipeline(list(step_code$model, code))
-      )
-
     results$pipeline_code <-
-      c(step_code, postprocess_code) |>
-      purrr::map(as.character) |>
-      tibble::as_tibble_row() |>
+      build_step_code(pipeline_code) |>
       tidyr::nest(pipeline_code = dplyr::everything())
 
     # run the universe in steps: data -> conditions -> model -> postprocess

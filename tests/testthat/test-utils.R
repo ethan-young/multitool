@@ -1,6 +1,4 @@
 # capture_base_data and append_decisions ----------------------------------
-
-# [Claude]
 test_that("capture_base_data uses the data itself first, then looks it up by name", {
   the_data <- make_data()
 
@@ -19,7 +17,6 @@ test_that("capture_base_data uses the data itself first, then looks it up by nam
   expect_error(data.frame(x = 1:3) |> add_variables("xs", x), "named data object")
 })
 
-# [Claude]
 test_that("append_decisions adds rows only to an existing pipeline", {
   the_data <- make_data()
   new_rows <- tibble::tibble(type = "variables", group = "ivs", code = "iv1")
@@ -39,8 +36,6 @@ test_that("append_decisions adds rows only to an existing pipeline", {
 })
 
 # df_to_expand_prep and df_to_expand --------------------------------------
-
-# [Ethan]
 test_that("df_to_expand_prep creates a list and its the correct length", {
 
   the_data <- make_data()
@@ -51,9 +46,6 @@ test_that("df_to_expand_prep creates a list and its the correct length", {
 
 })
 
-# [Claude, edited] from Ethan's "expanded grid is the right size", which
-# rebuilt the old expansion steps inside the test; the expand_pipeline()
-# version of that test is now in test-01-build.R
 test_that("df_to_expand crosses every group's alternatives", {
   the_data <- make_data()
   full_pipeline <- the_data |> make_pipeline()
@@ -68,7 +60,6 @@ test_that("df_to_expand crosses every group's alternatives", {
   expect_setequal(names(expanded), unique(full_pipeline$group))
 })
 
-# [Claude]
 test_that("df_to_expand keeps code exactly as stored", {
   # an apostrophe broke the old parsed version; a backslash was silently altered
   tricky <-
@@ -86,8 +77,6 @@ test_that("df_to_expand keeps code exactly as stored", {
 })
 
 # list_to_pipeline and get_code -------------------------------------------
-
-# [Ethan]
 test_that("list_to_pipline creates the correct length baseR piped function call", {
 
   fake_list <- list("this()","is_not()", "a_real()", "pipe()")
@@ -99,7 +88,6 @@ test_that("list_to_pipline creates the correct length baseR piped function call"
 
 })
 
-# [Claude]
 test_that("list_to_pipeline leaves braces in code untouched", {
   code <- list(original_data = "the_data", preprocess = "mutate(x = purrr::map_dbl(y, \\(v) {v + 1}))")
 
@@ -109,7 +97,6 @@ test_that("list_to_pipeline leaves braces in code untouched", {
   )
 })
 
-# [Claude]
 test_that("get_code names a missing step", {
   pipeline_list <- list(original_data = "the_data", model = "lm(y ~ x, data = _)")
 
@@ -118,7 +105,6 @@ test_that("get_code names a missing step", {
 
 # build_pipeline_code -----------------------------------------------------
 
-# [Claude]
 test_that("build_pipeline_code places collect() after the chosen step", {
   the_data <- make_data()
 
@@ -134,7 +120,6 @@ test_that("build_pipeline_code places collect() after the chosen step", {
   expect_identical(names(late_code), c("original_data", "filters", "collect", "model"))
 })
 
-# [Claude]
 test_that("subgroup code handles missing values and requires a pointer for path subgroups", {
   the_data <- tibble::tibble(grp = c("a", "b", NA), x = rnorm(3), y = rnorm(3))
 
@@ -160,7 +145,6 @@ test_that("subgroup code handles missing values and requires a pointer for path 
   expect_error(build_pipeline_code(grid, 1), "no `pointer_path`")
 })
 
-# [Claude]
 test_that("build_pipeline_code opens subgroup directories on the path route", {
   the_data <- tibble::tibble(grp = c("a", NA), x = rnorm(2), y = rnorm(2))
 
@@ -184,7 +168,6 @@ test_that("build_pipeline_code opens subgroup directories on the path route", {
   )
 })
 
-# [Claude]
 test_that("build_pipeline_code returns conditions beside the pipeline, not in it", {
   the_data <- make_data()
 
@@ -202,8 +185,6 @@ test_that("build_pipeline_code returns conditions beside the pipeline, not in it
 })
 
 # Arrow partitions --------------------------------------------------------
-
-# [Claude]
 test_that("partition and column routes give identical subgroups", {
   skip_if_not_installed("arrow")
 

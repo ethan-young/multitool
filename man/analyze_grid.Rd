@@ -14,7 +14,7 @@ analyze_grid(
 )
 }
 \arguments{
-\item{.grid}{a \code{tibble} produced by \code{\link{expand_decisions}}.}
+\item{.grid}{a \code{tibble} produced by \code{\link{expand_pipeline}}.}
 
 \item{show_progress}{logical, whether to show a progress bar while running.}
 
@@ -154,7 +154,7 @@ full_pipeline <-
   add_model("covariate", lm({dvs} ~ {ivs} * {mods} + cov1)) |>
   add_postprocess("ptp", predict())
 
-pipeline_grid <- expand_decisions(full_pipeline)
+pipeline_grid <- expand_pipeline(full_pipeline)
 
 # analyze the grid (sequential)
 analyzed_grid <- analyze_grid(pipeline_grid[1:10,])

@@ -188,6 +188,22 @@ utils::globalVariables(
     "run_ended",
     "run_message",
     "run_started",
-    "status"
+    "status",
+    "run_logs",
+    ".data",
+    "data_messages",
+    "data_warnings",
+    "run_logs",
+    "n_decisions",
+    "choice_mean",
+    "choice_n",
+    "estimate",
+    "grand_mean",
+    "group_n",
+    "group_variance",
+    "interaction_effect",
+    "main_effect total_effect",
+    "main_effect",
+    "total_effect"
   )
 )
